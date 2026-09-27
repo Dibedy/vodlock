@@ -23,7 +23,7 @@ on:
 
 concurrency:
   group: vodlock-auto-publish
-  cancel-in-progress: false
+  cancel-in-progress: ${{ github.event_name == 'push' }}
 
 permissions:
   contents: write

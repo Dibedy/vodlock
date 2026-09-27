@@ -93,7 +93,7 @@ def download_remote(job, work, hook, yt_dlp):
                    ("bestvideo[height<=720][protocol=m3u8_native]/best[height<=720][protocol=m3u8_native]", "web_safari"),
                    ("bestvideo[height<=720]/best[height<=720]", "web_embedded")]
     options = {"noplaylist": True, "outtmpl": str(work / "source.%(ext)s"), "quiet": True,
-               "no_warnings": False, "progress_hooks": [hook], "max_filesize": ANALYSIS_MAX_BYTES,
+               "no_warnings": False, "noprogress": True, "progress_hooks": [hook], "max_filesize": ANALYSIS_MAX_BYTES,
                "socket_timeout": 20, "retries": 2, "concurrent_fragment_downloads": 8}
     if shutil.which("node"):
         options["js_runtimes"] = {"node": {"path": shutil.which("node")}}

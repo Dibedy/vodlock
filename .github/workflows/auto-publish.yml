@@ -53,5 +53,4 @@ jobs:
       - name: Deploy VODLOCK
         if: env.VERCEL_TOKEN != ''
         run: |
-          deployment_url=$(npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN")
-          npx --yes vercel@latest alias set "$deployment_url" vodlock.vercel.app --token "$VERCEL_TOKEN"
+          npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"

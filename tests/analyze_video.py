@@ -9,14 +9,18 @@ import imageio_ffmpeg
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "indexer"))
-from detector import HudReader, RoundDetector
+from detector import HudReader, Observation, RoundDetector
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("video")
     parser.add_argument("output")
+    parser.add_argument("--observations")
     arguments = parser.parse_args()
+    cached = json.loads(Path(arguments.observations).read_text(encoding="utf-8")) if arguments.observations else None
+    if cached and cached["source"] != arguments.video:
+        raise ValueError("The cached observations belong to another video")
     reader = HudReader()
     detector = RoundDetector()
     command = [imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error", "-i", arguments.video,
@@ -32,13 +36,15 @@ def main():
             if len(chunk) != frame_size:
                 raise ValueError("Incomplete decoded frame")
             frame = np.frombuffer(chunk, dtype=np.uint8).reshape(720, 1280, 3)
-            sample = reader.read(frame, len(observations) * 2)
+            previous = cached["observations"][len(observations)] if cached else None
+            sample = Observation(**previous) if previous and not 85 <= (previous["timer"] or 0) <= 100 else reader.read(frame, len(observations) * 2)
             observations.append(asdict(sample))
             detector.observe(sample)
             if len(observations) % 300 == 0:
                 print(f"{sample.time / 60:.0f} minutes: {len(detector.rounds)} rounds", flush=True)
         if process.wait():
             raise ValueError("Video decoding failed")
+    detector.finalize()
     value = {"source": arguments.video, "rounds": detector.rounds, "warnings": detector.warnings,
              "observations": observations}
     Path(arguments.output).write_text(json.dumps(value, indent=2) + "\n", encoding="utf-8")

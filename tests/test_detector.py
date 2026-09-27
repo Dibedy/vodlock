@@ -74,6 +74,15 @@ class DetectorTests(unittest.TestCase):
         self.assertEqual([r["map"] for r in detector.rounds], [1, 1, 2])
         self.assertEqual(len(detector.warnings), 2)
 
+    def test_isolated_terminal_map_start_remains_excluded(self):
+        detector = RoundDetector()
+        detector.rounds = [{"map": 1, "round": 13}, {"map": 2, "round": 1}]
+        detector.finalize()
+        self.assertTrue(detector.rounds[-1]["excluded"])
+        detector.rounds = [{"map": 1, "round": 13}, {"map": 2, "round": 1}, {"map": 2, "round": 2}]
+        detector.finalize()
+        self.assertFalse(any(item.get("excluded") for item in detector.rounds))
+
 
 if __name__ == "__main__":
     unittest.main()

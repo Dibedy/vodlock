@@ -12,6 +12,7 @@ from detector import HudReader
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("job")
+    parser.add_argument("--output")
     arguments = parser.parse_args()
     job = json.loads(Path(arguments.job).read_text(encoding="utf-8"))
     reader = HudReader()
@@ -19,6 +20,8 @@ def main():
     results = []
     try:
         for entry in job["rounds"]:
+            if entry.get("excluded"):
+                continue
             samples = []
             for offset in [-5, 4]:
                 time = max(0, entry["start"] + offset)
@@ -36,7 +39,10 @@ def main():
             print(json.dumps(result), flush=True)
     finally:
         capture.release()
-    print(json.dumps({"checked": len(results), "passed": sum(result["passed"] for result in results), "warnings": job["warnings"]}), flush=True)
+    summary = {"checked": len(results), "passed": sum(result["passed"] for result in results), "warnings": job["warnings"]}
+    if arguments.output:
+        Path(arguments.output).write_text(json.dumps({**summary, "results": results}, indent=2) + "\n", encoding="utf-8")
+    print(json.dumps(summary), flush=True)
 
 
 if __name__ == "__main__":

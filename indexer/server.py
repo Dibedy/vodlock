@@ -193,6 +193,7 @@ def index_job(identifier):
             return_code = process.wait()
         if return_code:
             raise ValueError("FFmpeg could not finish reading the video: " + error_path.read_text(errors="replace")[-400:])
+        detector.finalize()
         if not detector.rounds:
             raise ValueError("No reliable round starts were found. This version needs the VCT top-centre ROUND label and timer; a different layout may need detector changes.")
         update(identifier, status="ready", message="Index ready · review accuracy before relying on it", progress=100,

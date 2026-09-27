@@ -103,7 +103,7 @@ def publishable(job, minimum_confidence, minimum_rounds):
         return False, job.get("message", "Indexing failed")
     if job.get("warnings"):
         return False, "; ".join(job["warnings"])
-    rounds = job.get("rounds", [])
+    rounds = [item for item in job.get("rounds", []) if not item.get("excluded")]
     if len(rounds) < minimum_rounds:
         return False, f"Only {len(rounds)} rounds were detected"
     if rounds[0].get("map") != 1 or rounds[0].get("round") != 1:

@@ -87,6 +87,8 @@ class AutoPublishTests(unittest.TestCase):
         gap = [dict(item) for item in rounds]
         gap[5]["round"] = 7
         self.assertFalse(auto_publish.publishable({**job, "rounds": gap}, 0.75, 13)[0])
+        excluded = {"map": 2, "round": 1, "start": 2000, "confidence": 0.1, "excluded": True}
+        self.assertTrue(auto_publish.publishable({**job, "rounds": rounds + [excluded]}, 0.75, 13)[0])
 
     def test_youtube_discovery_failure_does_not_block_twitch_or_held_retries(self):
         channels = [{"provider": "youtube", "name": "YouTube"},

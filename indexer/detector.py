@@ -3,7 +3,7 @@ import statistics
 from dataclasses import dataclass
 
 
-DETECTOR_VERSION = "vct-clock-ocr-v3"
+DETECTOR_VERSION = "vct-clock-ocr-v4"
 
 
 @dataclass
@@ -43,6 +43,10 @@ class RoundDetector:
         self.pending = []
         self.map_number = 1
         self.warnings = []
+
+    def finalize(self):
+        if len(self.rounds) > 1 and self.rounds[-1]["round"] == 1 and self.rounds[-1]["map"] > self.rounds[-2]["map"]:
+            self.rounds[-1]["excluded"] = True
 
     def observe(self, sample):
         if sample.replay or sample.round is None or sample.timer is None or sample.confidence < 0.65:
@@ -112,8 +116,11 @@ class HudReader:
         lines = self.read_lines(label, single=True, scale=4) + clock_lines
         sample = parse_hud(time, lines)
         if sample.timer is not None and 85 <= sample.timer <= 100:
-            top = frame[:int(height * 0.09), int(width * 0.43):int(width * 0.57)]
-            top_lines = self.read_lines(top)
+            top = frame[:int(height * 0.034), int(width * 0.445):int(width * 0.555)]
+            top_lines = self.read_lines(top, scale=4)
+            if parse_hud(time, top_lines).round is None:
+                top = frame[:int(height * 0.09), int(width * 0.43):int(width * 0.57)]
+                top_lines = self.read_lines(top)
             if parse_hud(time, top_lines).round is not None:
                 lines = top_lines + clock_lines
                 sample = parse_hud(time, lines)

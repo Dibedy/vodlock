@@ -3,6 +3,15 @@
   "updatedAt": "2026-09-27",
   "videos": [
     {
+      "provider": "twitch",
+      "sourceId": "2884362905",
+      "title": "EG FNS",
+      "event": "GE vs VIT | VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
+      "label": "Full broadcast",
+      "index": "/indexes/twitch-2884362905.json",
+      "chat": "/chats/twitch-2884362905.json"
+    },
+    {
       "provider": "youtube",
       "sourceId": "TWjd0AoZdaY",
       "title": "GE vs VIT",

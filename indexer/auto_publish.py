@@ -46,7 +46,7 @@ def should_attempt(key, published, state, retry_hours, now):
     if not previous:
         return True
     if previous.get("status") == "published":
-        return False
+        return True
     if previous.get("detectorVersion") != DETECTOR_VERSION:
         return True
     checked = datetime.fromisoformat(previous["checkedAt"])

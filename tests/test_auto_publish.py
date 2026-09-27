@@ -74,6 +74,7 @@ class AutoPublishTests(unittest.TestCase):
         self.assertFalse(auto_publish.should_attempt(key, set(), current, 6, now))
         self.assertTrue(auto_publish.should_attempt(key, set(), current, 6, now + timedelta(hours=6)))
         self.assertFalse(auto_publish.should_attempt(key, {key}, old, 6, now))
+        self.assertTrue(auto_publish.should_attempt(key, set(), {key: {"status": "published"}}, 6, now))
 
     def test_automatic_publication_requires_complete_high_confidence_sequence(self):
         rounds = [{"map": 1, "round": number, "start": number * 100, "confidence": 0.9} for number in range(1, 14)]

@@ -46,13 +46,13 @@
       "checkedAt": "2026-09-27T17:26:42.813563+00:00"
     },
     "twitch:2884362905": {
-      "status": "held",
+      "status": "published",
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | GE vs VIT - VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
-      "message": "Map 1: check the gap before round 9.; Map 1: check the gap before round 20.; Map 2: check the gap before round 10.; Map 2: check the gap before round 20.; Map 3: check the gap before round 10.; Map 3: check the gap before round 20.; Map 4: check the gap before round 10.; Map 4: check the gap before round 20.; Map 5: check the gap before round 9.",
-      "detectorVersion": "vct-clock-ocr-v4",
-      "checkedAt": "2026-09-27T16:47:58.054631+00:00"
+      "message": "Published after full-recording validation",
+      "detectorVersion": "vct-clock-ocr-v6",
+      "checkedAt": "2026-09-27T19:46:46.005870+00:00"
     },
     "twitch:2885318675": {
       "status": "published",

@@ -80,6 +80,42 @@
       "message": "Published",
       "detectorVersion": "vct-clock-ocr-v6",
       "checkedAt": "2026-09-27T20:52:08.305870+00:00"
+    },
+    "twitch:2882589453": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | PRX vs Team Liquid - VCT Champions Group Stage #VCTWatchparty | !vote !inzone",
+      "message": "The first detected round is not round 1. Check the beginning of this recording.",
+      "detectorVersion": "vct-clock-ocr-v6",
+      "checkedAt": "2026-09-27T22:40:42.260367+00:00"
+    },
+    "twitch:2882594925": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "VALORANT on Twitch",
+      "title": "TL vs. PRX - VALORANT Champions Shanghai - Opening Day",
+      "message": "The first detected round is not round 1. Check the beginning of this recording.",
+      "detectorVersion": "vct-clock-ocr-v6",
+      "checkedAt": "2026-09-27T23:29:08.248902+00:00"
+    },
+    "youtube:ZWhEMQVk4x0": {
+      "status": "held",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour",
+      "title": "100T vs. T1 - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
+      "message": "ERROR: [youtube] ZWhEMQVk4x0: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp for how to manually pass cookies. Also see https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies for tips on effectively exporting YouTube cookies",
+      "detectorVersion": "vct-clock-ocr-v6",
+      "checkedAt": "2026-09-27T23:29:13.631145+00:00"
+    },
+    "youtube:_wWnQ7KG8no": {
+      "status": "held",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour Americas",
+      "title": "FLY vs SPID - Verizon Game Changers NA Stage 2 Main Event - Day 5",
+      "message": "ERROR: [youtube] _wWnQ7KG8no: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp for how to manually pass cookies. Also see https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies for tips on effectively exporting YouTube cookies",
+      "detectorVersion": "vct-clock-ocr-v6",
+      "checkedAt": "2026-09-27T23:29:18.854120+00:00"
     }
   }
 }

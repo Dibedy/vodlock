@@ -4,6 +4,24 @@
   "videos": [
     {
       "provider": "twitch",
+      "sourceId": "2883454178",
+      "title": "NS vs NRG",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full broadcast",
+      "index": "/indexes/twitch-2883454178.json",
+      "chat": "/chats/twitch-2883454178.json"
+    },
+    {
+      "provider": "twitch",
+      "sourceId": "2883449763",
+      "title": "EG FNS",
+      "event": "NRG vs NS | VCT Champions Group Stage #VCTWatchparty | !vote !inzone",
+      "label": "Full broadcast",
+      "index": "/indexes/twitch-2883449763.json",
+      "chat": "/chats/twitch-2883449763.json"
+    },
+    {
+      "provider": "twitch",
       "sourceId": "2884362905",
       "title": "EG FNS",
       "event": "GE vs VIT | VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",

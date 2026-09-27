@@ -15,7 +15,8 @@
       "channel": "VALORANT Champions Tour Americas",
       "title": "SRG vs FLY - Verizon Game Changers NA Stage 2 Grand Finals",
       "message": "ERROR: [youtube] 0p5IMJh-3vE: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp for how to manually pass cookies. Also see https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies for tips on effectively exporting YouTube cookies",
-      "checkedAt": "2026-09-27T03:37:43.774608+00:00"
+      "detectorVersion": "vct-clock-ocr-v4",
+      "checkedAt": "2026-09-27T17:26:48.055302+00:00"
     },
     "twitch:2885323336": {
       "status": "published",
@@ -39,7 +40,26 @@
       "channel": "VALORANT Champions Tour",
       "title": "JDG vs. FUT - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
       "message": "ERROR: [youtube] fFfCJDNHEvc: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp for how to manually pass cookies. Also see https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies for tips on effectively exporting YouTube cookies",
-      "checkedAt": "2026-09-27T14:50:13.947889+00:00"
+      "detectorVersion": "vct-clock-ocr-v4",
+      "checkedAt": "2026-09-27T17:26:42.813563+00:00"
+    },
+    "twitch:2884362905": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | GE vs VIT - VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
+      "message": "Map 1: check the gap before round 9.; Map 1: check the gap before round 20.; Map 2: check the gap before round 10.; Map 2: check the gap before round 20.; Map 3: check the gap before round 10.; Map 3: check the gap before round 20.; Map 4: check the gap before round 10.; Map 4: check the gap before round 20.; Map 5: check the gap before round 9.",
+      "detectorVersion": "vct-clock-ocr-v4",
+      "checkedAt": "2026-09-27T16:47:58.054631+00:00"
+    },
+    "twitch:2885318675": {
+      "status": "published",
+      "provider": "twitch",
+      "channel": "VALORANT on Twitch",
+      "title": "100T vs. T1 - VALORANT Champions Shanghai - Group Stage",
+      "message": "Published",
+      "detectorVersion": "vct-clock-ocr-v4",
+      "checkedAt": "2026-09-27T17:26:38.217884+00:00"
     }
   }
 }

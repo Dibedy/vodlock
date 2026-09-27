@@ -1,6 +1,13 @@
 name: Auto-publish VOD indexes
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - indexer/*.py
+      - indexer/auto_channels.json
+      - .github/workflows/auto-publish.yml
   schedule:
     - cron: "17,47 * * * *"
   workflow_dispatch:

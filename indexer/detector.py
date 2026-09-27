@@ -3,6 +3,9 @@ import statistics
 from dataclasses import dataclass
 
 
+DETECTOR_VERSION = "vct-clock-ocr-v2"
+
+
 @dataclass
 class Observation:
     time: float
@@ -20,9 +23,10 @@ def parse_hud(time, lines, replay_lines=()):
         if confidence < 0.65:
             continue
         text = text.upper().replace("O", "0")
-        match = re.search(r"R[0O]UND\s*([0-9S]{1,2})\b", text)
-        if match and 1 <= int(match[1].replace("S", "5")) <= 60:
-            round_number = int(match[1].replace("S", "5"))
+        match = re.search(r"R[0O]UND\s*([0-9SGB]{1,2})\b", text)
+        number = match[1].translate(str.maketrans({"S": "5", "G": "6", "B": "8"})) if match else ""
+        if number and 1 <= int(number) <= 60:
+            round_number = int(number)
             confidences.append(confidence)
         match = re.fullmatch(r"\s*([01])\s*[:.]\s*([0-5][0-9])\s*", text)
         if match:

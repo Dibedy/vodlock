@@ -1,7 +1,8 @@
 {
   "version": 1,
   "lookback": 30,
-  "maxPerRun": 1,
+  "maxPerRun": 4,
+  "retryHours": 6,
   "minimumConfidence": 0.65,
   "minimumRounds": 13,
   "channels": [

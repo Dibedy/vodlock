@@ -12,6 +12,7 @@ from urllib.request import Request, urlopen
 
 import server
 import chat_archive
+from detector import DETECTOR_VERSION
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -36,6 +37,20 @@ def clean_text(value):
 
 def source_key(provider, identifier):
     return f"{provider}:{identifier}"
+
+
+def should_attempt(key, published, state, retry_hours, now):
+    if key in published:
+        return False
+    previous = state.get(key)
+    if not previous:
+        return True
+    if previous.get("status") == "published":
+        return False
+    if previous.get("detectorVersion") != DETECTOR_VERSION:
+        return True
+    checked = datetime.fromisoformat(previous["checkedAt"])
+    return (now - checked).total_seconds() >= retry_hours * 3600
 
 
 def is_candidate(channel, entry):
@@ -212,8 +227,9 @@ def main():
     config = read_json(CONFIG_PATH)
     state = read_json(STATE_PATH)
     catalog = read_json(SITE / "catalog.json")
-    known = {source_key(item.get("provider", "youtube"), item.get("sourceId", item.get("videoId", "")))
-             for item in catalog["videos"]} | set(state["videos"])
+    published_ids = {source_key(item.get("provider", "youtube"), item.get("sourceId", item.get("videoId", "")))
+                     for item in catalog["videos"]}
+    now = datetime.now(timezone.utc)
     try:
         import yt_dlp
     except ImportError as error:
@@ -222,25 +238,33 @@ def main():
     youtube_channels = [channel for channel in config["channels"] if channel["provider"] == "youtube"]
     twitch_channels = [channel for channel in config["channels"] if channel["provider"] == "twitch"]
     for channel in youtube_channels:
-        entry = next((item for item in discover_youtube(channel, config["lookback"], yt_dlp)
-                      if source_key("youtube", item["id"]) not in known), None)
+        try:
+            entries = discover_youtube(channel, config["lookback"], yt_dlp)
+        except Exception as error:
+            print(f"YouTube discovery failed for {channel['name']}: {error}", file=sys.stderr, flush=True)
+            continue
+        entry = next((item for item in entries
+                      if should_attempt(source_key("youtube", item["id"]), published_ids, state["videos"],
+                                        config.get("retryHours", 6), now)), None)
         if entry:
-            processed = sum(1 for item in state["videos"].values() if item.get("channel") == channel["name"])
-            candidates.append((processed, channel, entry))
+            candidates.append((1, channel, entry))
     twitch_results = {}
     if twitch_channels:
         client_id = os.environ.get("TWITCH_CLIENT_ID", "")
         client_secret = os.environ.get("TWITCH_CLIENT_SECRET", "")
         if client_id and client_secret:
-            twitch_results = discover_twitch(twitch_channels, config["lookback"], client_id, client_secret)
+            try:
+                twitch_results = discover_twitch(twitch_channels, config["lookback"], client_id, client_secret)
+            except Exception as error:
+                print(f"Twitch discovery failed: {error}", file=sys.stderr, flush=True)
         else:
             print("Twitch discovery skipped: set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET", file=sys.stderr)
     for channel in twitch_channels:
         entry = next((item for item in twitch_results.get(channel["login"], [])
-                      if source_key("twitch", item["id"]) not in known), None)
+                      if should_attempt(source_key("twitch", item["id"]), published_ids, state["videos"],
+                                        config.get("retryHours", 6), now)), None)
         if entry:
-            processed = sum(1 for item in state["videos"].values() if item.get("channel") == channel["name"])
-            candidates.append((processed, channel, entry))
+            candidates.append((0, channel, entry))
     candidates.sort(key=lambda item: item[0])
     candidates = [(channel, entry) for _, channel, entry in candidates[:config["maxPerRun"]]]
     if arguments.dry_run:
@@ -256,9 +280,10 @@ def main():
         state["videos"][key] = {"status": "published" if published else "held",
                                 "provider": channel["provider"], "channel": channel["name"],
                                 "title": clean_text(entry["title"]), "message": clean_text(message),
+                                "detectorVersion": DETECTOR_VERSION,
                                 "checkedAt": datetime.now(timezone.utc).isoformat()}
         write_json(STATE_PATH, state)
-        print(f"{key}: {state['videos'][key]['status']} - {message}")
+        print(f"{key}: {state['videos'][key]['status']} - {message}", flush=True)
     return 0
 
 

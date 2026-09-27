@@ -15,6 +15,10 @@ class DetectorTests(unittest.TestCase):
         sample = parse_hud(430, [("ROUNDS", .98), ("1:39", .99)])
         self.assertEqual((sample.round, sample.timer), (5, 99))
 
+    def test_normalizes_observed_official_round_six_ocr_confusion(self):
+        sample = parse_hud(3020, [("ROUNDG", .89), ("1:38", .98)])
+        self.assertEqual((sample.round, sample.timer), (6, 98))
+
     def test_explicit_replay_is_rejected(self):
         sample = parse_hud(10, [("ROUND 16", .95), ("1:39", .98)], [("REPLAY", .9)])
         detector = RoundDetector()

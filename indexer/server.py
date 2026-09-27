@@ -12,7 +12,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from detector import HudReader, RoundDetector
+from detector import DETECTOR_VERSION, HudReader, RoundDetector
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
@@ -22,7 +22,7 @@ LOCK = threading.RLock()
 CANCEL = threading.Event()
 JOBS = {}
 ACTIVE = None
-ANALYSIS_MAX_BYTES = 5 * 1024 ** 3
+ANALYSIS_MAX_BYTES = 8 * 1024 ** 3
 
 
 class AnalysisSizeLimitError(ValueError):
@@ -72,7 +72,7 @@ def export(job):
     provider = "twitch" if job.get("kind") == "twitch" else "youtube"
     source_id = job.get("twitchVideoId", "") if provider == "twitch" else job.get("videoId", "")
     return {"schemaVersion": 2, "provider": provider, "sourceId": source_id, "label": job["label"],
-            "leadSeconds": 5, "detector": "vct-clock-ocr-v1",
+            "leadSeconds": 5, "detector": DETECTOR_VERSION,
             "rounds": [entry for entry in job.get("rounds", []) if not entry.get("excluded")]}
 
 
@@ -85,13 +85,15 @@ def download_remote(job, work, hook, yt_dlp):
     formats = [("bestvideo[height<=720]/best[height<=720]", None),
                ("bestvideo[height<=540]/best[height<=540]", None),
                ("bestvideo[height<=360]/best[height<=360]", None)]
+    if job.get("kind") == "twitch":
+        formats[0] = ("bestvideo[height<=720][fps<=30]/best[height<=720][fps<=30]/bestvideo[height<=720]/best[height<=720]", None)
     if job.get("kind", "youtube") == "youtube" and os.environ.get("VODLOCK_YOUTUBE_POT") == "1":
         formats = [("bestvideo[height<=720]/best[height<=720]", "mweb"),
                    ("bestvideo[height<=720][protocol=m3u8_native]/best[height<=720][protocol=m3u8_native]", "web_safari"),
                    ("bestvideo[height<=720]/best[height<=720]", "web_embedded")]
     options = {"noplaylist": True, "outtmpl": str(work / "source.%(ext)s"), "quiet": True,
                "no_warnings": False, "progress_hooks": [hook], "max_filesize": ANALYSIS_MAX_BYTES,
-               "socket_timeout": 20, "retries": 2}
+               "socket_timeout": 20, "retries": 2, "concurrent_fragment_downloads": 8}
     if shutil.which("node"):
         options["js_runtimes"] = {"node": {"path": shutil.which("node")}}
     last_error = None
@@ -105,7 +107,10 @@ def download_remote(job, work, hook, yt_dlp):
             with yt_dlp.YoutubeDL(options) as downloader:
                 source_url = "https://www.youtube.com/watch?v=" + job["videoId"] if job.get("kind", "youtube") == "youtube" else "https://www.twitch.tv/videos/" + job["twitchVideoId"]
                 info = downloader.extract_info(source_url, download=True)
-                return Path(downloader.prepare_filename(info))
+                source = Path(downloader.prepare_filename(info))
+                if not source.is_file():
+                    raise AnalysisSizeLimitError("The selected analysis copy was not downloaded. It may exceed the 8 GB limit.")
+                return source
         except (yt_dlp.utils.DownloadError, AnalysisSizeLimitError) as error:
             last_error = error
             for path in work.glob("source.*"):
@@ -137,7 +142,7 @@ def index_job(identifier):
                 check_cancel()
                 if event["status"] == "downloading":
                     if event.get("downloaded_bytes", 0) > ANALYSIS_MAX_BYTES:
-                        raise AnalysisSizeLimitError("The analysis copy exceeded the 5 GB limit.")
+                        raise AnalysisSizeLimitError("The analysis copy exceeded the 8 GB limit.")
                     total = event.get("total_bytes") or event.get("total_bytes_estimate")
                     percent = min(35, int(event.get("downloaded_bytes", 0) / total * 35)) if total else 0
                     with LOCK:
@@ -145,7 +150,7 @@ def index_job(identifier):
 
             source = download_remote(job, work, hook, yt_dlp)
             if not source.is_file():
-                raise ValueError("The analysis video was not downloaded. It may exceed the 5 GB limit or need sign-in. Use a local copy instead.")
+                raise ValueError("The analysis video was not downloaded. It may exceed the 8 GB limit or need sign-in. Use a local copy instead.")
         else:
             source = Path(job["source"])
         check_cancel()

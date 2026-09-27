@@ -43,7 +43,7 @@ class ServerTests(unittest.TestCase):
                 server.video_id(link)
 
     def test_analysis_copy_limit_allows_long_twitch_archives(self):
-        self.assertEqual(server.ANALYSIS_MAX_BYTES, 5 * 1024 ** 3)
+        self.assertEqual(server.ANALYSIS_MAX_BYTES, 8 * 1024 ** 3)
 
     def test_twitch_vod_link_validation(self):
         self.assertEqual(server.twitch_video_id("https://www.twitch.tv/videos/1234567890"), "1234567890")
@@ -121,6 +121,44 @@ class ServerTests(unittest.TestCase):
             with self.assertRaises(DownloadError):
                 server.download_remote(job, work, lambda _: None, yt_dlp)
         self.assertEqual(clients, ["mweb", "web_safari", "web_embedded"])
+
+    def test_size_filtered_download_tries_next_format(self):
+        identifier = "f" * 32
+        job = {"id": identifier, "kind": "twitch", "twitchVideoId": "1234567890", "status": "downloading"}
+        attempts = []
+
+        class DownloadError(Exception):
+            pass
+
+        class YoutubeDL:
+            def __init__(self, options):
+                self.options = dict(options)
+                attempts.append(self.options["format"])
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                pass
+
+            def extract_info(self, *_args, **_kwargs):
+                path = Path(self.options["outtmpl"].replace("%(ext)s", "mp4"))
+                if len(attempts) > 1:
+                    path.write_bytes(b"video")
+                return {"path": str(path)}
+
+            def prepare_filename(self, info):
+                return info["path"]
+
+        yt_dlp = SimpleNamespace(YoutubeDL=YoutubeDL, utils=SimpleNamespace(DownloadError=DownloadError))
+        with tempfile.TemporaryDirectory() as temporary, patch.object(server, "DATA", Path(temporary)), \
+                patch.dict(server.JOBS, {identifier: job}):
+            work = Path(temporary) / identifier
+            work.mkdir()
+            source = server.download_remote(job, work, lambda _: None, yt_dlp)
+            self.assertEqual(source.read_bytes(), b"video")
+        self.assertEqual(len(attempts), 2)
+        self.assertIn("fps<=30", attempts[0])
 
     def test_dns_rebinding_host_rejected(self):
         status, _ = self.request("GET", "/api/state", Host="evil.test:8766")

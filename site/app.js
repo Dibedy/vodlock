@@ -70,6 +70,9 @@
     const available = state.entry?.provider === 'twitch' && state.chat.length > 0;
     const visible = available && settings.showChat;
     $('chat-panel').hidden = !visible;
+    $('chat-toggle').hidden = !available;
+    $('chat-toggle').textContent = visible ? 'Chat off' : 'Chat on';
+    $('chat-toggle').setAttribute('aria-label', visible ? 'Turn chat off' : 'Turn chat on');
     document.querySelector('.watch-layout').classList.toggle('chat-visible', visible);
     syncFullscreenButton();
     if (!visible) return;
@@ -505,6 +508,11 @@
   $('back-ten').addEventListener('click', () => seek(Math.max(0, currentTime() - 10)));
   $('skip-replay').addEventListener('click', () => seek(currentTime() + 10, 'Skipped 10 seconds'));
   $('mute-button').addEventListener('click', toggleMute);
+  $('chat-toggle').addEventListener('click', () => {
+    settings = {...settings, showChat: !settings.showChat};
+    saveSettings();
+    applySettings();
+  });
   $('volume').addEventListener('input', event => {
     if (!state.ready) return;
     setVolume(Number(event.target.value));

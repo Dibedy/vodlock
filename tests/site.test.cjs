@@ -102,6 +102,8 @@ test('website mentions spoiler-safe once and uses ten-second arrow navigation', 
   assert.match(index, /setting-hide-twitch-timeline/);
   assert.match(index, /setting-show-chat/);
   assert.match(index, /id="watch-layout" class="watch-layout"/);
+  assert.match(index, /id="chat-toggle"/);
+  assert.doesNotMatch(index, /SYNCED/);
   const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
   assert.match(styles, /twitch-timeline-hidden #media-player iframe[^}]+top: -90px[^}]+height: calc\(100% \+ 180px\)/);
   assert.match(styles, /watch-layout:fullscreen \.chat-panel/);

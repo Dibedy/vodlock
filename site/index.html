@@ -83,6 +83,7 @@
             <input id="volume" type="range" min="0" max="100" value="80" aria-label="Volume" disabled>
             <span class="controls-spacer"></span>
             <span id="timeline-status" class="no-timeline">Timeline hidden</span>
+            <button id="chat-toggle" type="button" aria-label="Turn chat off" hidden>Chat off</button>
             <button id="fullscreen-button" type="button" aria-label="Enter fullscreen">Full screen</button>
           </div>
         </section>
@@ -94,7 +95,7 @@
           <div class="shield-note"><span aria-hidden="true"></span><p>Round totals, map totals, scores, and match-result metadata stay out of the VODLOCK interface.</p></div>
         </aside>
         <aside id="chat-panel" class="chat-panel" hidden>
-          <div class="chat-heading"><span>VOD CHAT</span><b>SYNCED</b></div>
+          <div class="chat-heading"><span>VOD CHAT</span></div>
           <div id="chat-messages" class="chat-messages" aria-live="off"></div>
         </aside>
       </div>

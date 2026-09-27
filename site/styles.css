@@ -102,7 +102,6 @@ main { width: min(1560px, calc(100% - 40px)); margin: 0 auto; }
 .shield-note p { margin: 0; font-size: 11px; line-height: 1.55; }
 .chat-panel { height: min(720px, calc(100vh - 126px)); min-height: 420px; border: 1px solid var(--line); border-top: 3px solid var(--lime); background: #0b0e0c; overflow: hidden; }
 .chat-heading { height: 49px; padding: 0 14px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); color: #aeb7b1; font-size: 11px; font-weight: 900; letter-spacing: .12em; }
-.chat-heading b { color: var(--lime); font-size: 9px; }
 .chat-messages { height: calc(100% - 49px); padding: 12px 14px 18px; overflow-y: auto; scrollbar-color: #424b45 #0b0e0c; }
 .chat-message { margin: 0 0 8px; color: #dce2de; font-size: 13px; line-height: 1.42; overflow-wrap: anywhere; }
 .chat-message time { margin-right: 6px; color: #717a74; font-size: 10px; font-variant-numeric: tabular-nums; }

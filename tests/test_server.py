@@ -87,7 +87,37 @@ class ServerTests(unittest.TestCase):
             self.assertEqual(len(attempts), 2)
             self.assertIn("m3u8_native", attempts[1])
             self.assertFalse((work / "source.mp4.part").exists())
-            self.assertIn("compatible stream", job["message"])
+            self.assertIn("trying another", job["message"])
+
+    def test_youtube_hosted_worker_tries_supported_player_clients(self):
+        identifier = "e" * 32
+        job = {"id": identifier, "kind": "youtube", "videoId": "ZphbktbT26k", "status": "downloading", "progress": 0}
+        clients = []
+
+        class DownloadError(Exception):
+            pass
+
+        class YoutubeDL:
+            def __init__(self, options):
+                clients.append(options["extractor_args"]["youtube"]["player_client"][0])
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                pass
+
+            def extract_info(self, *_args, **_kwargs):
+                raise DownloadError("blocked")
+
+        yt_dlp = SimpleNamespace(YoutubeDL=YoutubeDL, utils=SimpleNamespace(DownloadError=DownloadError))
+        with tempfile.TemporaryDirectory() as temporary, patch.object(server, "DATA", Path(temporary)), \
+                patch.dict(server.JOBS, {identifier: job}), patch.dict(server.os.environ, {"VODLOCK_YOUTUBE_POT": "1"}):
+            work = Path(temporary) / identifier
+            work.mkdir()
+            with self.assertRaises(DownloadError):
+                server.download_remote(job, work, lambda _: None, yt_dlp)
+        self.assertEqual(clients, ["mweb", "web_safari", "web_embedded"])
 
     def test_dns_rebinding_host_rejected(self):
         status, _ = self.request("GET", "/api/state", Host="evil.test:8766")

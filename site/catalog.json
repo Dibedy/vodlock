@@ -3,6 +3,14 @@
   "updatedAt": "2026-09-27",
   "videos": [
     {
+      "provider": "twitch",
+      "sourceId": "2885323336",
+      "title": "EG FNS",
+      "event": "LOUD vs EDG | VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
+      "label": "Full broadcast",
+      "index": "/indexes/twitch-2885323336.json"
+    },
+    {
       "provider": "youtube",
       "sourceId": "ZphbktbT26k",
       "title": "LOUD vs EDG",

@@ -159,6 +159,7 @@ class ServerTests(unittest.TestCase):
             self.assertEqual(source.read_bytes(), b"video")
         self.assertEqual(len(attempts), 2)
         self.assertIn("fps<=30", attempts[0])
+        self.assertIn("height=720", attempts[0])
 
     def test_dns_rebinding_host_rejected(self):
         status, _ = self.request("GET", "/api/state", Host="evil.test:8766")

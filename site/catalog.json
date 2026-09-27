@@ -3,6 +3,23 @@
   "updatedAt": "2026-09-27",
   "videos": [
     {
+      "provider": "youtube",
+      "sourceId": "TWjd0AoZdaY",
+      "title": "GE vs VIT",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-TWjd0AoZdaY.json"
+    },
+    {
+      "provider": "twitch",
+      "sourceId": "2884367669",
+      "title": "GE vs VIT",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full broadcast",
+      "index": "/indexes/twitch-2884367669.json",
+      "chat": "/chats/twitch-2884367669.json"
+    },
+    {
       "provider": "twitch",
       "sourceId": "2885318675",
       "title": "100T vs T1",

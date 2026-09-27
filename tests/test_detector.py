@@ -25,9 +25,23 @@ class DetectorTests(unittest.TestCase):
     def test_wider_label_read_corrects_confident_round_eight_misread(self):
         reader = HudReader.__new__(HudReader)
         with patch.object(reader, "read_lines", side_effect=[[("1:37", .99)], [("ROUNDS", .89)],
-                                                            [("ROUND8", .93)], []]):
+                                                            [("ROUND8", .93)], [("3", .99)], [("4", .99)], []]):
             sample = reader.read(np.zeros((720, 1280, 3), dtype=np.uint8), 3410)
         self.assertEqual((sample.round, sample.timer), (8, 97))
+
+    def test_team_scores_correct_a_confident_round_label_error(self):
+        reader = HudReader.__new__(HudReader)
+        with patch.object(reader, "read_lines", side_effect=[[("1:36", .99)], [("ROUND18", .99)],
+                                                            [("ROUND18", .99)], [("7", .99)], [("8", .99)], []]):
+            sample = reader.read(np.zeros((720, 1280, 3), dtype=np.uint8), 4676)
+        self.assertEqual((sample.round, sample.timer), (16, 96))
+
+    def test_uncertain_scores_do_not_override_a_readable_round_label(self):
+        reader = HudReader.__new__(HudReader)
+        with patch.object(reader, "read_lines", side_effect=[[("1:36", .99)], [("ROUND16", .99)],
+                                                            [("ROUND16", .99)], [("7", .8)], []]):
+            sample = reader.read(np.zeros((720, 1280, 3), dtype=np.uint8), 4676)
+        self.assertEqual((sample.round, sample.timer), (16, 96))
 
     def test_explicit_replay_is_rejected(self):
         sample = parse_hud(10, [("ROUND 16", .95), ("1:39", .98)], [("REPLAY", .9)])
@@ -66,13 +80,46 @@ class DetectorTests(unittest.TestCase):
             detector.observe(Observation(time, 1, timer, .99))
         self.assertEqual(len(detector.rounds), 1)
 
+    def test_matching_clocks_survive_an_unreadable_intermediate_frame(self):
+        detector = RoundDetector()
+        detector.observe(Observation(100, 1, 100, .99))
+        detector.observe(Observation(102, None, None))
+        detector.observe(Observation(104, 1, 96, .99))
+        self.assertEqual(detector.rounds[0]["start"], 100)
+
+    def test_backward_ocr_misread_does_not_discard_pending_next_round(self):
+        detector = RoundDetector()
+        detector.rounds = [{"map": 1, "round": 7, "start": 100}]
+        detector.observe(Observation(200, 8, 100, .99))
+        detector.observe(Observation(202, 5, 98, .99))
+        detector.observe(Observation(204, 8, 96, .99))
+        self.assertEqual(detector.rounds[-1]["round"], 8)
+        self.assertEqual(detector.warnings, [])
+
+    def test_unreadable_frames_do_not_extend_the_confirmation_window(self):
+        detector = RoundDetector()
+        detector.observe(Observation(100, 1, 100, .99))
+        detector.observe(Observation(108, None, None))
+        detector.observe(Observation(110, 1, 90, .99))
+        self.assertEqual(detector.rounds, [])
+
     def test_map_reset_and_missing_round_warning(self):
         detector = RoundDetector()
         for number, time in [(12, 100), (14, 400), (1, 1000)]:
             detector.observe(Observation(time, number, 100, .99))
             detector.observe(Observation(time + 2, number, 98, .99))
+            if number == 14:
+                detector.observe(Observation(time + 4, number, 96, .99))
         self.assertEqual([r["map"] for r in detector.rounds], [1, 1, 2])
         self.assertEqual(len(detector.warnings), 2)
+
+    def test_two_misread_frames_cannot_skip_the_expected_round(self):
+        detector = RoundDetector()
+        detector.rounds = [{"map": 1, "round": 5, "start": 100}]
+        for time, number, timer in [(200, 8, 100), (202, 8, 98), (204, 6, 96), (206, 6, 94)]:
+            detector.observe(Observation(time, number, timer, .99))
+        self.assertEqual(detector.rounds[-1]["round"], 6)
+        self.assertEqual(detector.warnings, [])
 
     def test_isolated_terminal_map_start_remains_excluded(self):
         detector = RoundDetector()

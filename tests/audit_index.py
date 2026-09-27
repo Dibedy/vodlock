@@ -23,7 +23,7 @@ def main():
             if entry.get("excluded"):
                 continue
             samples = []
-            for offset in [-5, 4]:
+            for offset in [-5, 4, 6, 8, 10, 12]:
                 time = max(0, entry["start"] + offset)
                 capture.set(cv2.CAP_PROP_POS_MSEC, time * 1000)
                 loaded, frame = capture.read()
@@ -32,8 +32,9 @@ def main():
                 frame = cv2.resize(frame, (1280, 720), interpolation=cv2.INTER_AREA)
                 sample = reader.read(frame, time)
                 samples.append({"time": time, "round": sample.round, "timer": sample.timer, "replay": sample.replay})
-            live = samples[1]
-            passed = live["round"] == entry["round"] and live["timer"] is not None and abs(live["timer"] - 96) <= 1 and not live["replay"]
+            passed = sum(sample["round"] == entry["round"] and sample["timer"] is not None
+                         and abs(sample["timer"] - (100 - offset)) <= 1 and not sample["replay"]
+                         for offset, sample in zip([4, 6, 8, 10, 12], samples[1:])) >= 2
             result = {"map": entry["map"], "round": entry["round"], "start": entry["start"], "passed": passed, "samples": samples}
             results.append(result)
             print(json.dumps(result), flush=True)

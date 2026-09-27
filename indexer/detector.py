@@ -3,7 +3,7 @@ import statistics
 from dataclasses import dataclass
 
 
-DETECTOR_VERSION = "vct-clock-ocr-v4"
+DETECTOR_VERSION = "vct-clock-ocr-v6"
 
 
 @dataclass
@@ -49,11 +49,14 @@ class RoundDetector:
             self.rounds[-1]["excluded"] = True
 
     def observe(self, sample):
-        if sample.replay or sample.round is None or sample.timer is None or sample.confidence < 0.65:
+        if self.pending and sample.time - self.pending[0].time > 7:
+            self.pending = []
+        if sample.replay:
             self.pending = []
             return
+        if sample.round is None or sample.timer is None or sample.confidence < 0.65:
+            return
         if not 85 <= sample.timer <= 100:
-            self.pending = []
             return
         if self.rounds:
             previous = self.rounds[-1]
@@ -61,7 +64,6 @@ class RoundDetector:
                 return
             if sample.round < previous["round"]:
                 if sample.round != 1 or previous["round"] < 12 or sample.time - previous["start"] < 120:
-                    self.pending = []
                     return
         start = sample.time - (100 - sample.timer)
         if start < -2:
@@ -75,7 +77,8 @@ class RoundDetector:
                 self.pending = [sample]
                 return
         self.pending.append(sample)
-        if len(self.pending) < 2:
+        required = 3 if self.rounds and sample.round not in {1, self.rounds[-1]["round"] + 1} else 2
+        if len(self.pending) < required:
             return
         start = max(0, statistics.median(s.time - (100 - s.timer) for s in self.pending))
         if self.rounds:
@@ -124,7 +127,18 @@ class HudReader:
             if parse_hud(time, top_lines).round is not None:
                 lines = top_lines + clock_lines
                 sample = parse_hud(time, lines)
+            scores = []
+            for left, right in [(0.417, 0.44), (0.56, 0.583)]:
+                score = frame[:int(height * 0.053), int(width * left):int(width * right)]
+                result = self.read_lines(score, single=True, scale=3)
+                if len(result) != 1 or result[0][1] < 0.95 or not re.fullmatch(r"[0-9]{1,2}", result[0][0].strip()):
+                    break
+                scores.append((int(result[0][0]), result[0][1]))
+            if len(scores) == 2 and 1 <= sum(value for value, _ in scores) + 1 <= 60:
+                sample.round = sum(value for value, _ in scores) + 1
+                sample.confidence = min(parse_hud(time, clock_lines).confidence, *(confidence for _, confidence in scores))
         if sample.round is None or sample.timer is None or not 85 <= sample.timer <= 100:
             return sample
         replay = frame[int(height * 0.84):, int(width * 0.73):]
-        return parse_hud(time, lines, self.read_lines(replay))
+        sample.replay = parse_hud(time, (), self.read_lines(replay)).replay
+        return sample

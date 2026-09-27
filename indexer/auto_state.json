@@ -2,12 +2,13 @@
   "version": 1,
   "videos": {
     "youtube:TWjd0AoZdaY": {
-      "status": "held",
+      "status": "published",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour",
       "title": "GE vs. VIT - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "ERROR: [youtube] TWjd0AoZdaY: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp for how to manually pass cookies. Also see https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies for tips on effectively exporting YouTube cookies",
-      "checkedAt": "2026-09-27T03:25:45.604191+00:00"
+      "message": "Published after full-recording validation",
+      "checkedAt": "2026-09-27T19:33:06.009816+00:00",
+      "detectorVersion": "vct-clock-ocr-v5"
     },
     "youtube:0p5IMJh-3vE": {
       "status": "held",
@@ -27,12 +28,13 @@
       "checkedAt": "2026-09-27T13:14:17.716716+00:00"
     },
     "twitch:2884367669": {
-      "status": "held",
+      "status": "published",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "GE vs. VIT - VALORANT Champions Shanghai - Group Stage",
-      "message": "Map 1: check the gap before round 7.; Map 1: check the gap before round 10.; Map 1: check the gap before round 18.; Map 1: check the gap before round 20.; Map 2: check the gap before round 7.; Map 2: check the gap before round 10.; Map 3: check the gap before round 17.; Map 3: check the gap before round 20.; Map 4: check the gap before round 7.; Map 4: check the gap before round 10.; Map 5: check the gap before round 17.; Map 5: check the gap before round 19.; Map 6: check the gap before round 7.; Map 6: check the gap before round 10.; Map 6: check the gap before round 14.; Map 6: check the gap before round 17.; Map 6: check the gap before round 20.; Map 7: check the gap before round 7.; Map 7: check the gap before round 10.; Map 7: check the gap before round 17.",
-      "checkedAt": "2026-09-27T14:17:56.553057+00:00"
+      "message": "Published after full-recording validation",
+      "checkedAt": "2026-09-27T19:33:06.003813+00:00",
+      "detectorVersion": "vct-clock-ocr-v5"
     },
     "youtube:fFfCJDNHEvc": {
       "status": "held",

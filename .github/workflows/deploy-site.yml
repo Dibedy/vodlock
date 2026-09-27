@@ -1,0 +1,32 @@
+name: Deploy VODLOCK website
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - site/**
+      - .github/workflows/deploy-site.yml
+  workflow_dispatch:
+
+concurrency:
+  group: vodlock-site-deploy
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERCEL_ORG_ID: team_RVbqStzk6bcBVRtZJdFZNCGK
+      VERCEL_PROJECT_ID: prj_v4wVPQu8PDkHaPFu0x2EhMmOiPfR
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v6
+      - name: Deploy VODLOCK
+        run: |
+          test -n "$VERCEL_TOKEN"
+          npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"

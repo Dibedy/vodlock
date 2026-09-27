@@ -24,6 +24,14 @@
       "title": "EG FNS | LOUD vs EDG - VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
       "message": "Published",
       "checkedAt": "2026-09-27T13:14:17.716716+00:00"
+    },
+    "twitch:2884367669": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "VALORANT on Twitch",
+      "title": "GE vs. VIT - VALORANT Champions Shanghai - Group Stage",
+      "message": "Map 1: check the gap before round 7.; Map 1: check the gap before round 10.; Map 1: check the gap before round 18.; Map 1: check the gap before round 20.; Map 2: check the gap before round 7.; Map 2: check the gap before round 10.; Map 3: check the gap before round 17.; Map 3: check the gap before round 20.; Map 4: check the gap before round 7.; Map 4: check the gap before round 10.; Map 5: check the gap before round 17.; Map 5: check the gap before round 19.; Map 6: check the gap before round 7.; Map 6: check the gap before round 10.; Map 6: check the gap before round 14.; Map 6: check the gap before round 17.; Map 6: check the gap before round 20.; Map 7: check the gap before round 7.; Map 7: check the gap before round 10.; Map 7: check the gap before round 17.",
+      "checkedAt": "2026-09-27T14:17:56.553057+00:00"
     }
   }
 }

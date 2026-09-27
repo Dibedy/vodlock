@@ -70,6 +70,7 @@ class AutoPublishTests(unittest.TestCase):
         low = [dict(item) for item in rounds]
         low[5]["confidence"] = 0.7
         self.assertFalse(auto_publish.publishable({**job, "rounds": low}, 0.75, 13)[0])
+        self.assertEqual(auto_publish.publishable({**job, "rounds": low}, 0.65, 13), (True, ""))
         gap = [dict(item) for item in rounds]
         gap[5]["round"] = 7
         self.assertFalse(auto_publish.publishable({**job, "rounds": gap}, 0.75, 13)[0])

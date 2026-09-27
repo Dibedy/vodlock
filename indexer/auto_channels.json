@@ -2,7 +2,7 @@
   "version": 1,
   "lookback": 30,
   "maxPerRun": 1,
-  "minimumConfidence": 0.75,
+  "minimumConfidence": 0.65,
   "minimumRounds": 13,
   "channels": [
     {

@@ -42,13 +42,16 @@ class ServerTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 server.video_id(link)
 
+    def test_analysis_copy_limit_allows_long_twitch_archives(self):
+        self.assertEqual(server.ANALYSIS_MAX_BYTES, 5 * 1024 ** 3)
+
     def test_twitch_vod_link_validation(self):
         self.assertEqual(server.twitch_video_id("https://www.twitch.tv/videos/1234567890"), "1234567890")
         for link in ["https://www.twitch.tv/gofns", "https://twitch.tv/directory", "http://twitch.tv/videos/1234567890"]:
             with self.assertRaises(ValueError):
                 server.twitch_video_id(link)
 
-    def test_youtube_download_retries_403_with_hls(self):
+    def test_remote_download_retries_at_lower_resolution(self):
         identifier = "a" * 32
         job = {"id": identifier, "videoId": "ZphbktbT26k", "status": "downloading", "progress": 10}
         attempts = []
@@ -85,7 +88,7 @@ class ServerTests(unittest.TestCase):
             source = server.download_youtube(job, work, lambda _: None, yt_dlp)
             self.assertEqual(source.read_bytes(), b"video")
             self.assertEqual(len(attempts), 2)
-            self.assertIn("m3u8_native", attempts[1])
+            self.assertIn("height<=540", attempts[1])
             self.assertFalse((work / "source.mp4.part").exists())
             self.assertIn("trying another", job["message"])
 

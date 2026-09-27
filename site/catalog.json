@@ -8,7 +8,8 @@
       "title": "EG FNS",
       "event": "LOUD vs EDG | VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
       "label": "Full broadcast",
-      "index": "/indexes/twitch-2885323336.json"
+      "index": "/indexes/twitch-2885323336.json",
+      "chat": "/chats/twitch-2885323336.json"
     },
     {
       "provider": "youtube",

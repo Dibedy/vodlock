@@ -6,7 +6,7 @@ const {test} = require('node:test');
 
 const context = vm.createContext({URL, URLSearchParams});
 vm.runInContext(readFileSync(resolve(__dirname, '../site/core.js'), 'utf8'), context);
-const {videoId, twitchId, mediaSource, sourceKey, validateIndex, position, roundDestination, mapDestination} = context.VodlockSite;
+const {videoId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, position, roundDestination, mapDestination} = context.VodlockSite;
 const sample = () => ({schemaVersion: 1, videoId: 'ZphbktbT26k', rounds: [
   {map: 1, round: 1, start: 100}, {map: 1, round: 2, start: 250},
   {map: 2, round: 1, start: 700}, {map: 2, round: 2, start: 850}
@@ -42,6 +42,18 @@ test('website validates provider-neutral Twitch indexes', () => {
   const index = validateIndex({schemaVersion: 2, provider: 'twitch', sourceId: '1234567890', rounds: sample().rounds});
   assert.equal(index.provider, 'twitch');
   assert.equal(index.sourceId, '1234567890');
+});
+
+test('website validates compact synchronized Twitch chat without future data', () => {
+  const messages = validateChat({v: 1, source: '1234567890', messages: [
+    {t: 10, u: 'viewer', c: '#12Ab34', f: [['hello '], ['Kappa', '25']]},
+    {t: 12.5, u: 'other', c: '', f: [['nice']]}
+  ]}, '1234567890');
+  assert.equal(messages.length, 2);
+  assert.equal(messages[0].fragments[1][1], '25');
+  assert.throws(() => validateChat({v: 1, source: '1234567890', messages: [
+    {t: 12, u: 'viewer', c: '', f: [['later']]}, {t: 10, u: 'viewer', c: '', f: [['earlier']]}
+  ]}, '1234567890'));
 });
 
 test('map navigation lands on the first round without exposing map totals', () => {
@@ -85,6 +97,9 @@ test('website mentions spoiler-safe once and uses ten-second arrow navigation', 
   assert.match(index, /-10 s \/ \+10 s/);
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   assert.doesNotMatch(app, /\+ 31|31 seconds/);
+  assert.match(app, /twitch-timeline-hidden/);
+  assert.match(index, /setting-hide-twitch-timeline/);
+  assert.match(index, /setting-show-chat/);
 });
 
 test('website avoids the prohibited design and copy patterns', () => {

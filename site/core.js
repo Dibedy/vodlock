@@ -97,5 +97,30 @@
     return Math.max(0, target.start - index.leadSeconds);
   }
 
-  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, position, roundDestination, mapDestination});
+  function validateChat(value, sourceId) {
+    if (!value || value.v !== 1 || value.source !== sourceId || !Array.isArray(value.messages) || value.messages.length > 120000) {
+      throw new Error('The archived VOD chat is invalid.');
+    }
+    let previousTime = -1;
+    const messages = value.messages.map(message => {
+      if (!message || typeof message.t !== 'number' || !Number.isFinite(message.t) || message.t < previousTime || message.t < 0 ||
+          typeof message.u !== 'string' || !message.u || message.u.length > 40 ||
+          typeof message.c !== 'string' || !/^(?:#[0-9A-Fa-f]{6})?$/.test(message.c) ||
+          !Array.isArray(message.f) || !message.f.length || message.f.length > 50) {
+        throw new Error('The archived VOD chat is invalid.');
+      }
+      const fragments = message.f.map(fragment => {
+        if (!Array.isArray(fragment) || ![1, 2].includes(fragment.length) || typeof fragment[0] !== 'string' || fragment[0].length > 500 ||
+            fragment.length === 2 && (typeof fragment[1] !== 'string' || !/^[0-9]{1,20}$/.test(fragment[1]))) {
+          throw new Error('The archived VOD chat is invalid.');
+        }
+        return fragment.slice();
+      });
+      previousTime = message.t;
+      return {time: message.t, user: message.u, color: message.c, fragments};
+    });
+    return Object.freeze(messages);
+  }
+
+  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, position, roundDestination, mapDestination});
 })();

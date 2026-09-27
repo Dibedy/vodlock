@@ -9,6 +9,10 @@ on:
         description: Deploy the current site without processing a VOD
         type: boolean
         default: false
+      chat_vod_id:
+        description: Archive chat for an already published Twitch VOD ID
+        type: string
+        required: false
 
 concurrency:
   group: vodlock-auto-publish
@@ -41,13 +45,26 @@ jobs:
           cache: pip
           cache-dependency-path: indexer/requirements.txt
       - run: python -m pip install -r indexer/requirements.txt
+      - name: Install Twitch chat archiver
+        if: inputs.deploy_only != true || inputs.chat_vod_id != ''
+        run: |
+          curl -fsSL https://github.com/lay295/TwitchDownloader/releases/download/1.56.5/TwitchDownloaderCLI-1.56.5-Linux-x64.zip -o "$RUNNER_TEMP/twitch-downloader.zip"
+          unzip -q "$RUNNER_TEMP/twitch-downloader.zip" -d "$RUNNER_TEMP/twitch-downloader"
+          twitch_downloader=$(find "$RUNNER_TEMP/twitch-downloader" -type f -name TwitchDownloaderCLI | head -n 1)
+          chmod +x "$twitch_downloader"
+          echo "TWITCH_DOWNLOADER=$twitch_downloader" >> "$GITHUB_ENV"
       - run: python indexer/auto_publish.py
         if: inputs.deploy_only != true
+      - name: Archive published VOD chat
+        if: inputs.chat_vod_id != ''
+        env:
+          VODLOCK_CHAT_VOD_ID: ${{ inputs.chat_vod_id }}
+        run: python indexer/chat_archive.py "$VODLOCK_CHAT_VOD_ID"
       - name: Save published indexes
         run: |
           git config user.name "vodlock-bot"
           git config user.email "vodlock-bot@users.noreply.github.com"
-          git add site/catalog.json site/indexes indexer/auto_state.json
+          git add site/catalog.json site/indexes site/chats indexer/auto_state.json
           git diff --cached --quiet || git commit -m "Publish automatic VOD index"
           git push
       - name: Deploy VODLOCK

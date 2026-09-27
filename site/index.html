@@ -17,7 +17,10 @@
       <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 4h10M4 4v10M28 4H18M28 4v10M4 28h10M4 28V18M28 28H18M28 28V18"/><path d="M12 12h8v8h-8z"/></svg>
       <span>VODLOCK</span>
     </button>
-    <span class="top-status"><i></i> INDEXED VOD LIBRARY</span>
+    <div class="top-actions">
+      <span class="top-status"><i></i> INDEXED VOD LIBRARY</span>
+      <button id="settings-button" class="settings-button" type="button">Settings</button>
+    </div>
   </header>
   <main>
     <section id="library-view" class="library-view">
@@ -52,7 +55,7 @@
     <section id="player-view" class="player-view" hidden>
       <button id="back-button" class="back-button" type="button">← Back to library</button>
       <div class="watch-heading">
-        <div><span id="watch-event" class="eyebrow"></span><h1 id="watch-title"></h1></div>
+        <div id="watch-metadata"><span id="watch-event" class="eyebrow"></span><h1 id="watch-title"></h1></div>
         <span class="safe-badge"><i></i> ROUND NAVIGATION ACTIVE</span>
       </div>
       <div class="watch-layout">
@@ -90,10 +93,25 @@
           <button id="restart-round" class="restart-button" type="button" disabled>Restart current round</button>
           <div class="shield-note"><span aria-hidden="true"></span><p>Round totals, map totals, scores, and match-result metadata stay out of the VODLOCK interface.</p></div>
         </aside>
+        <aside id="chat-panel" class="chat-panel" hidden>
+          <div class="chat-heading"><span>VOD CHAT</span><b>SYNCED</b></div>
+          <div id="chat-messages" class="chat-messages" aria-live="off"></div>
+        </aside>
       </div>
       <div class="shortcuts"><span><kbd>Space</kbd> Play / pause</span><span><kbd>↑</kbd><kbd>↓</kbd> Previous / next round</span><span><kbd>←</kbd><kbd>→</kbd> -10 s / +10 s</span><span><kbd>F</kbd> Full screen</span></div>
     </section>
   </main>
+  <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
+    <div class="settings-heading"><div><span class="eyebrow">VIEW OPTIONS</span><h2 id="settings-title">Settings</h2></div><button id="settings-close" type="button" aria-label="Close settings">Close</button></div>
+    <div class="settings-list">
+      <label><span><strong>Hide Twitch timeline</strong><small>Use only VODLOCK controls and prevent player hover controls.</small></span><input id="setting-hide-twitch-timeline" type="checkbox"></label>
+      <label><span><strong>Hide match details</strong><small>Hide the broadcast title and event while watching.</small></span><input id="setting-hide-metadata" type="checkbox"></label>
+      <label><span><strong>Hide current map and round</strong><small>Keep the navigation buttons without showing your position.</small></span><input id="setting-hide-round-status" type="checkbox"></label>
+      <label><span><strong>Show archived VOD chat</strong><small>Display only messages posted up to the current playback position.</small></span><input id="setting-show-chat" type="checkbox"></label>
+      <label><span><strong>Show chat timestamps</strong><small>Reveal each message's position within the broadcast.</small></span><input id="setting-show-chat-timestamps" type="checkbox"></label>
+      <label><span><strong>Protect the end screen</strong><small>Remove the player when playback finishes.</small></span><input id="setting-end-screen-protection" type="checkbox"></label>
+    </div>
+  </dialog>
   <div id="toast" class="toast" role="status" hidden></div>
   <footer><span>VODLOCK</span><p>Precomputed indexes. Original video served by YouTube or Twitch.</p><nav aria-label="Legal"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav></footer>
 </body>

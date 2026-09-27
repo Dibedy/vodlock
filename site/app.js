@@ -2,7 +2,50 @@
   'use strict';
 
   const $ = id => document.getElementById(id);
-  const state = {catalog: [], entry: null, index: null, player: null, ready: false, started: false, playing: false, toastTimer: null, statusTimer: null};
+  const defaultSettings = {hideTwitchTimeline: true, hideMetadata: false, hideRoundStatus: false, showChat: true, showChatTimestamps: false, endScreenProtection: true};
+  const settingIds = {
+    hideTwitchTimeline: 'setting-hide-twitch-timeline',
+    hideMetadata: 'setting-hide-metadata',
+    hideRoundStatus: 'setting-hide-round-status',
+    showChat: 'setting-show-chat',
+    showChatTimestamps: 'setting-show-chat-timestamps',
+    endScreenProtection: 'setting-end-screen-protection'
+  };
+  const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, toastTimer: null, statusTimer: null};
+  let settings = readSettings();
+
+  function readSettings() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('vodlock-settings') || '{}');
+      return Object.fromEntries(Object.keys(defaultSettings).map(key => [key, typeof saved[key] === 'boolean' ? saved[key] : defaultSettings[key]]));
+    } catch {
+      return {...defaultSettings};
+    }
+  }
+
+  function saveSettings() {
+    try { localStorage.setItem('vodlock-settings', JSON.stringify(settings)); } catch {}
+  }
+
+  function formatTime(seconds) {
+    const value = Math.max(0, Math.floor(seconds));
+    const hours = Math.floor(value / 3600);
+    const minutes = Math.floor(value % 3600 / 60);
+    const remainder = value % 60;
+    return (hours ? hours + ':' + String(minutes).padStart(2, '0') : minutes) + ':' + String(remainder).padStart(2, '0');
+  }
+
+  function applySettings() {
+    for (const [key, identifier] of Object.entries(settingIds)) $(identifier).checked = settings[key];
+    const twitchTimelineHidden = state.entry?.provider === 'twitch' && settings.hideTwitchTimeline;
+    $('player-shell').classList.toggle('twitch-timeline-hidden', twitchTimelineHidden);
+    $('watch-metadata').hidden = settings.hideMetadata;
+    $('timeline-status').textContent = state.entry?.provider === 'twitch'
+      ? twitchTimelineHidden ? 'Timeline hidden' : 'Twitch controls visible'
+      : 'Timeline hidden';
+    renderChat(true);
+    updateStatus();
+  }
 
   function toast(message) {
     clearTimeout(state.toastTimer);
@@ -21,6 +64,63 @@
     state.player = null;
     state.ready = false;
     state.playing = false;
+  }
+
+  function renderChat(force = false) {
+    const available = state.entry?.provider === 'twitch' && state.chat.length > 0;
+    const visible = available && settings.showChat;
+    $('chat-panel').hidden = !visible;
+    document.querySelector('.watch-layout').classList.toggle('chat-visible', visible);
+    if (!visible) return;
+    const now = currentTime();
+    const position = Math.floor(now);
+    if (!force && state.chatPosition === position) return;
+    state.chatPosition = position;
+    const messages = state.chat.filter(message => message.time <= now && message.time >= now - 90).slice(-120);
+    const host = $('chat-messages');
+    host.replaceChildren();
+    if (!messages.length) {
+      const empty = document.createElement('p');
+      empty.className = 'chat-empty';
+      empty.textContent = 'No archived messages at this point in the VOD.';
+      host.append(empty);
+      return;
+    }
+    for (const message of messages) {
+      const row = document.createElement('p');
+      row.className = 'chat-message';
+      if (settings.showChatTimestamps) {
+        const time = document.createElement('time');
+        time.textContent = formatTime(message.time);
+        row.append(time);
+      }
+      const user = document.createElement('strong');
+      user.textContent = message.user + ':';
+      if (message.color) user.style.color = message.color;
+      row.append(user);
+      for (const [text, emote] of message.fragments) {
+        if (emote) {
+          const image = document.createElement('img');
+          image.src = 'https://static-cdn.jtvnw.net/emoticons/v2/' + emote + '/default/dark/1.0';
+          image.alt = text;
+          image.loading = 'lazy';
+          row.append(image);
+        } else {
+          row.append(document.createTextNode(text));
+        }
+      }
+      host.append(row);
+    }
+    host.scrollTop = host.scrollHeight;
+  }
+
+  async function loadChat(entry) {
+    state.chat = [];
+    state.chatPosition = null;
+    if (entry.provider !== 'twitch' || typeof entry.chat !== 'string' || !/^\/chats\/twitch-[0-9]{6,20}\.json$/.test(entry.chat)) return;
+    const response = await fetch(entry.chat, {cache: 'no-store'});
+    if (!response.ok) return;
+    state.chat = VodlockSite.validateChat(await response.json(), entry.sourceId);
   }
 
   function resetPlayerHost() {
@@ -93,6 +193,8 @@
     state.started = false;
     state.entry = null;
     state.index = null;
+    state.chat = [];
+    state.chatPosition = null;
     setPlaybackControlsDisabled(true);
     resetPlayerHost();
     $('player-view').hidden = true;
@@ -101,6 +203,7 @@
     $('start-gate').hidden = false;
     $('start-watching').disabled = false;
     $('start-watching').textContent = 'Start watching';
+    applySettings();
     if (updateHistory) history.pushState({}, '', location.pathname);
     document.title = 'VODLOCK | Indexed VALORANT VODs';
     window.scrollTo({top: 0});
@@ -118,6 +221,7 @@
     if (!response.ok) throw new Error('This round index is temporarily unavailable.');
     const index = VodlockSite.validateIndex(await response.json());
     if (index.provider !== entry.provider || index.sourceId !== entry.sourceId) throw new Error('The catalog and round index do not match.');
+    await loadChat(entry);
     setPlaybackControlsDisabled(true);
     state.entry = entry;
     state.index = index;
@@ -126,13 +230,13 @@
     resetPlayerHost();
     $('watch-event').textContent = entry.event;
     $('watch-title').textContent = entry.title;
-    $('timeline-status').textContent = entry.provider === 'youtube' ? 'Timeline hidden' : 'Twitch source controls';
     $('library-view').hidden = true;
     $('player-view').hidden = false;
     $('start-gate').hidden = false;
     $('end-shield').hidden = true;
     $('start-watching').disabled = false;
     $('start-watching').textContent = 'Start watching';
+    applySettings();
     if (updateHistory) history.pushState({source: entryKey(entry)}, '', '?v=' + encodeURIComponent(entryKey(entry)));
     document.title = entry.title + ' | VODLOCK';
     window.scrollTo({top: 0});
@@ -181,6 +285,12 @@
     seekPlayer(Math.max(0, state.index.rounds[0].start - state.index.leadSeconds));
     playPlayer();
     setPlaybackControlsDisabled(false);
+    const revealDelay = state.entry.provider === 'twitch' && settings.hideTwitchTimeline ? 1400 : 0;
+    setTimeout(() => {
+      if (!state.ready) return;
+      $('start-gate').hidden = true;
+      $('start-watching').textContent = 'Start watching';
+    }, revealDelay);
     updateStatus();
     clearInterval(state.statusTimer);
     state.statusTimer = setInterval(updateStatus, 500);
@@ -203,6 +313,7 @@
   }
 
   function createTwitchPlayer() {
+    $('player-shell').classList.toggle('twitch-timeline-hidden', settings.hideTwitchTimeline);
     state.player = new Twitch.Player('media-player', {
       video: 'v' + state.entry.sourceId,
       parent: [location.hostname],
@@ -234,6 +345,10 @@
   }
 
   function finishWatching() {
+    if (!settings.endScreenProtection) {
+      setPlaying(false);
+      return;
+    }
     clearInterval(state.statusTimer);
     state.statusTimer = null;
     destroyPlayer();
@@ -303,13 +418,17 @@
     if (!state.index) return;
     const position = VodlockSite.position(state.index, currentTime());
     const round = state.index.rounds[Math.max(position, 0)];
-    if (position < 0) {
+    if (settings.hideRoundStatus) {
+      $('current-map').textContent = 'Position hidden';
+      $('current-round').textContent = 'Navigation remains active';
+    } else if (position < 0) {
       $('current-map').textContent = 'Opening';
       $('current-round').textContent = 'Ready to begin';
     } else {
       $('current-map').textContent = 'Map ' + round.map;
       $('current-round').textContent = 'Round ' + round.round;
     }
+    renderChat();
   }
 
   function navigateRound(direction) {
@@ -329,7 +448,6 @@
   function startWatching() {
     if (state.started) return;
     state.started = true;
-    $('start-gate').hidden = true;
     $('start-watching').disabled = true;
     $('start-watching').textContent = 'Loading ' + (state.entry.provider === 'youtube' ? 'YouTube' : 'Twitch') + '...';
     createPlayer();
@@ -346,6 +464,19 @@
   function toggleFullscreen() {
     if (document.fullscreenElement) document.exitFullscreen();
     else $('player-shell').requestFullscreen?.();
+  }
+
+  $('settings-button').addEventListener('click', () => $('settings-dialog').showModal());
+  $('settings-close').addEventListener('click', () => $('settings-dialog').close());
+  $('settings-dialog').addEventListener('click', event => {
+    if (event.target === $('settings-dialog')) $('settings-dialog').close();
+  });
+  for (const [key, identifier] of Object.entries(settingIds)) {
+    $(identifier).addEventListener('change', event => {
+      settings = {...settings, [key]: event.target.checked};
+      saveSettings();
+      applySettings();
+    });
   }
 
   $('video-search').addEventListener('submit', event => {
@@ -412,6 +543,7 @@
     else showLibrary(false);
   });
 
+  applySettings();
   loadCatalog().then(() => {
     const source = VodlockSite.mediaSource(new URL(location.href).searchParams.get('v'));
     if (source) return openVideo(VodlockSite.sourceKey(source.provider, source.sourceId), false);

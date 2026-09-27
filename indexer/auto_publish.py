@@ -11,6 +11,7 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 import server
+import chat_archive
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -178,15 +179,23 @@ def process(channel, entry, config):
                               for item in exported["rounds"]]
         filename = f"{provider}-{entry['id']}.json"
         write_json(SITE / "indexes" / filename, exported)
+        chat_path = None
+        if provider == "twitch":
+            try:
+                chat_path = chat_archive.archive_chat(entry["id"])
+            except Exception as error:
+                print(f"twitch:{entry['id']} chat unavailable - {clean_text(error)}", file=sys.stderr)
         catalog_path = SITE / "catalog.json"
         catalog = read_json(catalog_path)
         catalog["version"] = 2
         catalog["videos"] = [item for item in catalog["videos"]
                              if source_key(item.get("provider", "youtube"), item.get("sourceId", item.get("videoId", "")))
                              != source_key(provider, entry["id"])]
-        catalog["videos"].insert(0, {"provider": provider, "sourceId": entry["id"], "title": title,
-                                      "event": event, "label": "Full broadcast",
-                                      "index": f"/indexes/{filename}"})
+        catalog_entry = {"provider": provider, "sourceId": entry["id"], "title": title,
+                         "event": event, "label": "Full broadcast", "index": f"/indexes/{filename}"}
+        if chat_path:
+            catalog_entry["chat"] = "/chats/" + chat_path.name
+        catalog["videos"].insert(0, catalog_entry)
         catalog["updatedAt"] = datetime.now(timezone.utc).date().isoformat()
         write_json(catalog_path, catalog)
         return True, "Published"

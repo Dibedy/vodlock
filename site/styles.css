@@ -71,7 +71,7 @@ main { width: min(1560px, calc(100% - 40px)); margin: 0 auto; }
 .video-column { min-width: 0; }
 .player-shell { aspect-ratio: 16 / 9; background: #000; position: relative; overflow: hidden; border: 1px solid #2a302d; }
 #media-player, #media-player iframe { width: 100%; height: 100%; }
-.player-shell.twitch-timeline-hidden #media-player iframe { pointer-events: none; }
+.player-shell.twitch-timeline-hidden #media-player iframe { position: absolute; top: -90px; left: 0; height: calc(100% + 180px) !important; pointer-events: none; }
 .player-gate { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 24px; background: #090c0a; }
 .player-gate::before { content: ""; position: absolute; inset: 18px; border: 1px solid #202722; pointer-events: none; }
 .player-gate strong { font-size: clamp(24px, 4vw, 42px); letter-spacing: -.045em; }
@@ -109,6 +109,13 @@ main { width: min(1560px, calc(100% - 40px)); margin: 0 auto; }
 .chat-message strong { margin-right: 5px; color: #aeb7b1; }
 .chat-message img { width: 24px; height: 24px; margin: -5px 2px; object-fit: contain; vertical-align: middle; }
 .chat-empty { margin: 0; color: #737c76; font-size: 12px; line-height: 1.55; }
+.watch-layout:fullscreen { width: 100vw; height: 100vh; grid-template-columns: minmax(0, 1fr) clamp(300px, 22vw, 400px); gap: 0; align-items: stretch; background: #000; }
+.watch-layout:fullscreen:not(.chat-visible) { grid-template-columns: 1fr; }
+.watch-layout:fullscreen .video-column { min-height: 0; display: flex; flex-direction: column; justify-content: center; background: #000; }
+.watch-layout:fullscreen .player-shell { width: 100%; flex: 0 0 auto; border: 0; }
+.watch-layout:fullscreen .player-controls { flex: 0 0 62px; border-right: 0; border-bottom: 0; border-left: 0; }
+.watch-layout:fullscreen .round-panel { display: none; }
+.watch-layout:fullscreen .chat-panel { height: 100vh; min-height: 0; border-top: 0; border-right: 0; border-bottom: 0; }
 .settings-dialog { width: min(560px, calc(100% - 32px)); max-height: calc(100vh - 40px); padding: 0; border: 1px solid #39443d; border-radius: 0; background: #0d100f; color: var(--text); box-shadow: 0 24px 90px #000; }
 .settings-dialog::backdrop { background: rgba(0,0,0,.78); }
 .settings-heading { padding: 22px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); }

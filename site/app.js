@@ -71,6 +71,7 @@
     const visible = available && settings.showChat;
     $('chat-panel').hidden = !visible;
     document.querySelector('.watch-layout').classList.toggle('chat-visible', visible);
+    syncFullscreenButton();
     if (!visible) return;
     const now = currentTime();
     const position = Math.floor(now);
@@ -463,7 +464,15 @@
 
   function toggleFullscreen() {
     if (document.fullscreenElement) document.exitFullscreen();
-    else $('player-shell').requestFullscreen?.();
+    else if ($('watch-layout').requestFullscreen) $('watch-layout').requestFullscreen();
+    else toast('Full screen is not available in this browser.');
+  }
+
+  function syncFullscreenButton() {
+    const chatVisible = !$('chat-panel').hidden;
+    const fullscreen = document.fullscreenElement === $('watch-layout');
+    $('fullscreen-button').textContent = fullscreen ? 'Exit full screen' : chatVisible ? 'Full screen + chat' : 'Full screen';
+    $('fullscreen-button').setAttribute('aria-label', fullscreen ? 'Exit fullscreen' : chatVisible ? 'Enter fullscreen with chat' : 'Enter fullscreen');
   }
 
   $('settings-button').addEventListener('click', () => $('settings-dialog').showModal());
@@ -502,6 +511,7 @@
     if (Number(event.target.value)) setMuted(false);
   });
   $('fullscreen-button').addEventListener('click', toggleFullscreen);
+  document.addEventListener('fullscreenchange', syncFullscreenButton);
   $('previous-round').addEventListener('click', () => navigateRound(-1));
   $('next-round').addEventListener('click', () => navigateRound(1));
   $('previous-map').addEventListener('click', () => navigateMap(-1));

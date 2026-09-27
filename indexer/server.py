@@ -13,6 +13,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from detector import DETECTOR_VERSION, HudReader, RoundDetector
+from storyboard_align import frame_hash
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
@@ -158,6 +159,8 @@ def index_job(identifier):
         update(identifier, status="analyzing", message="Reading the broadcast clock and rejecting replay frames", progress=35)
         reader = HudReader()
         detector = RoundDetector()
+        fingerprint_interval = int(job.get("fingerprintInterval", 0))
+        fingerprints = []
         capture = cv2.VideoCapture(str(source))
         duration = capture.get(cv2.CAP_PROP_FRAME_COUNT) / max(1, capture.get(cv2.CAP_PROP_FPS))
         opened = capture.isOpened()
@@ -186,6 +189,8 @@ def index_job(identifier):
                 if len(chunk) != frame_size:
                     raise ValueError("Video decoding stopped in the middle of a frame.")
                 frame = np.frombuffer(chunk, dtype=np.uint8).reshape(720, 1280, 3)
+                if fingerprint_interval and frame_number * 2 % fingerprint_interval == 0:
+                    fingerprints.append({"time": frame_number * 2, "hash": frame_hash(frame)})
                 detector.observe(reader.read(frame, frame_number * 2))
                 frame_number += 1
                 with LOCK:
@@ -198,7 +203,7 @@ def index_job(identifier):
             raise ValueError("No reliable round starts were found. This version needs the VCT top-centre ROUND label and timer; a different layout may need detector changes.")
         update(identifier, status="ready", message="Index ready · review accuracy before relying on it", progress=100,
                rounds=detector.rounds, warnings=detector.warnings,
-               source=str(source), duration=duration)
+               source=str(source), duration=duration, fingerprints=fingerprints)
     except InterruptedError as error:
         update(identifier, status="cancelled", message=str(error), progress=0)
     except Exception as error:
@@ -245,7 +250,7 @@ class Handler(BaseHTTPRequestHandler):
         path = urlparse(self.path).path
         if path == "/api/state":
             with LOCK:
-                jobs = [{key: value for key, value in job.items() if key not in {"source", "duration"}} for job in JOBS.values()]
+                jobs = [{key: value for key, value in job.items() if key not in {"source", "duration", "fingerprints"}} for job in JOBS.values()]
                 self.respond(200, {"token": TOKEN, "active": ACTIVE, "jobs": jobs, "workspace": str(ROOT)})
             return
         match = re.fullmatch(r"/api/export/([a-f0-9]{32})", path)

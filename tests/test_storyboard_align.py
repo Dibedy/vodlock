@@ -1,0 +1,61 @@
+import hashlib
+import sys
+import unittest
+from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "indexer"))
+from storyboard_align import align_storyboards, hamming, translate_index
+
+
+def unique_hash(value):
+    return hashlib.blake2b(str(value).encode(), digest_size=8).hexdigest()
+
+
+class StoryboardAlignmentTests(unittest.TestCase):
+    def test_hamming_distance_counts_changed_bits(self):
+        self.assertEqual(hamming("00ff", "01fe"), 2)
+
+    def test_alignment_requires_consistent_anchors_across_full_video(self):
+        reference = {"duration": 3000, "interval": 10,
+                     "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(300)]}
+        target = {"duration": 600, "interval": 10,
+                  "frames": [{"time": index * 10, "hash": unique_hash(index + 100)} for index in range(60)]}
+        result = align_storyboards(reference, target)
+        self.assertEqual(result["offset"], 1000)
+        self.assertEqual(result["coverage"], [20, 20, 20])
+        self.assertEqual(result["anchors"], 60)
+
+    def test_unrelated_storyboards_are_rejected(self):
+        reference = {"duration": 600, "interval": 10,
+                     "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}
+        target = {"duration": 600, "interval": 10,
+                  "frames": [{"time": index * 10, "hash": unique_hash(index + 1000)} for index in range(60)]}
+        with self.assertRaisesRegex(ValueError, "matching visual anchors"):
+            align_storyboards(reference, target, maximum_distance=0)
+
+    def test_alignment_detects_breaks_removed_between_maps(self):
+        reference = {"duration": 4000, "interval": 10,
+                     "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(400)]}
+        target_frames = ([{"time": index * 10, "hash": unique_hash(index + 100)} for index in range(60)]
+                         + [{"time": (index + 60) * 10, "hash": unique_hash(index + 220)} for index in range(60)])
+        result = align_storyboards(reference, {"duration": 1200, "interval": 10, "frames": target_frames})
+        self.assertEqual([item["offset"] for item in result["segments"]], [1000.0, 1600.0])
+        self.assertEqual(result["anchors"], 120)
+
+    def test_index_translation_selects_and_renumbers_aligned_maps(self):
+        rounds = []
+        for map_number, base in [(1, 100), (2, 900), (3, 2100), (4, 2900)]:
+            rounds.extend({"map": map_number, "round": number, "start": base + number * 40}
+                          for number in range(1, 14))
+        translated = translate_index({"rounds": rounds}, {"duration": 1500}, {"offset": 2000})
+        self.assertEqual(translated[0], {"map": 1, "round": 1, "start": 140.0})
+        self.assertEqual(translated[-1]["map"], 2)
+
+    def test_partial_map_alignment_is_rejected(self):
+        rounds = [{"map": 2, "round": number, "start": 1000 + number * 40} for number in range(5, 18)]
+        with self.assertRaisesRegex(ValueError, "map 1 round 1"):
+            translate_index({"rounds": rounds}, {"duration": 1000}, {"offset": 1000})
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,257 @@
+{
+  "schemaVersion": 2,
+  "provider": "youtube",
+  "sourceId": "ZWhEMQVk4x0",
+  "label": "100T vs T1",
+  "leadSeconds": 5,
+  "detector": "vct-clock-ocr-v6+storyboard-v1",
+  "rounds": [
+    {
+      "map": 1,
+      "round": 1,
+      "start": 371.05
+    },
+    {
+      "map": 1,
+      "round": 2,
+      "start": 467.05
+    },
+    {
+      "map": 1,
+      "round": 3,
+      "start": 565.05
+    },
+    {
+      "map": 1,
+      "round": 4,
+      "start": 681.05
+    },
+    {
+      "map": 1,
+      "round": 5,
+      "start": 777.05
+    },
+    {
+      "map": 1,
+      "round": 6,
+      "start": 914.05
+    },
+    {
+      "map": 1,
+      "round": 7,
+      "start": 1158.05
+    },
+    {
+      "map": 1,
+      "round": 8,
+      "start": 1285.05
+    },
+    {
+      "map": 1,
+      "round": 9,
+      "start": 1494.05
+    },
+    {
+      "map": 1,
+      "round": 10,
+      "start": 1608.05
+    },
+    {
+      "map": 1,
+      "round": 11,
+      "start": 1767.05
+    },
+    {
+      "map": 1,
+      "round": 12,
+      "start": 1910.05
+    },
+    {
+      "map": 1,
+      "round": 13,
+      "start": 2150.05
+    },
+    {
+      "map": 1,
+      "round": 14,
+      "start": 2289.05
+    },
+    {
+      "map": 1,
+      "round": 15,
+      "start": 2486.05
+    },
+    {
+      "map": 1,
+      "round": 16,
+      "start": 2550.05
+    },
+    {
+      "map": 1,
+      "round": 17,
+      "start": 2711.05
+    },
+    {
+      "map": 1,
+      "round": 18,
+      "start": 2833.05
+    },
+    {
+      "map": 1,
+      "round": 19,
+      "start": 3012.05
+    },
+    {
+      "map": 1,
+      "round": 20,
+      "start": 3156.05
+    },
+    {
+      "map": 1,
+      "round": 21,
+      "start": 3323.05
+    },
+    {
+      "map": 2,
+      "round": 1,
+      "start": 3558.02
+    },
+    {
+      "map": 2,
+      "round": 2,
+      "start": 3685.02
+    },
+    {
+      "map": 2,
+      "round": 3,
+      "start": 3807.02
+    },
+    {
+      "map": 2,
+      "round": 4,
+      "start": 3936.02
+    },
+    {
+      "map": 2,
+      "round": 5,
+      "start": 4073.52
+    },
+    {
+      "map": 2,
+      "round": 6,
+      "start": 4278.02
+    },
+    {
+      "map": 2,
+      "round": 7,
+      "start": 4419.02
+    },
+    {
+      "map": 2,
+      "round": 8,
+      "start": 4581.02
+    },
+    {
+      "map": 2,
+      "round": 9,
+      "start": 4814.02
+    },
+    {
+      "map": 2,
+      "round": 10,
+      "start": 4930.02
+    },
+    {
+      "map": 2,
+      "round": 11,
+      "start": 5133.02
+    },
+    {
+      "map": 2,
+      "round": 12,
+      "start": 5270.02
+    },
+    {
+      "map": 2,
+      "round": 13,
+      "start": 5519.02
+    },
+    {
+      "map": 2,
+      "round": 14,
+      "start": 5603.02
+    },
+    {
+      "map": 2,
+      "round": 15,
+      "start": 5667.02
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 5805.02
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 5984.02
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 6084.02
+    },
+    {
+      "map": 2,
+      "round": 19,
+      "start": 6174.02
+    },
+    {
+      "map": 2,
+      "round": 20,
+      "start": 6326.02
+    },
+    {
+      "map": 2,
+      "round": 21,
+      "start": 6463.02
+    },
+    {
+      "map": 2,
+      "round": 22,
+      "start": 6549.02
+    }
+  ],
+  "alignment": {
+    "version": "storyboard-v1",
+    "offset": 2121.951,
+    "segments": [
+      {
+        "offset": 2121.951,
+        "anchors": 161,
+        "medianDistance": 5.0,
+        "maximumResidual": 2.052,
+        "targetStart": 0,
+        "targetEnd": 3429.997
+      },
+      {
+        "offset": 2783.983,
+        "anchors": 182,
+        "medianDistance": 4.0,
+        "maximumResidual": 2.021,
+        "targetStart": 3429.997,
+        "targetEnd": 6659.0
+      }
+    ],
+    "timelineScale": 1.00165094,
+    "anchors": 338,
+    "coverage": [
+      103,
+      111,
+      124
+    ],
+    "medianDistance": 4.0,
+    "maximumResidual": 2.052,
+    "source": "twitch:2885318675"
+  }
+}

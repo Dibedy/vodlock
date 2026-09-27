@@ -4,7 +4,7 @@
   "sourceId": "TWjd0AoZdaY",
   "label": "GE vs VIT",
   "leadSeconds": 5,
-  "detector": "vct-clock-ocr-v5",
+  "detector": "vct-clock-ocr-v6+storyboard-v1",
   "rounds": [
     {
       "map": 1,
@@ -29,7 +29,7 @@
     {
       "map": 1,
       "round": 5,
-      "start": 569.0
+      "start": 568.0
     },
     {
       "map": 1,
@@ -124,232 +124,272 @@
     {
       "map": 2,
       "round": 1,
-      "start": 3279.0
+      "start": 3278.62
     },
     {
       "map": 2,
       "round": 2,
-      "start": 3383.0
+      "start": 3382.62
     },
     {
       "map": 2,
       "round": 3,
-      "start": 3455.0
+      "start": 3454.62
     },
     {
       "map": 2,
       "round": 4,
-      "start": 3558.0
+      "start": 3557.62
     },
     {
       "map": 2,
       "round": 5,
-      "start": 3652.0
+      "start": 3652.62
     },
     {
       "map": 2,
       "round": 6,
-      "start": 3770.0
+      "start": 3769.62
     },
     {
       "map": 2,
       "round": 7,
-      "start": 3944.0
+      "start": 3943.62
     },
     {
       "map": 2,
       "round": 8,
-      "start": 4043.0
+      "start": 4042.62
     },
     {
       "map": 2,
       "round": 9,
-      "start": 4228.0
+      "start": 4227.62
     },
     {
       "map": 2,
       "round": 10,
-      "start": 4352.0
+      "start": 4351.62
     },
     {
       "map": 2,
       "round": 11,
-      "start": 4467.0
+      "start": 4466.62
     },
     {
       "map": 2,
       "round": 12,
-      "start": 4546.0
+      "start": 4546.62
     },
     {
       "map": 2,
       "round": 13,
-      "start": 4797.0
+      "start": 4796.62
     },
     {
       "map": 2,
       "round": 14,
-      "start": 4908.0
+      "start": 4907.62
     },
     {
       "map": 2,
       "round": 15,
-      "start": 5019.0
+      "start": 5018.62
     },
     {
       "map": 2,
       "round": 16,
-      "start": 5143.0
+      "start": 5142.62
     },
     {
       "map": 2,
       "round": 17,
-      "start": 5367.0
+      "start": 5366.62
     },
     {
       "map": 2,
       "round": 18,
-      "start": 5459.0
+      "start": 5458.62
     },
     {
       "map": 2,
       "round": 19,
-      "start": 5600.0
+      "start": 5599.62
     },
     {
       "map": 2,
       "round": 20,
-      "start": 5743.0
+      "start": 5742.62
     },
     {
       "map": 2,
       "round": 21,
-      "start": 5829.0
+      "start": 5828.62
     },
     {
       "map": 2,
       "round": 22,
-      "start": 5990.0
+      "start": 5989.62
     },
     {
       "map": 3,
       "round": 1,
-      "start": 6238.0
+      "start": 6238.05
     },
     {
       "map": 3,
       "round": 2,
-      "start": 6351.0
+      "start": 6351.05
     },
     {
       "map": 3,
       "round": 3,
-      "start": 6439.0
+      "start": 6439.05
     },
     {
       "map": 3,
       "round": 4,
-      "start": 6585.0
+      "start": 6586.05
     },
     {
       "map": 3,
       "round": 5,
-      "start": 6737.0
+      "start": 6737.05
     },
     {
       "map": 3,
       "round": 6,
-      "start": 6802.0
+      "start": 6803.05
     },
     {
       "map": 3,
       "round": 7,
-      "start": 6932.0
+      "start": 6932.05
     },
     {
       "map": 3,
       "round": 8,
-      "start": 7138.0
+      "start": 7138.05
     },
     {
       "map": 3,
       "round": 9,
-      "start": 7298.0
+      "start": 7298.05
     },
     {
       "map": 3,
       "round": 10,
-      "start": 7410.0
+      "start": 7410.05
     },
     {
       "map": 3,
       "round": 11,
-      "start": 7577.0
+      "start": 7577.05
     },
     {
       "map": 3,
       "round": 12,
-      "start": 7711.0
+      "start": 7711.05
     },
     {
       "map": 3,
       "round": 13,
-      "start": 7997.0
+      "start": 7998.05
     },
     {
       "map": 3,
       "round": 14,
-      "start": 8103.0
+      "start": 8103.05
     },
     {
       "map": 3,
       "round": 15,
-      "start": 8184.0
+      "start": 8184.05
     },
     {
       "map": 3,
       "round": 16,
-      "start": 8334.0
+      "start": 8334.05
     },
     {
       "map": 3,
       "round": 17,
-      "start": 8431.0
+      "start": 8431.05
     },
     {
       "map": 3,
       "round": 18,
-      "start": 8547.0
+      "start": 8548.05
     },
     {
       "map": 3,
       "round": 19,
-      "start": 8610.0
+      "start": 8610.05
     },
     {
       "map": 3,
       "round": 20,
-      "start": 8721.0
+      "start": 8721.05
     },
     {
       "map": 3,
       "round": 21,
-      "start": 8881.5
+      "start": 8882.05
     },
     {
       "map": 3,
       "round": 22,
-      "start": 8991.0
+      "start": 8991.05
     },
     {
       "map": 3,
       "round": 23,
-      "start": 9162.0
+      "start": 9162.05
     },
     {
       "map": 3,
       "round": 24,
-      "start": 9290.0
+      "start": 9290.05
     }
-  ]
+  ],
+  "alignment": {
+    "version": "storyboard-v1",
+    "offset": 2227.998,
+    "segments": [
+      {
+        "offset": 2227.998,
+        "anchors": 283,
+        "medianDistance": 2.0,
+        "maximumResidual": 2.001,
+        "targetStart": 0,
+        "targetEnd": 3175.018
+      },
+      {
+        "offset": 2843.377,
+        "anchors": 70,
+        "medianDistance": 6.0,
+        "maximumResidual": 2.6,
+        "targetStart": 3175.018,
+        "targetEnd": 6060.035
+      },
+      {
+        "offset": 3355.955,
+        "anchors": 197,
+        "medianDistance": 4.0,
+        "maximumResidual": 2.003,
+        "targetStart": 6060.035,
+        "targetEnd": 9411.0
+      }
+    ],
+    "timelineScale": 1.0020247,
+    "anchors": 545,
+    "coverage": [
+      280,
+      83,
+      182
+    ],
+    "medianDistance": 3.0,
+    "maximumResidual": 2.6,
+    "source": "twitch:2884367669"
+  }
 }

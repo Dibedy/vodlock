@@ -21,13 +21,12 @@
       "chat": "/chats/twitch-2883449763.json"
     },
     {
-      "provider": "twitch",
-      "sourceId": "2884362905",
-      "title": "EG FNS",
-      "event": "GE vs VIT | VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
-      "label": "Full broadcast",
-      "index": "/indexes/twitch-2884362905.json",
-      "chat": "/chats/twitch-2884362905.json"
+      "provider": "youtube",
+      "sourceId": "ZWhEMQVk4x0",
+      "title": "100T vs T1",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-ZWhEMQVk4x0.json"
     },
     {
       "provider": "youtube",
@@ -38,22 +37,21 @@
       "index": "/indexes/youtube-TWjd0AoZdaY.json"
     },
     {
-      "provider": "twitch",
-      "sourceId": "2884367669",
-      "title": "GE vs VIT",
+      "provider": "youtube",
+      "sourceId": "fFfCJDNHEvc",
+      "title": "JDG vs FUT",
       "event": "VALORANT Champions Shanghai | Group Stage",
-      "label": "Full broadcast",
-      "index": "/indexes/twitch-2884367669.json",
-      "chat": "/chats/twitch-2884367669.json"
+      "label": "Full match",
+      "index": "/indexes/youtube-fFfCJDNHEvc.json"
     },
     {
       "provider": "twitch",
-      "sourceId": "2885318675",
-      "title": "100T vs T1",
-      "event": "VALORANT Champions Shanghai | Group Stage",
+      "sourceId": "2884362905",
+      "title": "EG FNS",
+      "event": "GE vs VIT | VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
       "label": "Full broadcast",
-      "index": "/indexes/twitch-2885318675.json",
-      "chat": "/chats/twitch-2885318675.json"
+      "index": "/indexes/twitch-2884362905.json",
+      "chat": "/chats/twitch-2884362905.json"
     },
     {
       "provider": "twitch",

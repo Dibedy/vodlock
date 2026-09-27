@@ -1,0 +1,227 @@
+{
+  "schemaVersion": 2,
+  "provider": "youtube",
+  "sourceId": "fFfCJDNHEvc",
+  "label": "JDG vs FUT",
+  "leadSeconds": 5,
+  "detector": "vct-clock-ocr-v6+storyboard-v1",
+  "rounds": [
+    {
+      "map": 1,
+      "round": 1,
+      "start": 155.56
+    },
+    {
+      "map": 1,
+      "round": 2,
+      "start": 200.56
+    },
+    {
+      "map": 1,
+      "round": 3,
+      "start": 610.56
+    },
+    {
+      "map": 1,
+      "round": 4,
+      "start": 777.56
+    },
+    {
+      "map": 1,
+      "round": 5,
+      "start": 888.56
+    },
+    {
+      "map": 1,
+      "round": 6,
+      "start": 974.06
+    },
+    {
+      "map": 1,
+      "round": 7,
+      "start": 1131.56
+    },
+    {
+      "map": 1,
+      "round": 8,
+      "start": 1259.56
+    },
+    {
+      "map": 1,
+      "round": 9,
+      "start": 1443.56
+    },
+    {
+      "map": 1,
+      "round": 10,
+      "start": 1580.56
+    },
+    {
+      "map": 1,
+      "round": 11,
+      "start": 1697.56
+    },
+    {
+      "map": 1,
+      "round": 12,
+      "start": 1762.56
+    },
+    {
+      "map": 1,
+      "round": 13,
+      "start": 2017.56
+    },
+    {
+      "map": 1,
+      "round": 14,
+      "start": 2105.56
+    },
+    {
+      "map": 2,
+      "round": 1,
+      "start": 2285.5
+    },
+    {
+      "map": 2,
+      "round": 2,
+      "start": 2404.5
+    },
+    {
+      "map": 2,
+      "round": 3,
+      "start": 2508.5
+    },
+    {
+      "map": 2,
+      "round": 4,
+      "start": 2608.0
+    },
+    {
+      "map": 2,
+      "round": 5,
+      "start": 2742.5
+    },
+    {
+      "map": 2,
+      "round": 6,
+      "start": 2848.5
+    },
+    {
+      "map": 2,
+      "round": 7,
+      "start": 3134.5
+    },
+    {
+      "map": 2,
+      "round": 8,
+      "start": 3271.5
+    },
+    {
+      "map": 2,
+      "round": 9,
+      "start": 3391.5
+    },
+    {
+      "map": 2,
+      "round": 10,
+      "start": 3579.5
+    },
+    {
+      "map": 2,
+      "round": 11,
+      "start": 3698.5
+    },
+    {
+      "map": 2,
+      "round": 12,
+      "start": 3842.5
+    },
+    {
+      "map": 2,
+      "round": 13,
+      "start": 4053.5
+    },
+    {
+      "map": 2,
+      "round": 14,
+      "start": 4132.5
+    },
+    {
+      "map": 2,
+      "round": 15,
+      "start": 4190.5
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 4346.5
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 4520.5
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 4625.5
+    },
+    {
+      "map": 2,
+      "round": 19,
+      "start": 4785.5
+    },
+    {
+      "map": 2,
+      "round": 20,
+      "start": 4892.5
+    },
+    {
+      "map": 2,
+      "round": 21,
+      "start": 4984.5
+    },
+    {
+      "map": 2,
+      "round": 22,
+      "start": 5118.5
+    },
+    {
+      "map": 2,
+      "round": 23,
+      "start": 5256.5
+    }
+  ],
+  "alignment": {
+    "version": "storyboard-v1",
+    "offset": 11042.436,
+    "segments": [
+      {
+        "offset": 11042.436,
+        "anchors": 78,
+        "medianDistance": 7.0,
+        "maximumResidual": 2.518,
+        "targetStart": 0,
+        "targetEnd": 2125.099
+      },
+      {
+        "offset": 11773.502,
+        "anchors": 107,
+        "medianDistance": 6.0,
+        "maximumResidual": 2.39,
+        "targetStart": 2125.099,
+        "targetEnd": 5402.0
+      }
+    ],
+    "timelineScale": 1.00337892,
+    "anchors": 178,
+    "coverage": [
+      64,
+      67,
+      47
+    ],
+    "medianDistance": 6.0,
+    "maximumResidual": 2.518,
+    "source": "twitch:2885318675"
+  }
+}

@@ -32,18 +32,12 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 180
-    services:
-      youtube-pot-provider:
-        image: brainicism/bgutil-ytdlp-pot-provider:2.0.0-node
-        ports:
-          - 4416:4416
     env:
       VERCEL_ORG_ID: team_RVbqStzk6bcBVRtZJdFZNCGK
       VERCEL_PROJECT_ID: prj_v4wVPQu8PDkHaPFu0x2EhMmOiPfR
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
       TWITCH_CLIENT_ID: ${{ secrets.TWITCH_CLIENT_ID }}
       TWITCH_CLIENT_SECRET: ${{ secrets.TWITCH_CLIENT_SECRET }}
-      VODLOCK_YOUTUBE_POT: "1"
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
@@ -71,7 +65,7 @@ jobs:
         run: |
           git config user.name "vodlock-bot"
           git config user.email "vodlock-bot@users.noreply.github.com"
-          git add site/catalog.json site/indexes site/chats indexer/auto_state.json
+          git add site/catalog.json site/indexes site/chats indexer/auto_state.json indexer/storyboards
           git diff --cached --quiet || git commit -m "Publish automatic VOD index"
           git pull --rebase origin main
           git push

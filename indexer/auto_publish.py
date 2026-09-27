@@ -9,16 +9,19 @@ from datetime import datetime, timezone
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
+from xml.etree import ElementTree
 
 import server
 import chat_archive
 from detector import DETECTOR_VERSION
+from storyboard_align import ALIGNER_VERSION, align_storyboards, extract_storyboard, load_storyboard, save_storyboard, translate_index
 
 
 ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
 CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
+STORYBOARDS = Path(__file__).with_name("storyboards")
 
 
 def read_json(path):
@@ -53,13 +56,15 @@ def should_attempt(key, published, state, retry_hours, now):
     return (now - checked).total_seconds() >= retry_hours * 3600
 
 
-def is_candidate(channel, entry):
+def is_candidate(channel, entry, require_duration=True):
     title = clean_text(entry.get("title", ""))
     identifier = str(entry.get("id", ""))
     duration = entry.get("duration")
     if not re.fullmatch(r"[A-Za-z0-9_-]{11}", identifier):
         return False
-    if not isinstance(duration, (int, float)) or isinstance(duration, bool) or duration < channel["minimumDuration"]:
+    if require_duration and (not isinstance(duration, (int, float)) or isinstance(duration, bool) or duration < channel["minimumDuration"]):
+        return False
+    if duration is not None and (not isinstance(duration, (int, float)) or isinstance(duration, bool) or duration < channel["minimumDuration"]):
         return False
     if entry.get("live_status") in {"is_live", "is_upcoming"}:
         return False
@@ -121,7 +126,18 @@ def publishable(job, minimum_confidence, minimum_rounds):
     return True, ""
 
 
-def discover_youtube(channel, lookback, yt_dlp):
+def discover_youtube(channel, lookback, yt_dlp=None, requester=None):
+    if channel.get("channelId"):
+        request = requester or (lambda url: urlopen(Request(url), timeout=30).read())
+        feed = request("https://www.youtube.com/feeds/videos.xml?channel_id=" + channel["channelId"])
+        root = ElementTree.fromstring(feed)
+        namespaces = {"atom": "http://www.w3.org/2005/Atom", "yt": "http://www.youtube.com/xml/schemas/2015"}
+        entries = []
+        for item in root.findall("atom:entry", namespaces)[:lookback]:
+            entries.append({"id": item.findtext("yt:videoId", default="", namespaces=namespaces),
+                            "title": item.findtext("atom:title", default="", namespaces=namespaces),
+                            "published": item.findtext("atom:published", default="", namespaces=namespaces)})
+        return [entry for entry in entries if is_candidate(channel, entry, require_duration=False)]
     options = {"extract_flat": "in_playlist", "playlistend": lookback, "quiet": True, "no_warnings": True}
     with yt_dlp.YoutubeDL(options) as downloader:
         result = downloader.extract_info(channel["url"], download=False)
@@ -170,13 +186,60 @@ def discover_twitch(channels, lookback, client_id, client_secret, requester=requ
     return discovered
 
 
-def process(channel, entry, config):
+def storyboard_path(provider, identifier):
+    return STORYBOARDS / f"{provider}-{identifier}.json"
+
+
+def storyboard(provider, identifier, yt_dlp):
+    path = storyboard_path(provider, identifier)
+    if path.is_file():
+        return load_storyboard(path)
+    url = ("https://www.youtube.com/watch?v=" + identifier if provider == "youtube"
+           else "https://www.twitch.tv/videos/" + identifier)
+    value = extract_storyboard(url, provider, yt_dlp)
+    save_storyboard(path, value)
+    return value
+
+
+def youtube_alignment(channel, entry, config, state, yt_dlp):
+    target = storyboard("youtube", entry["id"], yt_dlp)
+    if target["duration"] < channel["minimumDuration"]:
+        raise ValueError("The YouTube upload is shorter than the configured full-match minimum")
+    source_names = {item["name"] for item in config["channels"]
+                    if item["provider"] == "twitch" and item.get("alignmentSource")}
+    source_ids = [key.split(":", 1)[1] for key, value in state["videos"].items()
+                  if key.startswith("twitch:") and value.get("status") == "published"
+                  and value.get("channel") in source_names
+                  and (SITE / "indexes" / f"twitch-{key.split(':', 1)[1]}.json").is_file()]
+    source_ids = source_ids[-int(config.get("alignmentLookback", 8)):]
+    matches = []
+    for source_id in reversed(source_ids):
+        try:
+            reference = storyboard("twitch", source_id, yt_dlp)
+            alignment = align_storyboards(reference, target)
+            index = read_json(SITE / "indexes" / f"twitch-{source_id}.json")
+            rounds = translate_index(index, target, alignment)
+            matches.append((alignment["anchors"], source_id, alignment, rounds))
+        except (OSError, ValueError, KeyError):
+            continue
+    if not matches:
+        raise ValueError("No verified official Twitch broadcast matches this YouTube full match")
+    matches.sort(reverse=True, key=lambda item: item[0])
+    if len(matches) > 1 and matches[1][0] >= matches[0][0] * 0.8:
+        raise ValueError("More than one official broadcast matches this YouTube upload")
+    _, source_id, alignment, rounds = matches[0]
+    return source_id, alignment, rounds
+
+
+def process(channel, entry, config, state=None, yt_dlp=None):
     identifier = uuid.uuid4().hex
     provider = channel["provider"]
     title, event = catalog_metadata(channel, entry)
     job = {"id": identifier, "label": title, "kind": provider, "status": "queued", "progress": 0,
            "message": "Preparing the automatic index", "rounds": [], "warnings": [],
            "created": datetime.now(timezone.utc).timestamp()}
+    if provider == "twitch" and channel.get("alignmentSource"):
+        job["fingerprintInterval"] = 2
     if provider == "youtube":
         job["videoId"] = entry["id"]
     else:
@@ -184,15 +247,27 @@ def process(channel, entry, config):
     server.DATA.mkdir(exist_ok=True)
     server.JOBS[identifier] = job
     server.save(job)
+    aligned_source_id = None
     try:
         print(f"Processing {provider}:{entry['id']} - {clean_text(entry['title'])}", flush=True)
-        server.index_job(identifier)
-        accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
-        if not accepted:
-            return False, reason
-        exported = server.export(job)
-        exported["rounds"] = [{"map": item["map"], "round": item["round"], "start": item["start"]}
-                              for item in exported["rounds"]]
+        if provider == "youtube" and state is not None and yt_dlp is not None:
+            aligned_source_id, alignment, rounds = youtube_alignment(channel, entry, config, state, yt_dlp)
+            exported = {"schemaVersion": 2, "provider": "youtube", "sourceId": entry["id"], "label": title,
+                        "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION,
+                        "rounds": rounds, "alignment": {**alignment, "source": "twitch:" + aligned_source_id}}
+        else:
+            server.index_job(identifier)
+            accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
+            if not accepted:
+                return False, reason
+            if provider == "twitch" and channel.get("alignmentSource"):
+                save_storyboard(storyboard_path("twitch", entry["id"]),
+                                {"version": 1, "provider": "twitch", "sourceId": entry["id"],
+                                 "duration": round(float(job["duration"]), 3), "interval": job["fingerprintInterval"],
+                                 "frames": job["fingerprints"]})
+            exported = server.export(job)
+            exported["rounds"] = [{"map": item["map"], "round": item["round"], "start": item["start"]}
+                                  for item in exported["rounds"]]
         filename = f"{provider}-{entry['id']}.json"
         write_json(SITE / "indexes" / filename, exported)
         chat_path = None
@@ -206,9 +281,12 @@ def process(channel, entry, config):
         catalog["version"] = 2
         catalog["videos"] = [item for item in catalog["videos"]
                              if source_key(item.get("provider", "youtube"), item.get("sourceId", item.get("videoId", "")))
-                             != source_key(provider, entry["id"])]
+                             != source_key(provider, entry["id"])
+                             and not (aligned_source_id and item.get("provider") == "twitch"
+                                      and str(item.get("sourceId", "")) == aligned_source_id)]
         catalog_entry = {"provider": provider, "sourceId": entry["id"], "title": title,
-                         "event": event, "label": "Full broadcast", "index": f"/indexes/{filename}"}
+                         "event": event, "label": "Full match" if provider == "youtube" else "Full broadcast",
+                         "index": f"/indexes/{filename}"}
         if chat_path:
             catalog_entry["chat"] = "/chats/" + chat_path.name
         catalog["videos"].insert(0, catalog_entry)
@@ -246,7 +324,7 @@ def main():
             continue
         entry = next((item for item in entries
                       if should_attempt(source_key("youtube", item["id"]), published_ids, state["videos"],
-                                        config.get("retryHours", 6), now)), None)
+                                        config.get("youtubeRetryHours", 0.5), now)), None)
         if entry:
             candidates.append((1, channel, entry))
     twitch_results = {}
@@ -275,12 +353,13 @@ def main():
     for channel, entry in candidates:
         key = source_key(channel["provider"], entry["id"])
         try:
-            published, message = process(channel, entry, config)
+            published, message = process(channel, entry, config, state, yt_dlp)
         except Exception as error:
             published, message = False, str(error)
         state["videos"][key] = {"status": "published" if published else "held",
                                 "provider": channel["provider"], "channel": channel["name"],
                                 "title": clean_text(entry["title"]), "message": clean_text(message),
+                                "publishedAt": entry.get("published") or entry.get("created_at"),
                                 "detectorVersion": DETECTOR_VERSION,
                                 "checkedAt": datetime.now(timezone.utc).isoformat()}
         write_json(STATE_PATH, state)

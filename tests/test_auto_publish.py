@@ -23,6 +23,15 @@ class AutoPublishTests(unittest.TestCase):
         self.assertFalse(auto_publish.is_candidate(self.global_channel, {**valid, "duration": 1200}))
         self.assertFalse(auto_publish.is_candidate(self.global_channel, {**valid, "live_status": "is_live"}))
 
+    def test_youtube_feed_discovers_only_full_matches_without_scraping_channel_page(self):
+        channel = {**self.global_channel, "channelId": "channel"}
+        feed = b'''<?xml version="1.0"?><feed xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://www.youtube.com/xml/schemas/2015">
+        <entry><yt:videoId>fFfCJDNHEvc</yt:videoId><title>JDG vs. FUT - FULL MATCH - Champions Shanghai</title><published>2026-09-27T12:00:00Z</published></entry>
+        <entry><yt:videoId>abcdefghijk</yt:videoId><title>JDG vs. FUT - HIGHLIGHTS</title><published>2026-09-27T13:00:00Z</published></entry></feed>'''
+        result = auto_publish.discover_youtube(channel, 30, requester=lambda _: feed)
+        self.assertEqual(result, [{"id": "fFfCJDNHEvc", "title": "JDG vs. FUT - FULL MATCH - Champions Shanghai",
+                                   "published": "2026-09-27T12:00:00Z"}])
+
     def test_americas_channel_rejects_non_match_programming(self):
         valid = {"id": "TntlDvMFTX0", "title": "NRG vs 100T - VCT Americas Stage 2", "duration": 4835}
         self.assertTrue(auto_publish.is_candidate(self.americas_channel, valid))

@@ -107,6 +107,7 @@ test('website mentions spoiler-safe once and uses ten-second arrow navigation', 
   const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
   assert.match(styles, /twitch-timeline-hidden #media-player iframe[^}]+top: -90px[^}]+height: calc\(100% \+ 180px\)/);
   assert.match(styles, /watch-layout:fullscreen \.chat-panel/);
+  assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);
 });
 
 test('website avoids the prohibited design and copy patterns', () => {

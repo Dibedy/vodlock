@@ -1,4 +1,13 @@
 {
   "version": 1,
-  "videos": {}
+  "videos": {
+    "youtube:TWjd0AoZdaY": {
+      "status": "held",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour",
+      "title": "GE vs. VIT - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
+      "message": "ERROR: [youtube] TWjd0AoZdaY: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp for how to manually pass cookies. Also see https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies for tips on effectively exporting YouTube cookies",
+      "checkedAt": "2026-09-27T03:25:45.604191+00:00"
+    }
+  }
 }

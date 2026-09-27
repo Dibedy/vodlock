@@ -102,7 +102,7 @@ class ServerTests(unittest.TestCase):
 
         class YoutubeDL:
             def __init__(self, options):
-                clients.append(options["extractor_args"]["youtube"]["player_client"][0])
+                clients.append(options.get("extractor_args", {}).get("youtube", {}).get("player_client", [None])[0])
 
             def __enter__(self):
                 return self
@@ -120,7 +120,7 @@ class ServerTests(unittest.TestCase):
             work.mkdir()
             with self.assertRaises(DownloadError):
                 server.download_remote(job, work, lambda _: None, yt_dlp)
-        self.assertEqual(clients, ["mweb", "web_safari", "web_embedded"])
+        self.assertEqual(clients, [None, "mweb", "web_safari", "web_embedded"])
 
     def test_size_filtered_download_tries_next_format(self):
         identifier = "f" * 32

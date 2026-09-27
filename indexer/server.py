@@ -88,7 +88,8 @@ def download_remote(job, work, hook, yt_dlp):
     if job.get("kind") == "twitch":
         formats[0] = ("bestvideo[height<=720][fps<=30]/best[height<=720][fps<=30]/bestvideo[height<=720]/best[height<=720]", None)
     if job.get("kind", "youtube") == "youtube" and os.environ.get("VODLOCK_YOUTUBE_POT") == "1":
-        formats = [("bestvideo[height<=720]/best[height<=720]", "mweb"),
+        formats = [("bestvideo[height<=720]/best[height<=720]", None),
+                   ("bestvideo[height<=720]/best[height<=720]", "mweb"),
                    ("bestvideo[height<=720][protocol=m3u8_native]/best[height<=720][protocol=m3u8_native]", "web_safari"),
                    ("bestvideo[height<=720]/best[height<=720]", "web_embedded")]
     options = {"noplaylist": True, "outtmpl": str(work / "source.%(ext)s"), "quiet": True,

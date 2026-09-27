@@ -1,0 +1,14 @@
+{
+  "version": 2,
+  "updatedAt": "2026-09-27",
+  "videos": [
+    {
+      "provider": "youtube",
+      "sourceId": "ZphbktbT26k",
+      "title": "LOUD vs EDG",
+      "event": "VALORANT Champions Shanghai · Group Stage",
+      "label": "Full match",
+      "index": "/indexes/ZphbktbT26k.json"
+    }
+  ]
+}

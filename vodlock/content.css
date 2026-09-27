@@ -1,0 +1,244 @@
+/* VODLOCK only applies these rules while spoiler mode is enabled. */
+html.vodlock-enabled .vodlock-hidden { display: none !important; }
+
+/* YouTube: timeline, timestamps, hover preview and scrub affordances */
+html.vodlock-enabled.vodlock-hide-timeline .ytp-progress-bar-container,
+html.vodlock-enabled.vodlock-hide-timeline .ytp-progress-bar,
+html.vodlock-enabled.vodlock-hide-timeline .ytp-time-display,
+html.vodlock-enabled.vodlock-hide-timeline .ytp-time-current,
+html.vodlock-enabled.vodlock-hide-timeline .ytp-time-duration,
+html.vodlock-enabled.vodlock-hide-timeline .ytp-time-separator,
+html.vodlock-enabled.vodlock-hide-timeline .ytp-live-badge,
+html.vodlock-enabled.vodlock-hide-timeline .ytp-chapter-container {
+  display: none !important;
+}
+
+html.vodlock-enabled.vodlock-hide-thumbnails .ytp-tooltip,
+html.vodlock-enabled.vodlock-hide-thumbnails .ytp-tooltip-bg,
+html.vodlock-enabled.vodlock-hide-thumbnails .ytp-tooltip-text,
+html.vodlock-enabled.vodlock-hide-thumbnails .ytp-storyboard-framepreview,
+html.vodlock-enabled.vodlock-hide-thumbnails .ytp-storyboard-framepreview-img,
+html.vodlock-enabled.vodlock-hide-thumbnails .ytp-preview,
+html.vodlock-enabled.vodlock-hide-thumbnails .ytp-progress-list {
+  visibility: hidden !important;
+}
+
+/* YouTube watch page spoiler surfaces */
+html.vodlock-enabled.vodlock-hide-sidebar ytd-watch-next-secondary-results-renderer,
+html.vodlock-enabled.vodlock-hide-sidebar #secondary,
+html.vodlock-enabled.vodlock-hide-sidebar ytd-reel-shelf-renderer,
+html.vodlock-enabled.vodlock-hide-sidebar ytd-compact-video-renderer {
+  display: none !important;
+}
+
+html.vodlock-enabled.vodlock-hide-comments ytd-comments,
+html.vodlock-enabled.vodlock-hide-comments #comments,
+html.vodlock-enabled.vodlock-hide-comments ytd-live-chat-frame {
+  display: none !important;
+}
+
+html.vodlock-enabled.vodlock-hide-metadata ytd-watch-metadata #title,
+html.vodlock-enabled.vodlock-hide-metadata #above-the-fold #title,
+html.vodlock-enabled.vodlock-hide-metadata #info-contents,
+html.vodlock-enabled.vodlock-hide-metadata ytd-video-primary-info-renderer {
+  visibility: hidden !important;
+}
+
+/* YouTube thumbnail duration badges elsewhere on the site */
+html.vodlock-enabled.vodlock-hide-timeline ytd-thumbnail-overlay-time-status-renderer,
+html.vodlock-enabled.vodlock-hide-timeline #time-status,
+html.vodlock-enabled.vodlock-hide-timeline .ytd-thumbnail-overlay-time-status-renderer {
+  display: none !important;
+}
+
+/* Twitch: known seek/time surfaces. Selectors are intentionally redundant. */
+html.vodlock-enabled.vodlock-hide-timeline [data-a-target="player-seekbar"],
+html.vodlock-enabled.vodlock-hide-timeline [data-a-target="player-seekbar-current-time"],
+html.vodlock-enabled.vodlock-hide-timeline [data-a-target="player-seekbar-duration"],
+html.vodlock-enabled.vodlock-hide-timeline [data-a-target="player-seekbar-time-container"],
+html.vodlock-enabled.vodlock-hide-timeline [class*="seekbar" i],
+html.vodlock-enabled.vodlock-hide-timeline [class*="seek-bar" i] {
+  display: none !important;
+}
+
+html.vodlock-enabled.vodlock-hide-sidebar [data-a-target="side-nav-bar"],
+html.vodlock-enabled.vodlock-hide-sidebar [data-test-selector="side-nav"],
+html.vodlock-enabled.vodlock-hide-sidebar aside {
+  display: none !important;
+}
+
+html.vodlock-enabled.vodlock-hide-comments [data-a-target="right-column"],
+html.vodlock-enabled.vodlock-hide-comments [data-test-selector="chat-room-component-layout"],
+html.vodlock-enabled.vodlock-hide-comments [class*="video-chat" i] {
+  display: none !important;
+}
+
+/* Keep VODLOCK controls above player chrome but out of the center of the video. */
+#vodlock-controls {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: calc(100vw - 32px);
+  width: max-content;
+  align-items: center;
+  gap: 7px;
+  padding: 8px;
+  border: 1px solid rgba(255,255,255,.13);
+  border-radius: 14px;
+  background: rgba(10,10,12,.88);
+  box-shadow: 0 12px 40px rgba(0,0,0,.35);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+  opacity: .22;
+  transition: opacity .16s ease, transform .16s ease;
+}
+
+#vodlock-controls:hover,
+#vodlock-controls:focus-within {
+  opacity: 1;
+}
+
+#vodlock-controls button {
+  appearance: none;
+  border: 0;
+  border-radius: 9px;
+  min-width: 46px;
+  height: 36px;
+  padding: 0 10px;
+  color: #f4f4f5;
+  background: rgba(255,255,255,.09);
+  font: 600 12px/1 Inter, ui-sans-serif, system-ui, sans-serif;
+  cursor: pointer;
+}
+
+#vodlock-controls button:hover { background: rgba(255,255,255,.16); }
+#vodlock-controls button:active { transform: translateY(1px); }
+#vodlock-controls .vodlock-primary { background: #6d28d9; }
+#vodlock-controls .vodlock-primary:hover { background: #7c3aed; }
+
+#vodlock-toast {
+  position: fixed;
+  left: 50%;
+  bottom: 76px;
+  transform: translateX(-50%);
+  z-index: 2147483647;
+  padding: 7px 11px;
+  border-radius: 8px;
+  background: rgba(10,10,12,.9);
+  color: white;
+  font: 600 12px/1.2 Inter, ui-sans-serif, system-ui, sans-serif;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .15s ease;
+}
+
+#vodlock-toast.vodlock-show { opacity: 1; }
+
+html:not(.vodlock-enabled) #vodlock-controls,
+html:not(.vodlock-enabled) #vodlock-toast,
+html.vodlock-enabled:not(.vodlock-safe-controls) #vodlock-controls {
+  display: none !important;
+}
+
+html:not(.vodlock-index-ready) #vodlock-controls .vodlock-indexed {
+  display: none !important;
+}
+
+/* VCT smart skip controls */
+#vodlock-controls .vodlock-divider {
+  width: 1px;
+  height: 24px;
+  margin: 0 2px;
+  background: rgba(255,255,255,.13);
+}
+
+#vodlock-controls .vodlock-smart {
+  min-width: 72px;
+}
+
+#vodlock-controls .vodlock-skip-break {
+  background: rgba(34,197,94,.18);
+}
+
+#vodlock-controls .vodlock-skip-break:hover {
+  background: rgba(34,197,94,.28);
+}
+
+html.vodlock-enabled:not(.vodlock-smart-skip) #vodlock-controls .vodlock-smart,
+html.vodlock-enabled:not(.vodlock-smart-skip) #vodlock-controls .vodlock-indexed,
+html.vodlock-enabled:not(.vodlock-smart-skip) #vodlock-controls .vodlock-divider {
+  display: none !important;
+}
+
+#vodlock-shield {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483646;
+  display: none;
+  place-items: center;
+  background: #050507;
+  color: #f4f4f5;
+  font-family: Inter, ui-sans-serif, system-ui, sans-serif;
+}
+
+#vodlock-shield.vodlock-visible {
+  display: grid;
+}
+
+#vodlock-shield .vodlock-shield-card {
+  display: grid;
+  justify-items: center;
+  gap: 10px;
+  padding: 22px 26px;
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 16px;
+  background: rgba(255,255,255,.04);
+}
+
+#vodlock-shield strong {
+  letter-spacing: .1em;
+  font-size: 15px;
+}
+
+#vodlock-shield span {
+  color: #a1a1aa;
+  font-size: 12px;
+}
+
+#vodlock-shield button {
+  margin-top: 4px;
+  border: 0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: rgba(255,255,255,.1);
+  color: #f4f4f5;
+  cursor: pointer;
+}
+
+
+/* Browse-page duration protection: channel VOD tabs, search, home and playlists. */
+html.vodlock-enabled.vodlock-hide-browse-durations ytd-thumbnail-overlay-time-status-renderer,
+html.vodlock-enabled.vodlock-hide-browse-durations #time-status,
+html.vodlock-enabled.vodlock-hide-browse-durations yt-thumbnail-overlay-badge-view-model,
+html.vodlock-enabled.vodlock-hide-browse-durations .ytd-thumbnail-overlay-time-status-renderer,
+html.vodlock-enabled.vodlock-hide-browse-durations [data-a-target*="duration" i],
+html.vodlock-enabled.vodlock-hide-browse-durations [data-test-selector*="duration" i] {
+  display: none !important;
+}
+
+/* YouTube can reveal the next/resulting match through end-screen cards before
+   the current VOD has visibly finished. Kill those surfaces entirely. */
+html.vodlock-enabled.vodlock-end-screen-protection .ytp-endscreen-content,
+html.vodlock-enabled.vodlock-end-screen-protection .ytp-ce-element,
+html.vodlock-enabled.vodlock-end-screen-protection .ytp-autonav-endscreen-upnext-container,
+html.vodlock-enabled.vodlock-end-screen-protection .ytp-upnext,
+html.vodlock-enabled.vodlock-end-screen-protection .ytp-pause-overlay,
+html.vodlock-enabled.vodlock-end-screen-protection .ytp-suggestion-set {
+  display: none !important;
+}

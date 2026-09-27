@@ -1,0 +1,10 @@
+indexer/.venv/
+indexer/data/
+indexer/__pycache__/
+tests/__pycache__/
+*.pyc
+node_modules/
+*.zip
+VODLOCK-Round-Studio-v*/
+vodlock-extension-v*/
+TEST_REPORT.md

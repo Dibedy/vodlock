@@ -1,0 +1,4 @@
+rapidocr-onnxruntime==1.4.4
+imageio-ffmpeg==0.6.0
+yt-dlp==2026.8.19
+opencv-python-headless==5.0.0.93

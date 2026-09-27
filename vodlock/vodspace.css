@@ -1,0 +1,73 @@
+html:not(.vodlock-space-ready) body {
+  visibility: hidden !important;
+}
+
+html.vodlock-space.vodlock-enabled [class~="group/player"] > button.absolute.inset-0 {
+  background-image: none !important;
+}
+
+html.vodlock-space.vodlock-enabled.vodlock-hide-timeline [aria-label="Video progress"],
+html.vodlock-space.vodlock-enabled.vodlock-hide-timeline [class~="group/player"] span.type-body-sm.tabular-nums,
+html.vodlock-space.vodlock-enabled.vodlock-hide-timeline .vodlock-space-navigation > :not([data-vodlock-nav]),
+html.vodlock-space.vodlock-enabled.vodlock-hide-timeline body:has([aria-label="Video progress"]) section:has(> h2.type-label):has(> div.flex.flex-wrap) > :not([data-vodlock-nav]),
+html.vodlock-space.vodlock-enabled.vodlock-hide-timeline section:has(button[title^="Round "]) > :not([data-vodlock-nav]),
+html.vodlock-space.vodlock-enabled.vodlock-hide-comments .vodlock-space-notes,
+html.vodlock-space.vodlock-enabled.vodlock-hide-comments aside:has(#watch-log-entry) {
+  display: none !important;
+}
+
+html.vodlock-space.vodlock-enabled.vodlock-hide-metadata [class~="group/player"] > .pointer-events-none,
+html.vodlock-space.vodlock-enabled.vodlock-hide-timeline a[href*="?map="],
+html.vodlock-enabled.vodlock-hide-metadata .ytp-chrome-top,
+html.vodlock-enabled.vodlock-hide-metadata .ytp-title,
+html.vodlock-enabled.vodlock-end-screen-protection .ytp-scroll-min,
+html.vodlock-enabled.vodlock-end-screen-protection .ytp-pause-overlay-container {
+  display: none !important;
+}
+
+html.vodlock-space.vodlock-enabled.vodlock-hide-metadata .font-display.tabular-nums {
+  visibility: hidden !important;
+}
+
+html.vodlock-space.vodlock-enabled.vodlock-hide-metadata .mx-auto:has(> .font-display.tabular-nums) {
+  position: relative;
+  background: #262626 !important;
+  border-color: #404040 !important;
+}
+
+html.vodlock-space.vodlock-enabled.vodlock-hide-metadata .mx-auto:has(> .font-display.tabular-nums)::after {
+  content: 'vs';
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: #a1a1aa;
+}
+
+[data-vodlock-nav] {
+  display: none;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  padding: 8px 0;
+  font: 600 13px/1.4 system-ui, sans-serif;
+}
+
+html.vodlock-space.vodlock-enabled.vodlock-hide-timeline [data-vodlock-nav] {
+  display: flex;
+}
+
+[data-vodlock-nav] button {
+  border: 1px solid rgba(255,255,255,.18);
+  border-radius: 8px;
+  padding: 9px 12px;
+  color: #f4f4f5;
+  background: #262626;
+  cursor: pointer;
+  font: inherit;
+}
+
+[data-vodlock-nav] button:hover,
+[data-vodlock-nav] button:focus-visible {
+  background: #404040;
+}

@@ -1,0 +1,41 @@
+{
+  "version": 1,
+  "lookback": 30,
+  "maxPerRun": 1,
+  "minimumConfidence": 0.75,
+  "minimumRounds": 13,
+  "channels": [
+    {
+      "provider": "youtube",
+      "name": "VALORANT Champions Tour",
+      "url": "https://www.youtube.com/channel/UCA1d3HFGFUmkKr2JIUA5Vlw/videos",
+      "includeTitle": "\\bFULL MATCH\\b",
+      "excludeTitle": "\\b(HIGHLIGHTS|SHOWMATCH)\\b",
+      "minimumDuration": 3600
+    },
+    {
+      "provider": "youtube",
+      "name": "VALORANT Champions Tour Americas",
+      "url": "https://www.youtube.com/channel/UCifCesg-EUkjKyQedaB3hRg/videos",
+      "includeTitle": "^[A-Z0-9][A-Z0-9 ._-]{1,20}\\s+vs\\.?\\s+[A-Z0-9][A-Z0-9 ._-]{1,20}\\s+[-|]",
+      "excludeTitle": "\\b(HIGHLIGHTS|MATCH POINT|SHOWMATCH|DRAW SHOW|DAY [0-9]+ FILM)\\b",
+      "minimumDuration": 3600
+    },
+    {
+      "provider": "twitch",
+      "name": "FNS on Twitch",
+      "login": "gofns",
+      "includeTitle": ".+",
+      "excludeTitle": "\\b(JUST CHATTING|WATCH PARTY WITHOUT VALORANT)\\b",
+      "minimumDuration": 3600
+    },
+    {
+      "provider": "twitch",
+      "name": "VALORANT on Twitch",
+      "login": "valorant",
+      "includeTitle": ".+",
+      "excludeTitle": "\\b(RERUN|REBROADCAST)\\b",
+      "minimumDuration": 3600
+    }
+  ]
+}

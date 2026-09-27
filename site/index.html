@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="Watch indexed VALORANT broadcasts from YouTube and Twitch with direct round and map navigation.">
+  <meta name="theme-color" content="#070908">
+  <title>VODLOCK | Indexed VALORANT VODs</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/styles.css">
+  <script defer src="/core.js"></script>
+  <script defer src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <button class="brand" id="home-button" type="button" aria-label="VODLOCK library">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 4h10M4 4v10M28 4H18M28 4v10M4 28h10M4 28V18M28 28H18M28 28V18"/><path d="M12 12h8v8h-8z"/></svg>
+      <span>VODLOCK</span>
+    </button>
+    <span class="top-status"><i></i> INDEXED VOD LIBRARY</span>
+  </header>
+  <main>
+    <section id="library-view" class="library-view">
+      <div class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">YOUTUBE + TWITCH VALORANT VODS</span>
+          <h1>Every round.<br><em>One clean jump away.</em></h1>
+          <p>Open an indexed broadcast and move directly between rounds and maps. The library avoids match-result metadata for spoiler-safe watching. No extension or download required.</p>
+        </div>
+        <div class="hero-mark" aria-hidden="true">
+          <div class="scan-frame"><span></span><span></span><span></span><span></span><b></b></div>
+          <div class="mark-copy"><strong>ROUND</strong><small>INDEX READY</small></div>
+        </div>
+      </div>
+      <form id="video-search" class="search-card">
+        <label for="video-url">Find an indexed broadcast</label>
+        <div class="search-row">
+          <svg class="youtube-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 6.2c-.2-.8-.8-1.4-1.6-1.6C17.4 4.2 12 4.2 12 4.2s-5.4 0-6.8.4c-.8.2-1.4.8-1.6 1.6C3.2 7.6 3.2 12 3.2 12s0 4.4.4 5.8c.2.8.8 1.4 1.6 1.6 1.4.4 6.8.4 6.8.4s5.4 0 6.8-.4c.8-.2 1.4-.8 1.6-1.6.4-1.4.4-5.8.4-5.8s0-4.4-.4-5.8Z"/><path class="play-shape" d="m10 15.4 5-3.4-5-3.4v6.8Z"/></svg>
+          <input id="video-url" type="text" inputmode="url" autocomplete="off" placeholder="Paste a YouTube or Twitch VOD link">
+          <button type="submit">Find index <span aria-hidden="true">→</span></button>
+        </div>
+        <p id="search-message" class="search-message" role="status"></p>
+      </form>
+      <section class="catalog-section" aria-labelledby="catalog-title">
+        <div class="section-heading">
+          <div><span class="eyebrow">AVAILABLE NOW</span><h2 id="catalog-title">Indexed broadcasts</h2></div>
+          <span class="index-note">PRECOMPUTED ROUND DATA</span>
+        </div>
+        <div id="catalog" class="catalog-grid" aria-live="polite"><p class="loading-copy">Loading the broadcast library...</p></div>
+      </section>
+    </section>
+    <section id="player-view" class="player-view" hidden>
+      <button id="back-button" class="back-button" type="button">← Back to library</button>
+      <div class="watch-heading">
+        <div><span id="watch-event" class="eyebrow"></span><h1 id="watch-title"></h1></div>
+        <span class="safe-badge"><i></i> ROUND NAVIGATION ACTIVE</span>
+      </div>
+      <div class="watch-layout">
+        <section class="video-column">
+          <div id="player-shell" class="player-shell">
+            <div id="media-player"></div>
+            <div id="start-gate" class="player-gate">
+              <svg class="gate-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M8 8h18M8 8v18M56 8H38M56 8v18M8 56h18M8 56V38M56 56H38M56 56V38"/><path d="m27 23 15 9-15 9V23Z"/></svg>
+              <strong>Start at round one</strong>
+              <span>The original video loads only after you choose to start.</span>
+              <button id="start-watching" type="button">Start watching</button>
+            </div>
+            <div id="end-shield" class="player-gate end-shield" hidden>
+              <svg class="gate-icon" viewBox="0 0 64 64" aria-hidden="true"><path d="M8 8h18M8 8v18M56 8H38M56 8v18M8 56h18M8 56V38M56 56H38M56 56V38"/><path d="m23 32 6 6 13-14"/></svg>
+              <strong>Viewing complete</strong>
+              <span>The player was removed before the video service could show its end screen.</span>
+              <button id="return-library" type="button">Return to library</button>
+            </div>
+          </div>
+          <div class="player-controls" aria-label="Video controls">
+            <button id="play-button" type="button" aria-label="Play" disabled>Play</button>
+            <button id="back-ten" type="button" aria-label="Go back 10 seconds" disabled>-10 s</button>
+            <button id="skip-replay" type="button" aria-label="Skip forward 10 seconds" disabled>+10 s</button>
+            <button id="mute-button" type="button" aria-label="Mute" disabled>Sound</button>
+            <input id="volume" type="range" min="0" max="100" value="80" aria-label="Volume" disabled>
+            <span class="controls-spacer"></span>
+            <span id="timeline-status" class="no-timeline">Timeline hidden</span>
+            <button id="fullscreen-button" type="button" aria-label="Enter fullscreen">Full screen</button>
+          </div>
+        </section>
+        <aside class="round-panel">
+          <div class="now-playing"><span>YOU ARE WATCHING</span><strong id="current-map">Opening</strong><b id="current-round">Ready to begin</b></div>
+          <div class="navigation-group"><span class="nav-label">ROUND</span><div class="paired-buttons"><button id="previous-round" type="button" disabled>Previous</button><button id="next-round" class="accent" type="button" disabled>Next</button></div></div>
+          <div class="navigation-group"><span class="nav-label">MAP</span><div class="paired-buttons"><button id="previous-map" type="button" disabled>Previous</button><button id="next-map" type="button" disabled>Next</button></div></div>
+          <button id="restart-round" class="restart-button" type="button" disabled>Restart current round</button>
+          <div class="shield-note"><span aria-hidden="true"></span><p>Round totals, map totals, scores, and match-result metadata stay out of the VODLOCK interface.</p></div>
+        </aside>
+      </div>
+      <div class="shortcuts"><span><kbd>Space</kbd> Play / pause</span><span><kbd>↑</kbd><kbd>↓</kbd> Previous / next round</span><span><kbd>←</kbd><kbd>→</kbd> -10 s / +10 s</span><span><kbd>F</kbd> Full screen</span></div>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" hidden></div>
+  <footer><span>VODLOCK</span><p>Precomputed indexes. Original video served by YouTube or Twitch.</p><nav aria-label="Legal"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav></footer>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Replay fixture</title>
+<link rel="stylesheet" href="/vodlock/content.css">
+<link rel="stylesheet" href="/vodlock/vodspace.css">
+<style>body{background:#121212;color:white;font:16px system-ui;padding:24px}section{margin:20px 0}button{padding:10px;margin:4px}.bg-brand{background:orange}aside{border:1px solid white} [class~="group/player"]{height:200px;background:#333;padding:20px}</style>
+<script>
+const settings = {};
+const listeners = [];
+window.chrome = {storage:{sync:{get:async defaults=>({...defaults,...settings})},onChanged:{addListener:fn=>listeners.push(fn)}}};
+function configure(key,value){settings[key]=value;listeners.forEach(fn=>fn({[key]:{newValue:value}},'sync'));}
+function select(button){for(const el of button.parentElement.querySelectorAll('button'))el.classList.remove('bg-brand');button.classList.add('bg-brand');}
+</script>
+<script defer src="/vodspace-test.js"></script></head><body>
+<style>[class~="group/player"] > button.absolute.inset-0{background-image:linear-gradient(rgba(255,255,255,.12),transparent 45%);height:40px;width:100%}</style>
+<label><input type="checkbox" id="disable" onchange="configure('enabled',!this.checked)"> Disable protection</label>
+<label><input type="checkbox" id="timeline" onchange="configure('hideTimeline',!this.checked)"> Reveal navigation</label>
+<div class="group/player"><div class="pointer-events-none">Potentially revealing video title</div><div aria-label="Video progress" role="slider">Timeline</div><span class="type-body-sm tabular-nums">10:16<span> / </span>259:34</span><button aria-label="Play">Play</button><button aria-label="Volume">Volume</button><button aria-label="Fullscreen">Fullscreen</button></div>
+<section><h2 class="type-label">Select map</h2><div class="flex flex-wrap"><button class="bg-brand" onclick="select(this)">Split</button><button onclick="select(this)">Sunset</button><button onclick="select(this)">Ascent</button></div></section>
+<div class="group/player"><button class="absolute inset-0" aria-label="Video click-to-play" onclick="this.textContent='Clicked'">Video click-to-play</button></div>
+<section><div><h2>Round index</h2><p>1 / 19</p></div><div><button title="Round 1" class="bg-brand" onclick="select(this)">1</button><button title="Round 2" onclick="select(this)">2</button><button title="Round 3" onclick="select(this)">3</button></div></section>
+<aside><p>Notes and timestamps</p><textarea id="watch-log-entry"></textarea></aside>
+<article><p>Archive match: Team A vs Team B</p><div class="mx-auto"><span class="font-display tabular-nums">2<span> : </span>0</span></div><a href="/1874?map=0">Lotus</a><a href="/1874?map=1">Summit</a><a href="/1874">Play match</a></article>
+</body></html>

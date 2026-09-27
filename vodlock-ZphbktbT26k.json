@@ -1,0 +1,282 @@
+{
+  "schemaVersion": 1,
+  "videoId": "ZphbktbT26k",
+  "label": "Your test VOD",
+  "leadSeconds": 5,
+  "detector": "vct-clock-ocr-v1",
+  "rounds": [
+    {
+      "map": 1,
+      "round": 1,
+      "start": 92,
+      "confidence": 0.934,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 2,
+      "start": 174,
+      "confidence": 0.858,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 3,
+      "start": 261,
+      "confidence": 0.776,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 4,
+      "start": 326,
+      "confidence": 0.888,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 5,
+      "start": 429,
+      "confidence": 0.799,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 6,
+      "start": 528,
+      "confidence": 0.878,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 7,
+      "start": 687,
+      "confidence": 0.868,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 8,
+      "start": 812,
+      "confidence": 0.861,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 9,
+      "start": 960,
+      "confidence": 0.929,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 10,
+      "start": 1060,
+      "confidence": 0.901,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 11,
+      "start": 1126,
+      "confidence": 0.922,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 12,
+      "start": 1252,
+      "confidence": 0.876,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 13,
+      "start": 1459,
+      "confidence": 0.862,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 14,
+      "start": 1542,
+      "confidence": 0.893,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 15,
+      "start": 1593,
+      "confidence": 0.913,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 16,
+      "start": 1695,
+      "confidence": 0.87,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 17,
+      "start": 1832,
+      "confidence": 0.906,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 18,
+      "start": 1964,
+      "confidence": 0.88,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 19,
+      "start": 2063,
+      "confidence": 0.775,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 20,
+      "start": 2164,
+      "confidence": 0.914,
+      "verified": false
+    },
+    {
+      "map": 1,
+      "round": 21,
+      "start": 2360,
+      "confidence": 0.965,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 1,
+      "start": 2541,
+      "confidence": 0.853,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 2,
+      "start": 2611,
+      "confidence": 0.863,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 3,
+      "start": 2677,
+      "confidence": 0.863,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 4,
+      "start": 2765,
+      "confidence": 0.808,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 5,
+      "start": 2836,
+      "confidence": 0.886,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 6,
+      "start": 2915,
+      "confidence": 0.898,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 7,
+      "start": 3060,
+      "confidence": 0.879,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 8,
+      "start": 3236,
+      "confidence": 0.892,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 9,
+      "start": 3421,
+      "confidence": 0.86,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 10,
+      "start": 3549,
+      "confidence": 0.87,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 11,
+      "start": 3618,
+      "confidence": 0.911,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 12,
+      "start": 3702,
+      "confidence": 0.918,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 13,
+      "start": 3960,
+      "confidence": 0.891,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 14,
+      "start": 4048,
+      "confidence": 0.861,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 15,
+      "start": 4137.5,
+      "confidence": 0.857,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 4329,
+      "confidence": 0.871,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 4478,
+      "confidence": 0.901,
+      "verified": false
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 4562,
+      "confidence": 0.885,
+      "verified": false
+    }
+  ]
+}

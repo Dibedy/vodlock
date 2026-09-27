@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>VODLOCK · Round Studio</title>
+  <link rel="stylesheet" href="/style.css">
+  <script defer src="/app.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a class="brand" href="/" aria-label="VODLOCK home"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M6 6h7M6 6v7M26 6h-7M26 6v7M6 26h7M6 26v-7M26 26h-7M26 26v-7"/><circle cx="16" cy="16" r="4"/></svg><span>VODLOCK</span></a>
+    <span class="studio-label">ROUND STUDIO</span>
+    <nav aria-label="Main"><a class="nav-active" href="#workspace"><span>◈</span> Workspace</a><a href="#library"><span>▤</span> Your library</a><button id="help"><span>?</span> How it works</button></nav>
+    <div class="sidebar-bottom"><span class="local-dot"></span> Runs on your PC<p>No subscription. No uploads.</p></div>
+  </aside>
+  <main id="workspace">
+    <header><span class="breadcrumb">Your workspace <span>/</span> Round Studio</span><span class="privacy"><span class="local-dot"></span> LOCAL & PRIVATE</span></header>
+    <section class="intro"><span class="eyebrow">LESS SCRUBBING. MORE ROUNDS.</span><h1>Get straight to the game.</h1><p>Turn a long Valorant VOD into a reusable round index.<br>Analyse it once. Skip instantly whenever you watch.</p></section>
+    <div class="workspace-grid">
+      <section class="card add-card" aria-labelledby="new-title">
+        <div class="card-heading"><div><span class="step">01 / ADD A VOD</span><h2 id="new-title">What are we watching?</h2></div><span class="tag">Experimental</span></div>
+        <form id="new-vod">
+          <div class="source-tabs" role="group" aria-label="Video source"><button type="button" id="youtube-tab" aria-pressed="true">YouTube link</button><button type="button" id="local-tab" aria-pressed="false">Local recording</button></div>
+          <label id="source-label" for="source">YouTube video link</label><input id="source" type="url" required placeholder="https://www.youtube.com/watch?v=…" autocomplete="off">
+          <p id="source-help" class="field-help">Use the original VOD. No sign-in or account cookies are used.</p>
+          <div id="linked-video" hidden><label for="youtube-link">Matching YouTube link <span class="optional">optional</span></label><input id="youtube-link" type="url" placeholder="Use this to connect the index to VODLOCK"><p class="field-help">The recording must match the full, uncut YouTube video exactly.</p></div>
+          <label for="label">Give it a name <span class="optional">optional</span></label><input id="label" maxlength="100" placeholder="Friday match night" autocomplete="off">
+          <div class="download-notice" id="download-notice">↳ A video-only analysis copy (up to 720p / 2 GB) is downloaded to this PC. Indexing can take several minutes.</div>
+          <button class="primary" id="start" type="submit" disabled>Build round index <span>↗</span></button>
+          <p class="form-error" id="form-error" role="alert"></p>
+        </form>
+      </section>
+      <section class="card process-card" aria-labelledby="process-title">
+        <span class="step">02 / LET IT DO THE WORK</span><h2 id="process-title">Keep your player untouched.</h2>
+        <div class="process-visual" aria-hidden="true"><div class="frame-corners"><span>VOD</span><div class="scan-line"></div></div><div class="visual-arrow">→</div><div class="index-symbol"><i></i><i></i><i></i></div></div>
+        <ol class="process-list"><li><span>1</span><div><strong>Read the broadcast</strong><p>Extract frames outside your browser.</p></div></li><li><span>2</span><div><strong>Find the real round starts</strong><p>Check the clock, round label and replay sign.</p></div></li><li><span>3</span><div><strong>Watch, without the spoilers</strong><p>Jump in with a five-second lead-in.</p></div></li></ol>
+        <div class="accuracy-note"><span>ⓘ</span><p>This first detector supports the VCT top-centre round/timer layout. It has passed clock checks on the supplied full VOD, but other broadcasts may differ. Review new results before relying on them.</p></div>
+      </section>
+    </div>
+    <section class="library" id="library"><div class="library-heading"><div><span class="step">03 / YOUR LIBRARY</span><h2>Ready when you are.</h2></div><span class="spoiler-pill">◉ Spoiler-safe by default</span></div><div id="jobs" aria-live="polite"></div></section>
+    <footer>Made for watching, not guessing. <span>Your videos and indexes stay on this computer.</span></footer>
+  </main>
+  <dialog id="review"><div class="dialog-heading"><div><span class="step">ACCURACY REVIEW</span><h2 id="review-title">Review your index</h2></div><button id="close-review" class="icon-button" aria-label="Close review">×</button></div><p class="review-warning">Review mode reveals timestamps and the number of detected rounds. Check clips and save corrections. Excluded detections stay here and can be re-included. Send any changes to VODLOCK again.</p><div id="review-warnings"></div><p id="review-notice" class="field-help" role="status" hidden></p><div class="table-wrap"><table><thead><tr><th>Round</th><th>Actual start</th><th>Check</th><th>Review</th></tr></thead><tbody id="rounds"></tbody></table></div><form id="add-round" class="add-round"><div><label for="manual-map">Map</label><input id="manual-map" type="number" min="1" max="99" value="1" required></div><div><label for="manual-round">Round</label><input id="manual-round" type="number" min="1" max="100" required></div><div><label for="manual-start">Actual start</label><input id="manual-start" placeholder="mm:ss or hh:mm:ss" required></div><button type="submit">Add missing round</button></form></dialog>
+  <dialog id="help-dialog"><div class="dialog-heading"><h2>Your first index</h2><button id="close-help" class="icon-button" aria-label="Close help">×</button></div><ol class="help-list"><li>Paste a public YouTube VOD or the full path to a recording on this PC.</li><li>Build the index. Keep Round Studio running while it processes the video.</li><li>Review the detections, then press <strong>Use in VODLOCK</strong>.</li><li>Open the same YouTube video. Down Arrow jumps to the next indexed round; Right Arrow keeps the replay jump.</li></ol><p class="field-help">If the extension is not detected, export the JSON and import it from the VODLOCK popup. Start this app using Start Round Studio.cmd.</p></dialog>
+  <div id="notice" class="notice" role="status" hidden></div>
+</body>
+</html>

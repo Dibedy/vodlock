@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>VODLOCK</title>
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <main>
+    <div class="brand">
+      <div>
+        <h1>VODLOCK</h1>
+        <p>Spoiler safe VOD mode</p>
+      </div>
+      <label class="switch" title="Toggle spoiler mode">
+        <input id="enabled" type="checkbox" />
+        <span></span>
+      </label>
+    </div>
+
+    <div class="round-studio">
+      <a href="http://127.0.0.1:8766/" target="_blank" rel="noopener">Open Round Studio ↗</a>
+      <label class="index-import">Import round index <input id="roundIndexFile" type="file" accept=".json,application/json" /></label>
+      <p id="indexImportStatus" role="status">Start the local app before opening Round Studio.</p>
+    </div>
+    <section>
+      <label><input id="hideTimeline" type="checkbox" /> Hide timeline and all time labels</label>
+      <label><input id="hideMetadata" type="checkbox" /> Hide risky titles and metadata</label>
+      <label><input id="hideSidebar" type="checkbox" /> Hide recommendations and sidebars</label>
+      <label><input id="hideComments" type="checkbox" /> Hide comments and chat/replay panels</label>
+      <label><input id="hideThumbnails" type="checkbox" /> Hide preview thumbnails and tooltips</label>
+      <label><input id="safeControls" type="checkbox" /> Show spoiler safe controls</label>
+      <label><input id="smartSkip" type="checkbox" /> Enable replay and round / break controls</label>
+      <label>Replay jump (seconds) <input id="replaySkipSeconds" type="number" min="5" max="60" step="1" value="31" /></label>
+      <label><input id="hideBrowseDurations" type="checkbox" /> Hide VOD lengths on channel, search and playlist pages</label>
+      <label><input id="endScreenProtection" type="checkbox" /> Hide YouTube end screens and next video cards</label>
+      <label><input id="panicShield" type="checkbox" /> Enable instant spoiler shield</label>
+    </section>
+
+    <div class="hint">
+      <strong>Keyboard</strong>
+      <span>Alt + S: toggle mode</span>
+      <span>Alt + ← / →: skip 30s</span>
+      <span>Alt + ↑: skip 2m</span>
+      <span>→: Skip Replay</span>
+      <span>↓: Next indexed round / Skip Long Break</span>
+      <span>Alt + H: instant spoiler shield</span>
+      <span>Esc: cancel search / reveal panic shield</span>
+      <span>vods.space: use safe Previous / Next round and map buttons</span>
+    </div>
+  </main>
+  <script src="round-index.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

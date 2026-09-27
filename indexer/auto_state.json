@@ -16,14 +16,6 @@
       "title": "SRG vs FLY - Verizon Game Changers NA Stage 2 Grand Finals",
       "message": "ERROR: [youtube] 0p5IMJh-3vE: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp for how to manually pass cookies. Also see https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies for tips on effectively exporting YouTube cookies",
       "checkedAt": "2026-09-27T03:37:43.774608+00:00"
-    },
-    "twitch:2884362905": {
-      "status": "held",
-      "provider": "twitch",
-      "channel": "FNS on Twitch",
-      "title": "EG FNS | GE vs VIT - VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
-      "message": "The analysis copy exceeded the 2 GB limit. Use a local recording instead.",
-      "checkedAt": "2026-09-27T09:35:01.929556+00:00"
     }
   }
 }

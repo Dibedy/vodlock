@@ -3,7 +3,7 @@ import statistics
 from dataclasses import dataclass
 
 
-DETECTOR_VERSION = "vct-clock-ocr-v2"
+DETECTOR_VERSION = "vct-clock-ocr-v3"
 
 
 @dataclass
@@ -108,12 +108,15 @@ class HudReader:
         height, width = frame.shape[:2]
         label = frame[:int(height * 0.026), int(width * 0.46):int(width * 0.54)]
         clock = frame[int(height * 0.026):int(height * 0.065), int(width * 0.465):int(width * 0.535)]
-        lines = self.read_lines(label, single=True, scale=4) + self.read_lines(clock, single=True)
+        clock_lines = self.read_lines(clock, single=True)
+        lines = self.read_lines(label, single=True, scale=4) + clock_lines
         sample = parse_hud(time, lines)
-        if sample.timer is not None and 85 <= sample.timer <= 100 and (sample.round is None or sample.confidence < 0.65):
+        if sample.timer is not None and 85 <= sample.timer <= 100:
             top = frame[:int(height * 0.09), int(width * 0.43):int(width * 0.57)]
-            lines = self.read_lines(top)
-            sample = parse_hud(time, lines)
+            top_lines = self.read_lines(top)
+            if parse_hud(time, top_lines).round is not None:
+                lines = top_lines + clock_lines
+                sample = parse_hud(time, lines)
         if sample.round is None or sample.timer is None or not 85 <= sample.timer <= 100:
             return sample
         replay = frame[int(height * 0.84):, int(width * 0.73):]

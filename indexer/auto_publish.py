@@ -185,6 +185,7 @@ def process(channel, entry, config):
     server.JOBS[identifier] = job
     server.save(job)
     try:
+        print(f"Processing {provider}:{entry['id']} - {clean_text(entry['title'])}", flush=True)
         server.index_job(identifier)
         accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
         if not accepted:

@@ -1,9 +1,12 @@
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
+
+import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "indexer"))
-from detector import Observation, RoundDetector, parse_hud
+from detector import HudReader, Observation, RoundDetector, parse_hud
 
 
 class DetectorTests(unittest.TestCase):
@@ -18,6 +21,13 @@ class DetectorTests(unittest.TestCase):
     def test_normalizes_observed_official_round_six_ocr_confusion(self):
         sample = parse_hud(3020, [("ROUNDG", .89), ("1:38", .98)])
         self.assertEqual((sample.round, sample.timer), (6, 98))
+
+    def test_wider_label_read_corrects_confident_round_eight_misread(self):
+        reader = HudReader.__new__(HudReader)
+        with patch.object(reader, "read_lines", side_effect=[[("1:37", .99)], [("ROUNDS", .89)],
+                                                            [("ROUND8", .93)], []]):
+            sample = reader.read(np.zeros((720, 1280, 3), dtype=np.uint8), 3410)
+        self.assertEqual((sample.round, sample.timer), (8, 97))
 
     def test_explicit_replay_is_rejected(self):
         sample = parse_hud(10, [("ROUND 16", .95), ("1:39", .98)], [("REPLAY", .9)])

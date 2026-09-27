@@ -1,7 +1,9 @@
 import sys
+import io
 import unittest
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "indexer"))
 import auto_publish
@@ -85,6 +87,28 @@ class AutoPublishTests(unittest.TestCase):
         gap = [dict(item) for item in rounds]
         gap[5]["round"] = 7
         self.assertFalse(auto_publish.publishable({**job, "rounds": gap}, 0.75, 13)[0])
+
+    def test_youtube_discovery_failure_does_not_block_twitch_or_held_retries(self):
+        channels = [{"provider": "youtube", "name": "YouTube"},
+                    {"provider": "twitch", "name": "VALORANT", "login": "valorant"},
+                    {"provider": "twitch", "name": "FNS", "login": "gofns"}]
+        config = {"channels": channels, "lookback": 30, "maxPerRun": 4, "retryHours": 6}
+        state = {"videos": {"twitch:1234567890": {"status": "held", "checkedAt": datetime.now(timezone.utc).isoformat()}}}
+        catalog = {"videos": []}
+        entries = {"valorant": [{"id": "1234567890", "title": "Official"}],
+                   "gofns": [{"id": "1234567891", "title": "Watchparty"}]}
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, catalog]), \
+                patch.object(auto_publish, "discover_youtube", side_effect=RuntimeError("blocked")), \
+                patch.object(auto_publish, "discover_twitch", return_value=entries), \
+                patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \
+                patch.object(auto_publish, "write_json"), \
+                patch.dict(auto_publish.os.environ, {"TWITCH_CLIENT_ID": "client", "TWITCH_CLIENT_SECRET": "secret"}), \
+                patch.object(sys, "argv", ["auto_publish.py"]), \
+                patch("sys.stderr", new_callable=io.StringIO) as errors, patch("sys.stdout", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["1234567890", "1234567891"])
+        self.assertEqual(state["videos"]["twitch:1234567890"]["status"], "published")
+        self.assertIn("YouTube discovery failed", errors.getvalue())
 
 
 if __name__ == "__main__":

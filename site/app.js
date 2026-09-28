@@ -199,12 +199,17 @@
     const kind = entryKind(entry);
     const teams = matchup(entry);
     const card = document.createElement('article');
-    card.className = 'vod-row ' + kind;
+    card.className = 'vod-card ' + kind;
+    const top = document.createElement('div');
+    top.className = 'card-top';
     const source = document.createElement('span');
     source.className = 'source-label ' + entry.provider;
     source.textContent = entry.provider === 'youtube' ? 'YouTube' : 'Twitch';
+    const format = document.createElement('span');
+    format.textContent = kind === 'watch-party' ? entry.title.replace(/^EG\s+/i, '') + ' watch party' : 'Full match';
+    top.append(source, format);
     const body = document.createElement('div');
-    body.className = 'row-body';
+    body.className = 'card-body';
     const title = document.createElement('h3');
     if (teams.length === 2) {
       const first = document.createElement('strong');
@@ -218,19 +223,18 @@
       title.textContent = entry.title;
     }
     const event = document.createElement('p');
-    const creator = kind === 'watch-party' ? entry.title.replace(/^EG\s+/i, '') + ' watch party · ' : '';
     let eventText = displayEvent(entry);
     if (kind === 'watch-party' && teams.length === 2) {
       const matchupPrefix = teams[0] + ' vs ' + teams[1] + ' · ';
       if (eventText.startsWith(matchupPrefix)) eventText = eventText.slice(matchupPrefix.length);
     }
-    event.textContent = creator + eventText;
+    event.textContent = eventText;
     body.append(title, event);
     const watch = document.createElement('button');
     watch.type = 'button';
-    watch.textContent = entry.chat ? 'Watch + chat' : 'Watch';
+    watch.textContent = entry.chat ? 'Watch with chat' : 'Watch match';
     watch.addEventListener('click', () => openVideo(entryKey(entry)));
-    card.append(source, body, watch);
+    card.append(top, body, watch);
     return card;
   }
 

@@ -22,20 +22,22 @@
   <main>
     <section id="library-view" class="library-view">
       <div class="library-heading">
-        <h1>Match archive</h1>
-        <p>Official full matches and creator watch parties. Spoiler-safe controls jump between rounds and maps.</p>
-      </div>
-      <form id="video-search" class="search-card">
-        <label for="video-url">Already have a link?</label>
-        <div class="search-row">
-          <input id="video-url" type="text" inputmode="url" autocomplete="off" placeholder="Paste a YouTube or Twitch VOD link">
-          <button type="submit">Find VOD</button>
+        <div class="library-title"><span>VALORANT VODS</span><h1>Match<br>archive</h1></div>
+        <div class="library-tools">
+          <p>Official full matches and creator watch parties. Spoiler-safe controls jump between rounds and maps.</p>
+          <form id="video-search" class="search-card">
+            <label for="video-url">Open a VOD</label>
+            <div class="search-row">
+              <input id="video-url" type="text" inputmode="url" autocomplete="off" placeholder="YouTube or Twitch link">
+              <button type="submit">Find</button>
+            </div>
+            <p id="search-message" class="search-message" role="status"></p>
+          </form>
         </div>
-        <p id="search-message" class="search-message" role="status"></p>
-      </form>
+      </div>
       <section class="catalog-section" aria-labelledby="catalog-title">
         <div class="section-heading">
-          <h2 id="catalog-title">All VODs</h2>
+          <h2 id="catalog-title">Browse VODs</h2>
         </div>
         <div class="filter-panel" aria-label="Library filters">
           <div class="filter-block">

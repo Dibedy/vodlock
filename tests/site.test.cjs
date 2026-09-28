@@ -121,7 +121,7 @@ test('website library supports source and automatically derived team filters', (
   assert.match(app, /state\.teamFilter/);
   assert.match(app, /Official matches/);
   assert.match(app, /Watch parties/);
-  assert.match(app, /vod-row/);
+  assert.match(app, /vod-card/);
   assert.doesNotMatch(index, /class="hero"/);
   assert.doesNotMatch(app, /team-mark/);
 });

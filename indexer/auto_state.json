@@ -32,9 +32,10 @@
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "GE vs. VIT - VALORANT Champions Shanghai - Group Stage",
-      "message": "Published after full-recording validation",
-      "checkedAt": "2026-09-27T19:33:06.003813+00:00",
-      "detectorVersion": "vct-clock-ocr-v5"
+      "message": "Published",
+      "publishedAt": "2026-09-26T08:29:42Z",
+      "detectorVersion": "vct-clock-ocr-v6",
+      "checkedAt": "2026-09-28T06:54:18.390210+00:00"
     },
     "youtube:fFfCJDNHEvc": {
       "status": "published",
@@ -89,8 +90,9 @@
       "channel": "FNS on Twitch",
       "title": "EG FNS | PRX vs Team Liquid - VCT Champions Group Stage #VCTWatchparty | !vote !inzone",
       "message": "The first detected round is not round 1. Check the beginning of this recording.",
+      "publishedAt": "2026-09-24T07:32:31Z",
       "detectorVersion": "vct-clock-ocr-v6",
-      "checkedAt": "2026-09-27T22:40:42.260367+00:00"
+      "checkedAt": "2026-09-28T06:20:44.551670+00:00"
     },
     "twitch:2882594925": {
       "status": "held",

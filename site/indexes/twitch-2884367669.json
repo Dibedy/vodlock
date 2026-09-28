@@ -4,7 +4,7 @@
   "sourceId": "2884367669",
   "label": "GE vs VIT",
   "leadSeconds": 5,
-  "detector": "vct-clock-ocr-v5",
+  "detector": "vct-clock-ocr-v6",
   "rounds": [
     {
       "map": 1,

@@ -3,6 +3,7 @@
   "lookback": 30,
   "maxPerRun": 4,
   "maxPerChannelPerRun": 2,
+  "maxRetriesPerRun": 1,
   "retryHours": 6,
   "youtubeRetryHours": 0.5,
   "alignmentLookback": 8,

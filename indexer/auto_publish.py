@@ -394,7 +394,17 @@ def main():
             candidates.append((1 if key in state["videos"] else 0, channel.get("priority", 0),
                                channel_index, entry_index, channel, entry))
     candidates.sort(key=lambda item: item[:4])
-    candidates = [(channel, entry) for *_, channel, entry in candidates[:config["maxPerRun"]]]
+    selected = []
+    retry_count = 0
+    for candidate in candidates:
+        retrying = candidate[0]
+        if retrying and retry_count >= config.get("maxRetriesPerRun", 1):
+            continue
+        selected.append(candidate)
+        retry_count += retrying
+        if len(selected) >= config["maxPerRun"]:
+            break
+    candidates = [(channel, entry) for *_, channel, entry in selected]
     if arguments.dry_run:
         for channel, entry in candidates:
             print(f"{channel['provider']}:{entry['id']} | {clean_text(entry['title'])} | {channel['name']}")

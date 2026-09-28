@@ -131,6 +131,29 @@ class AutoPublishTests(unittest.TestCase):
             self.assertEqual(auto_publish.main(), 0)
         self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["abcdefghijk", "lmnopqrstuv"])
 
+    def test_stale_retries_are_limited_without_reducing_fresh_capacity(self):
+        now = datetime.now(timezone.utc)
+        channel = {"provider": "youtube", "name": "YouTube"}
+        config = {"channels": [channel], "lookback": 30, "maxPerRun": 4,
+                  "maxPerChannelPerRun": 4, "maxRetriesPerRun": 1, "youtubeRetryHours": 0}
+        entries = [{"id": "abcdefghijk", "title": "Fresh"},
+                   {"id": "lmnopqrstuv", "title": "Retry one"},
+                   {"id": "12345678901", "title": "Retry two"}]
+        state = {"videos": {
+            "youtube:lmnopqrstuv": {"status": "held", "message": "network", "checkedAt": now.isoformat(),
+                                     "detectorVersion": auto_publish.DETECTOR_VERSION,
+                                     "pipelineVersion": auto_publish.PIPELINE_VERSION},
+            "youtube:12345678901": {"status": "held", "message": "network", "checkedAt": now.isoformat(),
+                                     "detectorVersion": auto_publish.DETECTOR_VERSION,
+                                     "pipelineVersion": auto_publish.PIPELINE_VERSION}}}
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, {"videos": []}]), \
+                patch.object(auto_publish, "discover_youtube", return_value=entries), \
+                patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \
+                patch.object(auto_publish, "write_json"), patch.object(sys, "argv", ["auto_publish.py"]), \
+                patch("sys.stdout", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["abcdefghijk", "lmnopqrstuv"])
+
     def test_automatic_publication_requires_complete_high_confidence_sequence(self):
         rounds = [{"map": 1, "round": number, "start": number * 100, "confidence": 0.9} for number in range(1, 14)]
         job = {"status": "ready", "warnings": [], "rounds": rounds}

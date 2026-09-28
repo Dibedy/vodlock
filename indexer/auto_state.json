@@ -61,8 +61,9 @@
       "channel": "VALORANT on Twitch",
       "title": "100T vs. T1 - VALORANT Champions Shanghai - Group Stage",
       "message": "Published",
-      "detectorVersion": "vct-clock-ocr-v4",
-      "checkedAt": "2026-09-27T17:26:38.217884+00:00"
+      "publishedAt": "2026-09-27T08:30:07Z",
+      "detectorVersion": "vct-clock-ocr-v6",
+      "checkedAt": "2026-09-28T01:57:57.875736+00:00"
     },
     "twitch:2883449763": {
       "status": "published",
@@ -118,6 +119,26 @@
       "message": "ERROR: [youtube] _wWnQ7KG8no: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp for how to manually pass cookies. Also see https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies for tips on effectively exporting YouTube cookies",
       "detectorVersion": "vct-clock-ocr-v6",
       "checkedAt": "2026-09-27T23:29:18.854120+00:00"
+    },
+    "twitch:2869837140": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | LOUD vs 100T - VCT Americas Grand Finals #VCTWatchparty | !vote !inzone",
+      "message": "No reliable round starts were found. This version needs the VCT top-centre ROUND label and timer; a different layout may need detector changes.",
+      "publishedAt": "2026-09-09T20:54:30Z",
+      "detectorVersion": "vct-clock-ocr-v6",
+      "checkedAt": "2026-09-28T01:19:53.168802+00:00"
+    },
+    "twitch:2877469732": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "Ohnepixel on Twitch",
+      "title": "🔴$50K VALORANT TOURNEY PREP... HELP!🔴",
+      "message": "[Errno 28] No space left on device",
+      "publishedAt": "2026-09-18T15:04:36Z",
+      "detectorVersion": "vct-clock-ocr-v6",
+      "checkedAt": "2026-09-28T02:02:54.641721+00:00"
     }
   }
 }

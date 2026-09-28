@@ -4,7 +4,7 @@
   "sourceId": "2885318675",
   "label": "100T vs T1",
   "leadSeconds": 5,
-  "detector": "vct-clock-ocr-v4",
+  "detector": "vct-clock-ocr-v6",
   "rounds": [
     {
       "map": 1,

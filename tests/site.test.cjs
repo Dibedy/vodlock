@@ -110,6 +110,19 @@ test('website mentions spoiler-safe once and uses ten-second arrow navigation', 
   assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);
 });
 
+test('website library supports source and automatically derived team filters', () => {
+  const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  assert.match(index, /id="kind-filters"/);
+  assert.match(index, /data-kind="match"/);
+  assert.match(index, /data-kind="watch-party"/);
+  assert.match(index, /id="team-filters"/);
+  assert.match(app, /function matchup\(entry\)/);
+  assert.match(app, /state\.teamFilter/);
+  assert.match(app, /Official matches/);
+  assert.match(app, /Watch parties/);
+});
+
 test('website avoids the prohibited design and copy patterns', () => {
   const source = ['index.html', 'privacy.html', 'terms.html', 'styles.css', 'app.js']
     .map(file => readFileSync(resolve(__dirname, '../site/' + file), 'utf8')).join('\n');

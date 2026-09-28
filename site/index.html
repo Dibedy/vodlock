@@ -18,38 +18,44 @@
       <span>VODLOCK</span>
     </button>
     <div class="top-actions">
-      <span class="top-status"><i></i> INDEXED VOD LIBRARY</span>
+      <span class="top-status"><i></i> VALORANT VOD LIBRARY</span>
       <button id="settings-button" class="settings-button" type="button">Settings</button>
     </div>
   </header>
   <main>
     <section id="library-view" class="library-view">
       <div class="hero">
-        <div class="hero-copy">
-          <span class="eyebrow">YOUTUBE + TWITCH VALORANT VODS</span>
-          <h1>Every round.<br><em>One clean jump away.</em></h1>
-          <p>Open an indexed broadcast and move directly between rounds and maps. The library avoids match-result metadata for spoiler-safe watching. No extension or download required.</p>
-        </div>
-        <div class="hero-mark" aria-hidden="true">
-          <div class="scan-frame"><span></span><span></span><span></span><span></span><b></b></div>
-          <div class="mark-copy"><strong>ROUND</strong><small>INDEX READY</small></div>
-        </div>
+        <span class="eyebrow">VALORANT MATCH ARCHIVE</span>
+        <h1>Watch the match.<br><em>Skip the downtime.</em></h1>
+        <p>Official full matches from YouTube and creator watch parties from Twitch, indexed by round and map. Twitch watch parties include archived chat. The interface keeps match results out of view for spoiler-safe watching.</p>
       </div>
       <form id="video-search" class="search-card">
-        <label for="video-url">Find an indexed broadcast</label>
+        <label for="video-url">Open a VOD link</label>
         <div class="search-row">
-          <svg class="youtube-mark" viewBox="0 0 24 24" aria-hidden="true"><path d="M20.4 6.2c-.2-.8-.8-1.4-1.6-1.6C17.4 4.2 12 4.2 12 4.2s-5.4 0-6.8.4c-.8.2-1.4.8-1.6 1.6C3.2 7.6 3.2 12 3.2 12s0 4.4.4 5.8c.2.8.8 1.4 1.6 1.6 1.4.4 6.8.4 6.8.4s5.4 0 6.8-.4c.8-.2 1.4-.8 1.6-1.6.4-1.4.4-5.8.4-5.8s0-4.4-.4-5.8Z"/><path class="play-shape" d="m10 15.4 5-3.4-5-3.4v6.8Z"/></svg>
           <input id="video-url" type="text" inputmode="url" autocomplete="off" placeholder="Paste a YouTube or Twitch VOD link">
-          <button type="submit">Find index <span aria-hidden="true">→</span></button>
+          <button type="submit">Open</button>
         </div>
         <p id="search-message" class="search-message" role="status"></p>
       </form>
       <section class="catalog-section" aria-labelledby="catalog-title">
         <div class="section-heading">
-          <div><span class="eyebrow">AVAILABLE NOW</span><h2 id="catalog-title">Indexed broadcasts</h2></div>
-          <span class="index-note">PRECOMPUTED ROUND DATA</span>
+          <div><span class="eyebrow">LIBRARY</span><h2 id="catalog-title">Matches and watch parties</h2></div>
         </div>
-        <div id="catalog" class="catalog-grid" aria-live="polite"><p class="loading-copy">Loading the broadcast library...</p></div>
+        <div class="filter-panel" aria-label="Library filters">
+          <div class="filter-block">
+            <span class="filter-label">View</span>
+            <div id="kind-filters" class="kind-filters">
+              <button type="button" data-kind="all" aria-pressed="true">All VODs</button>
+              <button type="button" data-kind="match" aria-pressed="false">Official matches</button>
+              <button type="button" data-kind="watch-party" aria-pressed="false">Watch parties</button>
+            </div>
+          </div>
+          <div class="filter-block">
+            <span class="filter-label">Team</span>
+            <div id="team-filters" class="team-filters"></div>
+          </div>
+        </div>
+        <div id="catalog" class="catalog-library" aria-live="polite"><p class="loading-copy">Loading library...</p></div>
       </section>
     </section>
     <section id="player-view" class="player-view" hidden>

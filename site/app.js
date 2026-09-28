@@ -11,7 +11,7 @@
     showChatTimestamps: 'setting-show-chat-timestamps',
     endScreenProtection: 'setting-end-screen-protection'
   };
-  const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, toastTimer: null, statusTimer: null};
+  const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, toastTimer: null, statusTimer: null, kindFilter: 'all', teamFilter: 'all'};
   let settings = readSettings();
 
   function readSettings() {
@@ -143,32 +143,147 @@
     return VodlockSite.sourceKey(entry.provider, entry.sourceId);
   }
 
+  function matchup(entry) {
+    const candidates = [entry.title, entry.event.split('|')[0]];
+    for (const candidate of candidates) {
+      const parts = candidate.split(/\s+vs\.?\s+/i);
+      if (parts.length !== 2) continue;
+      const teams = parts.map(part => part.replace(/^[^A-Za-z0-9]+|[^A-Za-z0-9]+$/g, '').trim());
+      if (teams.every(Boolean)) return teams;
+    }
+    return [];
+  }
+
+  function teamCode(team) {
+    const compact = team.replace(/[^A-Za-z0-9]/g, '');
+    if (compact.length <= 4) return compact.toUpperCase();
+    const initials = team.split(/\s+/).map(part => part[0]).join('');
+    return (initials.length > 1 ? initials : compact.slice(0, 3)).toUpperCase();
+  }
+
+  function entryKind(entry) {
+    if (entry.kind === 'match' || entry.kind === 'watch-party') return entry.kind;
+    return entry.label === 'Full match' || matchup({title: entry.title, event: ''}).length === 2 ? 'match' : 'watch-party';
+  }
+
+  function displayEvent(entry) {
+    return entry.event.split('|').map(part => part.trim()).filter(part => part && !part.startsWith('!'))
+      .map(part => part.replace(/\s*#\S+/g, '').trim()).filter(Boolean).join(' · ');
+  }
+
+  function teamMark(team) {
+    const mark = document.createElement('span');
+    mark.className = 'team-mark';
+    mark.textContent = teamCode(team);
+    mark.setAttribute('aria-hidden', 'true');
+    return mark;
+  }
+
+  function renderFilters() {
+    const teams = [...new Set(state.catalog.flatMap(matchup))].sort((a, b) => a.localeCompare(b));
+    if (state.teamFilter !== 'all' && !teams.includes(state.teamFilter)) state.teamFilter = 'all';
+    const host = $('team-filters');
+    host.replaceChildren();
+    const all = document.createElement('button');
+    all.type = 'button';
+    all.dataset.team = 'all';
+    all.textContent = 'All teams';
+    host.append(all);
+    for (const team of teams) {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.team = team;
+      button.append(teamMark(team), document.createTextNode(team));
+      host.append(button);
+    }
+    for (const button of host.querySelectorAll('button')) {
+      const selected = button.dataset.team === state.teamFilter;
+      button.setAttribute('aria-pressed', String(selected));
+      button.addEventListener('click', () => {
+        state.teamFilter = button.dataset.team;
+        renderFilters();
+        renderCatalog();
+      });
+    }
+    for (const button of $('kind-filters').querySelectorAll('button')) {
+      button.setAttribute('aria-pressed', String(button.dataset.kind === state.kindFilter));
+    }
+  }
+
+  function renderCard(entry) {
+    const kind = entryKind(entry);
+    const teams = matchup(entry);
+    const card = document.createElement('article');
+    card.className = 'vod-card ' + kind;
+    const top = document.createElement('div');
+    top.className = 'card-top';
+    const source = document.createElement('span');
+    source.className = 'source-label ' + entry.provider;
+    source.textContent = entry.provider === 'youtube' ? 'YouTube' : 'Twitch';
+    const format = document.createElement('span');
+    format.textContent = kind === 'match' ? 'Official match' : 'Watch party';
+    top.append(source, format);
+    const body = document.createElement('div');
+    body.className = 'card-body';
+    if (teams.length === 2) {
+      const matchupRow = document.createElement('div');
+      matchupRow.className = 'card-matchup';
+      for (const [index, team] of teams.entries()) {
+        if (index) {
+          const versus = document.createElement('span');
+          versus.className = 'versus';
+          versus.textContent = 'VS';
+          matchupRow.append(versus);
+        }
+        const teamNode = document.createElement('div');
+        teamNode.append(teamMark(team));
+        const name = document.createElement('strong');
+        name.textContent = team;
+        teamNode.append(name);
+        matchupRow.append(teamNode);
+      }
+      body.append(matchupRow);
+    }
+    const title = document.createElement('h3');
+    title.textContent = kind === 'watch-party' ? entry.title.replace(/^EG\s+/i, '') + ' watch party' : entry.title;
+    const event = document.createElement('p');
+    event.textContent = displayEvent(entry);
+    body.append(title, event);
+    const watch = document.createElement('button');
+    watch.type = 'button';
+    watch.textContent = entry.chat ? 'Watch with chat' : 'Watch match';
+    watch.addEventListener('click', () => openVideo(entryKey(entry)));
+    card.append(top, body, watch);
+    return card;
+  }
+
   function renderCatalog() {
     const catalog = $('catalog');
     catalog.replaceChildren();
-    state.catalog.forEach(entry => {
-      const card = document.createElement('article');
-      card.className = 'vod-card';
-      const top = document.createElement('div');
-      top.className = 'card-top';
-      const ready = document.createElement('span');
-      ready.className = 'index-ready';
-      ready.textContent = entry.provider.toUpperCase() + ' · ROUND INDEX READY';
-      top.append(ready);
+    const visible = state.catalog.filter(entry => (state.kindFilter === 'all' || entryKind(entry) === state.kindFilter) &&
+      (state.teamFilter === 'all' || matchup(entry).includes(state.teamFilter)));
+    for (const [kind, heading] of [['match', 'Official matches'], ['watch-party', 'Watch parties']]) {
+      const entries = visible.filter(entry => entryKind(entry) === kind);
+      if (!entries.length) continue;
+      const group = document.createElement('section');
+      group.className = 'catalog-group';
+      const groupHeading = document.createElement('div');
+      groupHeading.className = 'catalog-group-heading';
       const title = document.createElement('h3');
-      title.textContent = entry.title;
-      const event = document.createElement('p');
-      event.textContent = entry.event;
-      const watch = document.createElement('button');
-      watch.type = 'button';
-      watch.textContent = 'Watch rounds';
-      watch.addEventListener('click', () => openVideo(entryKey(entry)));
-      card.append(top, title, event, watch);
-      catalog.append(card);
-    });
-    if (!state.catalog.length) {
+      title.textContent = heading;
+      const detail = document.createElement('span');
+      detail.textContent = kind === 'match' ? 'Full match uploads' : 'Creator VODs with archived chat';
+      groupHeading.append(title, detail);
+      const grid = document.createElement('div');
+      grid.className = 'catalog-grid';
+      for (const entry of entries) grid.append(renderCard(entry));
+      group.append(groupHeading, grid);
+      catalog.append(group);
+    }
+    if (!visible.length) {
       const empty = document.createElement('p');
-      empty.textContent = 'No processed broadcasts are available yet.';
+      empty.className = 'empty-library';
+      empty.textContent = 'No VODs match these filters.';
       catalog.append(empty);
     }
   }
@@ -187,6 +302,7 @@
       return parsed && typeof entry.index === 'string' && /^\/indexes\/[A-Za-z0-9_-]+\.json$/.test(entry.index) &&
         typeof entry.title === 'string' && typeof entry.event === 'string';
     });
+    renderFilters();
     renderCatalog();
   }
 
@@ -500,6 +616,13 @@
     }
     openVideo(VodlockSite.sourceKey(source.provider, source.sourceId)).catch(error => setSearchMessage(error.message, true));
   });
+  for (const button of $('kind-filters').querySelectorAll('button')) {
+    button.addEventListener('click', () => {
+      state.kindFilter = button.dataset.kind;
+      renderFilters();
+      renderCatalog();
+    });
+  }
   $('home-button').addEventListener('click', () => showLibrary());
   $('back-button').addEventListener('click', () => showLibrary());
   $('return-library').addEventListener('click', () => showLibrary());

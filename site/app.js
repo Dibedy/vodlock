@@ -679,6 +679,13 @@
     $('theater-button').setAttribute('aria-label', state.theater ? 'Exit theater mode' : 'Enter theater mode');
   }
 
+  function reclaimPlayerFocus() {
+    if ($('player-view').hidden || !state.started || $('settings-dialog').open) return;
+    setTimeout(() => {
+      if (document.activeElement?.tagName === 'IFRAME') $('player-shell').focus({preventScroll: true});
+    }, 150);
+  }
+
   function syncFullscreenButton() {
     const chatVisible = !$('chat-panel').hidden;
     const fullscreen = document.fullscreenElement === $('watch-layout');
@@ -727,6 +734,7 @@
   $('fullscreen-button').addEventListener('click', toggleFullscreen);
   $('theater-button').addEventListener('click', toggleTheater);
   document.addEventListener('fullscreenchange', syncFullscreenButton);
+  addEventListener('blur', reclaimPlayerFocus);
   addEventListener('pagehide', () => saveResume(true));
   $('previous-round').addEventListener('click', () => navigateRound(-1));
   $('next-round').addEventListener('click', () => navigateRound(1));
@@ -740,10 +748,12 @@
 
   document.addEventListener('keydown', event => {
     if ($('player-view').hidden || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
+    if ($('settings-dialog').open) return;
+    const key = event.code === 'Space' ? ' ' : event.key;
     if (!state.started) {
-      if (event.key === ' ') {
+      if (key === ' ') {
         event.preventDefault();
-        startWatching();
+        if (!event.repeat) startWatching();
       }
       return;
     }
@@ -760,10 +770,10 @@
       m: toggleMute,
       M: toggleMute
     };
-    if (!actions[event.key]) return;
+    if (!actions[key]) return;
     event.preventDefault();
-    actions[event.key]();
-  });
+    if (!event.repeat || key !== ' ') actions[key]();
+  }, true);
 
   addEventListener('popstate', () => {
     const source = new URL(location.href).searchParams.get('v');

@@ -126,7 +126,7 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .video-column { min-width: 0; }
 .player-shell { aspect-ratio: 16 / 9; background: #030504; position: relative; overflow: hidden; border: 1px solid var(--line); }
 #media-player, #media-player iframe { width: 100%; height: 100%; }
-.player-shell.twitch-timeline-hidden #media-player iframe { position: absolute; top: -90px; left: 0; height: calc(100% + 180px) !important; pointer-events: none; }
+.player-shell.twitch-timeline-hidden #media-player iframe { position: absolute; top: -90px; left: 0; height: calc(100% + 180px) !important; }
 .player-gate { position: absolute; inset: 0; z-index: 3; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 13px; padding: 24px; background: #050806; text-align: center; }
 .player-gate::before { content: ""; position: absolute; inset: 18px; border: 1px solid var(--line-soft); pointer-events: none; }
 .player-gate strong { font-family: var(--display); font-size: clamp(28px, 4vw, 54px); letter-spacing: -.055em; text-transform: uppercase; }

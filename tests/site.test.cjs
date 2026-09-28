@@ -148,6 +148,18 @@ test('website groups broadcasts by match and keeps resume state spoiler safe', (
   assert.match(app, /'MAP ' \+ round\.map \+ ' · ROUND ' \+ round\.round/);
 });
 
+test('website keeps playback shortcuts available after interacting with provider frames', () => {
+  const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
+  assert.match(index, /id="player-shell" class="player-shell" tabindex="-1"/);
+  assert.match(app, /function reclaimPlayerFocus\(\)/);
+  assert.match(app, /document\.activeElement\?\.tagName === 'IFRAME'/);
+  assert.match(app, /addEventListener\('blur', reclaimPlayerFocus\)/);
+  assert.match(app, /event\.code === 'Space'/);
+  assert.doesNotMatch(styles, /twitch-timeline-hidden #media-player iframe[^}]+pointer-events: none/);
+});
+
 test('website uses the SPOILLESS public identity', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
   const source = [index, ...['privacy.html', 'terms.html', 'app.js']

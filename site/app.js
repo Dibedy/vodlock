@@ -154,13 +154,6 @@
     return [];
   }
 
-  function teamCode(team) {
-    const compact = team.replace(/[^A-Za-z0-9]/g, '');
-    if (compact.length <= 4) return compact.toUpperCase();
-    const initials = team.split(/\s+/).map(part => part[0]).join('');
-    return (initials.length > 1 ? initials : compact.slice(0, 3)).toUpperCase();
-  }
-
   function entryKind(entry) {
     if (entry.kind === 'match' || entry.kind === 'watch-party') return entry.kind;
     return entry.label === 'Full match' || matchup({title: entry.title, event: ''}).length === 2 ? 'match' : 'watch-party';
@@ -169,14 +162,6 @@
   function displayEvent(entry) {
     return entry.event.split('|').map(part => part.trim()).filter(part => part && !part.startsWith('!'))
       .map(part => part.replace(/\s*#\S+/g, '').trim()).filter(Boolean).join(' · ');
-  }
-
-  function teamMark(team) {
-    const mark = document.createElement('span');
-    mark.className = 'team-mark';
-    mark.textContent = teamCode(team);
-    mark.setAttribute('aria-hidden', 'true');
-    return mark;
   }
 
   function renderFilters() {
@@ -193,7 +178,7 @@
       const button = document.createElement('button');
       button.type = 'button';
       button.dataset.team = team;
-      button.append(teamMark(team), document.createTextNode(team));
+      button.textContent = team;
       host.append(button);
     }
     for (const button of host.querySelectorAll('button')) {
@@ -214,46 +199,38 @@
     const kind = entryKind(entry);
     const teams = matchup(entry);
     const card = document.createElement('article');
-    card.className = 'vod-card ' + kind;
-    const top = document.createElement('div');
-    top.className = 'card-top';
+    card.className = 'vod-row ' + kind;
     const source = document.createElement('span');
     source.className = 'source-label ' + entry.provider;
     source.textContent = entry.provider === 'youtube' ? 'YouTube' : 'Twitch';
-    const format = document.createElement('span');
-    format.textContent = kind === 'match' ? 'Official match' : 'Watch party';
-    top.append(source, format);
     const body = document.createElement('div');
-    body.className = 'card-body';
-    if (teams.length === 2) {
-      const matchupRow = document.createElement('div');
-      matchupRow.className = 'card-matchup';
-      for (const [index, team] of teams.entries()) {
-        if (index) {
-          const versus = document.createElement('span');
-          versus.className = 'versus';
-          versus.textContent = 'VS';
-          matchupRow.append(versus);
-        }
-        const teamNode = document.createElement('div');
-        teamNode.append(teamMark(team));
-        const name = document.createElement('strong');
-        name.textContent = team;
-        teamNode.append(name);
-        matchupRow.append(teamNode);
-      }
-      body.append(matchupRow);
-    }
+    body.className = 'row-body';
     const title = document.createElement('h3');
-    title.textContent = kind === 'watch-party' ? entry.title.replace(/^EG\s+/i, '') + ' watch party' : entry.title;
+    if (teams.length === 2) {
+      const first = document.createElement('strong');
+      first.textContent = teams[0];
+      const versus = document.createElement('span');
+      versus.textContent = 'vs';
+      const second = document.createElement('strong');
+      second.textContent = teams[1];
+      title.append(first, versus, second);
+    } else {
+      title.textContent = entry.title;
+    }
     const event = document.createElement('p');
-    event.textContent = displayEvent(entry);
+    const creator = kind === 'watch-party' ? entry.title.replace(/^EG\s+/i, '') + ' watch party · ' : '';
+    let eventText = displayEvent(entry);
+    if (kind === 'watch-party' && teams.length === 2) {
+      const matchupPrefix = teams[0] + ' vs ' + teams[1] + ' · ';
+      if (eventText.startsWith(matchupPrefix)) eventText = eventText.slice(matchupPrefix.length);
+    }
+    event.textContent = creator + eventText;
     body.append(title, event);
     const watch = document.createElement('button');
     watch.type = 'button';
-    watch.textContent = entry.chat ? 'Watch with chat' : 'Watch match';
+    watch.textContent = entry.chat ? 'Watch + chat' : 'Watch';
     watch.addEventListener('click', () => openVideo(entryKey(entry)));
-    card.append(top, body, watch);
+    card.append(source, body, watch);
     return card;
   }
 
@@ -272,7 +249,7 @@
       const title = document.createElement('h3');
       title.textContent = heading;
       const detail = document.createElement('span');
-      detail.textContent = kind === 'match' ? 'Full match uploads' : 'Creator VODs with archived chat';
+      detail.textContent = kind === 'match' ? 'YouTube and official broadcasts' : 'FNS and Ohnepixel';
       groupHeading.append(title, detail);
       const grid = document.createElement('div');
       grid.className = 'catalog-grid';

@@ -17,33 +17,29 @@
       <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 4h10M4 4v10M28 4H18M28 4v10M4 28h10M4 28V18M28 28H18M28 28V18"/><path d="M12 12h8v8h-8z"/></svg>
       <span>VODLOCK</span>
     </button>
-    <div class="top-actions">
-      <span class="top-status"><i></i> VALORANT VOD LIBRARY</span>
-      <button id="settings-button" class="settings-button" type="button">Settings</button>
-    </div>
+    <button id="settings-button" class="settings-button" type="button">Settings</button>
   </header>
   <main>
     <section id="library-view" class="library-view">
-      <div class="hero">
-        <span class="eyebrow">VALORANT MATCH ARCHIVE</span>
-        <h1>Watch the match.<br><em>Skip the downtime.</em></h1>
-        <p>Official full matches from YouTube and creator watch parties from Twitch, indexed by round and map. Twitch watch parties include archived chat. The interface keeps match results out of view for spoiler-safe watching.</p>
+      <div class="library-heading">
+        <h1>Match archive</h1>
+        <p>Official full matches and creator watch parties. Spoiler-safe controls jump between rounds and maps.</p>
       </div>
       <form id="video-search" class="search-card">
-        <label for="video-url">Open a VOD link</label>
+        <label for="video-url">Already have a link?</label>
         <div class="search-row">
           <input id="video-url" type="text" inputmode="url" autocomplete="off" placeholder="Paste a YouTube or Twitch VOD link">
-          <button type="submit">Open</button>
+          <button type="submit">Find VOD</button>
         </div>
         <p id="search-message" class="search-message" role="status"></p>
       </form>
       <section class="catalog-section" aria-labelledby="catalog-title">
         <div class="section-heading">
-          <div><span class="eyebrow">LIBRARY</span><h2 id="catalog-title">Matches and watch parties</h2></div>
+          <h2 id="catalog-title">All VODs</h2>
         </div>
         <div class="filter-panel" aria-label="Library filters">
           <div class="filter-block">
-            <span class="filter-label">View</span>
+            <span class="filter-label">Type</span>
             <div id="kind-filters" class="kind-filters">
               <button type="button" data-kind="all" aria-pressed="true">All VODs</button>
               <button type="button" data-kind="match" aria-pressed="false">Official matches</button>

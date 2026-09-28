@@ -3,7 +3,15 @@ import statistics
 from dataclasses import dataclass
 
 
-DETECTOR_VERSION = "vct-clock-ocr-v6"
+DETECTOR_VERSION = "vct-clock-ocr-v7"
+HUD_PROFILES = (
+    {"label": (0, .026, .46, .54), "clock": (.026, .065, .465, .535),
+     "top": (0, .034, .445, .555), "wide": (0, .09, .43, .57), "score_top": .053},
+    {"label": (.006, .036, .45, .55), "clock": (.036, .078, .46, .54),
+     "top": (.006, .046, .435, .565), "wide": (0, .105, .42, .58), "score_top": .064},
+    {"label": (.012, .046, .44, .56), "clock": (.046, .09, .455, .545),
+     "top": (.012, .058, .425, .575), "wide": (0, .12, .41, .59), "score_top": .076},
+)
 
 
 @dataclass
@@ -111,25 +119,30 @@ class HudReader:
             return [(text, float(score)) for text, score in result or []]
         return [(text, float(score)) for _, text, score in result or []]
 
-    def read(self, frame, time):
+    def crop(self, frame, bounds):
         height, width = frame.shape[:2]
-        label = frame[:int(height * 0.026), int(width * 0.46):int(width * 0.54)]
-        clock = frame[int(height * 0.026):int(height * 0.065), int(width * 0.465):int(width * 0.535)]
+        top, bottom, left, right = bounds
+        return frame[int(height * top):int(height * bottom), int(width * left):int(width * right)]
+
+    def read_profile(self, frame, time, profile):
+        height, width = frame.shape[:2]
+        label = self.crop(frame, profile["label"])
+        clock = self.crop(frame, profile["clock"])
         clock_lines = self.read_lines(clock, single=True)
         lines = self.read_lines(label, single=True, scale=4) + clock_lines
         sample = parse_hud(time, lines)
         if sample.timer is not None and 85 <= sample.timer <= 100:
-            top = frame[:int(height * 0.034), int(width * 0.445):int(width * 0.555)]
+            top = self.crop(frame, profile["top"])
             top_lines = self.read_lines(top, scale=4)
             if parse_hud(time, top_lines).round is None:
-                top = frame[:int(height * 0.09), int(width * 0.43):int(width * 0.57)]
+                top = self.crop(frame, profile["wide"])
                 top_lines = self.read_lines(top)
             if parse_hud(time, top_lines).round is not None:
                 lines = top_lines + clock_lines
                 sample = parse_hud(time, lines)
             scores = []
             for left, right in [(0.417, 0.44), (0.56, 0.583)]:
-                score = frame[:int(height * 0.053), int(width * left):int(width * right)]
+                score = frame[:int(height * profile["score_top"]), int(frame.shape[1] * left):int(frame.shape[1] * right)]
                 result = self.read_lines(score, single=True, scale=3)
                 if len(result) != 1 or result[0][1] < 0.95 or not re.fullmatch(r"[0-9]{1,2}", result[0][0].strip()):
                     break
@@ -142,3 +155,13 @@ class HudReader:
         replay = frame[int(height * 0.84):, int(width * 0.73):]
         sample.replay = parse_hud(time, (), self.read_lines(replay)).replay
         return sample
+
+    def read(self, frame, time):
+        best = None
+        for profile in HUD_PROFILES:
+            sample = self.read_profile(frame, time, profile)
+            if best is None or sample.confidence > best.confidence:
+                best = sample
+            if sample.round is not None and sample.timer is not None:
+                return sample
+        return best

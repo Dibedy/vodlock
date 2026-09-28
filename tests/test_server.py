@@ -45,6 +45,21 @@ class ServerTests(unittest.TestCase):
     def test_analysis_copy_limit_allows_long_twitch_archives(self):
         self.assertEqual(server.ANALYSIS_MAX_BYTES, 8 * 1024 ** 3)
 
+    def test_analysis_copy_limit_preserves_free_disk_and_honors_hosted_cap(self):
+        usage = SimpleNamespace(free=10 * 1024 ** 3)
+        with patch.object(server.shutil, "disk_usage", return_value=usage), \
+                patch.dict(server.os.environ, {"VODLOCK_ANALYSIS_MAX_GB": "5"}):
+            self.assertEqual(server.analysis_download_limit(Path(".")), 5 * 1024 ** 3)
+        usage = SimpleNamespace(free=4 * 1024 ** 3)
+        with patch.object(server.shutil, "disk_usage", return_value=usage), patch.dict(server.os.environ, {}, clear=True):
+            self.assertEqual(server.analysis_download_limit(Path(".")), 2 * 1024 ** 3)
+
+    def test_analysis_copy_refuses_to_consume_disk_reserve(self):
+        usage = SimpleNamespace(free=server.ANALYSIS_RESERVE_BYTES + server.MINIMUM_ANALYSIS_BYTES - 1)
+        with patch.object(server.shutil, "disk_usage", return_value=usage):
+            with self.assertRaises(server.AnalysisSizeLimitError):
+                server.analysis_download_limit(Path("."))
+
     def test_twitch_vod_link_validation(self):
         self.assertEqual(server.twitch_video_id("https://www.twitch.tv/videos/1234567890"), "1234567890")
         for link in ["https://www.twitch.tv/gofns", "https://twitch.tv/directory", "http://twitch.tv/videos/1234567890"]:
@@ -91,6 +106,33 @@ class ServerTests(unittest.TestCase):
             self.assertIn("height<=540", attempts[1])
             self.assertFalse((work / "source.mp4.part").exists())
             self.assertIn("trying another", job["message"])
+
+    def test_remote_stream_resolution_does_not_download_the_archive(self):
+        calls = []
+
+        class DownloadError(Exception):
+            pass
+
+        class YoutubeDL:
+            def __init__(self, options):
+                self.options = dict(options)
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                pass
+
+            def extract_info(self, url, download):
+                calls.append((url, download, self.options["format"]))
+                return {"url": "https://media.example/video.m3u8", "duration": 7200,
+                        "http_headers": {"User-Agent": "test"}}
+
+        yt_dlp = SimpleNamespace(YoutubeDL=YoutubeDL, utils=SimpleNamespace(DownloadError=DownloadError))
+        result = server.resolve_remote({"kind": "twitch", "twitchVideoId": "1234567890"}, yt_dlp)
+        self.assertEqual(result["url"], "https://media.example/video.m3u8")
+        self.assertEqual(result["duration"], 7200)
+        self.assertEqual(calls[0][1], False)
 
     def test_youtube_hosted_worker_tries_supported_player_clients(self):
         identifier = "e" * 32

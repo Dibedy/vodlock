@@ -43,6 +43,15 @@ class DetectorTests(unittest.TestCase):
             sample = reader.read(np.zeros((720, 1280, 3), dtype=np.uint8), 4676)
         self.assertEqual((sample.round, sample.timer), (16, 96))
 
+    def test_reader_uses_an_alternate_hud_profile_when_primary_is_unreadable(self):
+        reader = HudReader.__new__(HudReader)
+        unreadable = Observation(10, None, None)
+        readable = Observation(10, 1, 99, .98)
+        with patch.object(reader, "read_profile", side_effect=[unreadable, readable]) as profiles:
+            sample = reader.read(np.zeros((720, 1280, 3), dtype=np.uint8), 10)
+        self.assertIs(sample, readable)
+        self.assertEqual(profiles.call_count, 2)
+
     def test_explicit_replay_is_rejected(self):
         sample = parse_hud(10, [("ROUND 16", .95), ("1:39", .98)], [("REPLAY", .9)])
         detector = RoundDetector()

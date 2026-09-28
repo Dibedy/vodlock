@@ -128,10 +128,16 @@ test('website library supports source and automatically derived team filters', (
 });
 
 test('website uses the SPOILLESS public identity', () => {
-  const source = ['index.html', 'privacy.html', 'terms.html', 'app.js']
-    .map(file => readFileSync(resolve(__dirname, '../site/' + file), 'utf8')).join('\n');
+  const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  const source = [index, ...['privacy.html', 'terms.html', 'app.js']
+    .map(file => readFileSync(resolve(__dirname, '../site/' + file), 'utf8'))].join('\n');
+  const vercel = readFileSync(resolve(__dirname, '../site/vercel.json'), 'utf8');
   assert.match(source, /SPOILLESS/);
   assert.doesNotMatch(source, /VODLOCK/);
+  assert.match(vercel, /spoilless\.vercel\.app/);
+  assert.doesNotMatch(vercel, /vodlock\.vercel\.app/);
+  const header = index.match(/<header[\s\S]*?<\/header>/)?.[0] || '';
+  assert.doesNotMatch(header, /<svg/);
 });
 
 test('website avoids the prohibited design and copy patterns', () => {

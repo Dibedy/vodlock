@@ -1,5 +1,6 @@
 indexer/.venv/
 indexer/data/
+indexer/diagnostics/
 indexer/__pycache__/
 tests/__pycache__/
 *.pyc

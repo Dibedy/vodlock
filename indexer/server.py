@@ -24,10 +24,32 @@ CANCEL = threading.Event()
 JOBS = {}
 ACTIVE = None
 ANALYSIS_MAX_BYTES = 8 * 1024 ** 3
+ANALYSIS_RESERVE_BYTES = 2 * 1024 ** 3
+MINIMUM_ANALYSIS_BYTES = 512 * 1024 ** 2
+INITIAL_DENSE_SAMPLE_SECONDS = 15 * 60
 
 
 class AnalysisSizeLimitError(ValueError):
     pass
+
+
+def analysis_download_limit(work):
+    configured = os.environ.get("VODLOCK_ANALYSIS_MAX_GB", "")
+    maximum = ANALYSIS_MAX_BYTES
+    if configured:
+        try:
+            maximum = min(maximum, int(float(configured) * 1024 ** 3))
+        except (TypeError, ValueError, OverflowError):
+            raise ValueError("VODLOCK_ANALYSIS_MAX_GB must be a positive number.")
+    available = shutil.disk_usage(work).free - ANALYSIS_RESERVE_BYTES
+    limit = min(maximum, available)
+    if maximum <= 0 or limit < MINIMUM_ANALYSIS_BYTES:
+        raise AnalysisSizeLimitError("Not enough free disk space remains for a safe analysis copy.")
+    return limit
+
+
+def size_limit_message(max_bytes):
+    return f"The selected analysis copy was not downloaded. It may exceed the {max_bytes / 1024 ** 3:g} GB limit."
 
 
 def video_id(value):
@@ -82,7 +104,7 @@ def check_cancel():
         raise InterruptedError("Indexing cancelled. Your original video has not been changed.")
 
 
-def download_remote(job, work, hook, yt_dlp):
+def remote_formats(job):
     formats = [("bestvideo[height<=720]/best[height<=720]", None),
                ("bestvideo[height<=540]/best[height<=540]", None),
                ("bestvideo[height<=360]/best[height<=360]", None)]
@@ -93,12 +115,52 @@ def download_remote(job, work, hook, yt_dlp):
                    ("bestvideo[height<=720]/best[height<=720]", "mweb"),
                    ("bestvideo[height<=720][protocol=m3u8_native]/best[height<=720][protocol=m3u8_native]", "web_safari"),
                    ("bestvideo[height<=720]/best[height<=720]", "web_embedded")]
+    return formats
+
+
+def remote_url(job):
+    if job.get("kind", "youtube") == "youtube":
+        return "https://www.youtube.com/watch?v=" + job["videoId"]
+    return "https://www.twitch.tv/videos/" + job["twitchVideoId"]
+
+
+def resolve_remote(job, yt_dlp):
+    options = {"noplaylist": True, "quiet": True, "no_warnings": False, "socket_timeout": 20, "retries": 2}
+    if shutil.which("node"):
+        options["js_runtimes"] = {"node": {"path": shutil.which("node")}}
+    last_error = None
+    for format_selector, player_client in remote_formats(job):
+        options["format"] = format_selector
+        if player_client:
+            options["extractor_args"] = {"youtube": {"player_client": [player_client]}}
+        else:
+            options.pop("extractor_args", None)
+        try:
+            with yt_dlp.YoutubeDL(options) as downloader:
+                info = downloader.extract_info(remote_url(job), download=False)
+            media_url = info.get("url")
+            if not media_url:
+                raise yt_dlp.utils.DownloadError("The video service did not return a playable media URL")
+            duration = float(info.get("duration", 0))
+            if not math.isfinite(duration) or duration <= 0:
+                raise yt_dlp.utils.DownloadError("The video service did not return a valid duration")
+            headers = {str(key): str(value) for key, value in info.get("http_headers", {}).items()
+                       if "\r" not in str(key) + str(value) and "\n" not in str(key) + str(value)}
+            return {"url": media_url, "duration": duration, "headers": headers}
+        except yt_dlp.utils.DownloadError as error:
+            last_error = error
+    raise last_error
+
+
+def download_remote(job, work, hook, yt_dlp, max_bytes=None):
+    max_bytes = max_bytes or analysis_download_limit(work)
     options = {"noplaylist": True, "outtmpl": str(work / "source.%(ext)s"), "quiet": True,
-               "no_warnings": False, "noprogress": True, "progress_hooks": [hook], "max_filesize": ANALYSIS_MAX_BYTES,
+               "no_warnings": False, "noprogress": True, "progress_hooks": [hook], "max_filesize": max_bytes,
                "socket_timeout": 20, "retries": 2, "concurrent_fragment_downloads": 8}
     if shutil.which("node"):
         options["js_runtimes"] = {"node": {"path": shutil.which("node")}}
     last_error = None
+    formats = remote_formats(job)
     for attempt, (format_selector, player_client) in enumerate(formats):
         options["format"] = format_selector
         if player_client:
@@ -107,16 +169,15 @@ def download_remote(job, work, hook, yt_dlp):
             options.pop("extractor_args", None)
         try:
             with yt_dlp.YoutubeDL(options) as downloader:
-                source_url = "https://www.youtube.com/watch?v=" + job["videoId"] if job.get("kind", "youtube") == "youtube" else "https://www.twitch.tv/videos/" + job["twitchVideoId"]
-                info = downloader.extract_info(source_url, download=True)
+                info = downloader.extract_info(remote_url(job), download=True)
                 source = Path(downloader.prepare_filename(info))
                 if not source.is_file():
-                    raise AnalysisSizeLimitError("The selected analysis copy was not downloaded. It may exceed the 8 GB limit.")
+                    raise AnalysisSizeLimitError(size_limit_message(max_bytes))
                 return source
         except (yt_dlp.utils.DownloadError, AnalysisSizeLimitError) as error:
             last_error = error
             for path in work.glob("source.*"):
-                path.unlink()
+                path.unlink(missing_ok=True)
             if attempt + 1 < len(formats):
                 update(job["id"], message="The video service rejected one playback client · trying another", progress=0)
     raise last_error
@@ -137,22 +198,28 @@ def index_job(identifier):
         job = JOBS[identifier]
         work = DATA / identifier
         work.mkdir(exist_ok=True)
-        if job["kind"] in {"youtube", "twitch"}:
+        remote = None
+        if job["kind"] in {"youtube", "twitch"} and job.get("streamAnalysis"):
+            update(identifier, status="downloading", message="Opening the remote analysis stream · your viewing player is untouched", progress=0)
+            remote = resolve_remote(job, yt_dlp)
+            source = remote["url"]
+        elif job["kind"] in {"youtube", "twitch"}:
             update(identifier, status="downloading", message="Downloading an analysis copy · your viewing player is untouched", progress=0)
+            max_bytes = analysis_download_limit(work)
 
             def hook(event):
                 check_cancel()
                 if event["status"] == "downloading":
-                    if event.get("downloaded_bytes", 0) > ANALYSIS_MAX_BYTES:
-                        raise AnalysisSizeLimitError("The analysis copy exceeded the 8 GB limit.")
+                    if event.get("downloaded_bytes", 0) > max_bytes:
+                        raise AnalysisSizeLimitError(size_limit_message(max_bytes))
                     total = event.get("total_bytes") or event.get("total_bytes_estimate")
                     percent = min(35, int(event.get("downloaded_bytes", 0) / total * 35)) if total else 0
                     with LOCK:
                         job["progress"] = percent
 
-            source = download_remote(job, work, hook, yt_dlp)
+            source = download_remote(job, work, hook, yt_dlp, max_bytes)
             if not source.is_file():
-                raise ValueError("The analysis video was not downloaded. It may exceed the 8 GB limit or need sign-in. Use a local copy instead.")
+                raise ValueError(size_limit_message(max_bytes) + " It may also need sign-in. Use a local copy instead.")
         else:
             source = Path(job["source"])
         check_cancel()
@@ -161,15 +228,23 @@ def index_job(identifier):
         detector = RoundDetector()
         fingerprint_interval = int(job.get("fingerprintInterval", 0))
         fingerprints = []
-        capture = cv2.VideoCapture(str(source))
-        duration = capture.get(cv2.CAP_PROP_FRAME_COUNT) / max(1, capture.get(cv2.CAP_PROP_FPS))
-        opened = capture.isOpened()
-        capture.release()
-        if not opened or not math.isfinite(duration) or duration <= 0:
-            raise ValueError("Could not read this video. Try an MP4, MKV or WebM recording.")
-        command = [imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error", "-i", str(source),
-                   "-an", "-vf", "fps=fps=1/2:start_time=0:round=up,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2",
-                   "-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:1"]
+        diagnostic_directory = work / "diagnostics"
+        diagnostic_count = 0
+        if remote:
+            duration = remote["duration"]
+        else:
+            capture = cv2.VideoCapture(str(source))
+            duration = capture.get(cv2.CAP_PROP_FRAME_COUNT) / max(1, capture.get(cv2.CAP_PROP_FPS))
+            opened = capture.isOpened()
+            capture.release()
+            if not opened or not math.isfinite(duration) or duration <= 0:
+                raise ValueError("Could not read this video. Try an MP4, MKV or WebM recording.")
+        command = [imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error"]
+        if remote and remote["headers"]:
+            command.extend(["-headers", "".join(f"{key}: {value}\r\n" for key, value in remote["headers"].items())])
+        command.extend(["-i", str(source),
+                   "-an", "-vf", "fps=fps=1:start_time=0:round=up,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2",
+                   "-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:1"])
         error_path = work / "ffmpeg.log"
         with error_path.open("wb") as error_log:
             process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=error_log,
@@ -189,12 +264,22 @@ def index_job(identifier):
                 if len(chunk) != frame_size:
                     raise ValueError("Video decoding stopped in the middle of a frame.")
                 frame = np.frombuffer(chunk, dtype=np.uint8).reshape(720, 1280, 3)
-                if fingerprint_interval and frame_number * 2 % fingerprint_interval == 0:
-                    fingerprints.append({"time": frame_number * 2, "hash": frame_hash(frame)})
-                detector.observe(reader.read(frame, frame_number * 2))
+                sample_time = frame_number
+                if fingerprint_interval and sample_time % fingerprint_interval == 0:
+                    fingerprints.append({"time": sample_time, "hash": frame_hash(frame)})
+                if sample_time < INITIAL_DENSE_SAMPLE_SECONDS or sample_time % 2 == 0:
+                    sample = reader.read(frame, sample_time)
+                    detector.observe(sample)
+                    diagnostic_candidate = (sample.round is None) != (sample.timer is None)
+                    periodic_candidate = sample_time in {5, 305, 605, 905}
+                    if diagnostic_count < 6 and (diagnostic_candidate or periodic_candidate):
+                        diagnostic_directory.mkdir(exist_ok=True)
+                        diagnostic = frame[:int(frame.shape[0] * .2)]
+                        if cv2.imwrite(str(diagnostic_directory / f"hud-{sample_time:05d}.jpg"), diagnostic):
+                            diagnostic_count += 1
                 frame_number += 1
                 with LOCK:
-                    job["progress"] = min(98, 35 + int(frame_number * 2 / duration * 63))
+                    job["progress"] = min(98, 35 + int(frame_number / duration * 63))
             return_code = process.wait()
         if return_code:
             raise ValueError("FFmpeg could not finish reading the video: " + error_path.read_text(errors="replace")[-400:])

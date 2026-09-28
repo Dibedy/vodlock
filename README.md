@@ -31,9 +31,9 @@ The detector is experimental. It reads the VCT top-centre `ROUND` label and coun
 
 Different HUDs, low-resolution text, camera cuts, covered timers or late returns from replays can cause missed detections. Detected gaps are flagged for review, and SPOILLESS refuses a forward round jump across a known gap within one map. Gaps at the end of a recording cannot reliably be identified. This is not a claim of equivalent accuracy to vods.space. Review a new broadcast before relying on its index.
 
-Analysis reads one frame every two seconds. A full match can take several minutes or longer depending on CPU and video download speed. That cost is paid once; indexed navigation performs one direct seek with no gameplay search. Unindexed videos retain the existing long-break search as a fallback.
+Analysis reads one frame per second during the first fifteen minutes, then one frame every two seconds. A full match can take several minutes or longer depending on CPU and video download speed. That cost is paid once; indexed navigation performs one direct seek with no gameplay search. Unindexed videos retain the existing long-break search as a fallback.
 
-YouTube downloads require a public video accessible without cookies. Restricted or blocked downloads fail visibly; use an authorized local recording instead. Downloads are capped at 720p and 2 GB. YouTube may change its delivery system, so downloader compatibility can change.
+YouTube downloads require a public video accessible without cookies. Restricted or blocked downloads fail visibly; use an authorized local recording instead. Analysis copies are capped at 720p and preserve at least 2 GB of free disk space; hosted automation uses a 5 GB file cap and Round Studio allows up to 8 GB when space permits. YouTube may change its delivery system, so downloader compatibility can change.
 
 ## Privacy and files
 

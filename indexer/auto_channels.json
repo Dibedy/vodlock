@@ -2,6 +2,7 @@
   "version": 1,
   "lookback": 30,
   "maxPerRun": 4,
+  "maxPerChannelPerRun": 2,
   "retryHours": 6,
   "youtubeRetryHours": 0.5,
   "alignmentLookback": 8,
@@ -12,31 +13,41 @@
       "provider": "twitch",
       "name": "FNS on Twitch",
       "login": "gofns",
+      "priority": 2,
+      "requireMatchup": true,
       "includeTitle": ".+",
       "excludeTitle": "\\b(JUST CHATTING|WATCH PARTY WITHOUT VALORANT)\\b",
-      "minimumDuration": 3600
+      "minimumDuration": 3600,
+      "maximumDuration": 43200
     },
     {
       "provider": "twitch",
       "name": "VALORANT on Twitch",
       "login": "valorant",
+      "priority": 0,
+      "requireMatchup": true,
       "alignmentSource": true,
       "includeTitle": ".+",
       "excludeTitle": "\\b(RERUN|REBROADCAST)\\b",
-      "minimumDuration": 3600
+      "minimumDuration": 3600,
+      "maximumDuration": 43200
     },
     {
       "provider": "twitch",
       "name": "Ohnepixel on Twitch",
       "login": "ohnepixel",
+      "priority": 3,
+      "requireMatchup": true,
       "includeTitle": "\\b(VALORANT|VCT|CHAMPIONS|SHANGHAI)\\b",
-      "excludeTitle": "\\b(RERUN|REBROADCAST)\\b",
-      "minimumDuration": 3600
+      "excludeTitle": "\\b(RERUN|REBROADCAST|PREP|TOURNEY)\\b",
+      "minimumDuration": 3600,
+      "maximumDuration": 36000
     },
     {
       "provider": "youtube",
       "name": "VALORANT Champions Tour",
       "channelId": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "priority": 1,
       "includeTitle": "\\bFULL MATCH\\b",
       "excludeTitle": "\\b(HIGHLIGHTS|SHOWMATCH)\\b",
       "minimumDuration": 3600

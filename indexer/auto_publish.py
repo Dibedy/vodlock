@@ -22,6 +22,8 @@ SITE = ROOT / "site"
 CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
+DIAGNOSTICS = Path(__file__).with_name("diagnostics")
+PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION
 
 
 def read_json(path):
@@ -34,12 +36,40 @@ def write_json(path, value):
     temporary.replace(path)
 
 
+def preserve_diagnostics(provider, identifier, work):
+    source = work / "diagnostics"
+    if not source.is_dir():
+        return
+    DIAGNOSTICS.mkdir(exist_ok=True)
+    destination = DIAGNOSTICS / f"{provider}-{identifier}"
+    shutil.rmtree(destination, ignore_errors=True)
+    shutil.copytree(source, destination)
+
+
 def clean_text(value):
     return re.sub(r"\s+", " ", str(value).replace("—", "-").replace("–", "-")).strip()
 
 
 def source_key(provider, identifier):
     return f"{provider}:{identifier}"
+
+
+def retry_class(message):
+    permanent = (
+        "No reliable round starts were found",
+        "The first detected round is not round 1",
+        "The index does not begin at map 1 round 1",
+        "The detected round sequence contains a gap",
+        "At least one round is below the automatic confidence threshold",
+        "The aligned match does not begin at map 1 round 1",
+        "The translated round sequence contains a gap",
+        "More than one official broadcast matches this YouTube full match",
+    )
+    if any(reason.lower() in str(message).lower() for reason in permanent):
+        return "pipeline-update"
+    if re.search(r"Only \d+ rounds were detected", str(message), re.IGNORECASE):
+        return "pipeline-update"
+    return "cooldown"
 
 
 def should_attempt(key, published, state, retry_hours, now):
@@ -50,8 +80,13 @@ def should_attempt(key, published, state, retry_hours, now):
         return True
     if previous.get("status") == "published":
         return True
-    if previous.get("detectorVersion") != DETECTOR_VERSION:
+    previous_version = previous.get("pipelineVersion")
+    if previous_version and previous_version != PIPELINE_VERSION:
         return True
+    if not previous_version and previous.get("detectorVersion") != DETECTOR_VERSION:
+        return True
+    if previous.get("retryClass", retry_class(previous.get("message", ""))) == "pipeline-update":
+        return False
     checked = datetime.fromisoformat(previous["checkedAt"])
     return (now - checked).total_seconds() >= retry_hours * 3600
 
@@ -88,7 +123,12 @@ def is_twitch_candidate(channel, entry, live_stream_ids):
         return False
     if str(entry.get("stream_id", "")) in live_stream_ids:
         return False
-    if twitch_duration(entry.get("duration")) < channel["minimumDuration"]:
+    duration = twitch_duration(entry.get("duration"))
+    if duration < channel["minimumDuration"]:
+        return False
+    if channel.get("maximumDuration") and duration > channel["maximumDuration"]:
+        return False
+    if channel.get("requireMatchup") and not re.search(r"\b[A-Z0-9][A-Z0-9 ._-]{0,24}\s+vs\.?\s+[A-Z0-9][A-Z0-9 ._-]{0,24}\b", title, re.IGNORECASE):
         return False
     if not re.search(channel["includeTitle"], title, re.IGNORECASE):
         return False
@@ -238,6 +278,8 @@ def process(channel, entry, config, state=None, yt_dlp=None):
     job = {"id": identifier, "label": title, "kind": provider, "status": "queued", "progress": 0,
            "message": "Preparing the automatic index", "rounds": [], "warnings": [],
            "created": datetime.now(timezone.utc).timestamp()}
+    if os.environ.get("VODLOCK_STREAM_ANALYSIS") == "1":
+        job["streamAnalysis"] = True
     if provider == "twitch" and channel.get("alignmentSource"):
         job["fingerprintInterval"] = 2
     if provider == "youtube":
@@ -259,6 +301,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             server.index_job(identifier)
             accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
             if not accepted:
+                preserve_diagnostics(provider, entry["id"], server.DATA / identifier)
                 return False, reason
             if provider == "twitch" and channel.get("alignmentSource"):
                 save_storyboard(storyboard_path("twitch", entry["id"]),
@@ -314,19 +357,22 @@ def main():
     except ImportError as error:
         raise SystemExit("Install indexer requirements before running automatic publishing") from error
     candidates = []
+    per_channel = max(1, int(config.get("maxPerChannelPerRun", 2)))
     youtube_channels = [channel for channel in config["channels"] if channel["provider"] == "youtube"]
     twitch_channels = [channel for channel in config["channels"] if channel["provider"] == "twitch"]
-    for channel in youtube_channels:
+    for channel_index, channel in enumerate(youtube_channels):
         try:
             entries = discover_youtube(channel, config["lookback"], yt_dlp)
         except Exception as error:
             print(f"YouTube discovery failed for {channel['name']}: {error}", file=sys.stderr, flush=True)
             continue
-        entry = next((item for item in entries
-                      if should_attempt(source_key("youtube", item["id"]), published_ids, state["videos"],
-                                        config.get("youtubeRetryHours", 0.5), now)), None)
-        if entry:
-            candidates.append((1, channel, entry))
+        eligible = [item for item in entries
+                    if should_attempt(source_key("youtube", item["id"]), published_ids, state["videos"],
+                                      config.get("youtubeRetryHours", 0.5), now)]
+        for entry_index, entry in enumerate(eligible[:per_channel]):
+            key = source_key("youtube", entry["id"])
+            candidates.append((1 if key in state["videos"] else 0, channel.get("priority", 1),
+                               channel_index, entry_index, channel, entry))
     twitch_results = {}
     if twitch_channels:
         client_id = os.environ.get("TWITCH_CLIENT_ID", "")
@@ -338,14 +384,16 @@ def main():
                 print(f"Twitch discovery failed: {error}", file=sys.stderr, flush=True)
         else:
             print("Twitch discovery skipped: set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET", file=sys.stderr)
-    for channel in twitch_channels:
-        entry = next((item for item in twitch_results.get(channel["login"], [])
-                      if should_attempt(source_key("twitch", item["id"]), published_ids, state["videos"],
-                                        config.get("retryHours", 6), now)), None)
-        if entry:
-            candidates.append((0, channel, entry))
-    candidates.sort(key=lambda item: item[0])
-    candidates = [(channel, entry) for _, channel, entry in candidates[:config["maxPerRun"]]]
+    for channel_index, channel in enumerate(twitch_channels):
+        eligible = [item for item in twitch_results.get(channel["login"], [])
+                    if should_attempt(source_key("twitch", item["id"]), published_ids, state["videos"],
+                                      config.get("retryHours", 6), now)]
+        for entry_index, entry in enumerate(eligible[:per_channel]):
+            key = source_key("twitch", entry["id"])
+            candidates.append((1 if key in state["videos"] else 0, channel.get("priority", 0),
+                               channel_index, entry_index, channel, entry))
+    candidates.sort(key=lambda item: item[:4])
+    candidates = [(channel, entry) for *_, channel, entry in candidates[:config["maxPerRun"]]]
     if arguments.dry_run:
         for channel, entry in candidates:
             print(f"{channel['provider']}:{entry['id']} | {clean_text(entry['title'])} | {channel['name']}")
@@ -361,6 +409,8 @@ def main():
                                 "title": clean_text(entry["title"]), "message": clean_text(message),
                                 "publishedAt": entry.get("published") or entry.get("created_at"),
                                 "detectorVersion": DETECTOR_VERSION,
+                                "pipelineVersion": PIPELINE_VERSION,
+                                "retryClass": "none" if published else retry_class(message),
                                 "checkedAt": datetime.now(timezone.utc).isoformat()}
         write_json(STATE_PATH, state)
         print(f"{key}: {state['videos'][key]['status']} - {message}", flush=True)

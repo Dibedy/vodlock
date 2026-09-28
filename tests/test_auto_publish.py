@@ -1,5 +1,6 @@
 import sys
 import io
+import tempfile
 import unittest
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
@@ -45,6 +46,17 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(event, "VALORANT Champions Shanghai | Group Stage")
         self.assertNotIn("—", title + event)
 
+    def test_held_diagnostics_are_copied_out_of_the_temporary_job(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            work = root / "job"
+            source = work / "diagnostics"
+            source.mkdir(parents=True)
+            (source / "hud-00005.jpg").write_bytes(b"image")
+            with patch.object(auto_publish, "DIAGNOSTICS", root / "saved"):
+                auto_publish.preserve_diagnostics("twitch", "1234567890", work)
+            self.assertEqual((root / "saved" / "twitch-1234567890" / "hud-00005.jpg").read_bytes(), b"image")
+
     def test_twitch_duration_and_finished_archive_filter(self):
         channel = {"includeTitle": ".+", "excludeTitle": r"\bRERUN\b", "minimumDuration": 3600}
         valid = {"id": "1234567890", "stream_id": "777", "type": "archive",
@@ -54,6 +66,15 @@ class AutoPublishTests(unittest.TestCase):
         self.assertFalse(auto_publish.is_twitch_candidate(channel, valid, {"777"}))
         self.assertFalse(auto_publish.is_twitch_candidate(channel, {**valid, "type": "upload"}, set()))
         self.assertFalse(auto_publish.is_twitch_candidate(channel, {**valid, "duration": "59m59s"}, set()))
+
+    def test_twitch_discovery_can_require_a_matchup_and_limit_duration(self):
+        channel = {"includeTitle": r"\bVALORANT\b", "excludeTitle": r"\bPREP\b", "minimumDuration": 3600,
+                   "maximumDuration": 36000, "requireMatchup": True}
+        valid = {"id": "1234567890", "stream_id": "777", "type": "archive",
+                 "title": "LOUD vs EDG - VALORANT watch party", "duration": "6h"}
+        self.assertTrue(auto_publish.is_twitch_candidate(channel, valid, set()))
+        self.assertFalse(auto_publish.is_twitch_candidate(channel, {**valid, "title": "$50K VALORANT TOURNEY PREP"}, set()))
+        self.assertFalse(auto_publish.is_twitch_candidate(channel, {**valid, "duration": "11h"}, set()))
 
     def test_twitch_discovery_rejects_current_live_stream(self):
         channels = [{"name": "FNS", "login": "gofns", "includeTitle": ".+",
@@ -84,6 +105,31 @@ class AutoPublishTests(unittest.TestCase):
         self.assertTrue(auto_publish.should_attempt(key, set(), current, 6, now + timedelta(hours=6)))
         self.assertFalse(auto_publish.should_attempt(key, {key}, old, 6, now))
         self.assertTrue(auto_publish.should_attempt(key, set(), {key: {"status": "published"}}, 6, now))
+
+    def test_detector_holds_wait_for_a_pipeline_update(self):
+        now = datetime.now(timezone.utc)
+        key = "twitch:1234567890"
+        held = {key: {"status": "held", "message": "The first detected round is not round 1. Check the beginning of this recording.",
+                      "checkedAt": (now - timedelta(days=2)).isoformat(), "detectorVersion": auto_publish.DETECTOR_VERSION,
+                      "pipelineVersion": auto_publish.PIPELINE_VERSION, "retryClass": "pipeline-update"}}
+        self.assertFalse(auto_publish.should_attempt(key, set(), held, 6, now))
+        held[key]["pipelineVersion"] = "older"
+        self.assertTrue(auto_publish.should_attempt(key, set(), held, 6, now))
+
+    def test_two_new_youtube_matches_can_be_processed_in_one_run(self):
+        channel = {"provider": "youtube", "name": "YouTube", "priority": 1}
+        config = {"channels": [channel], "lookback": 30, "maxPerRun": 4, "maxPerChannelPerRun": 2}
+        state = {"videos": {}}
+        catalog = {"videos": []}
+        entries = [{"id": "abcdefghijk", "title": "A vs B - FULL MATCH"},
+                   {"id": "lmnopqrstuv", "title": "C vs D - FULL MATCH"}]
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, catalog]), \
+                patch.object(auto_publish, "discover_youtube", return_value=entries), \
+                patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \
+                patch.object(auto_publish, "write_json"), patch.object(sys, "argv", ["auto_publish.py"]), \
+                patch("sys.stdout", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["abcdefghijk", "lmnopqrstuv"])
 
     def test_automatic_publication_requires_complete_high_confidence_sequence(self):
         rounds = [{"map": 1, "round": number, "start": number * 100, "confidence": 0.9} for number in range(1, 14)]
@@ -118,7 +164,7 @@ class AutoPublishTests(unittest.TestCase):
                 patch.object(sys, "argv", ["auto_publish.py"]), \
                 patch("sys.stderr", new_callable=io.StringIO) as errors, patch("sys.stdout", new_callable=io.StringIO):
             self.assertEqual(auto_publish.main(), 0)
-        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["1234567890", "1234567891"])
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["1234567891", "1234567890"])
         self.assertEqual(state["videos"]["twitch:1234567890"]["status"], "published")
         self.assertIn("YouTube discovery failed", errors.getvalue())
 

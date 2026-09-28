@@ -1,6 +1,6 @@
 {
   "$schema": "https://openapi.vercel.sh/vercel.json",
-  "alias": ["vodlock.vercel.app"],
+  "alias": ["spoilless.vercel.app"],
   "cleanUrls": true,
   "headers": [
     {

@@ -11,8 +11,38 @@
     showChatTimestamps: 'setting-show-chat-timestamps',
     endScreenProtection: 'setting-end-screen-protection'
   };
-  const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, toastTimer: null, statusTimer: null, kindFilter: 'all', teamFilter: 'all'};
+  const teamLogos = {
+    GE: '/assets/teams/ge.png',
+    VIT: '/assets/teams/vit.png',
+    '100T': '/assets/teams/100t.png',
+    T1: '/assets/teams/t1.png',
+    NS: '/assets/teams/ns.png',
+    NRG: '/assets/teams/nrg.png',
+    JDG: '/assets/teams/jdg.png',
+    FUT: '/assets/teams/fut.png',
+    LOUD: '/assets/teams/loud.png',
+    EDG: '/assets/teams/edg.png'
+  };
+  const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', teamFilter: 'all'};
   let settings = readSettings();
+
+  function readResume() {
+    try {
+      const value = JSON.parse(localStorage.getItem('spoilless-resume') || 'null');
+      return value && typeof value.key === 'string' && Number.isFinite(value.time) && value.time >= 0 ? value : null;
+    } catch {
+      return null;
+    }
+  }
+
+  function saveResume(force = false) {
+    if (!state.entry || !state.ready) return;
+    const now = Date.now();
+    if (!force && now - state.lastResumeWrite < 4000) return;
+    state.lastResumeWrite = now;
+    state.resume = {key: entryKey(state.entry), time: Math.max(0, currentTime()), updatedAt: now};
+    try { localStorage.setItem('spoilless-resume', JSON.stringify(state.resume)); } catch {}
+  }
 
   function readSettings() {
     try {
@@ -159,6 +189,58 @@
       .map(part => part.replace(/\s*#\S+/g, '').trim()).filter(Boolean).join(' · ');
   }
 
+  function matchKey(entry) {
+    const teams = matchup(entry);
+    return teams.length === 2 ? teams.map(team => team.toUpperCase()).sort().join(':') : entry.title.toUpperCase();
+  }
+
+  function creatorName(entry) {
+    return entry.title.replace(/^EG\s+/i, '').trim() || 'Creator';
+  }
+
+  function sourceName(entry) {
+    if (entryKind(entry) === 'watch-party') return creatorName(entry) + ' watch party';
+    return 'Official broadcast';
+  }
+
+  function groupedMatches() {
+    const matches = new Map();
+    for (const entry of state.catalog) {
+      const key = matchKey(entry);
+      if (!matches.has(key)) matches.set(key, []);
+      matches.get(key).push(entry);
+    }
+    return [...matches.values()].map(entries => {
+      const primary = entries.find(entry => entryKind(entry) === 'match') || entries[0];
+      return {primary, teams: matchup(primary), entries: entries.slice().sort((first, second) => {
+        const kindOrder = Number(entryKind(first) === 'watch-party') - Number(entryKind(second) === 'watch-party');
+        if (kindOrder) return kindOrder;
+        return Number(first.provider === 'twitch') - Number(second.provider === 'twitch');
+      })};
+    });
+  }
+
+  function teamIdentity(team) {
+    const identity = document.createElement('span');
+    identity.className = 'team-identity';
+    const crest = document.createElement('span');
+    crest.className = 'team-crest';
+    const fallback = document.createElement('b');
+    fallback.textContent = team;
+    crest.append(fallback);
+    if (teamLogos[team]) {
+      const image = document.createElement('img');
+      image.alt = '';
+      image.addEventListener('load', () => crest.classList.add('has-image'));
+      image.src = teamLogos[team];
+      crest.prepend(image);
+    }
+    const name = document.createElement('strong');
+    name.textContent = team;
+    identity.append(crest, name);
+    return identity;
+  }
+
   function renderFilters() {
     const teams = [...new Set(state.catalog.flatMap(matchup))].sort((a, b) => a.localeCompare(b));
     if (state.teamFilter !== 'all' && !teams.includes(state.teamFilter)) state.teamFilter = 'all';
@@ -190,78 +272,80 @@
     }
   }
 
-  function renderCard(entry) {
-    const kind = entryKind(entry);
-    const teams = matchup(entry);
+  function renderCard(match, number) {
+    const {primary, teams, entries} = match;
     const card = document.createElement('article');
-    card.className = 'vod-card ' + kind;
-    const top = document.createElement('div');
-    top.className = 'card-top';
-    const source = document.createElement('span');
-    source.className = 'source-label ' + entry.provider;
-    source.textContent = entry.provider === 'youtube' ? 'YouTube' : 'Twitch';
-    const format = document.createElement('span');
-    format.textContent = kind === 'watch-party' ? entry.title.replace(/^EG\s+/i, '') + ' watch party' : 'Full match';
-    top.append(source, format);
-    const body = document.createElement('div');
-    body.className = 'card-body';
-    const title = document.createElement('h3');
+    card.className = 'vod-card';
+    const heading = document.createElement('h3');
+    heading.className = 'visually-hidden';
+    heading.id = 'match-title-' + number;
+    heading.textContent = teams.length === 2 ? teams.join(' vs ') : primary.title;
+    card.setAttribute('aria-labelledby', heading.id);
+    const index = document.createElement('span');
+    index.className = 'match-number';
+    index.textContent = String(number).padStart(2, '0');
+    const matchTeams = document.createElement('div');
+    matchTeams.className = 'match-teams';
     if (teams.length === 2) {
-      const first = document.createElement('strong');
-      first.textContent = teams[0];
       const versus = document.createElement('span');
+      versus.className = 'versus';
       versus.textContent = 'vs';
-      const second = document.createElement('strong');
-      second.textContent = teams[1];
-      title.append(first, versus, second);
+      matchTeams.append(teamIdentity(teams[0]), versus, teamIdentity(teams[1]));
     } else {
-      title.textContent = entry.title;
+      const title = document.createElement('h3');
+      title.textContent = primary.title;
+      matchTeams.append(title);
     }
+    const details = document.createElement('div');
+    details.className = 'match-details';
     const event = document.createElement('p');
-    let eventText = displayEvent(entry);
-    if (kind === 'watch-party' && teams.length === 2) {
-      const matchupPrefix = teams[0] + ' vs ' + teams[1] + ' · ';
-      if (eventText.startsWith(matchupPrefix)) eventText = eventText.slice(matchupPrefix.length);
+    event.textContent = displayEvent(primary).replace(/^.*?\s+vs\.?\s+.*?\s+·\s+/i, '');
+    const availability = document.createElement('span');
+    availability.textContent = entries.length + (entries.length === 1 ? ' broadcast' : ' broadcasts');
+    details.append(event, availability);
+    const sourceGroups = {match: 'Official matches', 'watch-party': 'Watch parties'};
+    const sources = document.createElement('div');
+    sources.className = 'source-list';
+    sources.setAttribute('aria-label', 'Choose from ' + [...new Set(entries.map(entry => sourceGroups[entryKind(entry)]))].join(' and '));
+    for (const entry of entries) {
+      const watch = document.createElement('button');
+      watch.type = 'button';
+      const label = document.createElement('strong');
+      label.textContent = sourceName(entry);
+      const provider = document.createElement('span');
+      provider.textContent = entry.provider === 'youtube' ? 'YouTube' : entry.chat ? 'Twitch · archived chat' : 'Twitch';
+      const arrow = document.createElement('b');
+      arrow.textContent = '→';
+      watch.append(label, provider, arrow);
+      watch.addEventListener('click', () => openVideo(entryKey(entry)));
+      sources.append(watch);
     }
-    event.textContent = eventText;
-    body.append(title, event);
-    const watch = document.createElement('button');
-    watch.type = 'button';
-    watch.textContent = entry.chat ? 'Watch with chat' : 'Watch match';
-    watch.addEventListener('click', () => openVideo(entryKey(entry)));
-    card.append(top, body, watch);
+    card.append(heading, index, matchTeams, details, sources);
     return card;
   }
 
   function renderCatalog() {
     const catalog = $('catalog');
     catalog.replaceChildren();
-    const visible = state.catalog.filter(entry => (state.kindFilter === 'all' || entryKind(entry) === state.kindFilter) &&
-      (state.teamFilter === 'all' || matchup(entry).includes(state.teamFilter)));
-    for (const [kind, heading] of [['match', 'Official matches'], ['watch-party', 'Watch parties']]) {
-      const entries = visible.filter(entry => entryKind(entry) === kind);
-      if (!entries.length) continue;
-      const group = document.createElement('section');
-      group.className = 'catalog-group';
-      const groupHeading = document.createElement('div');
-      groupHeading.className = 'catalog-group-heading';
-      const title = document.createElement('h3');
-      title.textContent = heading;
-      const detail = document.createElement('span');
-      detail.textContent = kind === 'match' ? 'YouTube and official broadcasts' : 'FNS and Ohnepixel';
-      groupHeading.append(title, detail);
-      const grid = document.createElement('div');
-      grid.className = 'catalog-grid';
-      for (const entry of entries) grid.append(renderCard(entry));
-      group.append(groupHeading, grid);
-      catalog.append(group);
-    }
+    const visible = groupedMatches().filter(match =>
+      (state.kindFilter === 'all' || match.entries.some(entry => entryKind(entry) === state.kindFilter)) &&
+      (state.teamFilter === 'all' || match.teams.includes(state.teamFilter)));
+    for (const [position, match] of visible.entries()) catalog.append(renderCard(match, position + 1));
     if (!visible.length) {
       const empty = document.createElement('p');
       empty.className = 'empty-library';
-      empty.textContent = 'No VODs match these filters.';
+      empty.textContent = 'No matches are available for these filters.';
       catalog.append(empty);
     }
+  }
+
+  function renderContinue() {
+    const entry = state.resume && state.catalog.find(candidate => entryKey(candidate) === state.resume.key);
+    $('continue-panel').hidden = !entry;
+    if (!entry) return;
+    $('continue-title').textContent = matchup(entry).join(' vs ') || entry.title;
+    $('continue-source').textContent = sourceName(entry);
+    $('continue-button').onclick = () => openVideo(entryKey(entry), true, state.resume.time);
   }
 
   async function loadCatalog() {
@@ -280,15 +364,18 @@
     });
     renderFilters();
     renderCatalog();
+    renderContinue();
   }
 
   function showLibrary(updateHistory = true) {
+    saveResume(true);
     clearInterval(state.statusTimer);
     state.statusTimer = null;
     destroyPlayer();
     state.started = false;
     state.entry = null;
     state.index = null;
+    state.resumeTime = null;
     state.chat = [];
     state.chatPosition = null;
     setPlaybackControlsDisabled(true);
@@ -299,13 +386,19 @@
     $('start-gate').hidden = false;
     $('start-watching').disabled = false;
     $('start-watching').textContent = 'Start watching';
+    $('start-gate-title').textContent = 'Start at round one';
+    $('start-gate-copy').textContent = 'The original video loads only after you choose to start.';
+    state.theater = false;
+    document.body.classList.remove('theater-mode');
+    $('player-view').classList.remove('theater-active');
     applySettings();
+    renderContinue();
     if (updateHistory) history.pushState({}, '', location.pathname);
     document.title = 'SPOILLESS | VALORANT VODs';
     window.scrollTo({top: 0});
   }
 
-  async function openVideo(key, updateHistory = true) {
+  async function openVideo(key, updateHistory = true, resumeTime = null) {
     const source = VodlockSite.mediaSource(key);
     const entry = source && state.catalog.find(candidate => entryKey(candidate) === VodlockSite.sourceKey(source.provider, source.sourceId));
     if (!entry) {
@@ -320,17 +413,29 @@
     setPlaybackControlsDisabled(true);
     state.entry = entry;
     state.index = index;
+    state.resumeTime = Number.isFinite(resumeTime) && resumeTime >= 0 ? resumeTime : null;
     destroyPlayer();
     state.started = false;
     resetPlayerHost();
-    $('watch-event').textContent = entry.event;
+    const teams = matchup(entry);
+    $('watch-event').textContent = displayEvent(entry);
     $('watch-title').textContent = entry.title;
+    $('watch-team-one').textContent = teams[0] || entry.title;
+    $('watch-team-two').textContent = teams[1] || '';
+    for (const [identifier, team] of [['watch-team-one-logo', teams[0]], ['watch-team-two-logo', teams[1]]]) {
+      const image = $(identifier);
+      image.hidden = !teamLogos[team];
+      image.src = teamLogos[team] || '';
+    }
+    $('watch-source').textContent = sourceName(entry) + ' · ' + (entry.provider === 'youtube' ? 'YouTube' : 'Twitch');
     $('library-view').hidden = true;
     $('player-view').hidden = false;
     $('start-gate').hidden = false;
     $('end-shield').hidden = true;
     $('start-watching').disabled = false;
-    $('start-watching').textContent = 'Start watching';
+    $('start-gate-title').textContent = state.resumeTime === null ? 'Start at round one' : 'Continue watching';
+    $('start-gate-copy').textContent = state.resumeTime === null ? 'The original video loads only after you choose to start.' : 'The player will return to your saved position.';
+    $('start-watching').textContent = state.resumeTime === null ? 'Start watching' : 'Continue watching';
     applySettings();
     if (updateHistory) history.pushState({source: entryKey(entry)}, '', '?v=' + encodeURIComponent(entryKey(entry)));
     document.title = entry.title + ' | SPOILLESS';
@@ -377,7 +482,9 @@
   function playerReady() {
     state.ready = true;
     setVolume(Number($('volume').value));
-    seekPlayer(Math.max(0, state.index.rounds[0].start - state.index.leadSeconds));
+    const destination = state.resumeTime ?? Math.max(0, state.index.rounds[0].start - state.index.leadSeconds);
+    state.resumeTime = null;
+    seekPlayer(destination);
     playPlayer();
     setPlaybackControlsDisabled(false);
     const revealDelay = state.entry.provider === 'twitch' && settings.hideTwitchTimeline ? 1400 : 0;
@@ -451,6 +558,10 @@
     setPlaybackControlsDisabled(true);
     resetPlayerHost();
     $('end-shield').hidden = false;
+    if (state.resume?.key === entryKey(state.entry)) {
+      state.resume = null;
+      try { localStorage.removeItem('spoilless-resume'); } catch {}
+    }
   }
 
   function currentTime() {
@@ -514,15 +625,13 @@
     const position = VodlockSite.position(state.index, currentTime());
     const round = state.index.rounds[Math.max(position, 0)];
     if (settings.hideRoundStatus) {
-      $('current-map').textContent = 'Position hidden';
-      $('current-round').textContent = 'Navigation remains active';
+      $('current-round').textContent = 'Position hidden · Navigation active';
     } else if (position < 0) {
-      $('current-map').textContent = 'Opening';
       $('current-round').textContent = 'Ready to begin';
     } else {
-      $('current-map').textContent = 'Map ' + round.map;
-      $('current-round').textContent = 'Round ' + round.round;
+      $('current-round').textContent = 'MAP ' + round.map + ' · ROUND ' + round.round;
     }
+    saveResume();
     renderChat();
   }
 
@@ -562,10 +671,18 @@
     else toast('Full screen is not available in this browser.');
   }
 
+  function toggleTheater() {
+    state.theater = !state.theater;
+    document.body.classList.toggle('theater-mode', state.theater);
+    $('player-view').classList.toggle('theater-active', state.theater);
+    $('theater-button').textContent = state.theater ? 'Exit theater' : 'Theater';
+    $('theater-button').setAttribute('aria-label', state.theater ? 'Exit theater mode' : 'Enter theater mode');
+  }
+
   function syncFullscreenButton() {
     const chatVisible = !$('chat-panel').hidden;
     const fullscreen = document.fullscreenElement === $('watch-layout');
-    $('fullscreen-button').textContent = fullscreen ? 'Exit full screen' : chatVisible ? 'Full screen + chat' : 'Full screen';
+    $('fullscreen-button').textContent = fullscreen ? 'Exit full screen' : 'Full screen';
     $('fullscreen-button').setAttribute('aria-label', fullscreen ? 'Exit fullscreen' : chatVisible ? 'Enter fullscreen with chat' : 'Enter fullscreen');
   }
 
@@ -608,7 +725,9 @@
     if (Number(event.target.value)) setMuted(false);
   });
   $('fullscreen-button').addEventListener('click', toggleFullscreen);
+  $('theater-button').addEventListener('click', toggleTheater);
   document.addEventListener('fullscreenchange', syncFullscreenButton);
+  addEventListener('pagehide', () => saveResume(true));
   $('previous-round').addEventListener('click', () => navigateRound(-1));
   $('next-round').addEventListener('click', () => navigateRound(1));
   $('previous-map').addEventListener('click', () => navigateMap(-1));
@@ -636,6 +755,8 @@
       ArrowRight: () => seek(currentTime() + 10, 'Skipped 10 seconds'),
       f: toggleFullscreen,
       F: toggleFullscreen,
+      t: toggleTheater,
+      T: toggleTheater,
       m: toggleMute,
       M: toggleMute
     };

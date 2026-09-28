@@ -1,5 +1,5 @@
 const assert = require('node:assert/strict');
-const {readFileSync} = require('node:fs');
+const {existsSync, readFileSync} = require('node:fs');
 const {resolve} = require('node:path');
 const vm = require('node:vm');
 const {test} = require('node:test');
@@ -125,6 +125,27 @@ test('website library supports source and automatically derived team filters', (
   assert.doesNotMatch(index, /class="hero"/);
   assert.doesNotMatch(app, /team-mark/);
   assert.doesNotMatch(index, /video-search|video-url|Open a VOD/);
+});
+
+test('website groups broadcasts by match and keeps resume state spoiler safe', () => {
+  const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const vercel = readFileSync(resolve(__dirname, '../site/vercel.json'), 'utf8');
+  assert.match(app, /function matchKey\(entry\)/);
+  assert.match(app, /function groupedMatches\(\)/);
+  assert.match(app, /source-list/);
+  assert.match(app, /teamLogos/);
+  for (const team of ['ge', 'vit', '100t', 't1', 'ns', 'nrg', 'jdg', 'fut', 'loud', 'edg']) {
+    assert.equal(existsSync(resolve(__dirname, '../site/assets/teams/' + team + '.png')), true);
+  }
+  assert.doesNotMatch(vercel, /owcdn\.net/);
+  assert.match(index, /id="continue-panel"/);
+  assert.match(app, /spoilless-resume/);
+  assert.match(index, /id="theater-button"/);
+  assert.match(app, /function toggleTheater\(\)/);
+  assert.doesNotMatch(app, /getDuration|remainingDuration|progressPercentage|totalRounds|totalMaps/);
+  assert.doesNotMatch(index, /progress-bar|round-progress|map-progress/);
+  assert.match(app, /'MAP ' \+ round\.map \+ ' · ROUND ' \+ round\.round/);
 });
 
 test('website uses the SPOILLESS public identity', () => {

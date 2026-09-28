@@ -89,19 +89,24 @@
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | PRX vs Team Liquid - VCT Champions Group Stage #VCTWatchparty | !vote !inzone",
-      "message": "The first detected round is not round 1. Check the beginning of this recording.",
+      "message": "FFmpeg could not finish reading the video:",
       "publishedAt": "2026-09-24T07:32:31Z",
-      "detectorVersion": "vct-clock-ocr-v6",
-      "checkedAt": "2026-09-28T06:20:44.551670+00:00"
+      "detectorVersion": "vct-clock-ocr-v7",
+      "pipelineVersion": "vct-clock-ocr-v7+storyboard-v1",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-09-28T19:11:07.137109+00:00"
     },
     "twitch:2882594925": {
       "status": "held",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "TL vs. PRX - VALORANT Champions Shanghai - Opening Day",
-      "message": "The first detected round is not round 1. Check the beginning of this recording.",
-      "detectorVersion": "vct-clock-ocr-v6",
-      "checkedAt": "2026-09-27T23:29:08.248902+00:00"
+      "message": "FFmpeg could not finish reading the video:",
+      "publishedAt": "2026-09-24T07:50:45Z",
+      "detectorVersion": "vct-clock-ocr-v7",
+      "pipelineVersion": "vct-clock-ocr-v7+storyboard-v1",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-09-28T19:11:06.084782+00:00"
     },
     "youtube:ZWhEMQVk4x0": {
       "status": "published",
@@ -127,10 +132,12 @@
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | LOUD vs 100T - VCT Americas Grand Finals #VCTWatchparty | !vote !inzone",
-      "message": "No reliable round starts were found. This version needs the VCT top-centre ROUND label and timer; a different layout may need detector changes.",
+      "message": "FFmpeg could not finish reading the video:",
       "publishedAt": "2026-09-09T20:54:30Z",
-      "detectorVersion": "vct-clock-ocr-v6",
-      "checkedAt": "2026-09-28T01:19:53.168802+00:00"
+      "detectorVersion": "vct-clock-ocr-v7",
+      "pipelineVersion": "vct-clock-ocr-v7+storyboard-v1",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-09-28T19:11:08.102240+00:00"
     },
     "twitch:2877469732": {
       "status": "held",

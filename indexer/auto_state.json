@@ -101,12 +101,12 @@
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "TL vs. PRX - VALORANT Champions Shanghai - Opening Day",
-      "message": "FFmpeg could not finish reading the video:",
+      "message": "The first detected round is not round 1. Check the beginning of this recording.",
       "publishedAt": "2026-09-24T07:50:45Z",
       "detectorVersion": "vct-clock-ocr-v7",
-      "pipelineVersion": "vct-clock-ocr-v7+storyboard-v1",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-09-28T19:11:06.084782+00:00"
+      "pipelineVersion": "vct-clock-ocr-v7+storyboard-v1+publisher-v2",
+      "retryClass": "pipeline-update",
+      "checkedAt": "2026-09-28T20:26:22.104548+00:00"
     },
     "youtube:ZWhEMQVk4x0": {
       "status": "published",

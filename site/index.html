@@ -7,9 +7,9 @@
   <meta name="theme-color" content="#070908">
   <title>SPOILLESS | VALORANT VODs</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/styles.css?v=20260928-4">
-  <script defer src="/core.js?v=20260928-4"></script>
-  <script defer src="/app.js?v=20260928-4"></script>
+  <link rel="stylesheet" href="/styles.css?v=20260928-5">
+  <script defer src="/core.js?v=20260928-5"></script>
+  <script defer src="/app.js?v=20260928-5"></script>
 </head>
 <body>
   <a class="skip-link" href="#catalog-title">Skip to match index</a>
@@ -17,7 +17,7 @@
     <button class="brand" id="home-button" type="button" aria-label="SPOILLESS library">
       <span>SPOILLESS</span>
     </button>
-    <span class="top-note">MATCH ARCHIVE / ROUND NAVIGATION</span>
+    <div class="top-actions"><span class="top-note">MATCH ARCHIVE / ROUND NAVIGATION</span><button id="settings-button" class="header-settings" type="button"><span aria-hidden="true">⚙</span> Settings</button></div>
   </header>
   <main>
     <section id="library-view" class="library-view">
@@ -139,6 +139,6 @@
     </div>
   </dialog>
   <div id="toast" class="toast" role="status" hidden></div>
-  <footer><span>SPOILLESS</span><p>Precomputed indexes. Original video served by YouTube or Twitch.</p><nav aria-label="Site"><button id="settings-button" class="footer-settings" type="button">Settings</button><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav></footer>
+  <footer><span>SPOILLESS</span><p>Precomputed indexes. Original video served by YouTube or Twitch.</p><nav aria-label="Site"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav></footer>
 </body>
 </html>

@@ -28,6 +28,9 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .skip-link:focus { transform: translateY(0); }
 .topbar { height: 62px; padding: 0 clamp(18px, 4vw, 68px); display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); background: rgba(8, 11, 9, .97); position: sticky; top: 0; z-index: 20; }
 .brand { min-height: 42px; display: inline-flex; align-items: center; gap: 8px; border: 0; background: none; padding: 0; cursor: pointer; font-family: var(--display); font-size: 18px; font-weight: 900; letter-spacing: -.03em; text-decoration: none; }
+.top-actions { display: flex; align-items: center; gap: 24px; }
+.header-settings { min-height: 38px; display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--lime); background: rgba(179, 255, 34, .08); color: var(--text); padding: 0 14px; cursor: pointer; font-size: 10px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+.header-settings:hover { background: var(--lime); color: var(--bg); }
 .brand::before { content: "["; color: var(--lime); }
 .brand::after { content: "]"; color: var(--lime); }
 .topbar .brand svg { width: 22px; height: 22px; }
@@ -205,8 +208,7 @@ footer { min-height: 118px; padding: 26px clamp(20px, 4vw, 68px); display: grid;
 footer > span { color: var(--text); font-family: var(--display); font-weight: 900; }
 footer p { margin: 0; }
 footer nav { display: flex; gap: 18px; }
-.footer-settings { border: 0; background: none; padding: 0; color: inherit; cursor: pointer; font: inherit; }
-footer a:hover, .footer-settings:hover { color: var(--lime); }
+footer a:hover { color: var(--lime); }
 
 .legal-page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 94px 0 120px; }
 .legal-page h1 { max-width: 940px; margin: 18px 0 32px; font-family: var(--display); font-size: clamp(58px, 10vw, 120px); line-height: .78; letter-spacing: -.07em; text-transform: uppercase; }

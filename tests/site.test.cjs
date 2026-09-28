@@ -160,6 +160,16 @@ test('website keeps playback shortcuts available after interacting with provider
   assert.doesNotMatch(styles, /twitch-timeline-hidden #media-player iframe[^}]+pointer-events: none/);
 });
 
+test('website keeps settings visible in the sticky header', () => {
+  const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
+  const header = index.match(/<header[\s\S]*?<\/header>/)?.[0] || '';
+  const footer = index.match(/<footer[\s\S]*?<\/footer>/)?.[0] || '';
+  assert.match(header, /id="settings-button" class="header-settings"/);
+  assert.doesNotMatch(footer, /settings-button/);
+  assert.match(styles, /\.header-settings/);
+});
+
 test('website uses the SPOILLESS public identity', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
   const source = [index, ...['privacy.html', 'terms.html', 'app.js']

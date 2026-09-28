@@ -124,6 +124,14 @@ test('website library supports source and automatically derived team filters', (
   assert.match(app, /vod-card/);
   assert.doesNotMatch(index, /class="hero"/);
   assert.doesNotMatch(app, /team-mark/);
+  assert.doesNotMatch(index, /video-search|video-url|Open a VOD/);
+});
+
+test('website uses the SPOILLESS public identity', () => {
+  const source = ['index.html', 'privacy.html', 'terms.html', 'app.js']
+    .map(file => readFileSync(resolve(__dirname, '../site/' + file), 'utf8')).join('\n');
+  assert.match(source, /SPOILLESS/);
+  assert.doesNotMatch(source, /VODLOCK/);
 });
 
 test('website avoids the prohibited design and copy patterns', () => {

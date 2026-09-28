@@ -90,7 +90,7 @@ function render() {
       action(actions, 'Review index', () => openReview(job));
       action(actions, 'Export JSON', () => download(job));
       if (job.videoId) {
-        action(actions, 'Use in VODLOCK', () => transfer(job), 'use-index');
+        action(actions, 'Use in SPOILLESS', () => transfer(job), 'use-index');
         const watch = node('a', 'Watch ↗');
         watch.href = 'https://www.youtube.com/watch?v=' + job.videoId;
         watch.target = '_blank';
@@ -166,7 +166,7 @@ function openReview(job) {
       round.verified = true;
       label.textContent = 'Checked';
       if (link) link.href = `https://www.youtube.com/watch?v=${job.videoId}&t=${Math.max(0, Math.floor(start - 5))}s`;
-      notice('Saved. Send the updated index to VODLOCK when you finish reviewing.');
+      notice('Saved. Send the updated index to SPOILLESS when you finish reviewing.');
     });
     save.append(label);
     action(save, round.excluded ? 'Include' : 'Exclude', async () => {
@@ -192,7 +192,7 @@ async function download(job) {
 }
 
 async function transfer(job) {
-  if (!bridgeAvailable) throw new Error('The VODLOCK extension was not detected. Reload this page after updating it, or export JSON and import it in the extension popup.');
+  if (!bridgeAvailable) throw new Error('The SPOILLESS extension was not detected. Reload this page after updating it, or export JSON and import it in the extension popup.');
   const index = await api('/api/export/' + job.id);
   window.postMessage({type: 'VODLOCK_SAVE_INDEX', index, requestId: crypto.randomUUID()}, location.origin);
 }
@@ -200,7 +200,7 @@ async function transfer(job) {
 window.addEventListener('message', event => {
   if (event.source !== window || event.origin !== location.origin) return;
   if (event.data?.type === 'VODLOCK_INDEX_READY') bridgeAvailable = true;
-  if (event.data?.type === 'VODLOCK_INDEX_SAVED') notice(event.data.error || 'Saved to VODLOCK. Open the matching YouTube VOD and use Next Round or Down Arrow.');
+  if (event.data?.type === 'VODLOCK_INDEX_SAVED') notice(event.data.error || 'Saved to SPOILLESS. Open the matching YouTube VOD and use Next Round or Down Arrow.');
 });
 
 $('youtube-tab').addEventListener('click', () => chooseSource('youtube'));
@@ -215,7 +215,7 @@ $('add-round').addEventListener('submit', async event => {
     openReview(state.jobs.find(entry => entry.id === reviewJobId));
     $('manual-round').value = '';
     $('manual-start').value = '';
-    notice('Round added. Send the updated index to VODLOCK when finished.');
+    notice('Round added. Send the updated index to SPOILLESS when finished.');
   } catch (error) {
     notice(error.message);
   }

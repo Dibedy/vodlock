@@ -1,4 +1,4 @@
-name: Deploy VODLOCK website
+name: Deploy SPOILLESS website
 
 on:
   push:
@@ -26,7 +26,7 @@ jobs:
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v6
-      - name: Deploy VODLOCK
+      - name: Deploy SPOILLESS
         run: |
           test -n "$VERCEL_TOKEN"
           npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"

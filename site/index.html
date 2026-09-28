@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="description" content="Watch indexed VALORANT broadcasts from YouTube and Twitch with direct round and map navigation.">
   <meta name="theme-color" content="#070908">
-  <title>VODLOCK | Indexed VALORANT VODs</title>
+  <title>SPOILLESS | VALORANT VODs</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/styles.css">
   <script defer src="/core.js"></script>
@@ -13,9 +13,9 @@
 </head>
 <body>
   <header class="topbar">
-    <button class="brand" id="home-button" type="button" aria-label="VODLOCK library">
+    <button class="brand" id="home-button" type="button" aria-label="SPOILLESS library">
       <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M4 4h10M4 4v10M28 4H18M28 4v10M4 28h10M4 28V18M28 28H18M28 28V18"/><path d="M12 12h8v8h-8z"/></svg>
-      <span>VODLOCK</span>
+      <span>SPOILLESS</span>
     </button>
     <button id="settings-button" class="settings-button" type="button">Settings</button>
   </header>
@@ -23,16 +23,9 @@
     <section id="library-view" class="library-view">
       <div class="library-heading">
         <div class="library-title"><span>VALORANT VODS</span><h1>Match<br>archive</h1></div>
-        <div class="library-tools">
+        <div class="library-summary">
           <p>Official full matches and creator watch parties. Spoiler-safe controls jump between rounds and maps.</p>
-          <form id="video-search" class="search-card">
-            <label for="video-url">Open a VOD</label>
-            <div class="search-row">
-              <input id="video-url" type="text" inputmode="url" autocomplete="off" placeholder="YouTube or Twitch link">
-              <button type="submit">Find</button>
-            </div>
-            <p id="search-message" class="search-message" role="status"></p>
-          </form>
+          <div class="source-summary"><span>FULL MATCHES</span><strong>YouTube</strong><span>WATCH PARTIES</span><strong>Twitch + chat</strong></div>
         </div>
       </div>
       <section class="catalog-section" aria-labelledby="catalog-title">
@@ -96,7 +89,7 @@
           <div class="navigation-group"><span class="nav-label">ROUND</span><div class="paired-buttons"><button id="previous-round" type="button" disabled>Previous</button><button id="next-round" class="accent" type="button" disabled>Next</button></div></div>
           <div class="navigation-group"><span class="nav-label">MAP</span><div class="paired-buttons"><button id="previous-map" type="button" disabled>Previous</button><button id="next-map" type="button" disabled>Next</button></div></div>
           <button id="restart-round" class="restart-button" type="button" disabled>Restart current round</button>
-          <div class="shield-note"><span aria-hidden="true"></span><p>Round totals, map totals, scores, and match-result metadata stay out of the VODLOCK interface.</p></div>
+          <div class="shield-note"><span aria-hidden="true"></span><p>Round totals, map totals, scores, and match-result metadata stay out of the SPOILLESS interface.</p></div>
         </aside>
         <aside id="chat-panel" class="chat-panel" hidden>
           <div class="chat-heading"><span>VOD CHAT</span></div>
@@ -109,7 +102,7 @@
   <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
     <div class="settings-heading"><div><span class="eyebrow">VIEW OPTIONS</span><h2 id="settings-title">Settings</h2></div><button id="settings-close" type="button" aria-label="Close settings">Close</button></div>
     <div class="settings-list">
-      <label><span><strong>Hide Twitch timeline</strong><small>Crop Twitch's native control strip and use only VODLOCK controls.</small></span><input id="setting-hide-twitch-timeline" type="checkbox"></label>
+      <label><span><strong>Hide Twitch timeline</strong><small>Crop Twitch's native control strip and use only SPOILLESS controls.</small></span><input id="setting-hide-twitch-timeline" type="checkbox"></label>
       <label><span><strong>Hide match details</strong><small>Hide the broadcast title and event while watching.</small></span><input id="setting-hide-metadata" type="checkbox"></label>
       <label><span><strong>Hide current map and round</strong><small>Keep the navigation buttons without showing your position.</small></span><input id="setting-hide-round-status" type="checkbox"></label>
       <label><span><strong>Show archived VOD chat</strong><small>Display only messages posted up to the current playback position.</small></span><input id="setting-show-chat" type="checkbox"></label>
@@ -118,6 +111,6 @@
     </div>
   </dialog>
   <div id="toast" class="toast" role="status" hidden></div>
-  <footer><span>VODLOCK</span><p>Precomputed indexes. Original video served by YouTube or Twitch.</p><nav aria-label="Legal"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav></footer>
+  <footer><span>SPOILLESS</span><p>Precomputed indexes. Original video served by YouTube or Twitch.</p><nav aria-label="Legal"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav></footer>
 </body>
 </html>

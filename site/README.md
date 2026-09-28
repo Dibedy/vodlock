@@ -1,4 +1,4 @@
-# VODLOCK website
+# SPOILLESS website
 
 This folder is a standalone static website. Viewers do not need the browser extension or Round Studio. It embeds the original YouTube or Twitch broadcast and loads small, precomputed round indexes from `indexes/`.
 
@@ -32,7 +32,7 @@ Manually created indexes should be reviewed before publishing. Catalog cards int
 
 `indexer/auto_publish.py` monitors the official VALORANT YouTube upload feed plus the `gofns`, `ohnepixel`, and `valorant` Twitch channels in `indexer/auto_channels.json`. Twitch discovery requests archived broadcasts and rejects any VOD whose stream ID is still reported live, so processing starts only after that broadcast has ended. Ohnepixel VODs must also have a VALORANT event marker in their title.
 
-Official broadcasts are analyzed from Twitch. The analysis records a small visual fingerprint every two seconds. When a `FULL MATCH` upload appears on the official YouTube channel, VODLOCK downloads its timeline storyboard, verifies matching visual anchors across the beginning, middle, and end, detects breaks removed by the YouTube edit, and translates the round index to YouTube timestamps. It never publishes an uncertain alignment. Once verified, the permanent YouTube match replaces the temporary official Twitch card. Creator watch parties remain on Twitch with archived chat.
+Official broadcasts are analyzed from Twitch. The analysis records a small visual fingerprint every two seconds. When a `FULL MATCH` upload appears on the official YouTube channel, SPOILLESS downloads its timeline storyboard, verifies matching visual anchors across the beginning, middle, and end, detects breaks removed by the YouTube edit, and translates the round index to YouTube timestamps. It never publishes an uncertain alignment. Once verified, the permanent YouTube match replaces the temporary official Twitch card. Creator watch parties remain on Twitch with archived chat.
 
 Automatic publishing is deliberately strict. An index is published only when it begins at map 1 round 1, contains at least 13 rounds, has no sequence gaps or detector warnings, and every detection meets the configured confidence threshold. Rejected indexes are recorded as held in `indexer/auto_state.json`.
 

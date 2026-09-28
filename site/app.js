@@ -54,11 +54,6 @@
     state.toastTimer = setTimeout(() => { $('toast').hidden = true; }, 3500);
   }
 
-  function setSearchMessage(message, error = false) {
-    $('search-message').textContent = message;
-    $('search-message').classList.toggle('error', error);
-  }
-
   function destroyPlayer() {
     if (state.player?.destroy) state.player.destroy();
     state.player = null;
@@ -306,7 +301,7 @@
     $('start-watching').textContent = 'Start watching';
     applySettings();
     if (updateHistory) history.pushState({}, '', location.pathname);
-    document.title = 'VODLOCK | Indexed VALORANT VODs';
+    document.title = 'SPOILLESS | VALORANT VODs';
     window.scrollTo({top: 0});
   }
 
@@ -314,10 +309,9 @@
     const source = VodlockSite.mediaSource(key);
     const entry = source && state.catalog.find(candidate => entryKey(candidate) === VodlockSite.sourceKey(source.provider, source.sourceId));
     if (!entry) {
-      setSearchMessage('This VOD has not been processed yet. Completed broadcasts appear after their round index passes validation.', true);
+      toast('This VOD has not been processed yet.');
       return;
     }
-    setSearchMessage('');
     const response = await fetch(entry.index, {cache: 'no-store'});
     if (!response.ok) throw new Error('This round index is temporarily unavailable.');
     const index = VodlockSite.validateIndex(await response.json());
@@ -339,7 +333,7 @@
     $('start-watching').textContent = 'Start watching';
     applySettings();
     if (updateHistory) history.pushState({source: entryKey(entry)}, '', '?v=' + encodeURIComponent(entryKey(entry)));
-    document.title = entry.title + ' | VODLOCK';
+    document.title = entry.title + ' | SPOILLESS';
     window.scrollTo({top: 0});
   }
 
@@ -588,15 +582,6 @@
     });
   }
 
-  $('video-search').addEventListener('submit', event => {
-    event.preventDefault();
-    const source = VodlockSite.mediaSource($('video-url').value);
-    if (!source) {
-      setSearchMessage('Paste a valid public YouTube or Twitch VOD link.', true);
-      return;
-    }
-    openVideo(VodlockSite.sourceKey(source.provider, source.sourceId)).catch(error => setSearchMessage(error.message, true));
-  });
   for (const button of $('kind-filters').querySelectorAll('button')) {
     button.addEventListener('click', () => {
       state.kindFilter = button.dataset.kind;
@@ -671,6 +656,9 @@
     if (source) return openVideo(VodlockSite.sourceKey(source.provider, source.sourceId), false);
   }).catch(error => {
     $('catalog').replaceChildren();
-    setSearchMessage(error.message, true);
+    const message = document.createElement('p');
+    message.className = 'empty-library';
+    message.textContent = error.message;
+    $('catalog').append(message);
   });
 })();

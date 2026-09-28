@@ -69,7 +69,7 @@ jobs:
           git diff --cached --quiet || git commit -m "Publish automatic VOD index"
           git pull --rebase origin main
           git push
-      - name: Deploy VODLOCK
+      - name: Deploy SPOILLESS
         if: env.VERCEL_TOKEN != ''
         run: |
           npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"

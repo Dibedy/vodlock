@@ -74,7 +74,7 @@
         if (text === 'Select map') protectNavigation(heading.closest('section'), 'map');
       }
       mark(document.getElementById('watch-log-entry')?.closest('aside'), 'vodlock-space-notes');
-      const title = 'VODLOCK · vods.space';
+      const title = 'SPOILLESS · vods.space';
       if (settings.enabled && settings.hideMetadata && document.title !== title) document.title = title;
     }
     mark(root, 'vodlock-space-ready');

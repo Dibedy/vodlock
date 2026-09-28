@@ -1,8 +1,8 @@
-# VODLOCK 3.0.0
+# SPOILLESS 3.0.0
 
 ## Indexed rounds
 
-Round Studio builds a local round-start index outside the viewing player. Start it using **Start Round Studio.cmd** in the complete package, add the video, review its detections, then use **Use in VODLOCK**. You can also import an exported JSON from the extension popup.
+Round Studio builds a local round-start index outside the viewing player. Start it using **Start Round Studio.cmd** in the complete package, add the video, review its detections, then use **Use in SPOILLESS**. You can also import an exported JSON from the extension popup.
 
 On the matching YouTube VOD, **Down Arrow** becomes an immediate next-round jump with five seconds of lead-in. Previous/Next round buttons appear in the safe toolbar. The index is saved locally and remains usable when Round Studio is closed. Right Arrow still performs the fixed replay skip. Videos without an index retain the long-break search below.
 
@@ -16,7 +16,7 @@ Archive match scores are replaced with a neutral vs label, and map links are hid
 
 Open a replay on vods.space. Spoiler mode hides the progress bar, full duration, round totals, future round list, map list and notes panel. Previous/Next round and map buttons use the site's existing navigation; only the current round and map are displayed. Both navigation directions stay present so their appearance does not reveal the final round or map. Access-restricted rounds still use the site's normal access checks.
 
-The existing popup controls apply: Hide timeline controls the spoiler-safe round/map navigation; Hide comments controls the notes panel; Hide metadata hides the player title overlay. Disable spoiler mode to restore the site's controls. Embedded YouTube players also receive timeline, title and end-screen protection, without adding a second VODLOCK toolbar.
+The existing popup controls apply: Hide timeline controls the spoiler-safe round/map navigation; Hide comments controls the notes panel; Hide metadata hides the player title overlay. Disable spoiler mode to restore the site's controls. Embedded YouTube players also receive timeline, title and end-screen protection, without adding a second SPOILLESS toolbar.
 
 Scores or results baked into the video itself are not covered. This protects the website interface, not the broadcast image. The integration depends on the current vods.space markup and may need updating if the site changes.
 
@@ -36,7 +36,7 @@ Press **Right Arrow** or **Skip Replay** for one immediate jump. The default is 
 
 The gameplay reference is built in from the supplied VCT screenshot. Detection compares the top timer panel and repeated player-card backgrounds using luminance, contrast, and dark/light pixel proportions. It ignores the minimap, centre scene, sponsors, and team colors. The earlier pre-round screenshot supplies a built-in bottom-table reference for that alternate layout. No setup or HUD learning is required.
 
-Press **Down Arrow** or **Skip Long Break** during downtime. VODLOCK checks 30 seconds ahead first, then searches in 60-second steps for the built-in HUD reference, confirms a candidate two seconds later, refines the boundary to within two seconds, and lands five seconds before the detected return. This detects the HUD return, not the round timer: if the HUD appears early in buy phase, some pre-round may remain.
+Press **Down Arrow** or **Skip Long Break** during downtime. SPOILLESS checks 30 seconds ahead first, then searches in 60-second steps for the built-in HUD reference, confirms a candidate two seconds later, refines the boundary to within two seconds, and lands five seconds before the detected return. This detects the HUD return, not the round timer: if the HUD appears early in buy phase, some pre-round may remain.
 
 Searches cover up to 45 minutes of VOD time and stop after approximately 45 seconds of actual search time. Cancel or press Escape to return to the original position. Failed searches restore the original position, mute setting, and pause/play state. Long-break detection requires canvas frame access. Scan frames stay hidden under the shield, including player fullscreen. Exit native video fullscreen before skipping.
 
@@ -44,7 +44,7 @@ Searches cover up to 45 minutes of VOD time and stop after approximately 45 seco
 
 - Alt + Left / Right: back / forward 30 seconds
 - Alt + Up: forward 2 minutes
-- Alt + S: toggle VODLOCK
+- Alt + S: toggle SPOILLESS
 - Alt + H: spoiler shield
 - Escape: cancel search or reveal spoiler shield
 

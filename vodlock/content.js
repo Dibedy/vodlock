@@ -180,7 +180,7 @@
     shield.id = 'vodlock-shield';
     shield.innerHTML = `
       <div class="vodlock-shield-card">
-        <strong>VODLOCK</strong>
+        <strong>SPOILLESS</strong>
         <span id="vodlock-shield-status">Scanning safely…</span>
         <button type="button" id="vodlock-cancel-scan">Cancel</button>
       </div>
@@ -507,7 +507,7 @@
     controls = document.createElement('div');
     controls.id = 'vodlock-controls';
     controls.setAttribute('role', 'toolbar');
-    controls.setAttribute('aria-label', 'VODLOCK spoiler safe controls');
+    controls.setAttribute('aria-label', 'SPOILLESS spoiler safe controls');
     controls.innerHTML = `
       <button type="button" data-seek="-30" title="Back 30 seconds">−30s</button>
       <button type="button" data-action="play" class="vodlock-primary" title="Play or pause">Pause</button>
@@ -598,7 +598,7 @@
   function protectDocumentTitle() {
     if (!settings.enabled || !settings.hideMetadata) return;
     const site = isYouTube() ? 'YouTube' : isTwitch() ? 'Twitch' : 'VOD';
-    const safeTitle = `VODLOCK · ${site}`;
+    const safeTitle = `SPOILLESS · ${site}`;
     if (document.title !== safeTitle) document.title = safeTitle;
   }
 

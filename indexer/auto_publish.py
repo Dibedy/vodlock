@@ -23,7 +23,8 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION
+PUBLISHER_VERSION = "publisher-v2"
+PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 
 
 def read_json(path):

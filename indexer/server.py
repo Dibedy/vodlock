@@ -5,6 +5,7 @@ import re
 import secrets
 import shutil
 import subprocess
+import sys
 import threading
 import time
 import uuid
@@ -146,7 +147,8 @@ def resolve_remote(job, yt_dlp):
                 raise yt_dlp.utils.DownloadError("The video service did not return a valid duration")
             headers = {str(key): str(value) for key, value in info.get("http_headers", {}).items()
                        if "\r" not in str(key) + str(value) and "\n" not in str(key) + str(value)}
-            return {"url": media_url, "duration": duration, "headers": headers}
+            return {"url": media_url, "duration": duration, "headers": headers,
+                    "format": format_selector, "playerClient": player_client}
         except yt_dlp.utils.DownloadError as error:
             last_error = error
     raise last_error
@@ -187,9 +189,18 @@ def download_youtube(job, work, hook, yt_dlp):
     return download_remote(job, work, hook, yt_dlp)
 
 
+def stream_command(job, remote):
+    command = [sys.executable, "-m", "yt_dlp", "--quiet", "--no-warnings", "--no-progress",
+               "--no-part", "--format", remote["format"], "--output", "-", remote_url(job)]
+    if remote.get("playerClient"):
+        command[3:3] = ["--extractor-args", "youtube:player_client=" + remote["playerClient"]]
+    return command
+
+
 def index_job(identifier):
     global ACTIVE
     process = None
+    stream = None
     try:
         import cv2
         import imageio_ffmpeg
@@ -202,7 +213,7 @@ def index_job(identifier):
         if job["kind"] in {"youtube", "twitch"} and job.get("streamAnalysis"):
             update(identifier, status="downloading", message="Opening the remote analysis stream · your viewing player is untouched", progress=0)
             remote = resolve_remote(job, yt_dlp)
-            source = remote["url"]
+            source = "pipe:0"
         elif job["kind"] in {"youtube", "twitch"}:
             update(identifier, status="downloading", message="Downloading an analysis copy · your viewing player is untouched", progress=0)
             max_bytes = analysis_download_limit(work)
@@ -239,16 +250,20 @@ def index_job(identifier):
             capture.release()
             if not opened or not math.isfinite(duration) or duration <= 0:
                 raise ValueError("Could not read this video. Try an MP4, MKV or WebM recording.")
-        command = [imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error"]
-        if remote and remote["headers"]:
-            command.extend(["-headers", "".join(f"{key}: {value}\r\n" for key, value in remote["headers"].items())])
-        command.extend(["-i", str(source),
+        command = [imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error", "-i", str(source),
                    "-an", "-vf", "fps=fps=1:start_time=0:round=up,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2",
-                   "-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:1"])
+                   "-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:1"]
         error_path = work / "ffmpeg.log"
-        with error_path.open("wb") as error_log:
-            process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=error_log,
+        stream_error_path = work / "stream.log"
+        with error_path.open("wb") as error_log, stream_error_path.open("wb") as stream_error_log:
+            if remote:
+                stream = subprocess.Popen(stream_command(job, remote), stdout=subprocess.PIPE, stderr=stream_error_log,
+                                          creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            process = subprocess.Popen(command, stdin=stream.stdout if stream else None,
+                                       stdout=subprocess.PIPE, stderr=error_log,
                                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            if stream and stream.stdout:
+                stream.stdout.close()
             frame_number = 0
             frame_size = 1280 * 720 * 3
             while True:
@@ -281,8 +296,12 @@ def index_job(identifier):
                 with LOCK:
                     job["progress"] = min(98, 35 + int(frame_number / duration * 63))
             return_code = process.wait()
+            stream_return_code = stream.wait() if stream else 0
         if return_code:
-            raise ValueError("FFmpeg could not finish reading the video: " + error_path.read_text(errors="replace")[-400:])
+            message = error_path.read_text(errors="replace")[-400:] or stream_error_path.read_text(errors="replace")[-400:]
+            raise ValueError("FFmpeg could not finish reading the video: " + message)
+        if stream_return_code:
+            raise ValueError("The video service stream ended with an error: " + stream_error_path.read_text(errors="replace")[-400:])
         detector.finalize()
         if not detector.rounds:
             raise ValueError("No reliable round starts were found. This version needs the VCT top-centre ROUND label and timer; a different layout may need detector changes.")
@@ -306,6 +325,15 @@ def index_job(identifier):
                     process.kill()
             if process.stdout:
                 process.stdout.close()
+        if stream is not None:
+            if stream.poll() is None:
+                stream.terminate()
+                try:
+                    stream.wait(timeout=5)
+                except subprocess.TimeoutExpired:
+                    stream.kill()
+            if stream.stdout and not stream.stdout.closed:
+                stream.stdout.close()
         with LOCK:
             ACTIVE = None
 

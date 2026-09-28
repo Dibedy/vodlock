@@ -134,6 +134,14 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(result["duration"], 7200)
         self.assertEqual(calls[0][1], False)
 
+    def test_remote_stream_uses_ytdlp_stdout_instead_of_the_media_url(self):
+        job = {"kind": "twitch", "twitchVideoId": "1234567890"}
+        command = server.stream_command(job, {"format": "bestvideo[height<=720]", "playerClient": None})
+        self.assertIn("yt_dlp", command)
+        self.assertIn("--output", command)
+        self.assertEqual(command[command.index("--output") + 1], "-")
+        self.assertEqual(command[-1], "https://www.twitch.tv/videos/1234567890")
+
     def test_youtube_hosted_worker_tries_supported_player_clients(self):
         identifier = "e" * 32
         job = {"id": identifier, "kind": "youtube", "videoId": "ZphbktbT26k", "status": "downloading", "progress": 0}

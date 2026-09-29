@@ -89,6 +89,9 @@
     state.player = null;
     state.ready = false;
     state.playing = false;
+    $('quality-control').hidden = true;
+    $('quality').disabled = true;
+    $('quality').replaceChildren();
   }
 
   function renderChat(force = false) {
@@ -487,6 +490,11 @@
     seekPlayer(destination);
     playPlayer();
     setPlaybackControlsDisabled(false);
+    updateQualityOptions();
+    const player = state.player;
+    if (state.entry.provider === 'twitch') setTimeout(() => {
+      if (state.player === player) updateQualityOptions();
+    }, 1000);
     const revealDelay = state.entry.provider === 'twitch' && settings.hideTwitchTimeline ? 1400 : 0;
     setTimeout(() => {
       if (!state.ready) return;
@@ -600,6 +608,42 @@
 
   function setVolume(value) {
     state.player.setVolume(state.entry.provider === 'youtube' ? value : value / 100);
+  }
+
+  function updateQualityOptions() {
+    const control = $('quality-control');
+    const select = $('quality');
+    if (state.entry?.provider !== 'twitch' || !state.ready || typeof state.player?.getQualities !== 'function') {
+      control.hidden = true;
+      select.disabled = true;
+      return;
+    }
+    let qualities;
+    try {
+      qualities = state.player.getQualities() || [];
+    } catch {
+      qualities = [];
+    }
+    const options = qualities.map(quality => {
+      const value = typeof quality === 'string' ? quality : quality.group || quality.name;
+      const label = typeof quality === 'string' ? quality : quality.name || quality.group;
+      return value ? {value, label: value === 'chunked' ? 'Source' : value === 'auto' ? 'Auto' : label} : null;
+    }).filter(Boolean).filter((quality, index, all) => all.findIndex(candidate => candidate.value === quality.value) === index);
+    if (!options.length) {
+      control.hidden = true;
+      select.disabled = true;
+      return;
+    }
+    const current = typeof state.player.getQuality === 'function' ? state.player.getQuality() : '';
+    select.replaceChildren(...options.map(quality => {
+      const option = document.createElement('option');
+      option.value = quality.value;
+      option.textContent = quality.label;
+      return option;
+    }));
+    if (options.some(quality => quality.value === current)) select.value = current;
+    control.hidden = false;
+    select.disabled = false;
   }
 
   function setPlaybackControlsDisabled(disabled) {
@@ -730,6 +774,11 @@
     if (!state.ready) return;
     setVolume(Number(event.target.value));
     if (Number(event.target.value)) setMuted(false);
+  });
+  $('quality').addEventListener('change', event => {
+    if (!state.ready || state.entry.provider !== 'twitch' || typeof state.player.setQuality !== 'function') return;
+    state.player.setQuality(event.target.value);
+    toast('Video quality set to ' + event.target.options[event.target.selectedIndex].textContent + '.');
   });
   $('fullscreen-button').addEventListener('click', toggleFullscreen);
   $('theater-button').addEventListener('click', toggleTheater);

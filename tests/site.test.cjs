@@ -170,6 +170,16 @@ test('website keeps settings visible in the sticky header', () => {
   assert.match(styles, /\.header-settings/);
 });
 
+test('website exposes Twitch quality without exposing playback length', () => {
+  const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  assert.match(index, /id="quality" aria-label="Video quality"/);
+  assert.match(app, /state\.player\.getQualities\(\)/);
+  assert.match(app, /state\.player\.setQuality\(event\.target\.value\)/);
+  assert.match(app, /state\.entry\?\.provider !== 'twitch'/);
+  assert.doesNotMatch(app, /getDuration/);
+});
+
 test('website uses the SPOILLESS public identity', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
   const source = [index, ...['privacy.html', 'terms.html', 'app.js']

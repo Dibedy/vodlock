@@ -160,6 +160,9 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .player-controls button:hover:not(:disabled) { border-color: var(--line); color: var(--text); }
 .player-controls input { width: 78px; accent-color: var(--lime); }
 .player-controls input:disabled { opacity: .35; }
+.quality-control { height: 34px; display: inline-flex; align-items: center; gap: 7px; padding-left: 8px; color: var(--faint); font-size: 8px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.quality-control select { height: 30px; border: 1px solid var(--line); background: var(--surface); color: var(--text); padding: 0 24px 0 8px; cursor: pointer; font: inherit; text-transform: none; }
+.quality-control select:disabled { opacity: .35; cursor: not-allowed; }
 .controls-spacer { flex: 1; }
 .no-timeline { color: var(--faint); font-size: 8px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
 
@@ -290,6 +293,7 @@ footer a:hover { color: var(--lime); }
   .paired-buttons button { flex: 1; }
   .player-controls { flex-wrap: wrap; }
   .player-controls input, .no-timeline { display: none; }
+  .quality-control { padding-left: 0; }
   .controls-spacer { display: none; }
   .chat-panel { min-height: 360px; }
   body.theater-mode main { width: 100%; }

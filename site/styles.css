@@ -139,9 +139,12 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .gate-icon { width: 56px; height: 56px; margin-bottom: 5px; fill: none; stroke: var(--lime); stroke-width: 2; }
 
 .round-dock { min-height: 104px; display: grid; grid-template-columns: 230px minmax(0, 1fr); border: 1px solid var(--line); border-top: 3px solid var(--lime); background: var(--raised); }
-.round-position { padding: 20px 22px; display: flex; flex-direction: column; justify-content: center; gap: 10px; border-right: 1px solid var(--line); }
-.round-position span, .nav-label { color: var(--faint); font-size: 8px; font-weight: 900; letter-spacing: .16em; }
+.round-position { padding: 15px 18px; display: flex; flex-direction: column; justify-content: center; gap: 7px; border-right: 1px solid var(--line); }
+.round-position > span { color: var(--faint); font-size: 8px; font-weight: 900; letter-spacing: .16em; }
 .round-position strong { font-family: var(--display); font-size: 20px; letter-spacing: -.02em; }
+.map-inline { display: flex; gap: 3px; margin-top: 2px; }
+.map-inline button { min-height: 25px; border: 1px solid transparent; background: transparent; color: var(--faint); padding: 2px 7px; cursor: pointer; font-size: 8px; font-weight: 800; text-transform: uppercase; }
+.map-inline button:hover:not(:disabled) { border-color: var(--line); color: var(--text); }
 .round-actions { display: grid; grid-template-columns: repeat(3, 1fr); }
 .round-actions button { min-height: 100px; display: flex; align-items: center; justify-content: center; gap: 12px; border: 0; border-right: 1px solid var(--line); background: transparent; color: #c4cac2; cursor: pointer; font-size: 11px; font-weight: 900; text-transform: uppercase; }
 .round-actions button:last-child { border-right: 0; }
@@ -150,21 +153,18 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .round-actions .restart-button { background: var(--lime); color: var(--bg); }
 .round-actions .restart-button span { color: var(--bg); }
 .round-actions .restart-button:hover:not(:disabled) { background: #d0ff65; color: var(--bg); }
-.round-actions button:disabled, .paired-buttons button:disabled, .player-controls button:disabled { opacity: .35; cursor: not-allowed; }
-.map-controls { min-height: 50px; padding: 0 14px 0 22px; display: flex; align-items: center; justify-content: space-between; gap: 20px; border: 1px solid var(--line); border-top: 0; background: #0b0f0c; }
-.paired-buttons { display: flex; gap: 4px; }
-.paired-buttons button { min-height: 32px; border: 1px solid transparent; background: transparent; color: var(--muted); padding: 5px 10px; cursor: pointer; font-size: 10px; }
-.paired-buttons button:hover:not(:disabled) { border-color: var(--line); color: var(--text); }
-.player-controls { min-height: 54px; padding: 8px 10px; display: flex; align-items: center; gap: 4px; border: 1px solid var(--line); border-top: 0; background: #090d0a; }
-.player-controls button { min-width: 44px; height: 34px; border: 1px solid transparent; background: transparent; color: var(--muted); padding: 0 8px; cursor: pointer; font-size: 10px; font-weight: 800; }
+.round-actions button:disabled, .map-inline button:disabled, .player-controls button:disabled { opacity: .35; cursor: not-allowed; }
+.player-controls { min-height: 48px; padding: 6px 8px; display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-top: 0; background: #090d0a; }
+.control-group { min-width: 0; display: flex; align-items: center; gap: 2px; }
+.control-group + .control-group { padding-left: 8px; border-left: 1px solid var(--line-soft); }
+.player-controls button { min-width: 40px; height: 32px; border: 1px solid transparent; background: transparent; color: var(--muted); padding: 0 8px; cursor: pointer; font-size: 9px; font-weight: 800; }
 .player-controls button:hover:not(:disabled) { border-color: var(--line); color: var(--text); }
 .player-controls input { width: 78px; accent-color: var(--lime); }
 .player-controls input:disabled { opacity: .35; }
-.quality-control { height: 34px; display: inline-flex; align-items: center; gap: 7px; padding-left: 8px; color: var(--faint); font-size: 8px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
-.quality-control select { height: 30px; border: 1px solid var(--line); background: var(--surface); color: var(--text); padding: 0 24px 0 8px; cursor: pointer; font: inherit; text-transform: none; }
+.quality-control { height: 32px; display: inline-flex; align-items: center; }
+.quality-control select { height: 28px; border: 1px solid var(--line); background: var(--surface); color: var(--text); padding: 0 22px 0 8px; cursor: pointer; font-size: 9px; font-weight: 800; }
 .quality-control select:disabled { opacity: .35; cursor: not-allowed; }
 .controls-spacer { flex: 1; }
-.no-timeline { color: var(--faint); font-size: 8px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
 
 .chat-panel { min-height: 0; border: 1px solid var(--line); border-top: 3px solid var(--lime); background: var(--surface); overflow: hidden; }
 .chat-heading { height: 50px; padding: 0 15px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--line); color: #c6ccc4; font-size: 9px; font-weight: 900; letter-spacing: .13em; }
@@ -175,10 +175,6 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .chat-message strong { margin-right: 5px; color: #aeb7b1; }
 .chat-message img { width: 24px; height: 24px; margin: -5px 2px; object-fit: contain; vertical-align: middle; }
 .chat-empty { margin: 0; color: var(--faint); font-size: 11px; line-height: 1.55; }
-.player-footnote { padding-top: 18px; display: flex; align-items: center; justify-content: space-between; gap: 24px; color: var(--faint); }
-.player-footnote p { margin: 0; font-size: 10px; }
-.shortcuts { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px 18px; font-size: 9px; }
-kbd { min-width: 23px; display: inline-block; margin-right: 4px; padding: 3px 5px; border: 1px solid var(--line); background: var(--surface); color: #aeb7b1; text-align: center; font: inherit; }
 
 body.theater-mode main { width: 100%; }
 .player-view.theater-active { padding: 18px clamp(16px, 2.5vw, 42px) 60px; }
@@ -190,7 +186,7 @@ body.theater-mode main { width: 100%; }
 .watch-layout:fullscreen:not(.chat-visible) { grid-template-columns: 1fr; }
 .watch-layout:fullscreen .video-column { min-height: 0; display: flex; flex-direction: column; background: #000; }
 .watch-layout:fullscreen .player-shell { width: 100%; min-height: 0; height: 100%; flex: 1 1 auto; aspect-ratio: auto; border: 0; }
-.watch-layout:fullscreen .round-dock, .watch-layout:fullscreen .map-controls { display: none; }
+.watch-layout:fullscreen .round-dock { display: none; }
 .watch-layout:fullscreen .player-controls { display: none; }
 .watch-layout:fullscreen .chat-panel { height: 100vh; min-height: 0; border-top: 0; border-right: 0; border-bottom: 0; }
 
@@ -244,8 +240,6 @@ footer a:hover { color: var(--lime); }
   .chat-panel { min-height: 420px; }
   .round-dock { grid-template-columns: 1fr; }
   .round-position { min-height: 74px; border-right: 0; border-bottom: 1px solid var(--line); }
-  .player-footnote { align-items: start; flex-direction: column; }
-  .shortcuts { justify-content: flex-start; }
 }
 
 @media (max-width: 620px) {
@@ -288,12 +282,11 @@ footer a:hover { color: var(--lime); }
   .watch-crest b { font-size: 30px; }
   .player-shell { margin: 0 -12px; width: calc(100% + 24px); }
   .round-actions button { min-height: 80px; padding: 10px 5px; flex-direction: column; gap: 5px; font-size: 9px; }
-  .map-controls { min-height: 70px; align-items: start; flex-direction: column; justify-content: center; gap: 5px; }
-  .paired-buttons { width: 100%; }
-  .paired-buttons button { flex: 1; }
-  .player-controls { flex-wrap: wrap; }
-  .player-controls input, .no-timeline { display: none; }
-  .quality-control { padding-left: 0; }
+  .round-position { min-height: 88px; }
+  .player-controls { flex-wrap: wrap; gap: 4px; }
+  .player-controls input { display: none; }
+  .control-group + .control-group { padding-left: 4px; }
+  .view-controls { flex: 1 0 100%; justify-content: flex-end; padding-top: 4px; border-top: 1px solid var(--line-soft); border-left: 0 !important; }
   .controls-spacer { display: none; }
   .chat-panel { min-height: 360px; }
   body.theater-mode main { width: 100%; }

@@ -70,9 +70,6 @@
     const twitchTimelineHidden = state.entry?.provider === 'twitch' && settings.hideTwitchTimeline;
     $('player-shell').classList.toggle('twitch-timeline-hidden', twitchTimelineHidden);
     $('watch-metadata').hidden = settings.hideMetadata;
-    $('timeline-status').textContent = state.entry?.provider === 'twitch'
-      ? twitchTimelineHidden ? 'Timeline hidden' : 'Twitch controls visible'
-      : 'Timeline hidden';
     renderChat(true);
     updateStatus();
   }

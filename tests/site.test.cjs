@@ -94,7 +94,8 @@ test('website release surfaces include the favicon and legal pages', () => {
 test('website mentions spoiler-safe once and uses ten-second arrow navigation', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
   assert.equal((index.match(/spoiler-safe/gi) || []).length, 1);
-  assert.match(index, /-10 s \/ \+10 s/);
+  assert.match(index, /aria-label="Go back 10 seconds"/);
+  assert.match(index, /aria-label="Skip forward 10 seconds"/);
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   assert.doesNotMatch(app, /\+ 31|31 seconds/);
   assert.match(app, /twitch-timeline-hidden/);
@@ -178,6 +179,17 @@ test('website exposes Twitch quality without exposing playback length', () => {
   assert.match(app, /state\.player\.setQuality\(event\.target\.value\)/);
   assert.match(app, /state\.entry\?\.provider !== 'twitch'/);
   assert.doesNotMatch(app, /getDuration/);
+});
+
+test('website keeps secondary player controls compact', () => {
+  const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
+  assert.match(index, /class="map-inline" aria-label="Map navigation"/);
+  assert.match(index, /class="control-group playback-controls"/);
+  assert.match(index, /class="control-group audio-controls"/);
+  assert.match(index, /class="control-group view-controls"/);
+  assert.doesNotMatch(index, /class="map-controls"|player-footnote|timeline-status|class="shortcuts"/);
+  assert.match(styles, /\.view-controls/);
 });
 
 test('website uses the SPOILLESS public identity', () => {

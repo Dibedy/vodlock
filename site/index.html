@@ -7,9 +7,9 @@
   <meta name="theme-color" content="#070908">
   <title>SPOILLESS | VALORANT VODs</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/styles.css?v=20260929-1">
-  <script defer src="/core.js?v=20260929-1"></script>
-  <script defer src="/app.js?v=20260929-1"></script>
+  <link rel="stylesheet" href="/styles.css?v=20260929-2">
+  <script defer src="/core.js?v=20260929-2"></script>
+  <script defer src="/app.js?v=20260929-2"></script>
 </head>
 <body>
   <a class="skip-link" href="#catalog-title">Skip to match index</a>
@@ -95,29 +95,22 @@
             </div>
           </div>
           <div class="round-dock" aria-label="Round navigation">
-            <div class="round-position"><span>CURRENT POSITION</span><strong id="current-round">Ready to begin</strong></div>
+            <div class="round-position">
+              <span>CURRENT POSITION</span>
+              <strong id="current-round">Ready to begin</strong>
+              <div class="map-inline" aria-label="Map navigation"><button id="previous-map" type="button" disabled>← Map</button><button id="next-map" type="button" disabled>Map →</button></div>
+            </div>
             <div class="round-actions">
               <button id="previous-round" type="button" disabled><span>↑</span> Previous round</button>
               <button id="restart-round" class="restart-button" type="button" disabled><span>↺</span> Restart round</button>
               <button id="next-round" class="accent" type="button" disabled>Next round <span>↓</span></button>
             </div>
           </div>
-          <div class="map-controls">
-            <span class="nav-label">MAP NAVIGATION</span>
-            <div class="paired-buttons"><button id="previous-map" type="button" disabled>← Previous map</button><button id="next-map" type="button" disabled>Next map →</button></div>
-          </div>
           <div class="player-controls" aria-label="Video controls">
-            <button id="play-button" type="button" aria-label="Play" disabled>Play</button>
-            <button id="back-ten" type="button" aria-label="Go back 10 seconds" disabled>-10 s</button>
-            <button id="skip-replay" type="button" aria-label="Skip forward 10 seconds" disabled>+10 s</button>
-            <button id="mute-button" type="button" aria-label="Mute" disabled>Sound</button>
-            <input id="volume" type="range" min="0" max="100" value="80" aria-label="Volume" disabled>
-            <label id="quality-control" class="quality-control" hidden><span>Quality</span><select id="quality" aria-label="Video quality" disabled></select></label>
+            <div class="control-group playback-controls"><button id="play-button" type="button" aria-label="Play" disabled>Play</button><button id="back-ten" type="button" aria-label="Go back 10 seconds" disabled>-10</button><button id="skip-replay" type="button" aria-label="Skip forward 10 seconds" disabled>+10</button></div>
+            <div class="control-group audio-controls"><button id="mute-button" type="button" aria-label="Mute" disabled>Sound</button><input id="volume" type="range" min="0" max="100" value="80" aria-label="Volume" disabled><label id="quality-control" class="quality-control" hidden><span class="visually-hidden">Quality</span><select id="quality" aria-label="Video quality" disabled></select></label></div>
             <span class="controls-spacer"></span>
-            <span id="timeline-status" class="no-timeline">Timeline hidden</span>
-            <button id="chat-toggle" type="button" aria-label="Turn chat off" hidden>Chat off</button>
-            <button id="theater-button" type="button" aria-label="Enter theater mode">Theater</button>
-            <button id="fullscreen-button" type="button" aria-label="Enter fullscreen">Full screen</button>
+            <div class="control-group view-controls"><button id="chat-toggle" type="button" aria-label="Turn chat off" hidden>Chat</button><button id="theater-button" type="button" aria-label="Enter theater mode">Theater</button><button id="fullscreen-button" type="button" aria-label="Enter fullscreen">Full screen</button></div>
           </div>
         </section>
         <aside id="chat-panel" class="chat-panel" hidden>
@@ -125,7 +118,6 @@
           <div id="chat-messages" class="chat-messages" aria-live="off"></div>
         </aside>
       </div>
-      <div class="player-footnote"><p>No score. No series state. No indication of what remains.</p><div class="shortcuts"><span><kbd>Space</kbd> Play / pause</span><span><kbd>↑</kbd><kbd>↓</kbd> Previous / next round</span><span><kbd>←</kbd><kbd>→</kbd> -10 s / +10 s</span><span><kbd>T</kbd> Theater</span><span><kbd>F</kbd> Full screen</span></div></div>
     </section>
   </main>
   <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">

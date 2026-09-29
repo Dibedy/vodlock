@@ -279,7 +279,7 @@ test('website uses the SPOILLESS public identity', () => {
   assert.match(vercel, /spoilless\.vercel\.app/);
   assert.doesNotMatch(vercel, /vodlock\.vercel\.app/);
   const header = index.match(/<header[\s\S]*?<\/header>/)?.[0] || '';
-  assert.doesNotMatch(header, /<svg/);
+  assert.match(header, /<svg[\s\S]*?M5 5l22 22/);
 });
 
 test('website avoids the prohibited design and copy patterns', () => {

@@ -190,6 +190,8 @@ test('website keeps secondary player controls compact', () => {
   assert.match(index, /class="control-group view-controls"/);
   assert.doesNotMatch(index, /class="map-controls"|player-footnote|timeline-status|class="shortcuts"/);
   assert.match(styles, /\.view-controls/);
+  assert.match(styles, /\.player-controls button \{[^}]+height: 44px/);
+  assert.match(styles, /\.map-inline button \{[^}]+min-height: 38px/);
 });
 
 test('website uses the SPOILLESS public identity', () => {

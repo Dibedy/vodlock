@@ -190,6 +190,36 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(state["videos"]["twitch:1234567890"]["status"], "superseded")
         self.assertEqual(state["videos"]["twitch:1234567890"]["supersededBy"], "youtube:abcdefghijk")
 
+    def test_two_youtube_matches_can_reuse_one_superseded_twitch_broadcast(self):
+        youtube_channel = {"provider": "youtube", "name": "YouTube", "minimumDuration": 3600}
+        config = {"channels": [youtube_channel, {"provider": "twitch", "name": "Official",
+                                                 "alignmentSource": True}],
+                  "alignmentLookback": 8, "minimumConfidence": 0.65, "minimumRounds": 13}
+        state = {"videos": {"twitch:1234567890": {"status": "published", "channel": "Official"}}}
+        rounds = [{"map": 1, "round": number, "start": number * 100} for number in range(1, 14)]
+        entries = [{"id": "abcdefghijk", "title": "A vs B - FULL MATCH"},
+                   {"id": "lmnopqrstuv", "title": "C vs D - FULL MATCH"}]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "indexes" / "twitch-1234567890.json").write_text('{"rounds":[]}', encoding="utf-8")
+            (site / "catalog.json").write_text(
+                '{"version":2,"videos":[{"provider":"twitch","sourceId":"1234567890"}]}', encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), \
+                    patch.object(auto_publish, "storyboard", side_effect=lambda provider, identifier, _: {
+                        "duration": 5000, "provider": provider, "sourceId": identifier}), \
+                    patch.object(auto_publish, "align_storyboards", return_value={"anchors": 20, "offset": 10}), \
+                    patch.object(auto_publish, "translate_index", return_value=rounds):
+                for entry in entries:
+                    self.assertEqual(auto_publish.process(youtube_channel, entry, config, state, object()),
+                                     (True, "Published"))
+            catalog = auto_publish.read_json(site / "catalog.json")
+        self.assertEqual([item["sourceId"] for item in catalog["videos"]], ["lmnopqrstuv", "abcdefghijk"])
+        self.assertEqual(state["videos"]["twitch:1234567890"]["status"], "superseded")
+        self.assertEqual(state["videos"]["twitch:1234567890"]["supersededBy"], "youtube:lmnopqrstuv")
+
     def test_youtube_discovery_failure_does_not_block_twitch_or_held_retries(self):
         channels = [{"provider": "youtube", "name": "YouTube"},
                     {"provider": "twitch", "name": "VALORANT", "login": "valorant"},

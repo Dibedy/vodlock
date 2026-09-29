@@ -252,7 +252,7 @@ def youtube_alignment(channel, entry, config, state, yt_dlp):
     source_names = {item["name"] for item in config["channels"]
                     if item["provider"] == "twitch" and item.get("alignmentSource")}
     source_ids = [key.split(":", 1)[1] for key, value in state["videos"].items()
-                  if key.startswith("twitch:") and value.get("status") == "published"
+                  if key.startswith("twitch:") and value.get("status") in {"published", "superseded"}
                   and value.get("channel") in source_names
                   and (SITE / "indexes" / f"twitch-{key.split(':', 1)[1]}.json").is_file()]
     source_ids = source_ids[-int(config.get("alignmentLookback", 8)):]

@@ -28,6 +28,7 @@ ANALYSIS_MAX_BYTES = 8 * 1024 ** 3
 ANALYSIS_RESERVE_BYTES = 2 * 1024 ** 3
 MINIMUM_ANALYSIS_BYTES = 512 * 1024 ** 2
 INITIAL_DENSE_SAMPLE_SECONDS = 15 * 60
+COARSE_SAMPLE_INTERVAL = 2
 
 
 class AnalysisSizeLimitError(ValueError):
@@ -51,6 +52,18 @@ def analysis_download_limit(work):
 
 def size_limit_message(max_bytes):
     return f"The selected analysis copy was not downloaded. It may exceed the {max_bytes / 1024 ** 3:g} GB limit."
+
+
+def analysis_video_filter():
+    return ("fps=fps=1:start_time=0:round=up,select='lt(n\\," + str(INITIAL_DENSE_SAMPLE_SECONDS)
+            + ")+gte(n\\," + str(INITIAL_DENSE_SAMPLE_SECONDS) + ")*not(mod(n\\," + str(COARSE_SAMPLE_INTERVAL)
+            + "))',scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2")
+
+
+def analysis_sample_time(frame_number):
+    if frame_number < INITIAL_DENSE_SAMPLE_SECONDS:
+        return frame_number
+    return INITIAL_DENSE_SAMPLE_SECONDS + (frame_number - INITIAL_DENSE_SAMPLE_SECONDS) * COARSE_SAMPLE_INTERVAL
 
 
 def video_id(value):
@@ -251,7 +264,7 @@ def index_job(identifier):
             if not opened or not math.isfinite(duration) or duration <= 0:
                 raise ValueError("Could not read this video. Try an MP4, MKV or WebM recording.")
         command = [imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error", "-i", str(source),
-                   "-an", "-vf", "fps=fps=1:start_time=0:round=up,scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2",
+                   "-an", "-vf", analysis_video_filter(),
                    "-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:1"]
         error_path = work / "ffmpeg.log"
         stream_error_path = work / "stream.log"
@@ -279,22 +292,21 @@ def index_job(identifier):
                 if len(chunk) != frame_size:
                     raise ValueError("Video decoding stopped in the middle of a frame.")
                 frame = np.frombuffer(chunk, dtype=np.uint8).reshape(720, 1280, 3)
-                sample_time = frame_number
+                sample_time = analysis_sample_time(frame_number)
                 if fingerprint_interval and sample_time % fingerprint_interval == 0:
                     fingerprints.append({"time": sample_time, "hash": frame_hash(frame)})
-                if sample_time < INITIAL_DENSE_SAMPLE_SECONDS or sample_time % 2 == 0:
-                    sample = reader.read(frame, sample_time)
-                    detector.observe(sample)
-                    diagnostic_candidate = (sample.round is None) != (sample.timer is None)
-                    periodic_candidate = sample_time in {5, 305, 605, 905}
-                    if diagnostic_count < 6 and (diagnostic_candidate or periodic_candidate):
-                        diagnostic_directory.mkdir(exist_ok=True)
-                        diagnostic = frame[:int(frame.shape[0] * .2)]
-                        if cv2.imwrite(str(diagnostic_directory / f"hud-{sample_time:05d}.jpg"), diagnostic):
-                            diagnostic_count += 1
+                sample = reader.read(frame, sample_time)
+                detector.observe(sample)
+                diagnostic_candidate = (sample.round is None) != (sample.timer is None)
+                periodic_candidate = sample_time in {5, 305, 605, 905}
+                if diagnostic_count < 6 and (diagnostic_candidate or periodic_candidate):
+                    diagnostic_directory.mkdir(exist_ok=True)
+                    diagnostic = frame[:int(frame.shape[0] * .2)]
+                    if cv2.imwrite(str(diagnostic_directory / f"hud-{sample_time:05d}.jpg"), diagnostic):
+                        diagnostic_count += 1
                 frame_number += 1
                 with LOCK:
-                    job["progress"] = min(98, 35 + int(frame_number / duration * 63))
+                    job["progress"] = min(98, 35 + int(sample_time / duration * 63))
             return_code = process.wait()
             stream_return_code = stream.wait() if stream else 0
         if return_code:

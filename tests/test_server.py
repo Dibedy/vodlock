@@ -60,6 +60,16 @@ class ServerTests(unittest.TestCase):
             with self.assertRaises(server.AnalysisSizeLimitError):
                 server.analysis_download_limit(Path("."))
 
+    def test_analysis_keeps_dense_opening_samples_and_coarsens_the_rest(self):
+        self.assertEqual(server.analysis_sample_time(0), 0)
+        self.assertEqual(server.analysis_sample_time(server.INITIAL_DENSE_SAMPLE_SECONDS - 1),
+                         server.INITIAL_DENSE_SAMPLE_SECONDS - 1)
+        self.assertEqual(server.analysis_sample_time(server.INITIAL_DENSE_SAMPLE_SECONDS),
+                         server.INITIAL_DENSE_SAMPLE_SECONDS)
+        self.assertEqual(server.analysis_sample_time(server.INITIAL_DENSE_SAMPLE_SECONDS + 1),
+                         server.INITIAL_DENSE_SAMPLE_SECONDS + server.COARSE_SAMPLE_INTERVAL)
+        self.assertIn("select='lt(n\\,900)+gte(n\\,900)*not(mod(n\\,2))'", server.analysis_video_filter())
+
     def test_twitch_vod_link_validation(self):
         self.assertEqual(server.twitch_video_id("https://www.twitch.tv/videos/1234567890"), "1234567890")
         for link in ["https://www.twitch.tv/gofns", "https://twitch.tv/directory", "http://twitch.tv/videos/1234567890"]:

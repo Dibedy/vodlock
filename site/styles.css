@@ -40,8 +40,7 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .library-heading { min-height: calc(100vh - 62px); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr); position: relative; border-bottom: 1px solid var(--line); overflow: hidden; }
 .library-heading::after { content: ""; position: absolute; z-index: 2; top: clamp(72px, 9vw, 128px); bottom: clamp(72px, 9vw, 128px); left: 55%; width: 1px; background: #455047; pointer-events: none; }
 .library-title { min-width: 0; padding: clamp(48px, 6vw, 92px); display: flex; align-items: center; position: relative; z-index: 1; }
-.library-title::before, .library-summary::before { content: ""; position: absolute; z-index: 0; pointer-events: none; }
-.library-title::before { inset: 14% 0; background: radial-gradient(ellipse at 45% 50%, var(--bg) 0%, rgba(8, 11, 9, .88) 44%, rgba(8, 11, 9, 0) 78%); }
+.library-summary::before { content: ""; position: absolute; z-index: 0; pointer-events: none; }
 .library-heading h1 { max-width: 820px; margin: 0; font-family: var(--display); font-size: clamp(58px, 6.1vw, 98px); font-weight: 900; line-height: .87; letter-spacing: -.07em; text-transform: uppercase; }
 .library-heading h1 span { display: block; color: var(--lime); }
 .spoiler-word { position: relative; border: 0; background: transparent; color: inherit; cursor: pointer; font: inherit; letter-spacing: inherit; line-height: inherit; padding: 0; text-transform: inherit; }

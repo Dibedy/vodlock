@@ -506,6 +506,7 @@
 
   function renderTournaments() {
     const host = $('tournaments');
+    if (!host) return;
     host.replaceChildren();
     const tournaments = tournamentMatches();
     const selected = tournaments.find(tournament => tournament.key === state.tournament);

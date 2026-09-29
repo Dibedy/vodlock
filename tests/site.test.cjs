@@ -195,7 +195,7 @@ test('website keeps playback shortcuts available after interacting with provider
   assert.doesNotMatch(styles, /twitch-timeline-hidden #media-player iframe[^}]+pointer-events: none/);
 });
 
-test('website keeps favourite teams and tournament progress spoiler safe', () => {
+test('website keeps favourite teams spoiler safe while tournament browsing is unavailable', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
@@ -203,7 +203,7 @@ test('website keeps favourite teams and tournament progress spoiler safe', () =>
   assert.match(index, /id="choose-teams"/);
   assert.match(index, /id="teams-dialog"/);
   assert.match(index, /id="favourite-match-count"/);
-  assert.match(index, /id="tournaments"/);
+  assert.doesNotMatch(index, /id="tournaments"/);
   assert.match(app, /spoilless-favourite-teams/);
   assert.match(app, /spoilless-watched-matches/);
   assert.match(app, /function openTeamPicker\(mode\)/);
@@ -212,7 +212,6 @@ test('website keeps favourite teams and tournament progress spoiler safe', () =>
   assert.match(app, /title\.textContent = 'Locked'/);
   assert.match(app, /markMatchWatched\(state\.entry\)/);
   assert.match(styles, /\.team-picker \{/);
-  assert.match(styles, /\.tournament-match\.is-locked/);
   assert.ok(catalog.videos.every(entry => typeof entry.tournament === 'string' && typeof entry.tournamentKey === 'string'));
 });
 

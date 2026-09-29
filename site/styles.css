@@ -118,11 +118,6 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .team-filter-button { min-height: 52px; display: flex; align-items: center; justify-content: space-between; border: 0; background: #090d0a; color: var(--text); padding: 0 15px; cursor: pointer; text-align: left; }
 .team-filter-button::after { content: "↓"; color: var(--lime); font-size: 16px; }
 .team-filter-button:hover { background: var(--raised); }
-.team-filter-button[aria-expanded="true"] { outline: 1px solid var(--lime); outline-offset: -1px; }
-.team-filter-picker { max-height: 270px; padding: 6px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; overflow: auto; border: 1px solid var(--line); background: #090d0a; }
-.team-filter-picker button { min-height: 44px; border: 1px solid transparent; background: var(--surface); color: var(--muted); padding: 6px 9px; cursor: pointer; font-family: var(--display); font-size: 14px; letter-spacing: -.02em; text-align: left; }
-.team-filter-picker button:hover { border-color: var(--line); color: var(--text); }
-.team-filter-picker button[aria-pressed="true"] { border-color: var(--lime); color: var(--lime); }
 .filter-summary { min-width: 72px; height: 52px; display: grid; align-content: center; justify-items: end; gap: 2px; color: var(--faint); }
 .filter-summary strong { color: var(--text); font-family: var(--display); font-size: 22px; line-height: 1; }
 .filter-summary span { font-size: 10px; }

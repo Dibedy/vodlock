@@ -82,7 +82,7 @@
   const teamKey = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   const teamAliases = new Map(vctTeams.flatMap(team => [team.code, team.name, ...(team.aliases || [])].map(value => [teamKey(value), team.code])));
   const teamsByCode = new Map(vctTeams.map(team => [team.code, team]));
-  const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null};
+  const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null, teamPickerMode: 'favourites'};
   let settings = readSettings();
 
   function readResume() {
@@ -385,22 +385,6 @@
     if (selectedTeam && state.regionFilter !== 'all' && selectedTeam.region !== state.regionFilter) state.teamFilter = 'all';
     const allTeams = state.regionFilter === 'all' ? 'All VCT teams' : 'All ' + regions.find(region => region.id === state.regionFilter).name + ' teams';
     $('team-filter').textContent = state.teamFilter === 'all' ? allTeams : teamsByCode.get(state.teamFilter).name;
-    const picker = $('team-filter-picker');
-    picker.replaceChildren();
-    const all = document.createElement('button');
-    all.type = 'button';
-    all.textContent = allTeams;
-    all.setAttribute('aria-pressed', String(state.teamFilter === 'all'));
-    all.addEventListener('click', () => selectTeamFilter('all'));
-    picker.append(all);
-    for (const team of vctTeams.filter(candidate => state.regionFilter === 'all' || candidate.region === state.regionFilter)) {
-      const choice = document.createElement('button');
-      choice.type = 'button';
-      choice.textContent = team.name;
-      choice.setAttribute('aria-pressed', String(state.teamFilter === team.code));
-      choice.addEventListener('click', () => selectTeamFilter(team.code));
-      picker.append(choice);
-    }
     for (const button of $('kind-filters').querySelectorAll('button')) {
       button.setAttribute('aria-pressed', String(button.dataset.kind === state.kindFilter));
     }
@@ -411,8 +395,6 @@
 
   function selectTeamFilter(team) {
     state.teamFilter = team;
-    $('team-filter-picker').hidden = true;
-    $('team-filter').setAttribute('aria-expanded', 'false');
     renderFilters();
     renderCatalog();
   }
@@ -442,26 +424,56 @@
   function renderTeamPicker() {
     const picker = $('team-picker');
     picker.replaceChildren();
-    for (const region of regions) {
-      for (const team of vctTeams.filter(candidate => candidate.region === region.id)) {
-        const choice = document.createElement('button');
-        choice.type = 'button';
-        choice.setAttribute('aria-pressed', String(state.favouriteTeams.has(team.code)));
-        const name = document.createElement('strong');
-        name.textContent = team.name;
-        const label = document.createElement('span');
-        label.textContent = region.name;
-        choice.append(name, label);
-        choice.addEventListener('click', () => {
-          if (state.favouriteTeams.has(team.code)) state.favouriteTeams.delete(team.code);
-          else state.favouriteTeams.add(team.code);
-          saveFavouriteTeams();
-          renderTeamPicker();
-          renderFavourites();
-        });
-        picker.append(choice);
-      }
+    const filtering = state.teamPickerMode === 'filter';
+    const teams = vctTeams.filter(team => !filtering || state.regionFilter === 'all' || team.region === state.regionFilter);
+    if (filtering) {
+      const all = document.createElement('button');
+      all.type = 'button';
+      all.setAttribute('aria-pressed', String(state.teamFilter === 'all'));
+      const name = document.createElement('strong');
+      name.textContent = state.regionFilter === 'all' ? 'All VCT teams' : 'All ' + regions.find(region => region.id === state.regionFilter).name + ' teams';
+      const label = document.createElement('span');
+      label.textContent = 'Clear filter';
+      all.append(name, label);
+      all.addEventListener('click', () => {
+        selectTeamFilter('all');
+        $('teams-dialog').close();
+      });
+      picker.append(all);
     }
+    for (const team of teams) {
+      const choice = document.createElement('button');
+      choice.type = 'button';
+      choice.setAttribute('aria-pressed', String(filtering ? state.teamFilter === team.code : state.favouriteTeams.has(team.code)));
+      const name = document.createElement('strong');
+      name.textContent = team.name;
+      const label = document.createElement('span');
+      label.textContent = team.region;
+      choice.append(name, label);
+      choice.addEventListener('click', () => {
+        if (filtering) {
+          selectTeamFilter(team.code);
+          $('teams-dialog').close();
+          return;
+        }
+        if (state.favouriteTeams.has(team.code)) state.favouriteTeams.delete(team.code);
+        else state.favouriteTeams.add(team.code);
+        saveFavouriteTeams();
+        renderTeamPicker();
+        renderFavourites();
+      });
+      picker.append(choice);
+    }
+  }
+
+  function openTeamPicker(mode) {
+    state.teamPickerMode = mode;
+    const filtering = mode === 'filter';
+    $('teams-kicker').textContent = filtering ? 'Match archive' : 'Personal archive';
+    $('teams-title').textContent = filtering ? 'Filter matches' : 'Choose your teams';
+    $('teams-copy').textContent = filtering ? 'Choose one team to narrow the match archive, or clear the filter to show every team.' : 'Select the teams you want to follow. This never exposes their tournament path.';
+    renderTeamPicker();
+    $('teams-dialog').showModal();
   }
 
   function tournamentMatchRow(match, position, status) {
@@ -1024,8 +1036,7 @@
     if (event.target === $('settings-dialog')) $('settings-dialog').close();
   });
   $('choose-teams').addEventListener('click', () => {
-    renderTeamPicker();
-    $('teams-dialog').showModal();
+    openTeamPicker('favourites');
   });
   $('teams-close').addEventListener('click', () => $('teams-dialog').close());
   $('teams-dialog').addEventListener('click', event => {
@@ -1054,10 +1065,7 @@
     });
   }
   $('team-filter').addEventListener('click', () => {
-    const picker = $('team-filter-picker');
-    const expanded = picker.hidden;
-    picker.hidden = !expanded;
-    $('team-filter').setAttribute('aria-expanded', String(expanded));
+    openTeamPicker('filter');
   });
   $('home-button').addEventListener('click', () => showLibrary());
   const spoilerWord = $('spoiler-word');

@@ -141,7 +141,7 @@ test('website library supports source, region, and all VCT team filters', () => 
   assert.match(index, /data-region="pacific"/);
   assert.match(index, /data-region="china"/);
   assert.match(index, /id="team-filter"/);
-  assert.match(index, /id="team-filter-picker"/);
+  assert.match(index, /aria-haspopup="dialog"/);
   assert.doesNotMatch(index, /<select id="team-filter"/);
   assert.match(app, /function matchup\(entry\)/);
   assert.match(app, /const vctTeams = \[/);
@@ -206,6 +206,7 @@ test('website keeps favourite teams and tournament progress spoiler safe', () =>
   assert.match(index, /id="tournaments"/);
   assert.match(app, /spoilless-favourite-teams/);
   assert.match(app, /spoilless-watched-matches/);
+  assert.match(app, /function openTeamPicker\(mode\)/);
   assert.match(app, /function tournamentMatches\(\)/);
   assert.match(app, /tournament-match is-' \+ status/);
   assert.match(app, /title\.textContent = 'Locked'/);

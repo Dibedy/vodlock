@@ -80,8 +80,7 @@
           </div>
           <div class="filter-block filter-team">
             <span class="filter-label">Team</span>
-            <button id="team-filter" class="team-filter-button" type="button" aria-expanded="false" aria-controls="team-filter-picker"></button>
-            <div id="team-filter-picker" class="team-filter-picker" role="group" aria-label="Filter by VCT team" hidden></div>
+            <button id="team-filter" class="team-filter-button" type="button" aria-haspopup="dialog"></button>
           </div>
           <div id="filter-summary" class="filter-summary" aria-live="polite">
             <strong id="filter-match-count">0</strong>
@@ -161,8 +160,8 @@
     </div>
   </dialog>
   <dialog id="teams-dialog" class="teams-dialog" aria-labelledby="teams-title">
-    <div class="teams-dialog-heading"><div><span class="section-kicker">Personal archive</span><h2 id="teams-title">Choose your teams</h2></div><button id="teams-close" type="button" aria-label="Close team picker">Close</button></div>
-    <p>Select the teams you want to follow. This never exposes their tournament path.</p>
+    <div class="teams-dialog-heading"><div><span id="teams-kicker" class="section-kicker">Personal archive</span><h2 id="teams-title">Choose your teams</h2></div><button id="teams-close" type="button" aria-label="Close team picker">Close</button></div>
+    <p id="teams-copy">Select the teams you want to follow. This never exposes their tournament path.</p>
     <div id="team-picker" class="team-picker" role="group" aria-label="Choose favourite VCT teams"></div>
   </dialog>
   <div id="toast" class="toast" role="status" hidden></div>

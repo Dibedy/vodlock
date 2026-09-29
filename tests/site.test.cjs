@@ -111,6 +111,7 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.doesNotMatch(index, /Click to reveal/);
   assert.match(styles, /\.spoiler-word > span \{[^}]+filter: blur\(14px\)[^}]+transition: filter 240ms ease/);
   assert.match(styles, /assets\/noise\.svg/);
+  assert.match(styles, /body \{[^}]+background: var\(--bg\) url\("\/assets\/noise\.svg"\) repeat/);
   assert.match(styles, /assets\/halftone\.svg/);
   assert.match(styles, /twitch-timeline-hidden #media-player iframe[^}]+top: -90px[^}]+height: calc\(100% \+ 180px\)/);
   assert.match(styles, /watch-layout:fullscreen \.chat-panel/);

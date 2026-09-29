@@ -17,7 +17,7 @@
 
 * { box-sizing: border-box; }
 html { background: var(--bg); scroll-behavior: smooth; }
-body { margin: 0; min-width: 320px; color: var(--text); background: var(--bg); font-family: Arial, Helvetica, sans-serif; }
+body { margin: 0; min-width: 320px; color: var(--text); background: var(--bg) url("/assets/noise.svg") repeat; font-family: Arial, Helvetica, sans-serif; }
 button, input { font: inherit; }
 button, a { color: inherit; }
 button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid var(--lime); outline-offset: 3px; }
@@ -38,7 +38,6 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .library-view { padding-bottom: 120px; }
 .library-heading { min-height: calc(100vh - 62px); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr); position: relative; border-bottom: 1px solid var(--line); overflow: hidden; }
-.library-heading::before { content: ""; position: absolute; z-index: 0; inset: 0; background: url("/assets/noise.svg") repeat; opacity: .055; pointer-events: none; }
 .library-heading::after { content: ""; position: absolute; z-index: 2; top: clamp(72px, 9vw, 128px); bottom: clamp(72px, 9vw, 128px); left: 55%; width: 1px; background: var(--line); pointer-events: none; }
 .library-title { min-width: 0; padding: clamp(48px, 6vw, 92px); display: flex; align-items: center; position: relative; z-index: 1; }
 .library-title::before { content: ""; position: absolute; right: 6%; bottom: 12%; width: min(48%, 360px); height: 56%; background: url("/assets/halftone.svg") repeat; opacity: .08; pointer-events: none; }

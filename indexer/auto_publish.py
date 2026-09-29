@@ -79,6 +79,8 @@ def should_attempt(key, published, state, retry_hours, now):
     previous = state.get(key)
     if not previous:
         return True
+    if previous.get("status") == "superseded":
+        return False
     if previous.get("status") == "published":
         return True
     previous_version = previous.get("pipelineVersion")
@@ -336,6 +338,11 @@ def process(channel, entry, config, state=None, yt_dlp=None):
         catalog["videos"].insert(0, catalog_entry)
         catalog["updatedAt"] = datetime.now(timezone.utc).date().isoformat()
         write_json(catalog_path, catalog)
+        if aligned_source_id and state is not None:
+            source = state["videos"][source_key("twitch", aligned_source_id)]
+            source["status"] = "superseded"
+            source["message"] = "Superseded by " + source_key("youtube", entry["id"])
+            source["supersededBy"] = source_key("youtube", entry["id"])
         return True, "Published"
     finally:
         server.JOBS.pop(identifier, None)

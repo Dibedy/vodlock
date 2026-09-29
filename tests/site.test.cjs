@@ -111,10 +111,10 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.doesNotMatch(index, /Click to reveal/);
   assert.match(styles, /\.spoiler-word > span \{[^}]+filter: blur\(14px\)[^}]+transition: filter 240ms ease/);
   assert.match(styles, /assets\/noise\.svg/);
-  assert.match(styles, /body \{[^}]+background: url\("\/assets\/halftone\.svg"\) repeat, var\(--bg\) url\("\/assets\/noise\.svg"\) repeat/);
-  assert.match(styles, /assets\/halftone\.svg/);
+  assert.match(styles, /body \{[^}]+background: var\(--bg\) url\("\/assets\/noise\.svg"\) repeat/);
+  assert.doesNotMatch(styles, /assets\/halftone\.svg/);
   assert.match(styles, /\.library-heading::after \{[^}]+background: #455047/);
-  assert.match(styles, /\.library-heading::before \{[^}]+radial-gradient\(ellipse 30% 48% at 23% 54%/);
+  assert.match(styles, /\.library-heading::before \{[^}]+radial-gradient\(ellipse 24% 36% at 22% 48%/);
   assert.doesNotMatch(styles, /\.library-summary::before/);
   assert.doesNotMatch(styles, /\.library-title::before/);
   assert.match(styles, /\.library-summary \{[^}]+transform: translateY\(clamp\(12px, 2vw, 28px\)\)/);

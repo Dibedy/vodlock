@@ -4,6 +4,15 @@
   "videos": [
     {
       "provider": "twitch",
+      "sourceId": "2882594925",
+      "title": "TL vs PRX",
+      "event": "VALORANT Champions Shanghai | Opening Day",
+      "label": "Full broadcast",
+      "index": "/indexes/twitch-2882594925.json",
+      "chat": "/chats/twitch-2882594925.json"
+    },
+    {
+      "provider": "twitch",
       "sourceId": "2883454178",
       "title": "NS vs NRG",
       "event": "VALORANT Champions Shanghai | Group Stage",

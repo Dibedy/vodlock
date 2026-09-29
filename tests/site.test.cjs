@@ -107,8 +107,8 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.match(index, /id="chat-toggle"/);
   assert.doesNotMatch(index, /SYNCED/);
   const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
-  assert.match(app, /\$\('spoiler-word'\)\.setAttribute\('aria-pressed', 'true'\)/);
-  assert.match(styles, /\.spoiler-word \{[^}]+filter: blur\(14px\)/);
+  assert.match(app, /spoilerWord\.setAttribute\('aria-pressed', String\(!revealed\)\)/);
+  assert.match(styles, /\.spoiler-word > span \{[^}]+filter: blur\(14px\)[^}]+transition: filter 240ms ease, color 240ms ease/);
   assert.match(styles, /twitch-timeline-hidden #media-player iframe[^}]+top: -90px[^}]+height: calc\(100% \+ 180px\)/);
   assert.match(styles, /watch-layout:fullscreen \.chat-panel/);
   assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);

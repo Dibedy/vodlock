@@ -755,9 +755,11 @@
     });
   }
   $('home-button').addEventListener('click', () => showLibrary());
-  $('spoiler-word').addEventListener('click', () => {
-    $('spoiler-word').setAttribute('aria-pressed', 'true');
-    $('spoiler-word').setAttribute('aria-label', 'Spoilers revealed');
+  const spoilerWord = $('spoiler-word');
+  spoilerWord.addEventListener('click', () => {
+    const revealed = spoilerWord.getAttribute('aria-pressed') === 'true';
+    spoilerWord.setAttribute('aria-pressed', String(!revealed));
+    spoilerWord.setAttribute('aria-label', revealed ? 'Reveal spoilers' : 'Hide spoilers');
   });
   $('back-button').addEventListener('click', () => showLibrary());
   $('return-library').addEventListener('click', () => showLibrary());

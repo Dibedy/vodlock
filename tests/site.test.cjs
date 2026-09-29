@@ -91,9 +91,10 @@ test('website release surfaces include the favicon and legal pages', () => {
   }
 });
 
-test('website mentions spoiler-safe once and uses ten-second arrow navigation', () => {
+test('website keeps concise archive copy and uses ten-second arrow navigation', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
-  assert.equal((index.match(/spoiler-safe/gi) || []).length, 1);
+  assert.match(index, /Watch VALORANT VODs\.\s*<span>Without spoilers\.<\/span>/);
+  assert.doesNotMatch(index, /spoiler-safe/gi);
   assert.match(index, /aria-label="Go back 10 seconds"/);
   assert.match(index, /aria-label="Skip forward 10 seconds"/);
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');

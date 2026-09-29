@@ -4,6 +4,15 @@
   "videos": [
     {
       "provider": "twitch",
+      "sourceId": "2882589453",
+      "title": "EG FNS",
+      "event": "PRX vs Team Liquid | VCT Champions Group Stage #VCTWatchparty | !vote !inzone",
+      "label": "Full broadcast",
+      "index": "/indexes/twitch-2882589453.json",
+      "chat": "/chats/twitch-2882589453.json"
+    },
+    {
+      "provider": "twitch",
       "sourceId": "2882594925",
       "title": "TL vs PRX",
       "event": "VALORANT Champions Shanghai | Opening Day",

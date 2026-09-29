@@ -1,4 +1,5 @@
 import json
+import os
 import shutil
 import subprocess
 from pathlib import Path
@@ -42,7 +43,8 @@ def extract_storyboard(url, provider, yt_dlp, requester=None):
     if node:
         options["js_runtimes"] = {"node": {"path": node}}
     if provider == "youtube":
-        options["extractor_args"] = {"youtube": {"player_client": ["web_embedded"]}}
+        client = "web" if os.environ.get("VODLOCK_YOUTUBE_POT") == "1" else "web_embedded"
+        options["extractor_args"] = {"youtube": {"player_client": [client]}}
     with yt_dlp.YoutubeDL(options) as downloader:
         info = downloader.extract_info(url, download=False)
     formats = [item for item in info.get("formats", [])

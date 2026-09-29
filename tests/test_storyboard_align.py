@@ -1,10 +1,12 @@
 import hashlib
+import os
 import sys
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "indexer"))
-from storyboard_align import align_storyboards, hamming, translate_index
+from storyboard_align import align_storyboards, extract_storyboard, hamming, translate_index
 
 
 def unique_hash(value):
@@ -12,6 +14,33 @@ def unique_hash(value):
 
 
 class StoryboardAlignmentTests(unittest.TestCase):
+    def test_youtube_storyboard_uses_web_client_with_po_token_provider(self):
+        captured = {}
+
+        class Expected(Exception):
+            pass
+
+        class Downloader:
+            def __init__(self, options):
+                captured.update(options)
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return False
+
+            def extract_info(self, *_, **__):
+                raise Expected()
+
+        class YtDlp:
+            YoutubeDL = Downloader
+
+        with patch.dict(os.environ, {"VODLOCK_YOUTUBE_POT": "1"}):
+            with self.assertRaises(Expected):
+                extract_storyboard("https://youtube.com/watch?v=example", "youtube", YtDlp)
+        self.assertEqual(captured["extractor_args"]["youtube"]["player_client"], ["web"])
+
     def test_hamming_distance_counts_changed_bits(self):
         self.assertEqual(hamming("00ff", "01fe"), 2)
 

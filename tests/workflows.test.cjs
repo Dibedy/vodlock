@@ -33,3 +33,8 @@ test('publisher uses a local PO-token provider for YouTube downloads', () => {
   assert.match(publisher, /127\.0\.0\.1:4416:4416/);
   assert.match(publisher, /Stop YouTube PO-token provider/);
 });
+
+test('publisher synchronizes before committing generated indexes', () => {
+  const publisher = workflow('auto-publish.yml');
+  assert.ok(publisher.indexOf('git pull --rebase origin main') < publisher.indexOf('git add site/catalog.json'));
+});

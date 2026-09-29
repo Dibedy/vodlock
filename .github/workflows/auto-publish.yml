@@ -90,9 +90,9 @@ jobs:
         run: |
           git config user.name "vodlock-bot"
           git config user.email "vodlock-bot@users.noreply.github.com"
+          git pull --rebase origin main
           git add site/catalog.json site/indexes site/chats indexer/auto_state.json indexer/storyboards
           git diff --cached --quiet || git commit -m "Publish automatic VOD index"
-          git pull --rebase origin main
           git push
       - name: Stop YouTube PO-token provider
         if: always() && (github.event_name != 'workflow_dispatch' || inputs.process_vods == true)

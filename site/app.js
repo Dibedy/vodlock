@@ -130,7 +130,9 @@
       for (const [text, emote] of message.fragments) {
         if (emote) {
           const image = document.createElement('img');
-          image.src = 'https://static-cdn.jtvnw.net/emoticons/v2/' + emote + '/default/dark/1.0';
+          image.src = emote.startsWith('7tv:')
+            ? 'https://cdn.7tv.app/emote/' + emote.slice(4) + '/1x.webp'
+            : 'https://static-cdn.jtvnw.net/emoticons/v2/' + emote + '/default/dark/1.0';
           image.alt = text;
           image.loading = 'lazy';
           row.append(image);

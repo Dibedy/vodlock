@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
 MAX_MESSAGES = 120000
 MAX_MESSAGES_PER_SECOND = 8
+SEVENTV_ID = re.compile(r"[A-Za-z0-9]{20,32}")
 
 
 def clean_text(value, limit):
@@ -21,10 +22,44 @@ def clean_fragment(value, limit):
     return re.sub(r"[\x00-\x1f\x7f]+", " ", str(value or ""))[:limit]
 
 
+def seventv_emotes(value):
+    embedded = value.get("embeddedData") or value.get("embedded_data") or {}
+    entries = embedded.get("thirdParty") or embedded.get("third_party") or []
+    if not isinstance(entries, list):
+        return {}
+    emotes = {}
+    for entry in entries:
+        if not isinstance(entry, dict) or entry.get("isZeroWidth") is True or entry.get("is_zero_width") is True:
+            continue
+        emote_id = str(entry.get("id") or "")
+        name = str(entry.get("name") or "")
+        if SEVENTV_ID.fullmatch(emote_id) and 0 < len(name) <= 100 and not re.search(r"\s", name):
+            emotes[name] = emote_id
+    return emotes
+
+
+def split_seventv_fragment(text, emotes):
+    if not emotes:
+        return [[text]]
+    pattern = re.compile(r"(?<!\S)(" + "|".join(re.escape(name) for name in sorted(emotes, key=len, reverse=True)) + r")(?!\S)")
+    fragments = []
+    position = 0
+    for match in pattern.finditer(text):
+        if match.start() > position:
+            fragments.append([text[position:match.start()]])
+        name = match.group(0)
+        fragments.append([name, "7tv:" + emotes[name]])
+        position = match.end()
+    if position < len(text):
+        fragments.append([text[position:]])
+    return fragments or [[text]]
+
+
 def convert_chat(value, source_id):
     if not re.fullmatch(r"[0-9]{6,20}", source_id) or not isinstance(value, dict) or not isinstance(value.get("comments"), list):
         raise ValueError("TwitchDownloader returned an invalid chat archive")
     messages = []
+    emotes = seventv_emotes(value)
     per_second = {}
     comments = sorted(value["comments"], key=lambda item: item.get("content_offset_seconds", 0) if isinstance(item, dict) else 0)
     for comment in comments:
@@ -55,11 +90,15 @@ def convert_chat(value, source_id):
                     continue
                 emoticon = fragment.get("emoticon")
                 emote_id = str(emoticon.get("emoticon_id", "")) if isinstance(emoticon, dict) else ""
-                fragments.append([text, emote_id] if re.fullmatch(r"[0-9]{1,20}", emote_id) else [text])
+                if re.fullmatch(r"[0-9]{1,20}", emote_id):
+                    fragments.append([text, emote_id])
+                else:
+                    fragments.extend(split_seventv_fragment(text, emotes))
         if not fragments:
             body = clean_text(message.get("body"), 500)
             if body:
-                fragments = [[body]]
+                fragments = split_seventv_fragment(body, emotes)
+        fragments = fragments[:50]
         if not user or not fragments:
             continue
         messages.append({"t": round(float(offset), 2), "u": user, "c": color, "f": fragments})
@@ -90,7 +129,8 @@ def archive_chat(source_id, executable=None):
         return None
     with tempfile.TemporaryDirectory(prefix="vodlock-chat-") as directory:
         raw_path = Path(directory) / "chat.json"
-        result = subprocess.run([executable, "chatdownload", "--id", source_id, "-o", str(raw_path)],
+        result = subprocess.run([executable, "chatdownload", "--id", source_id, "--embed-images",
+                                 "--bttv=false", "--ffz=false", "--stv=true", "-o", str(raw_path)],
                                 capture_output=True, text=True, timeout=1800)
         if result.returncode:
             raise RuntimeError(clean_text(result.stderr or result.stdout or "Chat download failed", 1000))

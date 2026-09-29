@@ -111,7 +111,7 @@
       }
       const fragments = message.f.map(fragment => {
         if (!Array.isArray(fragment) || ![1, 2].includes(fragment.length) || typeof fragment[0] !== 'string' || fragment[0].length > 500 ||
-            fragment.length === 2 && (typeof fragment[1] !== 'string' || !/^[0-9]{1,20}$/.test(fragment[1]))) {
+            fragment.length === 2 && (typeof fragment[1] !== 'string' || !/^(?:[0-9]{1,20}|7tv:[A-Za-z0-9]{20,32})$/.test(fragment[1]))) {
           throw new Error('The archived VOD chat is invalid.');
         }
         return fragment.slice();

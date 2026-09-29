@@ -172,7 +172,7 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .chat-message { margin: 0 0 9px; color: #dce2dc; font-size: 12px; line-height: 1.45; overflow-wrap: anywhere; }
 .chat-message time { margin-right: 6px; color: var(--faint); font-size: 9px; font-variant-numeric: tabular-nums; }
 .chat-message strong { margin-right: 5px; color: #aeb7b1; }
-.chat-message img { width: 24px; height: 24px; margin: -5px 2px; object-fit: contain; vertical-align: middle; }
+.chat-message img { width: auto; max-width: 96px; height: 24px; margin: -5px 2px; object-fit: contain; vertical-align: middle; }
 .chat-empty { margin: 0; color: var(--faint); font-size: 11px; line-height: 1.55; }
 
 body.theater-mode main { width: 100%; }

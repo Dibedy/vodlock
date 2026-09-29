@@ -46,11 +46,16 @@ test('website validates provider-neutral Twitch indexes', () => {
 
 test('website validates compact synchronized Twitch chat without future data', () => {
   const messages = validateChat({v: 1, source: '1234567890', messages: [
-    {t: 10, u: 'viewer', c: '#12Ab34', f: [['hello '], ['Kappa', '25']]},
+    {t: 10, u: 'viewer', c: '#12Ab34', f: [['hello '], ['Kappa', '25'], ['KEKW', '7tv:01F6M2T8P00000000000000000']]},
     {t: 12.5, u: 'other', c: '', f: [['nice']]}
   ]}, '1234567890');
   assert.equal(messages.length, 2);
   assert.equal(messages[0].fragments[1][1], '25');
+  assert.equal(messages[0].fragments[2][1], '7tv:01F6M2T8P00000000000000000');
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const vercel = readFileSync(resolve(__dirname, '../site/vercel.json'), 'utf8');
+  assert.match(app, /https:\/\/cdn\.7tv\.app\/emote\//);
+  assert.match(vercel, /https:\/\/cdn\.7tv\.app/);
   assert.throws(() => validateChat({v: 1, source: '1234567890', messages: [
     {t: 12, u: 'viewer', c: '', f: [['later']]}, {t: 10, u: 'viewer', c: '', f: [['earlier']]}
   ]}, '1234567890'));

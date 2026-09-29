@@ -74,6 +74,19 @@
     updateStatus();
   }
 
+  function preventTwitchNativeFullscreen() {
+    if (state.entry?.provider !== 'twitch') return;
+    const iframe = $('media-player')?.querySelector('iframe');
+    if (!iframe) return;
+    iframe.removeAttribute('allowfullscreen');
+    const currentPermissions = iframe.getAttribute('allow') || '';
+    const permissions = currentPermissions.split(';').map(value => value.trim()).filter(value => value && !value.startsWith('fullscreen')).join('; ');
+    if (permissions !== currentPermissions) {
+      if (permissions) iframe.setAttribute('allow', permissions);
+      else iframe.removeAttribute('allow');
+    }
+  }
+
   function toast(message) {
     clearTimeout(state.toastTimer);
     $('toast').textContent = message;
@@ -483,6 +496,7 @@
 
   function playerReady() {
     state.ready = true;
+    preventTwitchNativeFullscreen();
     setVolume(Number($('volume').value));
     const destination = state.resumeTime ?? Math.max(0, state.index.rounds[0].start - state.index.leadSeconds);
     state.resumeTime = null;
@@ -530,6 +544,7 @@
       height: '100%',
       autoplay: false
     });
+    preventTwitchNativeFullscreen();
     state.player.addEventListener(Twitch.Player.READY, playerReady);
     state.player.addEventListener(Twitch.Player.PLAY, () => setPlaying(true));
     state.player.addEventListener(Twitch.Player.PAUSE, () => setPlaying(false));
@@ -788,6 +803,7 @@
   $('fullscreen-button').addEventListener('click', toggleFullscreen);
   $('theater-button').addEventListener('click', toggleTheater);
   document.addEventListener('fullscreenchange', syncFullscreenButton);
+  new MutationObserver(preventTwitchNativeFullscreen).observe($('player-shell'), {subtree: true, childList: true, attributes: true, attributeFilter: ['allow', 'allowfullscreen']});
   addEventListener('blur', reclaimPlayerFocus);
   addEventListener('pagehide', () => saveResume(true));
   $('previous-round').addEventListener('click', () => navigateRound(-1));

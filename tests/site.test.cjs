@@ -178,6 +178,16 @@ test('website keeps playback shortcuts available after interacting with provider
   assert.doesNotMatch(styles, /twitch-timeline-hidden #media-player iframe[^}]+pointer-events: none/);
 });
 
+test('website keeps Twitch native fullscreen from bypassing the hidden timeline', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const vercel = readFileSync(resolve(__dirname, '../site/vercel.json'), 'utf8');
+  assert.match(app, /function preventTwitchNativeFullscreen\(\)/);
+  assert.match(app, /iframe\.removeAttribute\('allowfullscreen'\)/);
+  assert.match(app, /new MutationObserver\(preventTwitchNativeFullscreen\)/);
+  assert.match(vercel, /fullscreen=\(self\)/);
+  assert.doesNotMatch(vercel, /fullscreen=\(self [^)]+\)/);
+});
+
 test('website keeps settings visible in the sticky header', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
   const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');

@@ -93,7 +93,7 @@ test('website release surfaces include the favicon and legal pages', () => {
 
 test('website keeps concise archive copy and uses ten-second arrow navigation', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
-  assert.match(index, /Watch VALORANT VODs\.\s*<span>Without spoilers\.<\/span>/);
+  assert.match(index, /id="spoiler-word" class="spoiler-word"/);
   assert.doesNotMatch(index, /spoiler-safe/gi);
   assert.match(index, /aria-label="Go back 10 seconds"/);
   assert.match(index, /aria-label="Skip forward 10 seconds"/);
@@ -107,6 +107,8 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.match(index, /id="chat-toggle"/);
   assert.doesNotMatch(index, /SYNCED/);
   const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
+  assert.match(app, /\$\('spoiler-word'\)\.setAttribute\('aria-pressed', 'true'\)/);
+  assert.match(styles, /\.spoiler-word \{[^}]+filter: blur\(8px\)/);
   assert.match(styles, /twitch-timeline-hidden #media-player iframe[^}]+top: -90px[^}]+height: calc\(100% \+ 180px\)/);
   assert.match(styles, /watch-layout:fullscreen \.chat-panel/);
   assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);

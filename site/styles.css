@@ -326,7 +326,6 @@ footer a:hover { color: var(--lime); }
   .teams-dialog-heading { padding: 22px 20px 18px; }
   .teams-dialog > p { margin: 18px 20px; }
   .team-picker { padding: 8px 20px 20px; }
-  .section-heading { margin-left: 0; }
   .section-heading h2 { font-size: 42px; }
   .filter-panel { padding: 14px; gap: 16px; }
   .filter-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }

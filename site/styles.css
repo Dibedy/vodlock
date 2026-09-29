@@ -259,7 +259,6 @@ footer a:hover { color: var(--lime); }
 .team-picker button span { display: block; margin-top: 5px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
 .team-picker button:hover { border-color: var(--line); background: var(--raised); }
 .team-picker button[aria-pressed="true"] { border-color: var(--lime); background: rgba(184, 245, 43, .09); }
-.team-picker button[aria-pressed="true"] strong::after { content: " ★"; color: var(--lime); font-family: Arial, sans-serif; font-size: 12px; vertical-align: middle; }
 
 .legal-page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 94px 0 120px; }
 .legal-page h1 { max-width: 940px; margin: 18px 0 32px; font-family: var(--display); font-size: clamp(58px, 10vw, 120px); line-height: .78; letter-spacing: -.07em; text-transform: uppercase; }

@@ -36,5 +36,6 @@ test('publisher uses a local PO-token provider for YouTube downloads', () => {
 
 test('publisher synchronizes before committing generated indexes', () => {
   const publisher = workflow('auto-publish.yml');
-  assert.ok(publisher.indexOf('git pull --rebase origin main') < publisher.indexOf('git add site/catalog.json'));
+  assert.match(publisher, /git pull --rebase --autostash origin main/);
+  assert.ok(publisher.indexOf('git pull --rebase --autostash origin main') < publisher.indexOf('git add site/catalog.json'));
 });

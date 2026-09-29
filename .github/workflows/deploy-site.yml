@@ -1,4 +1,4 @@
-name: Deploy SPOILLESS website
+name: Deploy SPOILLESS
 
 on:
   push:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: vodlock-site-deploy
+  group: spoilless-deploy
   cancel-in-progress: true
 
 permissions:
@@ -19,14 +19,19 @@ permissions:
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     env:
       VERCEL_ORG_ID: team_RVbqStzk6bcBVRtZJdFZNCGK
       VERCEL_PROJECT_ID: prj_v4wVPQu8PDkHaPFu0x2EhMmOiPfR
       VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
       - uses: actions/checkout@v6
-      - name: Deploy SPOILLESS
-        run: |
-          test -n "$VERCEL_TOKEN"
-          npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+      - name: Verify website behavior
+        run: node --test tests/site.test.cjs
+      - name: Verify deployment credentials
+        run: test -n "$VERCEL_TOKEN"
+      - name: Deploy production site
+        run: npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"

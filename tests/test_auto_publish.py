@@ -128,6 +128,29 @@ class AutoPublishTests(unittest.TestCase):
         held[key]["pipelineVersion"] = "older"
         self.assertTrue(auto_publish.should_attempt(key, set(), held, 6, now))
 
+    def test_manual_retry_bypasses_held_cooldown_without_republishing(self):
+        now = datetime.now(timezone.utc)
+        key = "youtube:abcdefghijk"
+        state = {key: {"status": "held", "checkedAt": now.isoformat(),
+                       "pipelineVersion": auto_publish.PIPELINE_VERSION, "retryClass": "pipeline-update"}}
+        self.assertFalse(auto_publish.should_process(key, set(), state, 6, now))
+        self.assertTrue(auto_publish.should_process(key, set(), state, 6, now, True))
+        self.assertFalse(auto_publish.should_process(key, {key}, state, 6, now, True))
+        self.assertFalse(auto_publish.should_process("youtube:lmnopqrstuv", set(), state, 6, now, True))
+
+    def test_pipeline_summary_reports_health_without_spoiler_data(self):
+        state = {"videos": {
+            "twitch:1234567890": {"status": "published", "channel": "Official", "checkedAt": "2026-09-29T12:00:00Z",
+                                    "message": "Published"},
+            "youtube:abcdefghijk": {"status": "held", "channel": "YouTube", "checkedAt": "2026-09-29T13:00:00Z",
+                                    "message": "No match | retry later"}}}
+        summary = auto_publish.pipeline_summary(state)
+        self.assertIn("Published: **1**", summary)
+        self.assertIn("Held: **1**", summary)
+        self.assertIn("youtube:abcdefghijk", summary)
+        self.assertIn("No match \\| retry later", summary)
+        self.assertNotIn("rounds", summary.lower())
+
     def test_two_new_youtube_matches_can_be_processed_in_one_run(self):
         channel = {"provider": "youtube", "name": "YouTube", "priority": 1}
         config = {"channels": [channel], "lookback": 30, "maxPerRun": 4, "maxPerChannelPerRun": 2}

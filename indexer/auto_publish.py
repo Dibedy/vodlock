@@ -95,6 +95,12 @@ def should_attempt(key, published, state, retry_hours, now):
     return (now - checked).total_seconds() >= retry_hours * 3600
 
 
+def should_process(key, published, state, retry_hours, now, retry_held=False):
+    if retry_held:
+        return key not in published and state.get(key, {}).get("status") == "held"
+    return should_attempt(key, published, state, retry_hours, now)
+
+
 def is_candidate(channel, entry, require_duration=True):
     title = clean_text(entry.get("title", ""))
     identifier = str(entry.get("id", ""))
@@ -165,6 +171,25 @@ def catalog_played_at(entry, rounds, source=None, alignment=None):
         elapsed = float(alignment.get("timelineScale", 1)) * first_round + float(segment["offset"])
     played = started.astimezone(timezone.utc) + timedelta(seconds=elapsed)
     return played.isoformat(timespec="seconds").replace("+00:00", "Z")
+
+
+def pipeline_summary(state):
+    videos = state.get("videos", {})
+    counts = {status: sum(1 for item in videos.values() if item.get("status") == status)
+              for status in ("published", "held", "superseded")}
+    recent = sorted(videos.items(), key=lambda item: item[1].get("checkedAt", ""), reverse=True)[:20]
+
+    def cell(value):
+        return clean_text(value).replace("|", "\\|")
+
+    lines = ["## VOD pipeline health", "",
+             f"Published: **{counts['published']}** · Held: **{counts['held']}** · Superseded: **{counts['superseded']}**",
+             "", "| Source | Status | Channel | Last checked | Result |", "|---|---|---|---|---|"]
+    for key, item in recent:
+        lines.append(f"| `{cell(key)}` | {cell(item.get('status', 'unknown'))} | {cell(item.get('channel', ''))} | "
+                     f"{cell(item.get('checkedAt', ''))} | {cell(item.get('message', ''))} |")
+    lines.extend(["", "Use **Run workflow → Retry held sources** to retry one eligible held source without waiting for its cooldown."])
+    return "\n".join(lines) + "\n"
 
 
 def publishable(job, minimum_confidence, minimum_rounds):
@@ -376,9 +401,19 @@ def process(channel, entry, config, state=None, yt_dlp=None):
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
+    parser.add_argument("--retry-held", action="store_true")
+    parser.add_argument("--summary-only", action="store_true")
     arguments = parser.parse_args()
     config = read_json(CONFIG_PATH)
     state = read_json(STATE_PATH)
+    if arguments.summary_only:
+        summary = pipeline_summary(state)
+        destination = os.environ.get("GITHUB_STEP_SUMMARY")
+        if destination:
+            Path(destination).write_text(summary, encoding="utf-8")
+        else:
+            sys.stdout.buffer.write(summary.encode("utf-8"))
+        return 0
     catalog = read_json(SITE / "catalog.json")
     published_ids = {source_key(item.get("provider", "youtube"), item.get("sourceId", item.get("videoId", "")))
                      for item in catalog["videos"]}
@@ -398,8 +433,8 @@ def main():
             print(f"YouTube discovery failed for {channel['name']}: {error}", file=sys.stderr, flush=True)
             continue
         eligible = [item for item in entries
-                    if should_attempt(source_key("youtube", item["id"]), published_ids, state["videos"],
-                                      config.get("youtubeRetryHours", 0.5), now)]
+                    if should_process(source_key("youtube", item["id"]), published_ids, state["videos"],
+                                      config.get("youtubeRetryHours", 0.5), now, arguments.retry_held)]
         for entry_index, entry in enumerate(eligible[:per_channel]):
             key = source_key("youtube", entry["id"])
             candidates.append((1 if key in state["videos"] else 0, channel.get("priority", 1),
@@ -417,8 +452,8 @@ def main():
             print("Twitch discovery skipped: set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET", file=sys.stderr)
     for channel_index, channel in enumerate(twitch_channels):
         eligible = [item for item in twitch_results.get(channel["login"], [])
-                    if should_attempt(source_key("twitch", item["id"]), published_ids, state["videos"],
-                                      config.get("retryHours", 6), now)]
+                    if should_process(source_key("twitch", item["id"]), published_ids, state["videos"],
+                                      config.get("retryHours", 6), now, arguments.retry_held)]
         for entry_index, entry in enumerate(eligible[:per_channel]):
             key = source_key("twitch", entry["id"])
             candidates.append((1 if key in state["videos"] else 0, channel.get("priority", 0),

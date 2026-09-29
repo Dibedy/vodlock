@@ -165,7 +165,7 @@
       "detectorVersion": "vct-clock-ocr-v8",
       "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
       "retryClass": "cooldown",
-      "checkedAt": "2026-09-29T12:49:57.127563+00:00"
+      "checkedAt": "2026-09-29T16:21:18.988810+00:00"
     },
     "twitch:2867033974": {
       "status": "published",
@@ -178,6 +178,30 @@
       "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
       "retryClass": "none",
       "checkedAt": "2026-09-29T13:58:00.917409+00:00"
+    },
+    "twitch:2866720987": {
+      "status": "published",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | NS vs GE - VCT Pacific Stage 2 Playoffs #VCTWatchparty | !vote !inzone",
+      "message": "Published",
+      "publishedAt": "2026-09-06T07:50:13Z",
+      "detectorVersion": "vct-clock-ocr-v8",
+      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
+      "retryClass": "none",
+      "checkedAt": "2026-09-29T15:20:43.656778+00:00"
+    },
+    "twitch:2866164077": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | NRG vs LOUD - VCT Americas Stage 2 Playoffs #VCTWatchparty | !vote !inzone",
+      "message": "Map 5: check the gap before round 14.",
+      "publishedAt": "2026-09-05T18:21:21Z",
+      "detectorVersion": "vct-clock-ocr-v8",
+      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-09-29T16:21:17.990348+00:00"
     }
   }
 }

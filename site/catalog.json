@@ -107,6 +107,16 @@
       "index": "/indexes/twitch-2867033974.json",
       "playedAt": "2026-09-06T17:17:12Z",
       "chat": "/chats/twitch-2867033974.json"
+    },
+    {
+      "provider": "twitch",
+      "sourceId": "2866720987",
+      "title": "EG FNS",
+      "event": "NS vs GE | VCT Pacific Stage 2 Playoffs #VCTWatchparty | !vote !inzone",
+      "label": "Full broadcast",
+      "index": "/indexes/twitch-2866720987.json",
+      "playedAt": "2026-09-06T08:15:44Z",
+      "chat": "/chats/twitch-2866720987.json"
     }
   ]
 }

@@ -4,6 +4,17 @@
   "videos": [
     {
       "provider": "youtube",
+      "sourceId": "y6wwIZysHns",
+      "title": "NRG vs KC",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-y6wwIZysHns.json",
+      "playedAt": "2026-09-29T16:02:28Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai"
+    },
+    {
+      "provider": "youtube",
       "sourceId": "fFfCJDNHEvc",
       "title": "JDG vs FUT",
       "event": "VALORANT Champions Shanghai | Group Stage",

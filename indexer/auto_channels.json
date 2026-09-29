@@ -16,7 +16,7 @@
       "login": "gofns",
       "priority": 2,
       "requireMatchup": true,
-      "includeTitle": ".+",
+      "includeTitle": "\\b(CHAMPIONS|SHANGHAI)\\b",
       "excludeTitle": "\\b(JUST CHATTING|WATCH PARTY WITHOUT VALORANT)\\b",
       "minimumDuration": 3600,
       "maximumDuration": 43200
@@ -28,7 +28,7 @@
       "priority": 0,
       "requireMatchup": true,
       "alignmentSource": true,
-      "includeTitle": ".+",
+      "includeTitle": "\\b(CHAMPIONS|SHANGHAI)\\b",
       "excludeTitle": "\\b(RERUN|REBROADCAST)\\b",
       "minimumDuration": 3600,
       "maximumDuration": 43200
@@ -49,7 +49,7 @@
       "name": "VALORANT Champions Tour",
       "channelId": "UCA1d3HFGFUmkKr2JIUA5Vlw",
       "priority": 1,
-      "includeTitle": "\\bFULL MATCH\\b",
+      "includeTitle": "(?=.*\\bFULL MATCH\\b)(?=.*\\b(CHAMPIONS|SHANGHAI)\\b)",
       "excludeTitle": "\\b(HIGHLIGHTS|SHOWMATCH)\\b",
       "minimumDuration": 3600
     }

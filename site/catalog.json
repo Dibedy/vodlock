@@ -117,30 +117,6 @@
       "index": "/indexes/twitch-2882594925.json",
       "playedAt": "2026-09-24T09:21:37Z",
       "chat": "/chats/twitch-2882594925.json"
-    },
-    {
-      "provider": "twitch",
-      "sourceId": "2867033974",
-      "title": "EG FNS",
-      "event": "LOUD vs 100T | VCT Americas Grand Finals #VCTWatchparty | !vote !inzone",
-      "tournament": "VCT Americas",
-      "tournamentKey": "vct-americas",
-      "label": "Full broadcast",
-      "index": "/indexes/twitch-2867033974.json",
-      "playedAt": "2026-09-06T17:17:12Z",
-      "chat": "/chats/twitch-2867033974.json"
-    },
-    {
-      "provider": "twitch",
-      "sourceId": "2866720987",
-      "title": "EG FNS",
-      "event": "NS vs GE | VCT Pacific Stage 2 Playoffs #VCTWatchparty | !vote !inzone",
-      "tournament": "VCT Pacific Stage 2",
-      "tournamentKey": "vct-pacific-stage-2",
-      "label": "Full broadcast",
-      "index": "/indexes/twitch-2866720987.json",
-      "playedAt": "2026-09-06T08:15:44Z",
-      "chat": "/chats/twitch-2866720987.json"
     }
   ]
 }

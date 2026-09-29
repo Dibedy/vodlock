@@ -23,7 +23,66 @@
     LOUD: '/assets/teams/loud.png',
     EDG: '/assets/teams/edg.png'
   };
-  const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', teamFilter: 'all'};
+  const regions = [
+    {id: 'americas', name: 'Americas'},
+    {id: 'emea', name: 'EMEA'},
+    {id: 'pacific', name: 'Pacific'},
+    {id: 'china', name: 'China'}
+  ];
+  const vctTeams = [
+    {code: '100T', name: '100 Thieves', region: 'americas'},
+    {code: 'C9', name: 'Cloud9', region: 'americas'},
+    {code: 'EG', name: 'Evil Geniuses', region: 'americas'},
+    {code: 'ENVY', name: 'ENVY', region: 'americas'},
+    {code: 'FUR', name: 'FURIA', region: 'americas'},
+    {code: 'G2', name: 'G2 Esports', region: 'americas'},
+    {code: 'KRU', name: 'KRÜ Visa', region: 'americas', aliases: ['KRÜ']},
+    {code: 'LEV', name: 'Leviatán Esports', region: 'americas', aliases: ['Leviatán']},
+    {code: 'LOUD', name: 'LOUD', region: 'americas'},
+    {code: 'MIBR', name: 'MIBR', region: 'americas'},
+    {code: 'NRG', name: 'NRG', region: 'americas'},
+    {code: 'SEN', name: 'Sentinels', region: 'americas'},
+    {code: 'BBL', name: 'BBL Esports', region: 'emea'},
+    {code: 'EF', name: 'Eternal Fire', region: 'emea'},
+    {code: 'FNC', name: 'FNATIC', region: 'emea'},
+    {code: 'FUT', name: 'FUT Esports', region: 'emea'},
+    {code: 'GX', name: 'GIANTX', region: 'emea'},
+    {code: 'KC', name: 'Karmine Corp', region: 'emea'},
+    {code: 'M8', name: 'Gentle Mates', region: 'emea'},
+    {code: 'NAVI', name: 'NAVI', region: 'emea', aliases: ['Natus Vincere']},
+    {code: 'PCF', name: 'PCIFIC Esports', region: 'emea'},
+    {code: 'TH', name: 'Team Heretics', region: 'emea'},
+    {code: 'TL', name: 'Team Liquid', region: 'emea'},
+    {code: 'VIT', name: 'Team Vitality', region: 'emea', aliases: ['Vitality']},
+    {code: 'DFM', name: 'DetonatioN FocusMe', region: 'pacific'},
+    {code: 'FS', name: 'FULL SENSE', region: 'pacific'},
+    {code: 'GE', name: 'Global Esports', region: 'pacific'},
+    {code: 'GEN', name: 'Gen.G', region: 'pacific'},
+    {code: 'KRX', name: 'Kiwoom DRX', region: 'pacific', aliases: ['DRX']},
+    {code: 'NS', name: 'Nongshim RedForce', region: 'pacific'},
+    {code: 'PRX', name: 'Paper Rex', region: 'pacific'},
+    {code: 'RRQ', name: 'Rex Regum Qeon', region: 'pacific'},
+    {code: 'T1', name: 'T1', region: 'pacific'},
+    {code: 'TS', name: 'Team Secret', region: 'pacific'},
+    {code: 'VL', name: 'VARREL', region: 'pacific'},
+    {code: 'ZETA', name: 'ZETA DIVISION', region: 'pacific'},
+    {code: 'AG', name: 'ALL GAMERS', region: 'china'},
+    {code: 'BLG', name: 'Bilibili Gaming', region: 'china'},
+    {code: 'DRG', name: 'Dragon Ranger Gaming', region: 'china'},
+    {code: 'EDG', name: 'EDward Gaming', region: 'china'},
+    {code: 'FPX', name: 'FunPlus Phoenix', region: 'china'},
+    {code: 'JDG', name: 'JD Gaming', region: 'china'},
+    {code: 'NOVA', name: 'NOVA Esports', region: 'china'},
+    {code: 'TE', name: 'Trace Esports', region: 'china'},
+    {code: 'TEC', name: 'Titan Esports Club', region: 'china'},
+    {code: 'TYL', name: 'TYLOO Gaming', region: 'china'},
+    {code: 'WOL', name: 'Wolves Esports', region: 'china'},
+    {code: 'XLG', name: 'Xi Lai Gaming', region: 'china'}
+  ];
+  const teamKey = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+  const teamAliases = new Map(vctTeams.flatMap(team => [team.code, team.name, ...(team.aliases || [])].map(value => [teamKey(value), team.code])));
+  const teamsByCode = new Map(vctTeams.map(team => [team.code, team]));
+  const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all'};
   let settings = readSettings();
 
   function readResume() {
@@ -194,6 +253,10 @@
     return [];
   }
 
+  function teamCode(value) {
+    return teamAliases.get(teamKey(value)) || value.toUpperCase();
+  }
+
   function entryKind(entry) {
     if (entry.kind === 'match' || entry.kind === 'watch-party') return entry.kind;
     return entry.label === 'Full match' || matchup({title: entry.title, event: ''}).length === 2 ? 'match' : 'watch-party';
@@ -206,7 +269,7 @@
 
   function matchKey(entry) {
     const teams = matchup(entry);
-    return teams.length === 2 ? teams.map(team => team.toUpperCase()).sort().join(':') : entry.title.toUpperCase();
+    return teams.length === 2 ? teams.map(teamCode).sort().join(':') : entry.title.toUpperCase();
   }
 
   function creatorName(entry) {
@@ -257,34 +320,42 @@
   }
 
   function renderFilters() {
-    const teams = [...new Set(state.catalog.flatMap(matchup))].sort((a, b) => a.localeCompare(b));
-    if (state.teamFilter !== 'all' && !teams.includes(state.teamFilter)) state.teamFilter = 'all';
-    const host = $('team-filters');
-    host.replaceChildren();
-    const all = document.createElement('button');
-    all.type = 'button';
-    all.dataset.team = 'all';
-    all.textContent = 'All teams';
-    host.append(all);
-    for (const team of teams) {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.dataset.team = team;
-      button.textContent = team;
-      host.append(button);
+    const selectedTeam = teamsByCode.get(state.teamFilter);
+    if (selectedTeam && state.regionFilter !== 'all' && selectedTeam.region !== state.regionFilter) state.teamFilter = 'all';
+    const select = $('team-filter');
+    select.replaceChildren();
+    const all = document.createElement('option');
+    all.value = 'all';
+    all.textContent = state.regionFilter === 'all' ? 'All VCT teams' : 'All ' + regions.find(region => region.id === state.regionFilter).name + ' teams';
+    select.append(all);
+    for (const region of regions) {
+      if (state.regionFilter !== 'all' && region.id !== state.regionFilter) continue;
+      const group = document.createElement('optgroup');
+      group.label = region.name;
+      for (const team of vctTeams.filter(candidate => candidate.region === region.id)) {
+        const option = document.createElement('option');
+        option.value = team.code;
+        option.textContent = team.code === team.name ? team.name : team.code + ' / ' + team.name;
+        group.append(option);
+      }
+      select.append(group);
     }
-    for (const button of host.querySelectorAll('button')) {
-      const selected = button.dataset.team === state.teamFilter;
-      button.setAttribute('aria-pressed', String(selected));
-      button.addEventListener('click', () => {
-        state.teamFilter = button.dataset.team;
-        renderFilters();
-        renderCatalog();
-      });
-    }
+    select.value = state.teamFilter;
     for (const button of $('kind-filters').querySelectorAll('button')) {
       button.setAttribute('aria-pressed', String(button.dataset.kind === state.kindFilter));
     }
+    for (const button of $('region-filters').querySelectorAll('button')) {
+      button.setAttribute('aria-pressed', String(button.dataset.region === state.regionFilter));
+    }
+  }
+
+  function filteredMatches() {
+    return groupedMatches().filter(match => {
+      const codes = match.teams.map(teamCode);
+      return (state.kindFilter === 'all' || match.entries.some(entry => entryKind(entry) === state.kindFilter)) &&
+        (state.regionFilter === 'all' || codes.some(code => teamsByCode.get(code)?.region === state.regionFilter)) &&
+        (state.teamFilter === 'all' || codes.includes(state.teamFilter));
+    });
   }
 
   function renderCard(match, number) {
@@ -340,9 +411,9 @@
   function renderCatalog() {
     const catalog = $('catalog');
     catalog.replaceChildren();
-    const visible = groupedMatches().filter(match =>
-      (state.kindFilter === 'all' || match.entries.some(entry => entryKind(entry) === state.kindFilter)) &&
-      (state.teamFilter === 'all' || match.teams.includes(state.teamFilter)));
+    const visible = filteredMatches();
+    $('filter-match-count').textContent = visible.length;
+    $('filter-summary').querySelector('span').textContent = visible.length === 1 ? 'match' : 'matches';
     for (const [position, match] of visible.entries()) catalog.append(renderCard(match, position + 1));
     if (!visible.length) {
       const empty = document.createElement('p');
@@ -769,6 +840,17 @@
       renderCatalog();
     });
   }
+  for (const button of $('region-filters').querySelectorAll('button')) {
+    button.addEventListener('click', () => {
+      state.regionFilter = button.dataset.region;
+      renderFilters();
+      renderCatalog();
+    });
+  }
+  $('team-filter').addEventListener('change', event => {
+    state.teamFilter = event.target.value;
+    renderCatalog();
+  });
   $('home-button').addEventListener('click', () => showLibrary());
   const spoilerWord = $('spoiler-word');
   spoilerWord.addEventListener('click', () => {

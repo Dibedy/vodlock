@@ -7,9 +7,9 @@
   <meta name="theme-color" content="#070908">
   <title>SPOILLESS | VALORANT VODs</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/styles.css?v=20260929-21">
+  <link rel="stylesheet" href="/styles.css?v=20260929-22">
   <script defer src="/core.js?v=20260929-12"></script>
-  <script defer src="/app.js?v=20260929-14"></script>
+  <script defer src="/app.js?v=20260929-15"></script>
 </head>
 <body>
   <a class="skip-link" href="#catalog-title">Skip to match index</a>
@@ -42,17 +42,31 @@
           <p>VALORANT Champions Shanghai</p>
         </div>
         <div class="filter-panel" aria-label="Library filters">
-          <div class="filter-block">
+          <div class="filter-block filter-source">
             <span class="filter-label">Source</span>
-            <div id="kind-filters" class="kind-filters">
-              <button type="button" data-kind="all" aria-pressed="true">All matches</button>
-              <button type="button" data-kind="match" aria-pressed="false">Official available</button>
-              <button type="button" data-kind="watch-party" aria-pressed="false">Watch party available</button>
+            <div id="kind-filters" class="filter-options" role="group" aria-label="Filter by source">
+              <button type="button" data-kind="all" aria-pressed="true">All</button>
+              <button type="button" data-kind="match" aria-pressed="false">Official</button>
+              <button type="button" data-kind="watch-party" aria-pressed="false">Watch parties</button>
             </div>
           </div>
-          <div class="filter-block">
+          <div class="filter-block filter-region">
+            <span class="filter-label">Region</span>
+            <div id="region-filters" class="filter-options" role="group" aria-label="Filter by VCT region">
+              <button type="button" data-region="all" aria-pressed="true">All</button>
+              <button type="button" data-region="americas" aria-pressed="false">Americas</button>
+              <button type="button" data-region="emea" aria-pressed="false">EMEA</button>
+              <button type="button" data-region="pacific" aria-pressed="false">Pacific</button>
+              <button type="button" data-region="china" aria-pressed="false">China</button>
+            </div>
+          </div>
+          <label class="filter-block filter-team" for="team-filter">
             <span class="filter-label">Team</span>
-            <div id="team-filters" class="team-filters"></div>
+            <span class="team-select-wrap"><select id="team-filter" aria-label="Filter by VCT team"></select></span>
+          </label>
+          <div id="filter-summary" class="filter-summary" aria-live="polite">
+            <strong id="filter-match-count">0</strong>
+            <span>matches</span>
           </div>
         </div>
         <div id="catalog" class="catalog-library" aria-live="polite"><p class="loading-copy">Loading library...</p></div>

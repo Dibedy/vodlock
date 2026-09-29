@@ -128,16 +128,25 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);
 });
 
-test('website library supports source and automatically derived team filters', () => {
+test('website library supports source, region, and all VCT team filters', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
   assert.match(index, /id="kind-filters"/);
   assert.match(index, /data-kind="match"/);
   assert.match(index, /data-kind="watch-party"/);
-  assert.match(index, /id="team-filters"/);
+  assert.match(index, /id="region-filters"/);
+  assert.match(index, /data-region="americas"/);
+  assert.match(index, /data-region="emea"/);
+  assert.match(index, /data-region="pacific"/);
+  assert.match(index, /data-region="china"/);
+  assert.match(index, /id="team-filter"/);
   assert.match(app, /function matchup\(entry\)/);
+  assert.match(app, /const vctTeams = \[/);
+  assert.equal((app.match(/region: '(?:americas|emea|pacific|china)'/g) || []).length, 48);
+  assert.match(app, /state\.regionFilter/);
   assert.match(app, /state\.teamFilter/);
+  assert.match(app, /function filteredMatches\(\)/);
   assert.match(app, /Official matches/);
   assert.match(app, /Watch parties/);
   assert.match(app, /vod-card/);

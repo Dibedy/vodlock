@@ -36,9 +36,8 @@ button:focus-visible, a:focus-visible, input:focus-visible { outline: 3px solid 
 .topbar .brand svg { width: 22px; height: 22px; }
 
 main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
-.library-view { padding: clamp(24px, 3vw, 48px) 0 120px; }
-.library-heading { min-height: min(520px, calc(100vh - 110px)); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr); border: 1px solid var(--line); }
-.library-heading:has(+ .continue-panel:not([hidden])) { border-bottom: 0; }
+.library-view { padding-bottom: 120px; }
+.library-heading { min-height: calc(100vh - 62px); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr); border-bottom: 1px solid var(--line); }
 .library-title { min-width: 0; padding: clamp(48px, 6vw, 92px); display: flex; align-items: center; border-right: 1px solid var(--line); }
 .library-heading h1 { max-width: 820px; margin: 0; font-family: var(--display); font-size: clamp(58px, 6.1vw, 98px); font-weight: 900; line-height: .87; letter-spacing: -.07em; text-transform: uppercase; }
 .library-heading h1 span { display: block; color: var(--lime); }
@@ -49,7 +48,7 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .hero-action { width: fit-content; display: inline-flex; align-items: center; gap: 22px; border-bottom: 1px solid var(--lime); padding: 0 0 12px; color: var(--text); font-size: 13px; font-weight: 900; letter-spacing: .08em; text-decoration: none; text-transform: uppercase; }
 .hero-action span { color: var(--lime); font-size: 18px; }
 
-.continue-panel { min-height: 118px; display: grid; grid-template-columns: 180px minmax(0, 1fr) auto; align-items: center; gap: 28px; border: 0 solid var(--line); border-width: 0 1px 1px; background: var(--raised); }
+.continue-panel { min-height: 118px; display: grid; grid-template-columns: 180px minmax(0, 1fr) auto; align-items: center; gap: 28px; border-bottom: 1px solid var(--line); background: var(--raised); }
 .continue-kicker { padding-left: 28px; color: var(--lime); font-size: 9px; font-weight: 900; letter-spacing: .16em; }
 .continue-match { padding: 22px 28px; display: grid; gap: 7px; border-left: 1px solid var(--line); }
 .continue-match span { color: var(--muted); font-size: 10px; text-transform: uppercase; }
@@ -237,7 +236,6 @@ footer a:hover { color: var(--lime); }
 @media (max-width: 620px) {
   main { width: min(100% - 24px, 1540px); }
   .topbar { height: 56px; padding: 0 14px; }
-  .library-view { padding-top: 12px; }
   .library-heading { min-height: 0; }
   .library-title { min-height: 280px; padding: 40px 22px; }
   .library-heading h1 { font-size: clamp(48px, 14vw, 66px); }

@@ -329,9 +329,7 @@
       label.textContent = sourceName(entry);
       const provider = document.createElement('span');
       provider.textContent = entry.provider === 'youtube' ? 'YouTube' : entry.chat ? 'Twitch · archived chat' : 'Twitch';
-      const arrow = document.createElement('b');
-      arrow.textContent = '→';
-      watch.append(label, provider, arrow);
+      watch.append(label, provider);
       watch.addEventListener('click', () => openVideo(entryKey(entry)));
       sources.append(watch);
     }

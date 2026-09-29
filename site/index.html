@@ -7,9 +7,9 @@
   <meta name="theme-color" content="#070908">
   <title>SPOILLESS | VALORANT VODs</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/styles.css?v=20260929-20">
+  <link rel="stylesheet" href="/styles.css?v=20260929-21">
   <script defer src="/core.js?v=20260929-12"></script>
-  <script defer src="/app.js?v=20260929-13"></script>
+  <script defer src="/app.js?v=20260929-14"></script>
 </head>
 <body>
   <a class="skip-link" href="#catalog-title">Skip to match index</a>
@@ -29,22 +29,21 @@
         </div>
       </div>
       <section id="continue-panel" class="continue-panel" aria-labelledby="continue-title" hidden>
-        <span class="continue-kicker">CONTINUE WATCHING</span>
+        <span class="continue-kicker">Continue watching</span>
         <div class="continue-match">
           <span id="continue-source"></span>
           <strong id="continue-title"></strong>
         </div>
-        <button id="continue-button" type="button">Resume broadcast <span>→</span></button>
+        <button id="continue-button" type="button">Resume broadcast</button>
       </section>
       <section class="catalog-section" aria-labelledby="catalog-title">
         <div class="section-heading">
-          <span>LIVE ARCHIVE / CHAMPIONS SHANGHAI</span>
-          <h2 id="catalog-title">Choose a match.</h2>
-          <p>Each match collects every indexed broadcast in one place. Pick the official feed or a creator watch party.</p>
+          <h2 id="catalog-title">Matches</h2>
+          <p>VALORANT Champions Shanghai</p>
         </div>
         <div class="filter-panel" aria-label="Library filters">
           <div class="filter-block">
-            <span class="filter-label">Type</span>
+            <span class="filter-label">Source</span>
             <div id="kind-filters" class="kind-filters">
               <button type="button" data-kind="all" aria-pressed="true">All matches</button>
               <button type="button" data-kind="match" aria-pressed="false">Official available</button>
@@ -73,7 +72,7 @@
           </div>
           <h1 id="watch-title" class="visually-hidden"></h1>
         </div>
-        <div class="watch-source"><span>SOURCE</span><strong id="watch-source"></strong></div>
+        <div class="watch-source"><strong id="watch-source"></strong></div>
       </header>
       <div id="watch-layout" class="watch-layout">
         <section class="video-column">
@@ -94,7 +93,6 @@
           </div>
           <div class="round-dock" aria-label="Round navigation">
             <div class="round-position">
-              <span>CURRENT POSITION</span>
               <strong id="current-round">Ready to begin</strong>
               <div class="map-inline" aria-label="Map navigation"><button id="previous-map" type="button" disabled>← Map</button><button id="next-map" type="button" disabled>Map →</button></div>
             </div>
@@ -112,14 +110,14 @@
           </div>
         </section>
         <aside id="chat-panel" class="chat-panel" hidden>
-          <div class="chat-heading"><span>ARCHIVED CHAT</span><i aria-hidden="true"></i></div>
+          <div class="chat-heading"><span>Chat</span><i aria-hidden="true"></i></div>
           <div id="chat-messages" class="chat-messages" aria-live="off"></div>
         </aside>
       </div>
     </section>
   </main>
   <dialog id="settings-dialog" class="settings-dialog" aria-labelledby="settings-title">
-    <div class="settings-heading"><div><span class="eyebrow">VIEW OPTIONS</span><h2 id="settings-title">Settings</h2></div><button id="settings-close" type="button" aria-label="Close settings">Close</button></div>
+    <div class="settings-heading"><h2 id="settings-title">Settings</h2><button id="settings-close" type="button" aria-label="Close settings">Close</button></div>
     <div class="settings-list">
       <label><span><strong>Hide Twitch timeline</strong><small>Crop Twitch's native control strip and use only SPOILLESS controls.</small></span><input id="setting-hide-twitch-timeline" type="checkbox"></label>
       <label><span><strong>Hide match details</strong><small>Hide the broadcast title and event while watching.</small></span><input id="setting-hide-metadata" type="checkbox"></label>

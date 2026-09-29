@@ -131,6 +131,7 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
 test('website library supports source and automatically derived team filters', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
   assert.match(index, /id="kind-filters"/);
   assert.match(index, /data-kind="match"/);
   assert.match(index, /data-kind="watch-party"/);
@@ -143,6 +144,10 @@ test('website library supports source and automatically derived team filters', (
   assert.doesNotMatch(index, /class="hero"/);
   assert.doesNotMatch(app, /team-mark/);
   assert.doesNotMatch(index, /video-search|video-url|Open a VOD/);
+  assert.match(index, /<h2 id="catalog-title">Matches<\/h2>/);
+  assert.doesNotMatch(index, /LIVE ARCHIVE|Choose a match\.<\/h2>/);
+  assert.doesNotMatch(app, /arrow\.textContent/);
+  assert.doesNotMatch(styles, /\.section-heading h2 \{[^}]+7vw|\.catalog-library \{[^}]+border-top: 3px/);
 });
 
 test('website groups broadcasts by match and keeps resume state spoiler safe', () => {

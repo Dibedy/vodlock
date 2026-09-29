@@ -155,7 +155,7 @@ test('website library supports source, region, and all VCT team filters', () => 
   assert.doesNotMatch(index, /class="hero"/);
   assert.doesNotMatch(app, /team-mark/);
   assert.doesNotMatch(index, /video-search|video-url|Open a VOD/);
-  assert.match(index, /<h2 id="catalog-title">Matches<\/h2>/);
+  assert.match(index, /<h2 id="catalog-title" class="major-heading">Matches<\/h2>/);
   assert.doesNotMatch(index, /LIVE ARCHIVE|Choose a match\.<\/h2>/);
   assert.doesNotMatch(app, /arrow\.textContent/);
   assert.doesNotMatch(styles, /\.section-heading h2 \{[^}]+7vw|\.catalog-library \{[^}]+border-top: 3px/);

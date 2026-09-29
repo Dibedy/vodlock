@@ -113,6 +113,9 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.match(styles, /assets\/noise\.svg/);
   assert.match(styles, /body \{[^}]+background: url\("\/assets\/halftone\.svg"\) repeat, var\(--bg\) url\("\/assets\/noise\.svg"\) repeat/);
   assert.match(styles, /assets\/halftone\.svg/);
+  assert.match(styles, /\.library-heading::after \{[^}]+background: #455047/);
+  assert.match(styles, /\.library-title::before, \.library-summary::before/);
+  assert.match(styles, /\.library-summary \{[^}]+transform: translateY\(clamp\(12px, 2vw, 28px\)\)/);
   assert.match(styles, /twitch-timeline-hidden #media-player iframe[^}]+top: -90px[^}]+height: calc\(100% \+ 180px\)/);
   assert.match(styles, /watch-layout:fullscreen \.chat-panel/);
   assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);

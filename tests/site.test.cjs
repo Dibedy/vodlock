@@ -141,6 +141,8 @@ test('website library supports source, region, and all VCT team filters', () => 
   assert.match(index, /data-region="pacific"/);
   assert.match(index, /data-region="china"/);
   assert.match(index, /id="team-filter"/);
+  assert.match(index, /id="team-filter-picker"/);
+  assert.doesNotMatch(index, /<select id="team-filter"/);
   assert.match(app, /function matchup\(entry\)/);
   assert.match(app, /const vctTeams = \[/);
   assert.equal((app.match(/region: '(?:americas|emea|pacific|china)'/g) || []).length, 48);
@@ -191,6 +193,26 @@ test('website keeps playback shortcuts available after interacting with provider
   assert.match(app, /addEventListener\('blur', reclaimPlayerFocus\)/);
   assert.match(app, /event\.code === 'Space'/);
   assert.doesNotMatch(styles, /twitch-timeline-hidden #media-player iframe[^}]+pointer-events: none/);
+});
+
+test('website keeps favourite teams and tournament progress spoiler safe', () => {
+  const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
+  const catalog = JSON.parse(readFileSync(resolve(__dirname, '../site/catalog.json'), 'utf8'));
+  assert.match(index, /id="choose-teams"/);
+  assert.match(index, /id="teams-dialog"/);
+  assert.match(index, /id="favourite-match-count"/);
+  assert.match(index, /id="tournaments"/);
+  assert.match(app, /spoilless-favourite-teams/);
+  assert.match(app, /spoilless-watched-matches/);
+  assert.match(app, /function tournamentMatches\(\)/);
+  assert.match(app, /tournament-match is-' \+ status/);
+  assert.match(app, /title\.textContent = 'Locked'/);
+  assert.match(app, /markMatchWatched\(state\.entry\)/);
+  assert.match(styles, /\.team-picker \{/);
+  assert.match(styles, /\.tournament-match\.is-locked/);
+  assert.ok(catalog.videos.every(entry => typeof entry.tournament === 'string' && typeof entry.tournamentKey === 'string'));
 });
 
 test('website parses match times for strict newest-first ordering', () => {

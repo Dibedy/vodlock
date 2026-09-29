@@ -7,9 +7,9 @@
   <meta name="theme-color" content="#070908">
   <title>SPOILLESS | VALORANT VODs</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/styles.css?v=20260929-22">
+  <link rel="stylesheet" href="/styles.css?v=20260929-23">
   <script defer src="/core.js?v=20260929-12"></script>
-  <script defer src="/app.js?v=20260929-15"></script>
+  <script defer src="/app.js?v=20260929-16"></script>
 </head>
 <body>
   <a class="skip-link" href="#catalog-title">Skip to match index</a>
@@ -36,6 +36,24 @@
         </div>
         <button id="continue-button" type="button">Resume broadcast</button>
       </section>
+      <section class="favourites-section" aria-labelledby="favourites-title">
+        <div class="favourites-heading">
+          <div><span class="section-kicker">Personal archive</span><h2 id="favourites-title">Your teams</h2></div>
+          <button id="choose-teams" class="text-action" type="button">Choose teams <span>+</span></button>
+        </div>
+        <div class="favourites-body">
+          <div id="favourite-teams" class="favourite-teams" aria-live="polite"></div>
+          <div class="favourite-summary"><strong id="favourite-match-count">0</strong><span id="favourite-match-copy">unwatched matches</span></div>
+        </div>
+      </section>
+      <section class="tournament-section" aria-labelledby="tournament-title">
+        <div class="section-heading">
+          <span class="section-kicker">Spoiler-free path</span>
+          <h2 id="tournament-title">Watch a tournament</h2>
+          <p>Matches unlock only after you finish the one before them.</p>
+        </div>
+        <div id="tournaments" class="tournament-library" aria-live="polite"></div>
+      </section>
       <section class="catalog-section" aria-labelledby="catalog-title">
         <div class="section-heading">
           <h2 id="catalog-title">Matches</h2>
@@ -60,10 +78,11 @@
               <button type="button" data-region="china" aria-pressed="false">China</button>
             </div>
           </div>
-          <label class="filter-block filter-team" for="team-filter">
+          <div class="filter-block filter-team">
             <span class="filter-label">Team</span>
-            <span class="team-select-wrap"><select id="team-filter" aria-label="Filter by VCT team"></select></span>
-          </label>
+            <button id="team-filter" class="team-filter-button" type="button" aria-expanded="false" aria-controls="team-filter-picker"></button>
+            <div id="team-filter-picker" class="team-filter-picker" role="group" aria-label="Filter by VCT team" hidden></div>
+          </div>
           <div id="filter-summary" class="filter-summary" aria-live="polite">
             <strong id="filter-match-count">0</strong>
             <span>matches</span>
@@ -140,6 +159,11 @@
       <label><span><strong>Show chat timestamps</strong><small>Reveal each message's position within the broadcast.</small></span><input id="setting-show-chat-timestamps" type="checkbox"></label>
       <label><span><strong>Protect the end screen</strong><small>Remove the player when playback finishes.</small></span><input id="setting-end-screen-protection" type="checkbox"></label>
     </div>
+  </dialog>
+  <dialog id="teams-dialog" class="teams-dialog" aria-labelledby="teams-title">
+    <div class="teams-dialog-heading"><div><span class="section-kicker">Personal archive</span><h2 id="teams-title">Choose your teams</h2></div><button id="teams-close" type="button" aria-label="Close team picker">Close</button></div>
+    <p>Select the teams you want to follow. This never exposes their tournament path.</p>
+    <div id="team-picker" class="team-picker" role="group" aria-label="Choose favourite VCT teams"></div>
   </dialog>
   <div id="toast" class="toast" role="status" hidden></div>
   <footer><span>SPOILLESS</span><nav aria-label="Site"><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a></nav></footer>

@@ -82,7 +82,7 @@
   const teamKey = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   const teamAliases = new Map(vctTeams.flatMap(team => [team.code, team.name, ...(team.aliases || [])].map(value => [teamKey(value), team.code])));
   const teamsByCode = new Map(vctTeams.map(team => [team.code, team]));
-  const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all'};
+  const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null};
   let settings = readSettings();
 
   function readResume() {
@@ -131,6 +131,32 @@
     $('watch-metadata').hidden = settings.hideMetadata;
     renderChat(true);
     updateStatus();
+  }
+
+  function readFavouriteTeams() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('spoilless-favourite-teams') || '[]');
+      return new Set(Array.isArray(saved) ? saved.filter(team => teamsByCode.has(team)) : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveFavouriteTeams() {
+    try { localStorage.setItem('spoilless-favourite-teams', JSON.stringify([...state.favouriteTeams])); } catch {}
+  }
+
+  function readWatchedMatches() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('spoilless-watched-matches') || '[]');
+      return new Set(Array.isArray(saved) ? saved.filter(value => typeof value === 'string') : []);
+    } catch {
+      return new Set();
+    }
+  }
+
+  function saveWatchedMatches() {
+    try { localStorage.setItem('spoilless-watched-matches', JSON.stringify([...state.watchedMatches])); } catch {}
   }
 
   function preventTwitchNativeFullscreen() {
@@ -298,6 +324,41 @@
     }).sort((first, second) => VodlockSite.playedTime(second.primary.playedAt) - VodlockSite.playedTime(first.primary.playedAt));
   }
 
+  function tournamentName(entry) {
+    if (typeof entry.tournament === 'string' && entry.tournament.trim()) return entry.tournament.trim();
+    const event = displayEvent(entry).replace(/^.*?\s+vs\.?\s+.*?\s*[|·]\s*/i, '');
+    const name = event.replace(/\s*[|·-]\s*(?:opening day|group stage|swiss stage|playoffs?|upper final|lower final|grand final).*$/i, '').trim();
+    return name || 'Tournament archive';
+  }
+
+  function tournamentKey(entry) {
+    if (typeof entry.tournamentKey === 'string' && entry.tournamentKey) return entry.tournamentKey;
+    return tournamentName(entry).normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]+/g, '-').replace(/(^-|-$)/g, '').toLowerCase() || 'tournament-archive';
+  }
+
+  function tournamentMatches() {
+    const groups = new Map();
+    for (const match of groupedMatches()) {
+      const key = tournamentKey(match.primary);
+      if (!groups.has(key)) groups.set(key, {key, name: tournamentName(match.primary), matches: []});
+      groups.get(key).matches.push(match);
+    }
+    return [...groups.values()].map(tournament => ({...tournament, matches: tournament.matches.slice()
+      .sort((first, second) => VodlockSite.playedTime(first.primary.playedAt) - VodlockSite.playedTime(second.primary.playedAt))}))
+      .sort((first, second) => VodlockSite.playedTime(second.matches.at(-1)?.primary.playedAt) - VodlockSite.playedTime(first.matches.at(-1)?.primary.playedAt));
+  }
+
+  function isMatchWatched(match) {
+    return state.watchedMatches.has(matchKey(match.primary));
+  }
+
+  function markMatchWatched(entry) {
+    state.watchedMatches.add(matchKey(entry));
+    saveWatchedMatches();
+    renderFavourites();
+    renderTournaments();
+  }
+
   function teamIdentity(team) {
     const identity = document.createElement('span');
     identity.className = 'team-identity';
@@ -322,30 +383,163 @@
   function renderFilters() {
     const selectedTeam = teamsByCode.get(state.teamFilter);
     if (selectedTeam && state.regionFilter !== 'all' && selectedTeam.region !== state.regionFilter) state.teamFilter = 'all';
-    const select = $('team-filter');
-    select.replaceChildren();
-    const all = document.createElement('option');
-    all.value = 'all';
-    all.textContent = state.regionFilter === 'all' ? 'All VCT teams' : 'All ' + regions.find(region => region.id === state.regionFilter).name + ' teams';
-    select.append(all);
-    for (const region of regions) {
-      if (state.regionFilter !== 'all' && region.id !== state.regionFilter) continue;
-      const group = document.createElement('optgroup');
-      group.label = region.name;
-      for (const team of vctTeams.filter(candidate => candidate.region === region.id)) {
-        const option = document.createElement('option');
-        option.value = team.code;
-        option.textContent = team.code === team.name ? team.name : team.code + ' / ' + team.name;
-        group.append(option);
-      }
-      select.append(group);
+    const allTeams = state.regionFilter === 'all' ? 'All VCT teams' : 'All ' + regions.find(region => region.id === state.regionFilter).name + ' teams';
+    $('team-filter').textContent = state.teamFilter === 'all' ? allTeams : teamsByCode.get(state.teamFilter).name;
+    const picker = $('team-filter-picker');
+    picker.replaceChildren();
+    const all = document.createElement('button');
+    all.type = 'button';
+    all.textContent = allTeams;
+    all.setAttribute('aria-pressed', String(state.teamFilter === 'all'));
+    all.addEventListener('click', () => selectTeamFilter('all'));
+    picker.append(all);
+    for (const team of vctTeams.filter(candidate => state.regionFilter === 'all' || candidate.region === state.regionFilter)) {
+      const choice = document.createElement('button');
+      choice.type = 'button';
+      choice.textContent = team.name;
+      choice.setAttribute('aria-pressed', String(state.teamFilter === team.code));
+      choice.addEventListener('click', () => selectTeamFilter(team.code));
+      picker.append(choice);
     }
-    select.value = state.teamFilter;
     for (const button of $('kind-filters').querySelectorAll('button')) {
       button.setAttribute('aria-pressed', String(button.dataset.kind === state.kindFilter));
     }
     for (const button of $('region-filters').querySelectorAll('button')) {
       button.setAttribute('aria-pressed', String(button.dataset.region === state.regionFilter));
+    }
+  }
+
+  function selectTeamFilter(team) {
+    state.teamFilter = team;
+    $('team-filter-picker').hidden = true;
+    $('team-filter').setAttribute('aria-expanded', 'false');
+    renderFilters();
+    renderCatalog();
+  }
+
+  function renderFavourites() {
+    const host = $('favourite-teams');
+    host.replaceChildren();
+    if (!state.favouriteTeams.size) {
+      const empty = document.createElement('p');
+      empty.className = 'favourite-empty';
+      empty.textContent = 'Pick teams to keep their unwatched matches in one place.';
+      host.append(empty);
+    } else {
+      for (const code of [...state.favouriteTeams].sort()) {
+        const team = teamsByCode.get(code);
+        const tile = document.createElement('span');
+        tile.className = 'favourite-team';
+        tile.textContent = team.name;
+        host.append(tile);
+      }
+    }
+    const unwatched = groupedMatches().filter(match => !isMatchWatched(match) && match.teams.map(teamCode).some(code => state.favouriteTeams.has(code))).length;
+    $('favourite-match-count').textContent = String(unwatched);
+    $('favourite-match-copy').textContent = unwatched === 1 ? 'unwatched match' : 'unwatched matches';
+  }
+
+  function renderTeamPicker() {
+    const picker = $('team-picker');
+    picker.replaceChildren();
+    for (const region of regions) {
+      for (const team of vctTeams.filter(candidate => candidate.region === region.id)) {
+        const choice = document.createElement('button');
+        choice.type = 'button';
+        choice.setAttribute('aria-pressed', String(state.favouriteTeams.has(team.code)));
+        const name = document.createElement('strong');
+        name.textContent = team.name;
+        const label = document.createElement('span');
+        label.textContent = region.name;
+        choice.append(name, label);
+        choice.addEventListener('click', () => {
+          if (state.favouriteTeams.has(team.code)) state.favouriteTeams.delete(team.code);
+          else state.favouriteTeams.add(team.code);
+          saveFavouriteTeams();
+          renderTeamPicker();
+          renderFavourites();
+        });
+        picker.append(choice);
+      }
+    }
+  }
+
+  function tournamentMatchRow(match, position, status) {
+    const row = document.createElement('article');
+    row.className = 'tournament-match is-' + status;
+    const index = document.createElement('span');
+    index.className = 'tournament-match-index';
+    index.textContent = 'Match ' + String(position + 1).padStart(2, '0');
+    const title = document.createElement('strong');
+    const label = document.createElement('span');
+    if (status === 'watched') {
+      title.textContent = 'Watched';
+      label.textContent = 'Watched ✓';
+      row.append(index, title, label);
+    } else if (status === 'unlocked') {
+      title.textContent = matchup(match.primary).join(' vs ') || 'Ready to watch';
+      label.textContent = 'Next match';
+      const watch = document.createElement('button');
+      watch.type = 'button';
+      watch.textContent = 'Watch';
+      watch.addEventListener('click', () => openVideo(entryKey(match.primary)));
+      row.append(index, title, label, watch);
+    } else {
+      title.textContent = 'Locked';
+      label.textContent = 'Locked';
+      row.append(index, title, label);
+    }
+    return row;
+  }
+
+  function renderTournaments() {
+    const host = $('tournaments');
+    host.replaceChildren();
+    const tournaments = tournamentMatches();
+    const selected = tournaments.find(tournament => tournament.key === state.tournament);
+    if (state.tournament && !selected) state.tournament = null;
+    if (selected) {
+      const path = document.createElement('div');
+      path.className = 'tournament-path';
+      const heading = document.createElement('div');
+      heading.className = 'tournament-path-heading';
+      const title = document.createElement('h3');
+      title.textContent = selected.name;
+      const back = document.createElement('button');
+      back.type = 'button';
+      back.textContent = '← All tournaments';
+      back.addEventListener('click', () => {
+        state.tournament = null;
+        renderTournaments();
+      });
+      heading.append(title, back);
+      path.append(heading);
+      const next = selected.matches.findIndex(match => !isMatchWatched(match));
+      for (const [position, match] of selected.matches.entries()) {
+        const status = isMatchWatched(match) ? 'watched' : position === next ? 'unlocked' : 'locked';
+        path.append(tournamentMatchRow(match, position, status));
+      }
+      host.append(path);
+      return;
+    }
+    for (const tournament of tournaments) {
+      const card = document.createElement('article');
+      card.className = 'tournament-card';
+      const details = document.createElement('div');
+      const name = document.createElement('h3');
+      name.textContent = tournament.name;
+      const copy = document.createElement('p');
+      copy.textContent = 'Follow the event in the order it was played.';
+      details.append(name, copy);
+      const watch = document.createElement('button');
+      watch.type = 'button';
+      watch.textContent = 'Watch tournament →';
+      watch.addEventListener('click', () => {
+        state.tournament = tournament.key;
+        renderTournaments();
+      });
+      card.append(details, watch);
+      host.append(card);
     }
   }
 
@@ -449,6 +643,9 @@
     renderFilters();
     renderCatalog();
     renderContinue();
+    renderFavourites();
+    renderTeamPicker();
+    renderTournaments();
   }
 
   function showLibrary(updateHistory = true) {
@@ -638,6 +835,7 @@
   }
 
   function finishWatching() {
+    markMatchWatched(state.entry);
     if (!settings.endScreenProtection) {
       setPlaying(false);
       return;
@@ -825,6 +1023,14 @@
   $('settings-dialog').addEventListener('click', event => {
     if (event.target === $('settings-dialog')) $('settings-dialog').close();
   });
+  $('choose-teams').addEventListener('click', () => {
+    renderTeamPicker();
+    $('teams-dialog').showModal();
+  });
+  $('teams-close').addEventListener('click', () => $('teams-dialog').close());
+  $('teams-dialog').addEventListener('click', event => {
+    if (event.target === $('teams-dialog')) $('teams-dialog').close();
+  });
   for (const [key, identifier] of Object.entries(settingIds)) {
     $(identifier).addEventListener('change', event => {
       settings = {...settings, [key]: event.target.checked};
@@ -847,9 +1053,11 @@
       renderCatalog();
     });
   }
-  $('team-filter').addEventListener('change', event => {
-    state.teamFilter = event.target.value;
-    renderCatalog();
+  $('team-filter').addEventListener('click', () => {
+    const picker = $('team-filter-picker');
+    const expanded = picker.hidden;
+    picker.hidden = !expanded;
+    $('team-filter').setAttribute('aria-expanded', String(expanded));
   });
   $('home-button').addEventListener('click', () => showLibrary());
   const spoilerWord = $('spoiler-word');

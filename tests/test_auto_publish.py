@@ -46,6 +46,12 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(event, "VALORANT Champions Shanghai | Group Stage")
         self.assertNotIn("—", title + event)
 
+    def test_tournament_metadata_hides_stage_and_matchup_details(self):
+        self.assertEqual(auto_publish.tournament_metadata("VALORANT Champions Shanghai | Group Stage"),
+                         {"tournament": "VALORANT Champions Shanghai", "tournamentKey": "valorant-champions-shanghai"})
+        self.assertEqual(auto_publish.tournament_metadata("NRG vs NS | VCT Champions Grand Final", "FNS"),
+                         {"tournament": "VCT Champions", "tournamentKey": "vct-champions"})
+
     def test_catalog_time_uses_the_first_round_in_the_original_broadcast(self):
         rounds = [{"map": 1, "round": 1, "start": 100}]
         self.assertEqual(auto_publish.catalog_played_at({"created_at": "2026-09-29T10:00:00Z"}, rounds),

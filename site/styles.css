@@ -63,6 +63,47 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .continue-panel button { align-self: stretch; min-width: 220px; border: 0; background: var(--raised-strong); color: var(--text); cursor: pointer; font-size: 12px; font-weight: 800; }
 .continue-panel button:hover { background: var(--lime); color: var(--bg); }
 
+.favourites-section, .tournament-section { padding-top: 88px; }
+.favourites-section { border-bottom: 1px solid var(--line); }
+.favourites-heading { padding: 0 clamp(0px, 3vw, 48px) 20px; display: flex; align-items: end; justify-content: space-between; gap: 24px; }
+.section-kicker { display: block; margin-bottom: 8px; color: var(--lime); font-size: 10px; font-weight: 900; letter-spacing: .12em; text-transform: uppercase; }
+.favourites-heading h2 { margin: 0; font-family: var(--display); font-size: clamp(32px, 3.3vw, 48px); line-height: .9; letter-spacing: -.05em; text-transform: uppercase; }
+.text-action { border: 0; background: transparent; color: var(--muted); padding: 8px 0; cursor: pointer; font-size: 11px; font-weight: 900; letter-spacing: .08em; text-transform: uppercase; }
+.text-action span { margin-left: 10px; color: var(--lime); font-size: 17px; }
+.text-action:hover { color: var(--text); }
+.favourites-body { min-height: 112px; display: grid; grid-template-columns: minmax(0, 1fr) 190px; border-top: 1px solid var(--line); background: rgba(13, 17, 14, .78); }
+.favourite-teams { padding: 18px; display: flex; flex-wrap: wrap; align-content: center; gap: 8px; }
+.favourite-team { min-height: 48px; display: inline-flex; align-items: center; gap: 10px; border: 1px solid var(--line); background: #0a0e0b; color: var(--text); padding: 0 14px; font-family: var(--display); font-size: 18px; font-weight: 800; letter-spacing: -.025em; text-transform: uppercase; }
+.favourite-team::before { content: "★"; color: var(--lime); font-family: Arial, sans-serif; font-size: 12px; }
+.favourite-empty { margin: 0; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.favourite-summary { padding: 18px 24px; display: grid; align-content: center; gap: 4px; border-left: 1px solid var(--line); }
+.favourite-summary strong { color: var(--lime); font-family: var(--display); font-size: 36px; line-height: .8; letter-spacing: -.05em; }
+.favourite-summary span { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; }
+.tournament-library { display: grid; gap: 2px; }
+.tournament-card { min-height: 134px; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 24px; padding: 28px clamp(20px, 4vw, 54px); background: rgba(13, 17, 14, .78); }
+.tournament-card:hover { background: var(--surface); }
+.tournament-card h3 { margin: 0; font-family: var(--display); font-size: clamp(28px, 3vw, 42px); letter-spacing: -.045em; text-transform: uppercase; }
+.tournament-card p { margin: 8px 0 0; color: var(--muted); font-size: 13px; }
+.tournament-card button { min-height: 48px; border: 1px solid var(--line); background: #0a0e0b; padding: 0 16px; cursor: pointer; font-size: 11px; font-weight: 900; letter-spacing: .07em; text-transform: uppercase; }
+.tournament-card button:hover { border-color: var(--lime); color: var(--lime); }
+.tournament-path { border-top: 1px solid var(--line); }
+.tournament-path-heading { min-height: 116px; display: flex; align-items: center; justify-content: space-between; gap: 24px; padding: 24px clamp(20px, 4vw, 54px); background: var(--raised); }
+.tournament-path-heading h3 { margin: 0; font-family: var(--display); font-size: clamp(28px, 3vw, 42px); letter-spacing: -.045em; text-transform: uppercase; }
+.tournament-path-heading button { border: 0; background: transparent; color: var(--muted); padding: 8px 0; cursor: pointer; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+.tournament-path-heading button:hover { color: var(--lime); }
+.tournament-match { min-height: 92px; display: grid; grid-template-columns: 82px minmax(0, 1fr) auto; align-items: center; gap: 20px; padding: 16px clamp(20px, 4vw, 54px); border-top: 1px solid var(--line-soft); background: rgba(13, 17, 14, .78); }
+.tournament-match-index { color: var(--faint); font-family: var(--display); font-size: 12px; font-weight: 900; }
+.tournament-match strong { font-family: var(--display); font-size: clamp(20px, 2.4vw, 30px); letter-spacing: -.04em; text-transform: uppercase; }
+.tournament-match span { color: var(--muted); font-size: 11px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+.tournament-match button { min-height: 44px; border: 0; background: var(--lime); color: var(--bg); padding: 0 15px; cursor: pointer; font-size: 11px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+.tournament-match button:hover { background: #d0ff65; }
+.tournament-match.is-watched { background: #0a0e0b; }
+.tournament-match.is-watched strong { color: var(--muted); }
+.tournament-match.is-watched span { color: var(--lime); }
+.tournament-match.is-locked { background: #090c0a; }
+.tournament-match.is-locked strong { color: var(--faint); font-size: 12px; letter-spacing: .08em; }
+.tournament-match.is-locked span { color: var(--faint); }
+
 .catalog-section { padding-top: 88px; }
 .section-heading { margin: 0 0 38px clamp(0px, 3vw, 48px); }
 .section-heading h2 { margin: 0; font-family: var(--display); font-size: clamp(38px, 4vw, 58px); line-height: .95; letter-spacing: -.045em; }
@@ -74,11 +115,14 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .filter-options button { min-width: 0; min-height: 44px; flex: 1; border: 0; background: transparent; color: var(--muted); padding: 8px 12px; cursor: pointer; font-size: 13px; white-space: nowrap; }
 .filter-options button:hover { background: var(--raised); color: var(--text); }
 .filter-options button[aria-pressed="true"] { background: var(--raised-strong); color: var(--lime); font-weight: 700; }
-.team-select-wrap { position: relative; display: block; background: #090d0a; }
-.team-select-wrap::after { content: "↓"; position: absolute; top: 50%; right: 15px; color: var(--lime); transform: translateY(-50%); pointer-events: none; }
-.team-select-wrap select { width: 100%; height: 52px; appearance: none; border: 0; background: transparent; color: var(--text); padding: 0 42px 0 15px; cursor: pointer; font-size: 13px; }
-.team-select-wrap select:hover { background: var(--raised); }
-.team-select-wrap option, .team-select-wrap optgroup { background: var(--surface); color: var(--text); }
+.team-filter-button { min-height: 52px; display: flex; align-items: center; justify-content: space-between; border: 0; background: #090d0a; color: var(--text); padding: 0 15px; cursor: pointer; text-align: left; }
+.team-filter-button::after { content: "↓"; color: var(--lime); font-size: 16px; }
+.team-filter-button:hover { background: var(--raised); }
+.team-filter-button[aria-expanded="true"] { outline: 1px solid var(--lime); outline-offset: -1px; }
+.team-filter-picker { max-height: 270px; padding: 6px; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2px; overflow: auto; border: 1px solid var(--line); background: #090d0a; }
+.team-filter-picker button { min-height: 44px; border: 1px solid transparent; background: var(--surface); color: var(--muted); padding: 6px 9px; cursor: pointer; font-family: var(--display); font-size: 14px; letter-spacing: -.02em; text-align: left; }
+.team-filter-picker button:hover { border-color: var(--line); color: var(--text); }
+.team-filter-picker button[aria-pressed="true"] { border-color: var(--lime); color: var(--lime); }
 .filter-summary { min-width: 72px; height: 52px; display: grid; align-content: center; justify-items: end; gap: 2px; color: var(--faint); }
 .filter-summary strong { color: var(--text); font-family: var(--display); font-size: 22px; line-height: 1; }
 .filter-summary span { font-size: 10px; }
@@ -207,6 +251,21 @@ footer > span { color: var(--text); font-family: var(--display); font-weight: 90
 footer nav { display: flex; gap: 18px; }
 footer a:hover { color: var(--lime); }
 
+.teams-dialog { width: min(940px, calc(100% - 32px)); max-height: min(760px, calc(100% - 32px)); border: 1px solid var(--line); background: var(--surface); color: var(--text); padding: 0; }
+.teams-dialog::backdrop { background: rgba(0, 0, 0, .78); }
+.teams-dialog-heading { padding: 26px 30px 20px; display: flex; align-items: start; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--line); }
+.teams-dialog-heading h2 { margin: 0; font-family: var(--display); font-size: clamp(30px, 4vw, 48px); letter-spacing: -.05em; text-transform: uppercase; }
+.teams-dialog-heading button { border: 0; background: transparent; color: var(--muted); padding: 8px 0; cursor: pointer; font-size: 11px; font-weight: 900; text-transform: uppercase; }
+.teams-dialog-heading button:hover { color: var(--lime); }
+.teams-dialog > p { max-width: 600px; margin: 20px 30px; color: var(--muted); font-size: 13px; line-height: 1.5; }
+.team-picker { padding: 10px 30px 30px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 2px; overflow: auto; }
+.team-picker button { min-height: 76px; border: 1px solid var(--line-soft); background: #090d0a; color: var(--muted); padding: 12px; cursor: pointer; text-align: left; }
+.team-picker button strong { display: block; color: var(--text); font-family: var(--display); font-size: 20px; letter-spacing: -.03em; }
+.team-picker button span { display: block; margin-top: 5px; font-size: 10px; font-weight: 700; text-transform: uppercase; }
+.team-picker button:hover { border-color: var(--line); background: var(--raised); }
+.team-picker button[aria-pressed="true"] { border-color: var(--lime); background: rgba(184, 245, 43, .09); }
+.team-picker button[aria-pressed="true"] strong::after { content: " ★"; color: var(--lime); font-family: Arial, sans-serif; font-size: 12px; vertical-align: middle; }
+
 .legal-page { width: min(1120px, calc(100% - 48px)); margin: 0 auto; padding: 94px 0 120px; }
 .legal-page h1 { max-width: 940px; margin: 18px 0 32px; font-family: var(--display); font-size: clamp(58px, 10vw, 120px); line-height: .78; letter-spacing: -.07em; text-transform: uppercase; }
 .legal-intro { max-width: 720px; margin: 0 0 72px 28%; color: var(--muted); font-size: 18px; line-height: 1.65; }
@@ -228,12 +287,16 @@ footer a:hover { color: var(--lime); }
   .filter-panel { grid-template-columns: 1fr 1.35fr; }
   .filter-team { grid-column: 1 / 2; }
   .filter-summary { grid-column: 2 / 3; grid-row: 2; }
+  .team-picker { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 
 @media (max-width: 900px) {
   .filter-panel { grid-template-columns: 1fr; }
   .filter-team, .filter-summary { grid-column: auto; grid-row: auto; }
   .filter-summary { height: auto; display: flex; justify-content: flex-start; align-items: baseline; gap: 6px; }
+  .favourites-body { grid-template-columns: 1fr; }
+  .favourite-summary { border-top: 1px solid var(--line); border-left: 0; }
+  .team-picker { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .continue-panel { grid-template-columns: 150px minmax(0, 1fr); }
   .continue-panel button { grid-column: 1 / -1; min-height: 58px; border-left: 0; }
   .vod-card { grid-template-columns: 46px minmax(260px, 1fr); }
@@ -258,6 +321,14 @@ footer a:hover { color: var(--lime); }
   .continue-match { padding: 18px 20px; border-left: 0; }
   .continue-panel button { grid-column: auto; }
   .catalog-section { padding-top: 72px; }
+  .favourites-section, .tournament-section { padding-top: 72px; }
+  .favourites-heading { align-items: start; flex-direction: column; gap: 10px; }
+  .tournament-card, .tournament-path-heading { align-items: start; grid-template-columns: 1fr; }
+  .tournament-match { grid-template-columns: 54px minmax(0, 1fr); gap: 12px; }
+  .tournament-match button, .tournament-match > span { grid-column: 2; justify-self: start; }
+  .teams-dialog-heading { padding: 22px 20px 18px; }
+  .teams-dialog > p { margin: 18px 20px; }
+  .team-picker { padding: 8px 20px 20px; }
   .section-heading { margin-left: 0; }
   .section-heading h2 { font-size: 42px; }
   .filter-panel { padding: 14px; gap: 16px; }

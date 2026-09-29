@@ -153,6 +153,17 @@ def catalog_metadata(channel, entry):
     return clean_text(title)[:100], clean_text(event)[:140]
 
 
+def tournament_metadata(event, title=""):
+    tournament = clean_text(event)
+    if re.match(r"^[^|]{1,80}\bvs\.?\s+[^|]{1,80}\|", tournament, re.IGNORECASE):
+        tournament = tournament.split("|", 1)[1].strip()
+    tournament = re.sub(r"\s*[|·-]\s*(?:opening day|group stage|swiss stage|playoffs?|upper final|lower final|grand final).*?$", "", tournament, flags=re.IGNORECASE)
+    tournament = re.sub(r"\s+(?:opening day|group stage|swiss stage|playoffs?|upper final|lower final|grand final).*?$", "", tournament, flags=re.IGNORECASE)
+    tournament = tournament.strip(" -|") or "Tournament archive"
+    key = re.sub(r"[^a-z0-9]+", "-", tournament.lower()).strip("-") or "tournament-archive"
+    return {"tournament": tournament[:100], "tournamentKey": key[:100]}
+
+
 def catalog_played_at(entry, rounds, source=None, alignment=None):
     value = source.get("publishedAt") if source else entry.get("created_at") or entry.get("published")
     if not value or not rounds:
@@ -380,7 +391,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
         played_at = catalog_played_at(entry, exported["rounds"], source, alignment if aligned_source_id else None)
         catalog_entry = {"provider": provider, "sourceId": entry["id"], "title": title,
                          "event": event, "label": "Full match" if provider == "youtube" else "Full broadcast",
-                         "index": f"/indexes/{filename}", "playedAt": played_at}
+                         "index": f"/indexes/{filename}", "playedAt": played_at, **tournament_metadata(event, title)}
         if chat_path:
             catalog_entry["chat"] = "/chats/" + chat_path.name
         catalog["videos"].insert(0, catalog_entry)

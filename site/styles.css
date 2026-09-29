@@ -252,6 +252,8 @@ footer a:hover { color: var(--lime); }
 .teams-dialog { width: min(940px, calc(100% - 32px)); max-height: min(760px, calc(100% - 32px)); border: 1px solid var(--line); background: var(--surface); color: var(--text); padding: 0; }
 .teams-dialog::backdrop { background: rgba(0, 0, 0, .78); }
 .teams-dialog-heading { padding: 26px 30px 20px; display: flex; align-items: start; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--line); }
+.teams-dialog-heading > div { position: relative; padding-top: 16px; }
+.teams-dialog-heading > div::before { content: ""; position: absolute; top: 0; left: 0; width: 40px; height: 2px; background: var(--lime); }
 .teams-dialog-heading h2 { margin: 0; font-family: var(--display); font-size: clamp(30px, 4vw, 48px); letter-spacing: -.05em; text-transform: uppercase; }
 .teams-dialog-heading button { border: 0; background: transparent; color: var(--muted); padding: 8px 0; cursor: pointer; font-size: 11px; font-weight: 900; text-transform: uppercase; }
 .teams-dialog-heading button:hover { color: var(--lime); }

@@ -469,7 +469,6 @@
   function openTeamPicker(mode) {
     state.teamPickerMode = mode;
     const filtering = mode === 'filter';
-    $('teams-kicker').textContent = filtering ? 'Match archive' : 'Personal archive';
     $('teams-title').textContent = filtering ? 'Filter matches' : 'Choose your teams';
     $('teams-copy').textContent = filtering ? 'Choose one team to narrow the match archive, or clear the filter to show every team.' : 'Select the teams you want to follow. This never exposes their tournament path.';
     renderTeamPicker();

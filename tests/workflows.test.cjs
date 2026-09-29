@@ -24,3 +24,12 @@ test('publisher exposes health and held-source recovery controls', () => {
   assert.match(publisher, /Pipeline health summary/);
   assert.match(publisher, /--summary-only/);
 });
+
+test('publisher uses a local PO-token provider for YouTube downloads', () => {
+  const publisher = workflow('auto-publish.yml');
+  assert.match(publisher, /VODLOCK_YOUTUBE_POT: "1"/);
+  assert.match(publisher, /Start YouTube PO-token provider/);
+  assert.match(publisher, /brainicism\/bgutil-ytdlp-pot-provider:2\.0\.0/);
+  assert.match(publisher, /127\.0\.0\.1:4416:4416/);
+  assert.match(publisher, /Stop YouTube PO-token provider/);
+});

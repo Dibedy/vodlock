@@ -13,7 +13,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
-from detector import DETECTOR_VERSION, HudReader, RoundDetector
+from detector import DETECTOR_VERSION, HudReader, Observation, RoundDetector
 from storyboard_align import frame_hash
 
 ROOT = Path(__file__).resolve().parent
@@ -29,6 +29,12 @@ ANALYSIS_RESERVE_BYTES = 2 * 1024 ** 3
 MINIMUM_ANALYSIS_BYTES = 512 * 1024 ** 2
 INITIAL_DENSE_SAMPLE_SECONDS = 15 * 60
 COARSE_SAMPLE_INTERVAL = 2
+ADAPTIVE_SCAN_INTERVAL = 4
+ADAPTIVE_DENSE_SECONDS = 20
+COMPACT_WIDTH = 1280
+COMPACT_HEIGHT = 324
+FINGERPRINT_WIDTH = 320
+FINGERPRINT_HEIGHT = 180
 
 
 class AnalysisSizeLimitError(ValueError):
@@ -54,7 +60,18 @@ def size_limit_message(max_bytes):
     return f"The selected analysis copy was not downloaded. It may exceed the {max_bytes / 1024 ** 3:g} GB limit."
 
 
-def analysis_video_filter():
+def compact_analysis_filter():
+    return ("fps=fps=1:start_time=0:round=up,scale=1280:720,split=3[canvas][thumbnail][replay];"
+            "[canvas]crop=1280:144:0:0[top];[thumbnail]scale=320:180[thumb];"
+            "[replay]crop=346:116:934:604,pad=960:180:614:64:black[replaypad];"
+            "[thumb][replaypad]hstack[bottom];[top][bottom]vstack")
+
+
+def analysis_video_filter(adaptive=False, fingerprint_interval=0):
+    if fingerprint_interval:
+        return f"fps=fps=1/{fingerprint_interval}:start_time=0:round=up,scale=320:180"
+    if adaptive:
+        return compact_analysis_filter()
     return ("fps=fps=1:start_time=0:round=up,select='lt(n\\," + str(INITIAL_DENSE_SAMPLE_SECONDS)
             + ")+gte(n\\," + str(INITIAL_DENSE_SAMPLE_SECONDS) + ")*not(mod(n\\," + str(COARSE_SAMPLE_INTERVAL)
             + "))',scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2")
@@ -119,11 +136,14 @@ def check_cancel():
 
 
 def remote_formats(job):
-    formats = [("bestvideo[height<=720]/best[height<=720]", None),
-               ("bestvideo[height<=540]/best[height<=540]", None),
+    preferred_height = 540 if int(job.get("analysisHeight", 720)) <= 540 else 720
+    secondary_height = 720 if preferred_height == 540 else 540
+    formats = [(f"bestvideo[height<={preferred_height}]/best[height<={preferred_height}]", None),
+               (f"bestvideo[height<={secondary_height}]/best[height<={secondary_height}]", None),
                ("bestvideo[height<=360]/best[height<=360]", None)]
     if job.get("kind") == "twitch":
-        formats[0] = ("bestvideo[height=720][fps<=30]/best[height=720][fps<=30]/bestvideo[height<=720]/best[height<=720]", None)
+        formats[0] = (f"bestvideo[height={preferred_height}][fps<=30]/best[height={preferred_height}][fps<=30]/"
+                      f"bestvideo[height<={preferred_height}]/best[height<={preferred_height}]", None)
     if job.get("kind", "youtube") == "youtube" and os.environ.get("VODLOCK_YOUTUBE_POT") == "1":
         formats = [("bestvideo[height<=720]/best[height<=720]", None),
                    ("bestvideo[height<=720]/best[height<=720]", "mweb"),
@@ -248,8 +268,10 @@ def index_job(identifier):
             source = Path(job["source"])
         check_cancel()
         update(identifier, status="analyzing", message="Reading the broadcast clock and rejecting replay frames", progress=35)
-        reader = HudReader()
-        detector = RoundDetector()
+        fingerprint_only = bool(job.get("fingerprintOnly"))
+        adaptive = bool(job.get("adaptiveAnalysis")) and not fingerprint_only
+        reader = None if fingerprint_only else HudReader()
+        detector = None if fingerprint_only else RoundDetector()
         fingerprint_interval = int(job.get("fingerprintInterval", 0))
         fingerprints = []
         diagnostic_directory = work / "diagnostics"
@@ -264,7 +286,7 @@ def index_job(identifier):
             if not opened or not math.isfinite(duration) or duration <= 0:
                 raise ValueError("Could not read this video. Try an MP4, MKV or WebM recording.")
         command = [imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error", "-i", str(source),
-                   "-an", "-vf", analysis_video_filter(),
+                   "-an", "-vf", analysis_video_filter(adaptive, fingerprint_interval if fingerprint_only else 0),
                    "-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:1"]
         error_path = work / "ffmpeg.log"
         stream_error_path = work / "stream.log"
@@ -278,7 +300,14 @@ def index_job(identifier):
             if stream and stream.stdout:
                 stream.stdout.close()
             frame_number = 0
-            frame_size = 1280 * 720 * 3
+            if fingerprint_only:
+                frame_height, frame_width = FINGERPRINT_HEIGHT, FINGERPRINT_WIDTH
+            elif adaptive:
+                frame_height, frame_width = COMPACT_HEIGHT, COMPACT_WIDTH
+            else:
+                frame_height, frame_width = 720, 1280
+            frame_size = frame_width * frame_height * 3
+            dense_until = -1
             while True:
                 check_cancel()
                 chunk = bytearray()
@@ -291,11 +320,27 @@ def index_job(identifier):
                     break
                 if len(chunk) != frame_size:
                     raise ValueError("Video decoding stopped in the middle of a frame.")
-                frame = np.frombuffer(chunk, dtype=np.uint8).reshape(720, 1280, 3)
-                sample_time = analysis_sample_time(frame_number)
-                if fingerprint_interval and sample_time % fingerprint_interval == 0:
-                    fingerprints.append({"time": sample_time, "hash": frame_hash(frame)})
-                sample = reader.read(frame, sample_time)
+                frame = np.frombuffer(chunk, dtype=np.uint8).reshape(frame_height, frame_width, 3)
+                sample_time = (frame_number * fingerprint_interval if fingerprint_only else
+                               frame_number if adaptive else analysis_sample_time(frame_number))
+                fingerprint_frame = frame if fingerprint_only else (frame[144:324, :320] if adaptive else frame)
+                if fingerprint_only or fingerprint_interval and sample_time % fingerprint_interval == 0:
+                    fingerprints.append({"time": sample_time, "hash": frame_hash(fingerprint_frame)})
+                if fingerprint_only:
+                    frame_number += 1
+                    with LOCK:
+                        job["progress"] = min(98, 35 + int(sample_time / duration * 63))
+                    continue
+                if adaptive and sample_time > dense_until:
+                    if frame_number % ADAPTIVE_SCAN_INTERVAL:
+                        sample = Observation(sample_time, None, None)
+                    else:
+                        sample = reader.read_clock(frame, sample_time, compact=True)
+                        if sample.timer is not None and 82 <= sample.timer <= 100:
+                            dense_until = sample_time + ADAPTIVE_DENSE_SECONDS
+                            sample = reader.read(frame, sample_time, compact=True)
+                else:
+                    sample = reader.read(frame, sample_time, compact=adaptive)
                 detector.observe(sample)
                 diagnostic_candidate = (sample.round is None) != (sample.timer is None)
                 periodic_candidate = sample_time in {5, 305, 605, 905}
@@ -314,6 +359,10 @@ def index_job(identifier):
             raise ValueError("FFmpeg could not finish reading the video: " + message)
         if stream_return_code:
             raise ValueError("The video service stream ended with an error: " + stream_error_path.read_text(errors="replace")[-400:])
+        if fingerprint_only:
+            update(identifier, status="ready", message="Fingerprint ready", progress=100,
+                   rounds=[], warnings=[], source=str(source), duration=duration, fingerprints=fingerprints)
+            return
         detector.finalize()
         if not detector.rounds:
             raise ValueError("No reliable round starts were found. This version needs the VCT top-centre ROUND label and timer; a different layout may need detector changes.")

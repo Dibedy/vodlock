@@ -3,7 +3,7 @@ import statistics
 from dataclasses import dataclass
 
 
-DETECTOR_VERSION = "vct-clock-ocr-v8"
+DETECTOR_VERSION = "vct-clock-ocr-v9"
 HUD_PROFILES = (
     {"label": (0, .026, .46, .54), "clock": (.026, .065, .465, .535),
      "top": (0, .034, .445, .555), "wide": (0, .09, .43, .57), "score_top": .053},
@@ -131,23 +131,37 @@ class HudReader:
             return [(text, float(score)) for text, score in result or []]
         return [(text, float(score)) for _, text, score in result or []]
 
-    def crop(self, frame, bounds):
-        height, width = frame.shape[:2]
+    def crop(self, frame, bounds, compact=False):
+        height, width = (720, 1280) if compact else frame.shape[:2]
         top, bottom, left, right = bounds
         return frame[int(height * top):int(height * bottom), int(width * left):int(width * right)]
 
-    def read_profile(self, frame, time, profile):
-        height, width = frame.shape[:2]
-        label = self.crop(frame, profile["label"])
-        clock = self.crop(frame, profile["clock"])
+    def read_clock(self, frame, time, compact=False):
+        best = Observation(time, None, None)
+        for profile in HUD_PROFILES:
+            clock = self.crop(frame, profile["clock"], compact)
+            sample = parse_hud(time, self.read_lines(clock, single=True))
+            if sample.confidence > best.confidence:
+                best = sample
+            if sample.timer is not None and 82 <= sample.timer <= 100:
+                return sample
+        return best
+
+    def read_profile(self, frame, time, profile, compact=False):
+        height, width = (720, 1280) if compact else frame.shape[:2]
+        clock = self.crop(frame, profile["clock"], compact)
         clock_lines = self.read_lines(clock, single=True)
+        clock_sample = parse_hud(time, clock_lines)
+        if clock_sample.timer is None or not 85 <= clock_sample.timer <= 100:
+            return clock_sample
+        label = self.crop(frame, profile["label"], compact)
         lines = self.read_lines(label, single=True, scale=4) + clock_lines
         sample = parse_hud(time, lines)
         if sample.timer is not None and 85 <= sample.timer <= 100:
-            top = self.crop(frame, profile["top"])
+            top = self.crop(frame, profile["top"], compact)
             top_lines = self.read_lines(top, scale=4)
             if parse_hud(time, top_lines).round is None:
-                top = self.crop(frame, profile["wide"])
+                top = self.crop(frame, profile["wide"], compact)
                 top_lines = self.read_lines(top)
             if parse_hud(time, top_lines).round is not None:
                 lines = top_lines + clock_lines
@@ -164,14 +178,15 @@ class HudReader:
                 sample.confidence = min(parse_hud(time, clock_lines).confidence, *(confidence for _, confidence in scores))
         if sample.round is None or sample.timer is None or not 85 <= sample.timer <= 100:
             return sample
-        replay = frame[int(height * 0.84):, int(width * 0.73):]
+        replay = (frame[208:324, 934:1280] if compact
+                  else frame[int(height * 0.84):, int(width * 0.73):])
         sample.replay = parse_hud(time, (), self.read_lines(replay)).replay
         return sample
 
-    def read(self, frame, time):
+    def read(self, frame, time, compact=False):
         best = None
         for profile in HUD_PROFILES:
-            sample = self.read_profile(frame, time, profile)
+            sample = self.read_profile(frame, time, profile, compact)
             if best is None or sample.confidence > best.confidence:
                 best = sample
             if sample.round is not None and sample.timer is not None:

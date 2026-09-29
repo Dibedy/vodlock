@@ -4,7 +4,9 @@ import os
 import re
 import shutil
 import sys
+import threading
 import uuid
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlencode
@@ -23,8 +25,9 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v2"
+PUBLISHER_VERSION = "publisher-v3"
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
+PUBLISH_LOCK = threading.Lock()
 
 
 def read_json(path):
@@ -331,6 +334,67 @@ def youtube_alignment(channel, entry, config, state, yt_dlp):
     return source_id, alignment, rounds
 
 
+def matchup_key(value):
+    match = re.search(r"\b([A-Z0-9][A-Z0-9 .']{0,24}?)\s+vs\.?\s+([A-Z0-9][A-Z0-9 .']{0,24}?)(?=\s*[-|#]|$)",
+                      clean_text(value), re.IGNORECASE)
+    if not match:
+        return ""
+    teams = [re.sub(r"[^A-Z0-9]+", "", team.upper()) for team in match.groups()]
+    return ":".join(sorted(teams)) if all(teams) else ""
+
+
+def reset_analysis_job(job):
+    job.update(status="queued", progress=0, message="Preparing the automatic index", rounds=[], warnings=[],
+               fingerprints=[])
+
+
+def compact_reference(reference, interval):
+    source_interval = max(1, float(reference.get("interval", interval)))
+    step = max(1, round(interval / source_interval))
+    return {**reference, "interval": source_interval * step, "frames": reference.get("frames", [])[::step]}
+
+
+def watchparty_alignment(job, entry, config, state, yt_dlp):
+    target_match = matchup_key(entry.get("title", ""))
+    if not target_match:
+        raise ValueError("The watch-party title does not identify a matchup for alignment")
+    source_names = {item["name"] for item in config["channels"]
+                    if item["provider"] == "twitch" and item.get("alignmentSource")}
+    candidates = [(key.split(":", 1)[1], value) for key, value in state["videos"].items()
+                  if key.startswith("twitch:") and value.get("status") in {"published", "superseded"}
+                  and value.get("channel") in source_names and matchup_key(value.get("title", "")) == target_match
+                  and (SITE / "indexes" / f"twitch-{key.split(':', 1)[1]}.json").is_file()
+                  and storyboard_path("twitch", key.split(":", 1)[1]).is_file()]
+    if not candidates:
+        raise ValueError("No indexed official Twitch broadcast matches this watch party")
+    interval = int(config.get("watchPartyFingerprintInterval", 10))
+    job.update(fingerprintOnly=True, fingerprintInterval=interval, analysisHeight=540)
+    server.index_job(job["id"])
+    if job.get("status") != "ready" or len(job.get("fingerprints", [])) < 30:
+        raise ValueError(job.get("message", "The watch-party fingerprint could not be created"))
+    target = {"version": 1, "provider": "twitch", "sourceId": entry["id"],
+              "duration": round(float(job["duration"]), 3), "interval": interval,
+              "frames": job["fingerprints"]}
+    matches = []
+    for source_id, _ in reversed(candidates[-int(config.get("alignmentLookback", 8)):]):
+        try:
+            reference = compact_reference(load_storyboard(storyboard_path("twitch", source_id)), interval)
+            alignment = align_storyboards(reference, target,
+                                          maximum_distance=int(config.get("watchPartyMaximumDistance", 18)))
+            index = read_json(SITE / "indexes" / f"twitch-{source_id}.json")
+            rounds = translate_index(index, target, alignment)
+            matches.append((alignment["anchors"], source_id, alignment, rounds))
+        except (OSError, ValueError, KeyError):
+            continue
+    if not matches:
+        raise ValueError("No verified official-broadcast alignment was found for this watch party")
+    matches.sort(reverse=True, key=lambda item: item[0])
+    if len(matches) > 1 and matches[1][0] >= matches[0][0] * 0.8:
+        raise ValueError("More than one official broadcast matches this watch party")
+    _, source_id, alignment, rounds = matches[0]
+    return source_id, alignment, rounds
+
+
 def process(channel, entry, config, state=None, yt_dlp=None):
     identifier = uuid.uuid4().hex
     provider = channel["provider"]
@@ -340,6 +404,9 @@ def process(channel, entry, config, state=None, yt_dlp=None):
            "created": datetime.now(timezone.utc).timestamp()}
     if os.environ.get("VODLOCK_STREAM_ANALYSIS") == "1":
         job["streamAnalysis"] = True
+    if provider == "twitch":
+        job["adaptiveAnalysis"] = True
+        job["analysisHeight"] = 540
     if provider == "twitch" and channel.get("alignmentSource"):
         job["fingerprintInterval"] = 2
     if provider == "youtube":
@@ -350,6 +417,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
     server.JOBS[identifier] = job
     server.save(job)
     aligned_source_id = None
+    alignment = None
     try:
         print(f"Processing {provider}:{entry['id']} - {clean_text(entry['title'])}", flush=True)
         if provider == "youtube" and state is not None and yt_dlp is not None:
@@ -358,19 +426,41 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                         "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION,
                         "rounds": rounds, "alignment": {**alignment, "source": "twitch:" + aligned_source_id}}
         else:
-            server.index_job(identifier)
-            accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
-            if not accepted:
-                preserve_diagnostics(provider, entry["id"], server.DATA / identifier)
-                return False, reason
-            if provider == "twitch" and channel.get("alignmentSource"):
-                save_storyboard(storyboard_path("twitch", entry["id"]),
-                                {"version": 1, "provider": "twitch", "sourceId": entry["id"],
-                                 "duration": round(float(job["duration"]), 3), "interval": job["fingerprintInterval"],
-                                 "frames": job["fingerprints"]})
-            exported = server.export(job)
-            exported["rounds"] = [{"map": item["map"], "round": item["round"], "start": item["start"]}
-                                  for item in exported["rounds"]]
+            if state is not None and yt_dlp is not None and channel.get("reuseOfficialIndex"):
+                try:
+                    aligned_source_id, alignment, rounds = watchparty_alignment(job, entry, config, state, yt_dlp)
+                    exported = {"schemaVersion": 2, "provider": "twitch", "sourceId": entry["id"], "label": title,
+                                "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION,
+                                "rounds": rounds, "alignment": {**alignment, "source": "twitch:" + aligned_source_id}}
+                except (OSError, ValueError, KeyError) as error:
+                    print(f"twitch:{entry['id']} alignment unavailable - {clean_text(error)}; using OCR", flush=True)
+                    aligned_source_id = None
+                    alignment = None
+                    job.pop("fingerprintOnly", None)
+                    job["fingerprintInterval"] = 2 if channel.get("alignmentSource") else 0
+                    reset_analysis_job(job)
+            if aligned_source_id is None:
+                server.index_job(identifier)
+                accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
+                if not accepted and job.get("adaptiveAnalysis"):
+                    print(f"twitch:{entry['id']} adaptive analysis held - {clean_text(reason)}; retrying full 720p OCR",
+                          flush=True)
+                    job["adaptiveAnalysis"] = False
+                    job["analysisHeight"] = 720
+                    reset_analysis_job(job)
+                    server.index_job(identifier)
+                    accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
+                if not accepted:
+                    preserve_diagnostics(provider, entry["id"], server.DATA / identifier)
+                    return False, reason
+                if provider == "twitch" and channel.get("alignmentSource"):
+                    save_storyboard(storyboard_path("twitch", entry["id"]),
+                                    {"version": 1, "provider": "twitch", "sourceId": entry["id"],
+                                     "duration": round(float(job["duration"]), 3), "interval": job["fingerprintInterval"],
+                                     "frames": job["fingerprints"]})
+                exported = server.export(job)
+                exported["rounds"] = [{"map": item["map"], "round": item["round"], "start": item["start"]}
+                                      for item in exported["rounds"]]
         filename = f"{provider}-{entry['id']}.json"
         write_json(SITE / "indexes" / filename, exported)
         chat_path = None
@@ -379,29 +469,33 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                 chat_path = chat_archive.archive_chat(entry["id"])
             except Exception as error:
                 print(f"twitch:{entry['id']} chat unavailable - {clean_text(error)}", file=sys.stderr)
-        catalog_path = SITE / "catalog.json"
-        catalog = read_json(catalog_path)
-        catalog["version"] = 2
-        catalog["videos"] = [item for item in catalog["videos"]
-                             if source_key(item.get("provider", "youtube"), item.get("sourceId", item.get("videoId", "")))
-                             != source_key(provider, entry["id"])
-                             and not (aligned_source_id and item.get("provider") == "twitch"
-                                      and str(item.get("sourceId", "")) == aligned_source_id)]
-        source = state["videos"][source_key("twitch", aligned_source_id)] if aligned_source_id and state is not None else None
-        played_at = catalog_played_at(entry, exported["rounds"], source, alignment if aligned_source_id else None)
-        catalog_entry = {"provider": provider, "sourceId": entry["id"], "title": title,
-                         "event": event, "label": "Full match" if provider == "youtube" else "Full broadcast",
-                         "index": f"/indexes/{filename}", "playedAt": played_at, **tournament_metadata(event, title)}
-        if chat_path:
-            catalog_entry["chat"] = "/chats/" + chat_path.name
-        catalog["videos"].insert(0, catalog_entry)
-        catalog["videos"].sort(key=lambda item: item.get("playedAt", ""), reverse=True)
-        catalog["updatedAt"] = datetime.now(timezone.utc).date().isoformat()
-        write_json(catalog_path, catalog)
-        if aligned_source_id and state is not None:
-            source["status"] = "superseded"
-            source["message"] = "Superseded by " + source_key("youtube", entry["id"])
-            source["supersededBy"] = source_key("youtube", entry["id"])
+        supersede_source = provider == "youtube" and aligned_source_id
+        with PUBLISH_LOCK:
+            catalog_path = SITE / "catalog.json"
+            catalog = read_json(catalog_path)
+            catalog["version"] = 2
+            catalog["videos"] = [item for item in catalog["videos"]
+                                 if source_key(item.get("provider", "youtube"), item.get("sourceId", item.get("videoId", "")))
+                                 != source_key(provider, entry["id"])
+                                 and not (supersede_source and item.get("provider") == "twitch"
+                                          and str(item.get("sourceId", "")) == aligned_source_id)]
+            source = (state["videos"].get(source_key("twitch", aligned_source_id))
+                      if supersede_source and state is not None else None)
+            played_at = catalog_played_at(entry, exported["rounds"], source,
+                                          alignment if supersede_source else None)
+            catalog_entry = {"provider": provider, "sourceId": entry["id"], "title": title,
+                             "event": event, "label": "Full match" if provider == "youtube" else "Full broadcast",
+                             "index": f"/indexes/{filename}", "playedAt": played_at, **tournament_metadata(event, title)}
+            if chat_path:
+                catalog_entry["chat"] = "/chats/" + chat_path.name
+            catalog["videos"].insert(0, catalog_entry)
+            catalog["videos"].sort(key=lambda item: item.get("playedAt", ""), reverse=True)
+            catalog["updatedAt"] = datetime.now(timezone.utc).date().isoformat()
+            write_json(catalog_path, catalog)
+            if supersede_source and source is not None:
+                source["status"] = "superseded"
+                source["message"] = "Superseded by " + source_key("youtube", entry["id"])
+                source["supersededBy"] = source_key("youtube", entry["id"])
         return True, "Published"
     finally:
         server.JOBS.pop(identifier, None)
@@ -485,12 +579,17 @@ def main():
         for channel, entry in candidates:
             print(f"{channel['provider']}:{entry['id']} | {clean_text(entry['title'])} | {channel['name']}")
         return 0
-    for channel, entry in candidates:
-        key = source_key(channel["provider"], entry["id"])
+
+    def run_candidate(channel, entry):
         try:
             published, message = process(channel, entry, config, state, yt_dlp)
         except Exception as error:
             published, message = False, str(error)
+        return channel, entry, published, message
+
+    def record_result(result):
+        channel, entry, published, message = result
+        key = source_key(channel["provider"], entry["id"])
         state["videos"][key] = {"status": "published" if published else "held",
                                 "provider": channel["provider"], "channel": channel["name"],
                                 "title": clean_text(entry["title"]), "message": clean_text(message),
@@ -501,6 +600,20 @@ def main():
                                 "checkedAt": datetime.now(timezone.utc).isoformat()}
         write_json(STATE_PATH, state)
         print(f"{key}: {state['videos'][key]['status']} - {message}", flush=True)
+
+    prerequisites = [(channel, entry) for channel, entry in candidates if channel.get("alignmentSource")]
+    remaining = [(channel, entry) for channel, entry in candidates if not channel.get("alignmentSource")]
+    for channel, entry in prerequisites:
+        record_result(run_candidate(channel, entry))
+    workers = min(max(1, int(config.get("maxWorkers", 1))), len(remaining)) if remaining else 0
+    if workers == 1:
+        for channel, entry in remaining:
+            record_result(run_candidate(channel, entry))
+    elif workers > 1:
+        with ThreadPoolExecutor(max_workers=workers) as executor:
+            futures = [executor.submit(run_candidate, channel, entry) for channel, entry in remaining]
+            for future in as_completed(futures):
+                record_result(future.result())
     return 0
 
 

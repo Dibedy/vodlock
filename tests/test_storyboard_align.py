@@ -85,6 +85,15 @@ class StoryboardAlignmentTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "map 1 round 1"):
             translate_index({"rounds": rounds}, {"duration": 1000}, {"offset": 1000})
 
+    def test_disconnect_that_removes_rounds_is_rejected(self):
+        rounds = [{"map": 1, "round": number, "start": number * 100} for number in range(1, 14)]
+        alignment = {"segments": [
+            {"offset": 0, "targetStart": 0, "targetEnd": 450},
+            {"offset": 300, "targetStart": 450, "targetEnd": 1000},
+        ]}
+        with self.assertRaisesRegex(ValueError, "gap"):
+            translate_index({"rounds": rounds}, {"duration": 1000}, alignment)
+
 
 if __name__ == "__main__":
     unittest.main()

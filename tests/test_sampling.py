@@ -1,4 +1,5 @@
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -6,6 +7,9 @@ from pathlib import Path
 import cv2
 import imageio_ffmpeg
 import numpy as np
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "indexer"))
+import server
 
 
 class SamplingTests(unittest.TestCase):
@@ -25,6 +29,15 @@ class SamplingTests(unittest.TestCase):
             self.assertGreaterEqual(len(frames), 3)
             for frame, expected in zip(frames, [0, 20, 40]):
                 self.assertLessEqual(abs(float(frame.mean()) - expected), 1)
+
+    def test_compact_filter_emits_one_exactly_sized_frame(self):
+        result = subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error",
+                                 "-f", "lavfi", "-i", "testsrc=size=1280x720:rate=1", "-frames:v", "1",
+                                 "-vf", server.compact_analysis_filter(), "-f", "rawvideo", "-pix_fmt", "bgr24",
+                                 "pipe:1"], capture_output=True, timeout=20,
+                                creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        self.assertEqual(result.returncode, 0, result.stderr.decode(errors="replace"))
+        self.assertEqual(len(result.stdout), server.COMPACT_WIDTH * server.COMPACT_HEIGHT * 3)
 
 
 if __name__ == "__main__":

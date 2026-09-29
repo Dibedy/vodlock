@@ -6,7 +6,7 @@ from unittest.mock import patch
 import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "indexer"))
-from detector import HudReader, Observation, RoundDetector, parse_hud
+from detector import HUD_PROFILES, HudReader, Observation, RoundDetector, parse_hud
 
 
 class DetectorTests(unittest.TestCase):
@@ -51,6 +51,28 @@ class DetectorTests(unittest.TestCase):
             sample = reader.read(np.zeros((720, 1280, 3), dtype=np.uint8), 10)
         self.assertIs(sample, readable)
         self.assertEqual(profiles.call_count, 2)
+
+    def test_reader_stops_after_clock_when_round_start_is_impossible(self):
+        reader = HudReader.__new__(HudReader)
+        with patch.object(reader, "read_lines", return_value=[("0:42", .99)]) as reads:
+            sample = reader.read_profile(np.zeros((720, 1280, 3), dtype=np.uint8), 10, HUD_PROFILES[0])
+        self.assertEqual((sample.round, sample.timer), (None, 42))
+        self.assertEqual(reads.call_count, 1)
+
+    def test_compact_reader_uses_original_hud_coordinates(self):
+        reader = HudReader.__new__(HudReader)
+        frame = np.zeros((324, 1280, 3), dtype=np.uint8)
+        clock = reader.crop(frame, HUD_PROFILES[0]["clock"], compact=True)
+        replay = frame[208:324, 934:1280]
+        self.assertEqual(clock.shape[:2], (28, 89))
+        self.assertEqual(replay.shape[:2], (116, 346))
+
+    def test_clock_probe_checks_other_profiles_after_an_irrelevant_timer(self):
+        reader = HudReader.__new__(HudReader)
+        with patch.object(reader, "read_lines", side_effect=[[('0:42', .99)], [('1:37', .98)]]) as reads:
+            sample = reader.read_clock(np.zeros((324, 1280, 3), dtype=np.uint8), 10, compact=True)
+        self.assertEqual(sample.timer, 97)
+        self.assertEqual(reads.call_count, 2)
 
     def test_explicit_replay_is_rejected(self):
         sample = parse_hud(10, [("ROUND 16", .95), ("1:39", .98)], [("REPLAY", .9)])

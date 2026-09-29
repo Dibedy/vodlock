@@ -5,7 +5,7 @@ import re
 import shutil
 import sys
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -145,6 +145,26 @@ def catalog_metadata(channel, entry):
     title = re.sub(r"\bvs\.(?=\s|$)", "vs", pieces[0], flags=re.IGNORECASE) if pieces else "Indexed match"
     event = " | ".join(pieces[1:]) or channel["name"]
     return clean_text(title)[:100], clean_text(event)[:140]
+
+
+def catalog_played_at(entry, rounds, source=None, alignment=None):
+    value = source.get("publishedAt") if source else entry.get("created_at") or entry.get("published")
+    if not value or not rounds:
+        raise ValueError("The match does not have enough timing information for the catalog")
+    started = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    if started.tzinfo is None:
+        started = started.replace(tzinfo=timezone.utc)
+    first_round = float(rounds[0]["start"])
+    elapsed = first_round
+    if alignment:
+        segments = alignment.get("segments") or [{"offset": alignment["offset"], "targetStart": 0,
+                                                    "targetEnd": float("inf")}]
+        segment = next((item for item in segments
+                        if float(item.get("targetStart", 0)) <= first_round < float(item.get("targetEnd", float("inf")))),
+                       segments[0])
+        elapsed = float(alignment.get("timelineScale", 1)) * first_round + float(segment["offset"])
+    played = started.astimezone(timezone.utc) + timedelta(seconds=elapsed)
+    return played.isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
 def publishable(job, minimum_confidence, minimum_rounds):
@@ -331,16 +351,18 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                              != source_key(provider, entry["id"])
                              and not (aligned_source_id and item.get("provider") == "twitch"
                                       and str(item.get("sourceId", "")) == aligned_source_id)]
+        source = state["videos"][source_key("twitch", aligned_source_id)] if aligned_source_id and state is not None else None
+        played_at = catalog_played_at(entry, exported["rounds"], source, alignment if aligned_source_id else None)
         catalog_entry = {"provider": provider, "sourceId": entry["id"], "title": title,
                          "event": event, "label": "Full match" if provider == "youtube" else "Full broadcast",
-                         "index": f"/indexes/{filename}"}
+                         "index": f"/indexes/{filename}", "playedAt": played_at}
         if chat_path:
             catalog_entry["chat"] = "/chats/" + chat_path.name
         catalog["videos"].insert(0, catalog_entry)
+        catalog["videos"].sort(key=lambda item: item.get("playedAt", ""), reverse=True)
         catalog["updatedAt"] = datetime.now(timezone.utc).date().isoformat()
         write_json(catalog_path, catalog)
         if aligned_source_id and state is not None:
-            source = state["videos"][source_key("twitch", aligned_source_id)]
             source["status"] = "superseded"
             source["message"] = "Superseded by " + source_key("youtube", entry["id"])
             source["supersededBy"] = source_key("youtube", entry["id"])

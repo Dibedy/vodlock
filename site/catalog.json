@@ -3,13 +3,80 @@
   "updatedAt": "2026-09-29",
   "videos": [
     {
+      "provider": "youtube",
+      "sourceId": "fFfCJDNHEvc",
+      "title": "JDG vs FUT",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-fFfCJDNHEvc.json",
+      "playedAt": "2026-09-27T11:36:45Z"
+    },
+    {
+      "provider": "youtube",
+      "sourceId": "ZphbktbT26k",
+      "title": "LOUD vs EDG",
+      "event": "VALORANT Champions Shanghai · Group Stage",
+      "label": "Full match",
+      "index": "/indexes/ZphbktbT26k.json",
+      "playedAt": "2026-09-27T09:11:47Z"
+    },
+    {
       "provider": "twitch",
-      "sourceId": "2867033974",
+      "sourceId": "2885323336",
       "title": "EG FNS",
-      "event": "LOUD vs 100T | VCT Americas Grand Finals #VCTWatchparty | !vote !inzone",
+      "event": "LOUD vs EDG | VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
       "label": "Full broadcast",
-      "index": "/indexes/twitch-2867033974.json",
-      "chat": "/chats/twitch-2867033974.json"
+      "index": "/indexes/twitch-2885323336.json",
+      "playedAt": "2026-09-27T09:11:47Z",
+      "chat": "/chats/twitch-2885323336.json"
+    },
+    {
+      "provider": "youtube",
+      "sourceId": "ZWhEMQVk4x0",
+      "title": "100T vs T1",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-ZWhEMQVk4x0.json",
+      "playedAt": "2026-09-27T09:11:40Z"
+    },
+    {
+      "provider": "twitch",
+      "sourceId": "2884362905",
+      "title": "EG FNS",
+      "event": "GE vs VIT | VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
+      "label": "Full broadcast",
+      "index": "/indexes/twitch-2884362905.json",
+      "playedAt": "2026-09-26T09:09:19Z",
+      "chat": "/chats/twitch-2884362905.json"
+    },
+    {
+      "provider": "youtube",
+      "sourceId": "TWjd0AoZdaY",
+      "title": "GE vs VIT",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-TWjd0AoZdaY.json",
+      "playedAt": "2026-09-26T09:09:12Z"
+    },
+    {
+      "provider": "twitch",
+      "sourceId": "2883449763",
+      "title": "EG FNS",
+      "event": "NRG vs NS | VCT Champions Group Stage #VCTWatchparty | !vote !inzone",
+      "label": "Full broadcast",
+      "index": "/indexes/twitch-2883449763.json",
+      "playedAt": "2026-09-25T09:10:02Z",
+      "chat": "/chats/twitch-2883449763.json"
+    },
+    {
+      "provider": "twitch",
+      "sourceId": "2883454178",
+      "title": "NS vs NRG",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full broadcast",
+      "index": "/indexes/twitch-2883454178.json",
+      "playedAt": "2026-09-25T09:09:54Z",
+      "chat": "/chats/twitch-2883454178.json"
     },
     {
       "provider": "twitch",
@@ -18,6 +85,7 @@
       "event": "PRX vs Team Liquid | VCT Champions Group Stage #VCTWatchparty | !vote !inzone",
       "label": "Full broadcast",
       "index": "/indexes/twitch-2882589453.json",
+      "playedAt": "2026-09-24T09:21:51Z",
       "chat": "/chats/twitch-2882589453.json"
     },
     {
@@ -27,75 +95,18 @@
       "event": "VALORANT Champions Shanghai | Opening Day",
       "label": "Full broadcast",
       "index": "/indexes/twitch-2882594925.json",
+      "playedAt": "2026-09-24T09:21:37Z",
       "chat": "/chats/twitch-2882594925.json"
     },
     {
       "provider": "twitch",
-      "sourceId": "2883454178",
-      "title": "NS vs NRG",
-      "event": "VALORANT Champions Shanghai | Group Stage",
-      "label": "Full broadcast",
-      "index": "/indexes/twitch-2883454178.json",
-      "chat": "/chats/twitch-2883454178.json"
-    },
-    {
-      "provider": "twitch",
-      "sourceId": "2883449763",
+      "sourceId": "2867033974",
       "title": "EG FNS",
-      "event": "NRG vs NS | VCT Champions Group Stage #VCTWatchparty | !vote !inzone",
+      "event": "LOUD vs 100T | VCT Americas Grand Finals #VCTWatchparty | !vote !inzone",
       "label": "Full broadcast",
-      "index": "/indexes/twitch-2883449763.json",
-      "chat": "/chats/twitch-2883449763.json"
-    },
-    {
-      "provider": "youtube",
-      "sourceId": "ZWhEMQVk4x0",
-      "title": "100T vs T1",
-      "event": "VALORANT Champions Shanghai | Group Stage",
-      "label": "Full match",
-      "index": "/indexes/youtube-ZWhEMQVk4x0.json"
-    },
-    {
-      "provider": "youtube",
-      "sourceId": "TWjd0AoZdaY",
-      "title": "GE vs VIT",
-      "event": "VALORANT Champions Shanghai | Group Stage",
-      "label": "Full match",
-      "index": "/indexes/youtube-TWjd0AoZdaY.json"
-    },
-    {
-      "provider": "youtube",
-      "sourceId": "fFfCJDNHEvc",
-      "title": "JDG vs FUT",
-      "event": "VALORANT Champions Shanghai | Group Stage",
-      "label": "Full match",
-      "index": "/indexes/youtube-fFfCJDNHEvc.json"
-    },
-    {
-      "provider": "twitch",
-      "sourceId": "2884362905",
-      "title": "EG FNS",
-      "event": "GE vs VIT | VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
-      "label": "Full broadcast",
-      "index": "/indexes/twitch-2884362905.json",
-      "chat": "/chats/twitch-2884362905.json"
-    },
-    {
-      "provider": "twitch",
-      "sourceId": "2885323336",
-      "title": "EG FNS",
-      "event": "LOUD vs EDG | VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
-      "label": "Full broadcast",
-      "index": "/indexes/twitch-2885323336.json",
-      "chat": "/chats/twitch-2885323336.json"
-    },
-    {
-      "provider": "youtube",
-      "sourceId": "ZphbktbT26k",
-      "title": "LOUD vs EDG",
-      "event": "VALORANT Champions Shanghai · Group Stage",
-      "label": "Full match",
-      "index": "/indexes/ZphbktbT26k.json"
+      "index": "/indexes/twitch-2867033974.json",
+      "playedAt": "2026-09-06T17:17:12Z",
+      "chat": "/chats/twitch-2867033974.json"
     }
   ]
 }

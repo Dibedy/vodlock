@@ -23,7 +23,7 @@ The viewer is static and needs no database, API key, server function, or hosted 
 1. Build and review the index in Round Studio.
 2. Export its JSON file.
 3. Save it as `indexes/PROVIDER-VIDEO_ID.json`.
-4. Add one matching entry to `catalog.json` with `provider`, `sourceId`, and the index path.
+4. Add one matching entry to `catalog.json` with `provider`, `sourceId`, the index path, and the first round's UTC `playedAt` timestamp.
 5. Redeploy the site.
 
 Manually created indexes should be reviewed before publishing. Catalog cards intentionally omit scores, map totals, round totals, durations, and thumbnails.

@@ -46,6 +46,17 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(event, "VALORANT Champions Shanghai | Group Stage")
         self.assertNotIn("—", title + event)
 
+    def test_catalog_time_uses_the_first_round_in_the_original_broadcast(self):
+        rounds = [{"map": 1, "round": 1, "start": 100}]
+        self.assertEqual(auto_publish.catalog_played_at({"created_at": "2026-09-29T10:00:00Z"}, rounds),
+                         "2026-09-29T10:01:40Z")
+        source = {"publishedAt": "2026-09-29T10:00:00Z"}
+        alignment = {"timelineScale": 1.002, "segments": [
+            {"offset": 600, "targetStart": 0, "targetEnd": 1000},
+            {"offset": 900, "targetStart": 1000, "targetEnd": 2000}]}
+        self.assertEqual(auto_publish.catalog_played_at({}, rounds, source, alignment),
+                         "2026-09-29T10:11:40Z")
+
     def test_held_diagnostics_are_copied_out_of_the_temporary_job(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -173,7 +184,8 @@ class AutoPublishTests(unittest.TestCase):
     def test_youtube_publication_supersedes_its_official_twitch_source(self):
         channel = {"provider": "youtube", "name": "YouTube", "minimumDuration": 3600}
         entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH"}
-        state = {"videos": {"twitch:1234567890": {"status": "published", "message": "Published"}}}
+        state = {"videos": {"twitch:1234567890": {"status": "published", "message": "Published",
+                                                    "publishedAt": "2026-09-29T10:00:00Z"}}}
         rounds = [{"map": 1, "round": number, "start": number * 100} for number in range(1, 14)]
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
@@ -187,6 +199,7 @@ class AutoPublishTests(unittest.TestCase):
                                                       state, object()), (True, "Published"))
             catalog = auto_publish.read_json(site / "catalog.json")
         self.assertEqual([item["sourceId"] for item in catalog["videos"]], ["abcdefghijk"])
+        self.assertEqual(catalog["videos"][0]["playedAt"], "2026-09-29T10:01:50Z")
         self.assertEqual(state["videos"]["twitch:1234567890"]["status"], "superseded")
         self.assertEqual(state["videos"]["twitch:1234567890"]["supersededBy"], "youtube:abcdefghijk")
 
@@ -195,7 +208,8 @@ class AutoPublishTests(unittest.TestCase):
         config = {"channels": [youtube_channel, {"provider": "twitch", "name": "Official",
                                                  "alignmentSource": True}],
                   "alignmentLookback": 8, "minimumConfidence": 0.65, "minimumRounds": 13}
-        state = {"videos": {"twitch:1234567890": {"status": "published", "channel": "Official"}}}
+        state = {"videos": {"twitch:1234567890": {"status": "published", "channel": "Official",
+                                                    "publishedAt": "2026-09-29T10:00:00Z"}}}
         rounds = [{"map": 1, "round": number, "start": number * 100} for number in range(1, 14)]
         entries = [{"id": "abcdefghijk", "title": "A vs B - FULL MATCH"},
                    {"id": "lmnopqrstuv", "title": "C vs D - FULL MATCH"}]

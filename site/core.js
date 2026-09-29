@@ -122,5 +122,10 @@
     return Object.freeze(messages);
   }
 
-  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, position, roundDestination, mapDestination});
+  function playedTime(value) {
+    const time = typeof value === 'string' ? Date.parse(value) : NaN;
+    return Number.isFinite(time) ? time : 0;
+  }
+
+  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, playedTime, position, roundDestination, mapDestination});
 })();

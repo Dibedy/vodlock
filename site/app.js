@@ -295,7 +295,7 @@
         if (kindOrder) return kindOrder;
         return Number(first.provider === 'twitch') - Number(second.provider === 'twitch');
       })};
-    });
+    }).sort((first, second) => VodlockSite.playedTime(second.primary.playedAt) - VodlockSite.playedTime(first.primary.playedAt));
   }
 
   function teamIdentity(team) {
@@ -444,7 +444,7 @@
     }).filter(entry => {
       const parsed = VodlockSite.mediaSource(VodlockSite.sourceKey(entry.provider, entry.sourceId));
       return parsed && typeof entry.index === 'string' && /^\/indexes\/[A-Za-z0-9_-]+\.json$/.test(entry.index) &&
-        typeof entry.title === 'string' && typeof entry.event === 'string';
+        typeof entry.title === 'string' && typeof entry.event === 'string' && VodlockSite.playedTime(entry.playedAt) > 0;
     });
     renderFilters();
     renderCatalog();

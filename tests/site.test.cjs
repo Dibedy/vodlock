@@ -6,7 +6,7 @@ const {test} = require('node:test');
 
 const context = vm.createContext({URL, URLSearchParams});
 vm.runInContext(readFileSync(resolve(__dirname, '../site/core.js'), 'utf8'), context);
-const {videoId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, position, roundDestination, mapDestination} = context.VodlockSite;
+const {videoId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, playedTime, position, roundDestination, mapDestination} = context.VodlockSite;
 const sample = () => ({schemaVersion: 1, videoId: 'ZphbktbT26k', rounds: [
   {map: 1, round: 1, start: 100}, {map: 1, round: 2, start: 250},
   {map: 2, round: 1, start: 700}, {map: 2, round: 2, start: 850}
@@ -165,6 +165,7 @@ test('website groups broadcasts by match and keeps resume state spoiler safe', (
   const vercel = readFileSync(resolve(__dirname, '../site/vercel.json'), 'utf8');
   assert.match(app, /function matchKey\(entry\)/);
   assert.match(app, /function groupedMatches\(\)/);
+  assert.match(app, /playedTime\(second\.primary\.playedAt\) - VodlockSite\.playedTime\(first\.primary\.playedAt\)/);
   assert.match(app, /source-list/);
   assert.match(app, /teamLogos/);
   for (const team of ['ge', 'vit', '100t', 't1', 'ns', 'nrg', 'jdg', 'fut', 'loud', 'edg']) {
@@ -190,6 +191,16 @@ test('website keeps playback shortcuts available after interacting with provider
   assert.match(app, /addEventListener\('blur', reclaimPlayerFocus\)/);
   assert.match(app, /event\.code === 'Space'/);
   assert.doesNotMatch(styles, /twitch-timeline-hidden #media-player iframe[^}]+pointer-events: none/);
+});
+
+test('website parses match times for strict newest-first ordering', () => {
+  assert.equal(playedTime('2026-09-29T12:00:00Z'), Date.parse('2026-09-29T12:00:00Z'));
+  assert.equal(playedTime('invalid'), 0);
+  assert.equal(playedTime(null), 0);
+  const catalog = JSON.parse(readFileSync(resolve(__dirname, '../site/catalog.json'), 'utf8'));
+  const times = catalog.videos.map(entry => playedTime(entry.playedAt));
+  assert.ok(times.every(time => time > 0));
+  assert.deepEqual(times, times.slice().sort((first, second) => second - first));
 });
 
 test('website keeps Twitch native fullscreen from bypassing the hidden timeline', () => {

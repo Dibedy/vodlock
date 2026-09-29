@@ -108,7 +108,10 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.doesNotMatch(index, /SYNCED/);
   const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
   assert.match(app, /spoilerWord\.setAttribute\('aria-pressed', String\(!revealed\)\)/);
-  assert.match(styles, /\.spoiler-word > span \{[^}]+filter: blur\(14px\)[^}]+transition: filter 240ms ease, color 240ms ease/);
+  assert.doesNotMatch(index, /Click to reveal/);
+  assert.match(styles, /\.spoiler-word > span \{[^}]+filter: blur\(14px\)[^}]+transition: filter 240ms ease/);
+  assert.match(styles, /assets\/noise\.svg/);
+  assert.match(styles, /assets\/halftone\.svg/);
   assert.match(styles, /twitch-timeline-hidden #media-player iframe[^}]+top: -90px[^}]+height: calc\(100% \+ 180px\)/);
   assert.match(styles, /watch-layout:fullscreen \.chat-panel/);
   assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);

@@ -112,14 +112,31 @@ class DetectorTests(unittest.TestCase):
         detector.observe(Observation(110, 1, 90, .99))
         self.assertEqual(detector.rounds, [])
 
+    def test_isolated_preroll_detection_is_ignored_until_round_one(self):
+        detector = RoundDetector()
+        for time, number, timer in [(100, 8, 100), (102, 8, 98),
+                                    (500, 1, 100), (502, 1, 98),
+                                    (600, 2, 100), (602, 2, 98)]:
+            detector.observe(Observation(time, number, timer, .99))
+        self.assertEqual([entry["round"] for entry in detector.rounds], [1, 2])
+        self.assertEqual(detector.warnings, [])
+
+    def test_pre_round_one_sequence_remains_held_as_possible_midmatch_recording(self):
+        detector = RoundDetector()
+        for time, number, timer in [(100, 8, 100), (102, 8, 98),
+                                    (200, 9, 100), (202, 9, 98),
+                                    (500, 1, 100), (502, 1, 98)]:
+            detector.observe(Observation(time, number, timer, .99))
+        self.assertEqual([entry["round"] for entry in detector.rounds], [1])
+        self.assertEqual(detector.warnings,
+                         ["A round sequence was detected before round 1. Check whether this recording starts mid-match."])
+
     def test_map_reset_and_missing_round_warning(self):
         detector = RoundDetector()
-        for number, time in [(12, 100), (14, 400), (1, 1000)]:
-            detector.observe(Observation(time, number, 100, .99))
-            detector.observe(Observation(time + 2, number, 98, .99))
-            if number == 14:
-                detector.observe(Observation(time + 4, number, 96, .99))
-        self.assertEqual([r["map"] for r in detector.rounds], [1, 1, 2])
+        for number, time, samples in [(1, 100, 2), (12, 300, 3), (14, 500, 3), (1, 1000, 2)]:
+            for offset in range(samples):
+                detector.observe(Observation(time + offset * 2, number, 100 - offset * 2, .99))
+        self.assertEqual([r["map"] for r in detector.rounds], [1, 1, 1, 2])
         self.assertEqual(len(detector.warnings), 2)
 
     def test_two_misread_frames_cannot_skip_the_expected_round(self):

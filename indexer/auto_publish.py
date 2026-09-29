@@ -59,6 +59,7 @@ def retry_class(message):
     permanent = (
         "No reliable round starts were found",
         "The first detected round is not round 1",
+        "A round sequence was detected before round 1",
         "The index does not begin at map 1 round 1",
         "The detected round sequence contains a gap",
         "At least one round is below the automatic confidence threshold",

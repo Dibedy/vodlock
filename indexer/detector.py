@@ -3,7 +3,7 @@ import statistics
 from dataclasses import dataclass
 
 
-DETECTOR_VERSION = "vct-clock-ocr-v7"
+DETECTOR_VERSION = "vct-clock-ocr-v8"
 HUD_PROFILES = (
     {"label": (0, .026, .46, .54), "clock": (.026, .065, .465, .535),
      "top": (0, .034, .445, .555), "wide": (0, .09, .43, .57), "score_top": .053},
@@ -49,6 +49,8 @@ class RoundDetector:
     def __init__(self):
         self.rounds = []
         self.pending = []
+        self.preroll_rounds = []
+        self.preroll_sequence = False
         self.map_number = 1
         self.warnings = []
 
@@ -65,6 +67,8 @@ class RoundDetector:
         if sample.round is None or sample.timer is None or sample.confidence < 0.65:
             return
         if not 85 <= sample.timer <= 100:
+            return
+        if not self.rounds and self.preroll_rounds and sample.round == self.preroll_rounds[-1]["round"]:
             return
         if self.rounds:
             previous = self.rounds[-1]
@@ -89,6 +93,14 @@ class RoundDetector:
         if len(self.pending) < required:
             return
         start = max(0, statistics.median(s.time - (100 - s.timer) for s in self.pending))
+        if not self.rounds and sample.round != 1:
+            if self.preroll_rounds:
+                previous = self.preroll_rounds[-1]
+                if sample.round == previous["round"] + 1 and start > previous["start"] + 15:
+                    self.preroll_sequence = True
+            self.preroll_rounds.append({"round": sample.round, "start": round(start, 2)})
+            self.pending = []
+            return
         if self.rounds:
             previous = self.rounds[-1]
             if start <= previous["start"] + 15:
@@ -98,8 +110,8 @@ class RoundDetector:
                 self.map_number += 1
             elif sample.round != previous["round"] + 1:
                 self.warnings.append(f"Map {self.map_number}: check the gap before round {sample.round}.")
-        elif sample.round != 1:
-            self.warnings.append("The first detected round is not round 1. Check the beginning of this recording.")
+        elif self.preroll_sequence:
+            self.warnings.append("A round sequence was detected before round 1. Check whether this recording starts mid-match.")
         self.rounds.append({"map": self.map_number, "round": sample.round, "start": round(start, 2),
                             "confidence": round(min(s.confidence for s in self.pending), 3), "verified": False})
         self.pending = []

@@ -329,8 +329,8 @@ footer a:hover { color: var(--lime); }
   .section-heading { margin-left: 0; }
   .section-heading h2 { font-size: 42px; }
   .filter-panel { padding: 14px; gap: 16px; }
-  .filter-options { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; overflow-x: auto; }
-  .filter-options button { min-width: max-content; padding-inline: 14px; }
+  .filter-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .filter-options button { min-width: 0; padding-inline: 10px; }
   .catalog-library { margin-top: 50px; }
   .vod-card { grid-template-columns: 1fr; padding-top: 20px; }
   .match-number { padding: 0 0 12px; }

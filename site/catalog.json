@@ -4,6 +4,15 @@
   "videos": [
     {
       "provider": "twitch",
+      "sourceId": "2867033974",
+      "title": "EG FNS",
+      "event": "LOUD vs 100T | VCT Americas Grand Finals #VCTWatchparty | !vote !inzone",
+      "label": "Full broadcast",
+      "index": "/indexes/twitch-2867033974.json",
+      "chat": "/chats/twitch-2867033974.json"
+    },
+    {
+      "provider": "twitch",
       "sourceId": "2882589453",
       "title": "EG FNS",
       "event": "PRX vs Team Liquid | VCT Champions Group Stage #VCTWatchparty | !vote !inzone",

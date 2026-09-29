@@ -134,12 +134,12 @@
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | LOUD vs 100T - VCT Americas Grand Finals #VCTWatchparty | !vote !inzone",
-      "message": "FFmpeg could not finish reading the video:",
+      "message": "No reliable round starts were found. This version needs the VCT top-centre ROUND label and timer; a different layout may need detector changes.",
       "publishedAt": "2026-09-09T20:54:30Z",
-      "detectorVersion": "vct-clock-ocr-v7",
-      "pipelineVersion": "vct-clock-ocr-v7+storyboard-v1",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-09-28T19:11:08.102240+00:00"
+      "detectorVersion": "vct-clock-ocr-v8",
+      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
+      "retryClass": "pipeline-update",
+      "checkedAt": "2026-09-29T14:20:26.262828+00:00"
     },
     "twitch:2877469732": {
       "status": "held",
@@ -150,6 +150,30 @@
       "publishedAt": "2026-09-18T15:04:36Z",
       "detectorVersion": "vct-clock-ocr-v6",
       "checkedAt": "2026-09-28T02:02:54.641721+00:00"
+    },
+    "youtube:z_aPp2s4d_o": {
+      "status": "held",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour",
+      "title": "PRX vs. G2 - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
+      "message": "ERROR: [youtube] z_aPp2s4d_o: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp for how to manually pass cookies. Also see https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies for tips on effectively exporting YouTube cookies",
+      "publishedAt": "2026-09-29T12:35:12+00:00",
+      "detectorVersion": "vct-clock-ocr-v8",
+      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-09-29T12:49:57.127563+00:00"
+    },
+    "twitch:2867033974": {
+      "status": "published",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | LOUD vs 100T - VCT Americas Grand Finals #VCTWatchparty | !vote !inzone",
+      "message": "Published",
+      "publishedAt": "2026-09-06T16:57:05Z",
+      "detectorVersion": "vct-clock-ocr-v8",
+      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
+      "retryClass": "none",
+      "checkedAt": "2026-09-29T13:58:00.917409+00:00"
     }
   }
 }

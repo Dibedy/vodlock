@@ -3,6 +3,7 @@
 
   const $ = id => document.getElementById(id);
   const defaultSettings = {hideTwitchTimeline: true, hideMetadata: false, hideRoundStatus: false, showChat: true, showChatTimestamps: false, endScreenProtection: true};
+  const defaultKeybinds = {previousRound: 'ArrowUp', nextRound: 'ArrowDown', skipBackward: 'ArrowLeft', skipForward: 'ArrowRight'};
   const settingIds = {
     hideTwitchTimeline: 'setting-hide-twitch-timeline',
     hideMetadata: 'setting-hide-metadata',
@@ -88,6 +89,7 @@
   const teamsByCode = new Map(vctTeams.map(team => [team.code, team]));
   const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null, teamPickerMode: 'favourites'};
   let settings = readSettings();
+  let keybinds = readKeybinds();
 
   function readResume() {
     try {
@@ -118,6 +120,28 @@
 
   function saveSettings() {
     try { localStorage.setItem('vodlock-settings', JSON.stringify(settings)); } catch {}
+  }
+
+  function readKeybinds() {
+    try {
+      const saved = JSON.parse(localStorage.getItem('spoilless-keybinds') || '{}');
+      return Object.fromEntries(Object.keys(defaultKeybinds).map(key => [key,
+        typeof saved[key] === 'string' && /^[A-Za-z0-9]+$/.test(saved[key]) ? saved[key] : defaultKeybinds[key]]));
+    } catch {
+      return {...defaultKeybinds};
+    }
+  }
+
+  function saveKeybinds() {
+    try { localStorage.setItem('spoilless-keybinds', JSON.stringify(keybinds)); } catch {}
+  }
+
+  function keybindLabel(code) {
+    return {ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', Space: 'Space' }[code] || code.replace(/^Key/, '').replace(/^Digit/, '');
+  }
+
+  function renderKeybinds() {
+    for (const button of document.querySelectorAll('[data-keybind]')) button.textContent = keybindLabel(keybinds[button.dataset.keybind]);
   }
 
   function formatTime(seconds) {
@@ -1053,6 +1077,35 @@
       applySettings();
     });
   }
+  for (const button of document.querySelectorAll('[data-keybind]')) {
+    button.addEventListener('keydown', event => {
+      event.preventDefault();
+      const code = event.code;
+      if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || !/^(Arrow(?:Up|Down|Left|Right)|Key[A-Z]|Digit[0-9])$/.test(code)) {
+        toast('Choose an arrow key, letter, or number.');
+        return;
+      }
+      if (['KeyF', 'KeyT', 'KeyM'].includes(code)) {
+        toast('That key is reserved for a player control.');
+        return;
+      }
+      const conflict = Object.entries(keybinds).find(([action, value]) => action !== button.dataset.keybind && value === code);
+      if (conflict) {
+        toast('That key is already in use.');
+        return;
+      }
+      keybinds = {...keybinds, [button.dataset.keybind]: code};
+      saveKeybinds();
+      renderKeybinds();
+      button.focus();
+    });
+  }
+  $('keybind-reset').addEventListener('click', () => {
+    keybinds = {...defaultKeybinds};
+    saveKeybinds();
+    renderKeybinds();
+    toast('Keyboard shortcuts reset.');
+  });
 
   for (const button of $('kind-filters').querySelectorAll('button')) {
     button.addEventListener('click', () => {
@@ -1127,12 +1180,20 @@
       }
       return;
     }
+    const boundAction = Object.entries(keybinds).find(([, code]) => code === event.code)?.[0];
+    const keybindActions = {
+      previousRound: () => navigateRound(-1),
+      nextRound: () => navigateRound(1),
+      skipBackward: () => seek(Math.max(0, currentTime() - 10)),
+      skipForward: () => seek(currentTime() + 10, 'Skipped 10 seconds')
+    };
+    if (boundAction) {
+      event.preventDefault();
+      keybindActions[boundAction]();
+      return;
+    }
     const actions = {
       ' ': togglePlayback,
-      ArrowUp: () => navigateRound(-1),
-      ArrowDown: () => navigateRound(1),
-      ArrowLeft: () => seek(Math.max(0, currentTime() - 10)),
-      ArrowRight: () => seek(currentTime() + 10, 'Skipped 10 seconds'),
       f: toggleFullscreen,
       F: toggleFullscreen,
       t: toggleTheater,
@@ -1152,6 +1213,7 @@
   });
 
   applySettings();
+  renderKeybinds();
   loadCatalog().then(() => {
     const source = new URL(location.href).searchParams.get('v');
     if (source) return openVideo(source, false);

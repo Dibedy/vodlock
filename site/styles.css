@@ -246,6 +246,17 @@ body.theater-mode main { width: 100%; }
 .settings-list strong { font-size: 13px; }
 .settings-list small { color: var(--muted); font-size: 11px; line-height: 1.4; }
 .settings-list input { width: 18px; height: 18px; flex: 0 0 18px; accent-color: var(--lime); }
+.keybind-settings { padding-top: 24px; }
+.keybind-heading { display: flex; align-items: end; justify-content: space-between; gap: 20px; margin-bottom: 12px; }
+.keybind-heading > div { display: grid; gap: 5px; }
+.keybind-heading strong { font-family: var(--display); font-size: 18px; letter-spacing: -.025em; text-transform: uppercase; }
+.keybind-heading small { color: var(--muted); font-size: 11px; }
+.keybind-heading button { border: 0; background: transparent; color: var(--muted); padding: 6px 0; cursor: pointer; font-size: 10px; font-weight: 900; letter-spacing: .06em; text-transform: uppercase; }
+.keybind-heading button:hover { color: var(--lime); }
+.keybind-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px; }
+.keybind-list > div { min-height: 58px; display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 12px; border: 1px solid var(--line-soft); background: #090d0a; color: var(--muted); font-size: 11px; font-weight: 700; }
+.keybind-list button { min-width: 42px; min-height: 34px; border: 1px solid var(--line); background: var(--raised); color: var(--text); padding: 0 9px; cursor: pointer; font-family: var(--display); font-size: 18px; font-weight: 900; line-height: 1; }
+.keybind-list button:hover, .keybind-list button:focus-visible { border-color: var(--lime); color: var(--lime); }
 .toast { position: fixed; z-index: 50; left: 50%; bottom: 28px; transform: translateX(-50%); max-width: calc(100% - 32px); padding: 12px 16px; border: 1px solid var(--line); background: var(--raised); box-shadow: 0 16px 50px #000; color: var(--text); font-size: 12px; }
 
 footer { min-height: 118px; padding: 26px clamp(20px, 4vw, 68px); display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 30px; border-top: 1px solid var(--line); background: #050706; color: var(--faint); font-size: 10px; }
@@ -335,6 +346,7 @@ footer a:hover { color: var(--lime); }
   .teams-dialog-heading { padding: 22px 20px 18px; }
   .teams-dialog > p { margin: 18px 20px; }
   .team-picker { padding: 8px 20px 20px; }
+  .keybind-list { grid-template-columns: 1fr; }
   .filter-panel { padding: 14px; gap: 16px; }
   .filter-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .filter-options button { min-width: 0; padding-inline: 10px; }

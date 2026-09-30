@@ -149,6 +149,15 @@
       <label><span><strong>Show archived VOD chat</strong><small>Display only messages posted up to the current playback position.</small></span><input id="setting-show-chat" type="checkbox"></label>
       <label><span><strong>Show chat timestamps</strong><small>Reveal each message's position within the broadcast.</small></span><input id="setting-show-chat-timestamps" type="checkbox"></label>
       <label><span><strong>Protect the end screen</strong><small>Remove the player when playback finishes.</small></span><input id="setting-end-screen-protection" type="checkbox"></label>
+      <section class="keybind-settings" aria-labelledby="keybind-title">
+        <div class="keybind-heading"><div><strong id="keybind-title">Keyboard shortcuts</strong><small>Click a binding, then press a new key.</small></div><button id="keybind-reset" type="button">Reset defaults</button></div>
+        <div class="keybind-list">
+          <div><span>Previous round</span><button type="button" data-keybind="previousRound">↑</button></div>
+          <div><span>Next round</span><button type="button" data-keybind="nextRound">↓</button></div>
+          <div><span>Back 10 seconds</span><button type="button" data-keybind="skipBackward">←</button></div>
+          <div><span>Forward 10 seconds</span><button type="button" data-keybind="skipForward">→</button></div>
+        </div>
+      </section>
     </div>
   </dialog>
   <dialog id="teams-dialog" class="teams-dialog" aria-labelledby="teams-title">

@@ -234,10 +234,10 @@
       "title": "EG FNS | PRX vs G2 - VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
       "message": "A round sequence was detected before round 1. Check whether this recording starts mid-match.; Map 3: check the gap before round 21.",
       "publishedAt": "2026-09-29T08:45:31Z",
-      "detectorVersion": "vct-clock-ocr-v8",
-      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v3",
       "retryClass": "pipeline-update",
-      "checkedAt": "2026-09-30T00:25:16.838664+00:00"
+      "checkedAt": "2026-09-30T08:36:50.557607+00:00"
     }
   }
 }

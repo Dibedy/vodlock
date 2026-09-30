@@ -228,28 +228,28 @@
       "checkedAt": "2026-09-30T15:06:37.780662+00:00"
     },
     "twitch:2887057207": {
-      "status": "held",
+      "status": "waiting",
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | PRX vs G2 - VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
-      "message": "A round sequence was detected before round 1. Check whether this recording starts mid-match.; Map 3: check the gap before round 21.",
+      "message": "Waiting for the indexed official YouTube full match",
       "publishedAt": "2026-09-29T08:45:31Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v4",
-      "retryClass": "pipeline-update",
-      "checkedAt": "2026-09-30T16:13:01.361448+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v5",
+      "retryClass": "dependency",
+      "checkedAt": "2026-09-30T18:15:56.907643+00:00"
     },
     "youtube:XdGX65LMxig": {
-      "status": "held",
+      "status": "published",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour",
       "title": "VIT vs. LOUD - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "YouTube blocked GitHub's shared runner. Add the YOUTUBE_COOKIES secret and retry.",
+      "message": "Published",
       "publishedAt": "2026-09-30T11:55:22+00:00",
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v5",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-09-30T17:28:26.452463+00:00"
+      "retryClass": "none",
+      "checkedAt": "2026-09-30T18:15:56.904877+00:00"
     },
     "twitch:2887911255": {
       "status": "indexed",
@@ -264,28 +264,28 @@
       "checkedAt": "2026-09-30T17:28:24.652586+00:00"
     },
     "youtube:2y9ne_hMZts": {
-      "status": "held",
+      "status": "published",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour",
       "title": "100T vs. FUT - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "YouTube blocked GitHub's shared runner. Add the YOUTUBE_COOKIES secret and retry.",
+      "message": "Published",
       "publishedAt": "2026-09-30T14:38:12+00:00",
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v5",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-09-30T17:28:25.578901+00:00"
+      "retryClass": "none",
+      "checkedAt": "2026-09-30T18:14:37.557599+00:00"
     },
     "twitch:2887917739": {
-      "status": "waiting",
+      "status": "held",
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | VIT vs LOUD - VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice !noYT",
-      "message": "Waiting for the indexed official YouTube full match",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-30T08:51:39Z",
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v5",
-      "retryClass": "dependency",
-      "checkedAt": "2026-09-30T17:28:26.453766+00:00"
+      "retryClass": "cooldown",
+      "checkedAt": "2026-09-30T18:33:28.397051+00:00"
     }
   }
 }

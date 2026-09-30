@@ -1,7 +1,29 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-29",
+  "updatedAt": "2026-09-30",
   "videos": [
+    {
+      "provider": "youtube",
+      "sourceId": "2y9ne_hMZts",
+      "title": "100T vs FUT",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-2y9ne_hMZts.json",
+      "playedAt": "2026-09-30T11:57:10Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai"
+    },
+    {
+      "provider": "youtube",
+      "sourceId": "XdGX65LMxig",
+      "title": "VIT vs LOUD",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-XdGX65LMxig.json",
+      "playedAt": "2026-09-30T09:08:51Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai"
+    },
     {
       "provider": "youtube",
       "sourceId": "y6wwIZysHns",

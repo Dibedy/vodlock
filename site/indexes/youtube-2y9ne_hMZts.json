@@ -1,0 +1,271 @@
+{
+  "schemaVersion": 2,
+  "provider": "youtube",
+  "sourceId": "2y9ne_hMZts",
+  "label": "100T vs FUT",
+  "leadSeconds": 5,
+  "detector": "vct-clock-ocr-v9+storyboard-v1",
+  "rounds": [
+    {
+      "map": 1,
+      "round": 1,
+      "start": 148.71
+    },
+    {
+      "map": 1,
+      "round": 2,
+      "start": 496.84
+    },
+    {
+      "map": 1,
+      "round": 3,
+      "start": 639.52
+    },
+    {
+      "map": 1,
+      "round": 4,
+      "start": 750.24
+    },
+    {
+      "map": 1,
+      "round": 5,
+      "start": 912.76
+    },
+    {
+      "map": 1,
+      "round": 6,
+      "start": 1034.46
+    },
+    {
+      "map": 1,
+      "round": 7,
+      "start": 1275.85
+    },
+    {
+      "map": 1,
+      "round": 8,
+      "start": 1440.44
+    },
+    {
+      "map": 1,
+      "round": 9,
+      "start": 1598.32
+    },
+    {
+      "map": 1,
+      "round": 10,
+      "start": 1705.06
+    },
+    {
+      "map": 1,
+      "round": 11,
+      "start": 1818.77
+    },
+    {
+      "map": 1,
+      "round": 12,
+      "start": 1972.39
+    },
+    {
+      "map": 1,
+      "round": 13,
+      "start": 2204.81
+    },
+    {
+      "map": 1,
+      "round": 14,
+      "start": 2342.46
+    },
+    {
+      "map": 1,
+      "round": 15,
+      "start": 2454.18
+    },
+    {
+      "map": 1,
+      "round": 16,
+      "start": 2600.82
+    },
+    {
+      "map": 1,
+      "round": 17,
+      "start": 2717.52
+    },
+    {
+      "map": 1,
+      "round": 18,
+      "start": 2828.25
+    },
+    {
+      "map": 2,
+      "round": 1,
+      "start": 3056.51
+    },
+    {
+      "map": 2,
+      "round": 2,
+      "start": 3166.24
+    },
+    {
+      "map": 2,
+      "round": 3,
+      "start": 3279.95
+    },
+    {
+      "map": 2,
+      "round": 4,
+      "start": 3388.68
+    },
+    {
+      "map": 2,
+      "round": 5,
+      "start": 3540.3
+    },
+    {
+      "map": 2,
+      "round": 6,
+      "start": 3655.02
+    },
+    {
+      "map": 2,
+      "round": 7,
+      "start": 3773.72
+    },
+    {
+      "map": 2,
+      "round": 8,
+      "start": 3898.41
+    },
+    {
+      "map": 2,
+      "round": 9,
+      "start": 3997.16
+    },
+    {
+      "map": 2,
+      "round": 10,
+      "start": 4179.71
+    },
+    {
+      "map": 2,
+      "round": 11,
+      "start": 4307.39
+    },
+    {
+      "map": 2,
+      "round": 12,
+      "start": 4461.0
+    },
+    {
+      "map": 2,
+      "round": 13,
+      "start": 4661.5
+    },
+    {
+      "map": 2,
+      "round": 14,
+      "start": 4742.3
+    },
+    {
+      "map": 2,
+      "round": 15,
+      "start": 4803.15
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 4907.89
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 5044.54
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 5106.39
+    },
+    {
+      "map": 2,
+      "round": 19,
+      "start": 5279.96
+    },
+    {
+      "map": 2,
+      "round": 20,
+      "start": 5391.68
+    },
+    {
+      "map": 2,
+      "round": 21,
+      "start": 5496.41
+    },
+    {
+      "map": 2,
+      "round": 22,
+      "start": 5638.06
+    },
+    {
+      "map": 2,
+      "round": 23,
+      "start": 5820.6
+    }
+  ],
+  "alignment": {
+    "version": "storyboard-v1",
+    "offset": 12267.916,
+    "segments": [
+      {
+        "offset": 12267.916,
+        "anchors": 52,
+        "medianDistance": 3.0,
+        "maximumResidual": 1.939,
+        "targetStart": 0,
+        "targetEnd": 625.095
+      },
+      {
+        "offset": 13383.884,
+        "anchors": 19,
+        "medianDistance": 4.0,
+        "maximumResidual": 2.02,
+        "targetStart": 625.095,
+        "targetEnd": 900.137
+      },
+      {
+        "offset": 13651.959,
+        "anchors": 27,
+        "medianDistance": 5.0,
+        "maximumResidual": 1.898,
+        "targetStart": 900.137,
+        "targetEnd": 1580.241
+      },
+      {
+        "offset": 14399.682,
+        "anchors": 78,
+        "medianDistance": 4.0,
+        "maximumResidual": 2.043,
+        "targetStart": 1580.241,
+        "targetEnd": 2900.443
+      },
+      {
+        "offset": 15037.846,
+        "anchors": 83,
+        "medianDistance": 6.0,
+        "maximumResidual": 2.455,
+        "targetStart": 2900.443,
+        "targetEnd": 5966.0
+      }
+    ],
+    "timelineScale": 1.00249973,
+    "anchors": 259,
+    "coverage": [
+      120,
+      89,
+      50
+    ],
+    "medianDistance": 4.0,
+    "maximumResidual": 2.455,
+    "source": "twitch:2887911255"
+  }
+}

@@ -140,6 +140,7 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .team-crest::before { inset: 0 auto auto 0; border-top: 1px solid; border-left: 1px solid; }
 .team-crest::after { inset: auto 0 0 auto; border-right: 1px solid; border-bottom: 1px solid; }
 .team-crest img { width: 60px; height: 60px; object-fit: contain; filter: grayscale(1) brightness(1.6); }
+.team-crest img[src$="/prx.png"] { filter: invert(1); }
 .team-crest b { color: var(--muted); font-family: var(--display); font-size: 24px; }
 .team-crest.has-image b { display: none; }
 .team-identity > strong { font-family: var(--display); font-size: clamp(24px, 2.4vw, 38px); letter-spacing: -.045em; text-transform: uppercase; }
@@ -164,6 +165,7 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .watch-matchup { margin-top: 12px; display: flex; align-items: center; gap: 14px; }
 .watch-crest { display: inline-flex; align-items: center; gap: 8px; }
 .watch-crest img { width: 34px; height: 34px; object-fit: contain; filter: grayscale(1) brightness(1.6); }
+.watch-crest img[src$="/prx.png"] { filter: invert(1); }
 .watch-crest b { font-family: var(--display); font-size: clamp(28px, 3vw, 44px); letter-spacing: -.05em; }
 .watch-versus { color: var(--faint); font-family: var(--display); font-size: 10px; font-weight: 900; }
 .watch-source { display: grid; gap: 6px; text-align: right; }

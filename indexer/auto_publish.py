@@ -561,6 +561,14 @@ def main():
         except Exception as error:
             print(f"YouTube discovery failed for {channel['name']}: {error}", file=sys.stderr, flush=True)
             continue
+        known_ids = {item["id"] for item in entries}
+        retained = [
+            {"id": key.split(":", 1)[1], "title": item["title"], "published": item.get("publishedAt")}
+            for key, item in state["videos"].items()
+            if key.startswith("youtube:") and item.get("status") == "held"
+            and item.get("channel") == channel["name"] and key.split(":", 1)[1] not in known_ids
+        ]
+        entries.extend(retained)
         eligible = [item for item in entries
                     if should_process(source_key("youtube", item["id"]), published_ids, state["videos"],
                                       config.get("youtubeRetryHours", 0.5), now, arguments.retry_held)]

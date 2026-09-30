@@ -252,6 +252,22 @@ class AutoPublishTests(unittest.TestCase):
             self.assertEqual(auto_publish.main(), 0)
         self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["abcdefghijk", "lmnopqrstuv"])
 
+    def test_held_youtube_match_remains_eligible_after_it_leaves_the_feed(self):
+        now = datetime.now(timezone.utc).isoformat()
+        channel = {"provider": "youtube", "name": "YouTube", "priority": 1}
+        config = {"channels": [channel], "lookback": 30, "maxPerRun": 4,
+                  "maxPerChannelPerRun": 2, "youtubeRetryHours": 0}
+        state = {"videos": {
+            "youtube:lmnopqrstuv": {"status": "held", "channel": "YouTube", "title": "Retry - FULL MATCH",
+                                      "publishedAt": now, "checkedAt": now, "retryClass": "cooldown"}}}
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, {"videos": []}]), \
+                patch.object(auto_publish, "discover_youtube", return_value=[{"id": "abcdefghijk", "title": "Fresh - FULL MATCH"}]), \
+                patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \
+                patch.object(auto_publish, "write_json"), patch.object(sys, "argv", ["auto_publish.py"]), \
+                patch("sys.stdout", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["abcdefghijk", "lmnopqrstuv"])
+
     def test_match_dependency_chain_can_retry_in_one_run(self):
         channels = [{"provider": "twitch", "name": "Official", "login": "official", "priority": 0,
                      "alignmentSource": True},

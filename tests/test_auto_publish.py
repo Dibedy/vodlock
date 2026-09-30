@@ -390,6 +390,12 @@ class AutoPublishTests(unittest.TestCase):
                 result = auto_publish.youtube_alignment(channel, {"id": "abcdefghijk"}, config, state, object())
         self.assertEqual(result[0], "1234567890")
 
+    def test_normalize_storyboard_timeline_corrects_a_doubled_archive_timeline(self):
+        normalized, scale = auto_publish.normalize_storyboard_timeline(
+            {"duration": 1000, "interval": 2, "frames": [{"time": 0}, {"time": 1998}]})
+        self.assertEqual(scale, 2)
+        self.assertEqual(normalized["frames"][-1]["time"], 999)
+
     def test_official_day_archive_is_indexed_without_appearing_in_the_catalog(self):
         channel = {"provider": "twitch", "name": "Official", "alignmentSource": True, "archiveOnly": True}
         entry = {"id": "1234567890", "title": "A vs B - Champions", "created_at": "2026-09-29T10:00:00Z"}

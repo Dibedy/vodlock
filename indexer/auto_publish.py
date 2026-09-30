@@ -364,6 +364,18 @@ def storyboard(provider, identifier, yt_dlp):
     return value
 
 
+def normalize_storyboard_timeline(value):
+    frames = value.get("frames", [])
+    duration = float(value.get("duration", 0))
+    interval = float(value.get("interval", 0))
+    if not frames or duration <= 0 or interval <= 0:
+        return value, 1.0
+    scale = (float(frames[-1]["time"]) + interval) / duration
+    if not 1.5 <= scale <= 2.2:
+        return value, 1.0
+    return {**value, "frames": [{**item, "time": round(float(item["time"]) / scale, 3)} for item in frames]}, scale
+
+
 def youtube_alignment(channel, entry, config, state, yt_dlp):
     target = storyboard("youtube", entry["id"], yt_dlp)
     if target["duration"] < channel["minimumDuration"]:
@@ -379,8 +391,12 @@ def youtube_alignment(channel, entry, config, state, yt_dlp):
     for source_id in reversed(source_ids):
         try:
             reference = storyboard("twitch", source_id, yt_dlp)
+            reference, timebase_scale = normalize_storyboard_timeline(reference)
             alignment = align_storyboards(reference, target)
             index = read_json(SITE / "indexes" / f"twitch-{source_id}.json")
+            if timebase_scale != 1:
+                index = {**index, "rounds": [{**item, "start": float(item["start"]) / timebase_scale}
+                                               for item in index["rounds"]]}
             rounds = translate_index(index, target, alignment)
             matches.append((alignment["anchors"], source_id, alignment, rounds))
         except (OSError, ValueError, KeyError):

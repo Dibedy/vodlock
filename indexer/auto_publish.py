@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v7"
+PUBLISHER_VERSION = "publisher-v8"
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 PUBLISH_LOCK = threading.Lock()
 
@@ -527,7 +527,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             if aligned_source_id is None:
                 server.index_job(identifier)
                 accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
-                if not accepted and job.get("adaptiveAnalysis"):
+                if not accepted and job.get("adaptiveAnalysis") and job.get("status") == "ready":
                     gap = isolated_gap(job)
                     if gap:
                         original_rounds = [dict(item) for item in job["rounds"]]

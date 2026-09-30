@@ -496,6 +496,31 @@ class AutoPublishTests(unittest.TestCase):
                     (True, "Published"))
         self.assertEqual(attempts, [(True, 540), (False, 720)])
 
+    def test_failed_adaptive_download_does_not_retry_with_720p(self):
+        channel = {"provider": "youtube", "name": "YouTube", "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH", "published": "2026-09-30T10:00:00Z"}
+        attempts = []
+
+        def index_job(identifier):
+            job = auto_publish.server.JOBS[identifier]
+            attempts.append((job["adaptiveAnalysis"], job["analysisHeight"]))
+            job.update(status="failed", message="Requested format is not available")
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "catalog.json").write_text('{"version":2,"videos":[]}', encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), \
+                    patch.object(auto_publish, "youtube_alignment",
+                                 side_effect=auto_publish.OfficialArchiveUnmatched("No matching archive")), \
+                    patch.object(auto_publish.server, "index_job", side_effect=index_job):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13},
+                                              {"videos": {}}, object())
+        self.assertEqual(result, (False, "Requested format is not available"))
+        self.assertEqual(attempts, [(True, 540)])
+
     def test_single_adaptive_gap_rechecks_only_its_local_window(self):
         channel = {"provider": "twitch", "name": "Official", "archiveOnly": True}
         entry = {"id": "1234567890", "title": "A vs B - Champions", "created_at": "2026-09-29T10:00:00Z"}

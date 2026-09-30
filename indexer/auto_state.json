@@ -216,16 +216,16 @@
       "checkedAt": "2026-09-29T19:38:38.064445+00:00"
     },
     "twitch:2887052196": {
-      "status": "held",
+      "status": "indexed",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "PRX vs. G2 - VALORANT Champions Shanghai - Group Stage",
-      "message": "A round sequence was detected before round 1. Check whether this recording starts mid-match.",
+      "message": "Indexed official day broadcast",
       "publishedAt": "2026-09-29T08:30:43Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v3",
-      "retryClass": "pipeline-update",
-      "checkedAt": "2026-09-30T02:59:02.282019+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v4",
+      "retryClass": "none",
+      "checkedAt": "2026-09-30T15:06:37.780662+00:00"
     },
     "twitch:2887057207": {
       "status": "held",
@@ -235,9 +235,21 @@
       "message": "A round sequence was detected before round 1. Check whether this recording starts mid-match.; Map 3: check the gap before round 21.",
       "publishedAt": "2026-09-29T08:45:31Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v3",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v4",
       "retryClass": "pipeline-update",
-      "checkedAt": "2026-09-30T08:36:50.557607+00:00"
+      "checkedAt": "2026-09-30T16:13:01.361448+00:00"
+    },
+    "youtube:XdGX65LMxig": {
+      "status": "held",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour",
+      "title": "VIT vs. LOUD - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
+      "message": "ERROR: [youtube] XdGX65LMxig: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp for how to manually pass cookies. Also see https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies for tips on effectively exporting YouTube cookies",
+      "publishedAt": "2026-09-30T11:55:22+00:00",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v4",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-09-30T15:06:38.726986+00:00"
     }
   }
 }

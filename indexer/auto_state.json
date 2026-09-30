@@ -160,12 +160,12 @@
       "provider": "youtube",
       "channel": "VALORANT Champions Tour",
       "title": "PRX vs. G2 - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "ERROR: [youtube] z_aPp2s4d_o: Requested format is not available. Use --list-formats for a list of available formats",
+      "message": "No reliable round starts were found. This version needs the VCT top-centre ROUND label and timer; a different layout may need detector changes.",
       "publishedAt": "2026-09-29T12:35:12+00:00",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v7",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-09-30T19:31:18.574857+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v8",
+      "retryClass": "pipeline-update",
+      "checkedAt": "2026-09-30T19:55:20.651028+00:00"
     },
     "twitch:2867033974": {
       "status": "published",
@@ -235,9 +235,9 @@
       "message": "Waiting for the indexed official YouTube full match",
       "publishedAt": "2026-09-29T08:45:31Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v7",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v8",
       "retryClass": "dependency",
-      "checkedAt": "2026-09-30T19:31:18.578022+00:00"
+      "checkedAt": "2026-09-30T19:55:20.654640+00:00"
     },
     "youtube:XdGX65LMxig": {
       "status": "published",
@@ -283,9 +283,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-30T08:51:39Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v7",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v8",
       "retryClass": "cooldown",
-      "checkedAt": "2026-09-30T19:39:23.636576+00:00"
+      "checkedAt": "2026-09-30T20:05:57.694219+00:00"
     }
   }
 }

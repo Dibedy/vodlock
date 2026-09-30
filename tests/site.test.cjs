@@ -241,6 +241,7 @@ test('website keeps settings visible in the sticky header', () => {
   const header = index.match(/<header[\s\S]*?<\/header>/)?.[0] || '';
   const footer = index.match(/<footer[\s\S]*?<\/footer>/)?.[0] || '';
   assert.match(header, /id="settings-button" class="header-settings"/);
+  assert.match(header, /class="header-support" href="https:\/\/ko-fi\.com\/dibedy"/);
   assert.doesNotMatch(footer, /settings-button/);
   assert.match(styles, /\.header-settings/);
 });

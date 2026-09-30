@@ -10,7 +10,7 @@ on:
         type: boolean
         default: true
       retry_held:
-        description: Retry held sources without waiting for their cooldown
+        description: Retry held sources and recheck waiting dependencies
         type: boolean
         default: false
       chat_vod_id:

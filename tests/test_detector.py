@@ -10,6 +10,15 @@ from detector import HUD_PROFILES, HudReader, Observation, RoundDetector, parse_
 
 
 class DetectorTests(unittest.TestCase):
+    def test_seeded_detector_can_verify_a_local_mid_map_window(self):
+        seed = {"map": 2, "round": 8, "start": 1000, "confidence": .9, "verified": False}
+        detector = RoundDetector(seed=seed)
+        for second, timer in [(1110, 100), (1111, 99)]:
+            detector.observe(Observation(second, 9, timer, .95))
+        self.assertEqual([(item["map"], item["round"], item["start"]) for item in detector.rounds],
+                         [(2, 8, 1000), (2, 9, 1110)])
+        self.assertEqual(detector.warnings, [])
+
     def test_parses_broadcast_hud(self):
         sample = parse_hud(10, [("ROUND 16", .95), ("0:56", .98)])
         self.assertEqual((sample.round, sample.timer), (16, 56))

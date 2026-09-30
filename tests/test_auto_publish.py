@@ -157,6 +157,14 @@ class AutoPublishTests(unittest.TestCase):
         held[key]["pipelineVersion"] = "older"
         self.assertTrue(auto_publish.should_attempt(key, set(), held, 6, now))
 
+    def test_waiting_dependency_is_checked_without_becoming_held(self):
+        now = datetime.now(timezone.utc)
+        key = "twitch:1234567890"
+        state = {key: {"status": "waiting", "checkedAt": now.isoformat(),
+                       "pipelineVersion": auto_publish.PIPELINE_VERSION, "retryClass": "dependency"}}
+        self.assertTrue(auto_publish.should_attempt(key, set(), state, 6, now))
+        self.assertTrue(auto_publish.should_process(key, set(), state, 6, now, True))
+
     def test_manual_retry_bypasses_held_cooldown_without_republishing(self):
         now = datetime.now(timezone.utc)
         key = "youtube:abcdefghijk"
@@ -179,6 +187,14 @@ class AutoPublishTests(unittest.TestCase):
         self.assertIn("youtube:abcdefghijk", summary)
         self.assertIn("No match \\| retry later", summary)
         self.assertNotIn("rounds", summary.lower())
+
+    def test_pipeline_summary_reports_waiting_separately_from_held(self):
+        state = {"videos": {
+            "twitch:1234567890": {"status": "waiting", "channel": "FNS", "checkedAt": "2026-09-29T13:00:00Z",
+                                    "title": "A vs B", "message": "Waiting for official match"}}}
+        summary = auto_publish.pipeline_summary(state)
+        self.assertIn("Waiting: **1**", summary)
+        self.assertIn("Held: **0**", summary)
 
     def test_pipeline_summary_hides_sources_outside_the_current_champions_scope(self):
         state = {"videos": {
@@ -293,6 +309,31 @@ class AutoPublishTests(unittest.TestCase):
             self.assertEqual(auto_publish.main(), 0)
         self.assertEqual([call.args[1]["id"] for call in process.call_args_list],
                          ["1234567890", "abcdefghijk", "1234567891"])
+
+    def test_youtube_match_runs_before_waiting_watch_party_when_archive_is_already_indexed(self):
+        channels = [{"provider": "twitch", "name": "Official", "login": "official", "priority": 0,
+                     "alignmentSource": True},
+                    {"provider": "youtube", "name": "YouTube", "priority": 1},
+                    {"provider": "twitch", "name": "Watch party", "login": "watchparty", "priority": 2,
+                     "reuseOfficialIndex": True}]
+        now = datetime.now(timezone.utc).isoformat()
+        state = {"videos": {
+            "twitch:1234567890": {"status": "indexed", "channel": "Official", "checkedAt": now},
+            "twitch:1234567891": {"status": "waiting", "channel": "Watch party", "checkedAt": now,
+                                   "pipelineVersion": auto_publish.PIPELINE_VERSION}}}
+        config = {"channels": channels, "lookback": 30, "maxPerRun": 4, "maxPerChannelPerRun": 2,
+                  "maxRetriesPerRun": 1, "retryHours": 6, "youtubeRetryHours": 6}
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, {"videos": []}]), \
+                patch.object(auto_publish, "discover_youtube", return_value=[{"id": "abcdefghijk", "title": "A vs B"}]), \
+                patch.object(auto_publish, "discover_twitch", return_value={
+                    "official": [], "watchparty": [{"id": "1234567891", "title": "A vs B"}]}), \
+                patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \
+                patch.object(auto_publish, "write_json"), \
+                patch.dict(auto_publish.os.environ, {"TWITCH_CLIENT_ID": "client", "TWITCH_CLIENT_SECRET": "secret"}), \
+                patch.object(sys, "argv", ["auto_publish.py"]), patch("sys.stdout", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list],
+                         ["abcdefghijk", "1234567891"])
 
     def test_automatic_publication_requires_complete_high_confidence_sequence(self):
         rounds = [{"map": 1, "round": number, "start": number * 100, "confidence": 0.9} for number in range(1, 14)]
@@ -421,6 +462,53 @@ class AutoPublishTests(unittest.TestCase):
                     channel, entry, {"minimumConfidence": .65, "minimumRounds": 13}, {"videos": {}}, object()),
                     (True, "Published"))
         self.assertEqual(attempts, [(True, 540), (False, 720)])
+
+    def test_single_adaptive_gap_rechecks_only_its_local_window(self):
+        channel = {"provider": "twitch", "name": "Official", "archiveOnly": True}
+        entry = {"id": "1234567890", "title": "A vs B - Champions", "created_at": "2026-09-29T10:00:00Z"}
+        original = [{"map": 1, "round": number, "start": number * 100, "confidence": .9}
+                    for number in range(1, 14) if number != 9]
+        attempts = []
+
+        def index_job(identifier):
+            job = auto_publish.server.JOBS[identifier]
+            attempts.append((job["adaptiveAnalysis"], job.get("analysisWindow"), job.get("seedRound")))
+            if len(attempts) == 1:
+                job.update(status="ready", warnings=["Map 1: check the gap before round 10."], duration=2000,
+                           rounds=original, fingerprints=[{"time": 0, "hash": "00"}])
+            else:
+                seed = dict(job["seedRound"])
+                job.update(status="ready", warnings=[], duration=2000, fingerprints=[], rounds=[seed,
+                           {"map": 1, "round": 9, "start": 900, "confidence": .95},
+                           {"map": 1, "round": 10, "start": 1000, "confidence": .95}])
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "catalog.json").write_text('{"version":2,"videos":[]}', encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), \
+                    patch.object(auto_publish.server, "index_job", side_effect=index_job):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13},
+                                              {"videos": {}}, object())
+                index = auto_publish.read_json(site / "indexes" / "twitch-1234567890.json")
+        self.assertEqual(result, ("indexed", "Indexed official day broadcast"))
+        self.assertEqual(len(attempts), 2)
+        self.assertEqual(attempts[1][1], [770.0, 1030.0])
+        self.assertEqual(attempts[1][2]["round"], 8)
+        self.assertEqual([item["round"] for item in index["rounds"]], list(range(1, 14)))
+
+    def test_watch_party_waits_without_running_ocr_when_official_match_is_missing(self):
+        channel = {"provider": "twitch", "name": "FNS", "reuseOfficialIndex": True}
+        entry = {"id": "1234567891", "title": "FNS | A vs B - Champions", "created_at": "2026-09-29T10:00:00Z"}
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with patch.object(auto_publish, "SITE", root / "site"), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), patch.object(auto_publish.server, "index_job") as index_job:
+                result = auto_publish.process(channel, entry, {"alignmentLookback": 8}, {"videos": {}}, object())
+        self.assertEqual(result, ("waiting", "Waiting for the indexed official YouTube full match"))
+        index_job.assert_not_called()
 
     def test_two_youtube_matches_can_reuse_one_superseded_twitch_broadcast(self):
         youtube_channel = {"provider": "youtube", "name": "YouTube", "minimumDuration": 3600}

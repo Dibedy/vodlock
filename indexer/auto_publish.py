@@ -25,9 +25,13 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v4"
+PUBLISHER_VERSION = "publisher-v5"
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 PUBLISH_LOCK = threading.Lock()
+
+
+class OfficialMatchPending(ValueError):
+    pass
 
 
 def read_json(path):
@@ -94,6 +98,8 @@ def should_attempt(key, published, state, retry_hours, now):
         return True
     if previous.get("status") in {"superseded", "indexed"}:
         return False
+    if previous.get("status") == "waiting":
+        return True
     if previous.get("status") == "published":
         return True
     previous_version = previous.get("pipelineVersion")
@@ -109,7 +115,7 @@ def should_attempt(key, published, state, retry_hours, now):
 
 def should_process(key, published, state, retry_hours, now, retry_held=False):
     if retry_held:
-        return key not in published and state.get(key, {}).get("status") == "held"
+        return key not in published and state.get(key, {}).get("status") in {"held", "waiting"}
     return should_attempt(key, published, state, retry_hours, now)
 
 
@@ -211,19 +217,19 @@ def pipeline_summary(state, config=None):
 
         videos = {key: item for key, item in videos.items() if tracked(item)}
     counts = {status: sum(1 for item in videos.values() if item.get("status") == status)
-              for status in ("published", "indexed", "held", "superseded")}
+              for status in ("published", "indexed", "waiting", "held", "superseded")}
     recent = sorted(videos.items(), key=lambda item: item[1].get("checkedAt", ""), reverse=True)[:20]
 
     def cell(value):
         return clean_text(value).replace("|", "\\|")
 
     lines = ["## VOD pipeline health", "",
-             f"Published: **{counts['published']}** · Indexed: **{counts['indexed']}** · Held: **{counts['held']}** · Superseded: **{counts['superseded']}**",
+             f"Published: **{counts['published']}** · Indexed: **{counts['indexed']}** · Waiting: **{counts['waiting']}** · Held: **{counts['held']}** · Superseded: **{counts['superseded']}**",
              "", "| Source | Status | Channel | Last checked | Result |", "|---|---|---|---|---|"]
     for key, item in recent:
         lines.append(f"| `{cell(key)}` | {cell(item.get('status', 'unknown'))} | {cell(item.get('channel', ''))} | "
                      f"{cell(item.get('checkedAt', ''))} | {cell(item.get('message', ''))} |")
-    lines.extend(["", "Use **Run workflow → Retry held sources** to retry one eligible held source without waiting for its cooldown."])
+    lines.extend(["", "Use **Run workflow → Retry held sources** to retry one eligible held source or recheck a waiting dependency."])
     return "\n".join(lines) + "\n"
 
 
@@ -248,6 +254,39 @@ def publishable(job, minimum_confidence, minimum_rounds):
                 return False, "The detected round sequence contains a gap"
         previous = round_entry
     return True, ""
+
+
+def sequence_warnings(rounds):
+    rounds = [item for item in rounds if not item.get("excluded")]
+    warnings = []
+    for previous, item in zip(rounds, rounds[1:]):
+        same_map = item["map"] == previous["map"] and item["round"] == previous["round"] + 1
+        next_map = item["map"] == previous["map"] + 1 and item["round"] == 1 and previous["round"] >= 12
+        if not same_map and not next_map:
+            warnings.append(f"Map {item['map']}: check the gap before round {item['round']}.")
+    return warnings
+
+
+def isolated_gap(job):
+    rounds = [item for item in job.get("rounds", []) if not item.get("excluded")]
+    gaps = [(previous, item) for previous, item in zip(rounds, rounds[1:])
+            if item["map"] == previous["map"] and item["round"] > previous["round"] + 1]
+    if len(job.get("warnings", [])) == 1 and len(gaps) == 1:
+        return gaps[0]
+    return None
+
+
+def merge_gap_repair(original_rounds, repaired_rounds, gap):
+    previous, following = gap
+    replacements = [item for item in repaired_rounds
+                    if item["map"] == previous["map"]
+                    and previous["round"] < item["round"] < following["round"]
+                    and previous["start"] < item["start"] < following["start"]]
+    merged = [dict(item) for item in original_rounds]
+    existing = {(item["map"], item["round"]) for item in merged}
+    merged.extend(dict(item) for item in replacements if (item["map"], item["round"]) not in existing)
+    merged.sort(key=lambda item: item["start"])
+    return merged
 
 
 def discover_youtube(channel, lookback, yt_dlp=None, requester=None):
@@ -384,7 +423,7 @@ def watchparty_alignment(job, entry, config, state, yt_dlp):
                   and matchup_key(value.get("title", "")) == target_match
                   and (SITE / "indexes" / f"youtube-{key.split(':', 1)[1]}.json").is_file()]
     if not candidates:
-        raise ValueError("No indexed official full match matches this watch party")
+        raise OfficialMatchPending("Waiting for the indexed official YouTube full match")
     interval = int(config.get("watchPartyFingerprintInterval", 10))
     job.update(fingerprintOnly=True, fingerprintInterval=interval, analysisHeight=540)
     server.index_job(job["id"])
@@ -427,7 +466,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
         job["adaptiveAnalysis"] = True
         job["analysisHeight"] = 540
         if channel.get("archiveOnly"):
-            job["allowPreroll"] = True
+            job["multiSeriesArchive"] = True
     if provider == "twitch" and channel.get("alignmentSource"):
         job["fingerprintInterval"] = 2
     if provider == "youtube":
@@ -453,24 +492,42 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                     exported = {"schemaVersion": 2, "provider": "twitch", "sourceId": entry["id"], "label": title,
                                 "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION,
                                 "rounds": rounds, "alignment": {**alignment, "source": aligned_source_id if ":" in aligned_source_id else "twitch:" + aligned_source_id}}
+                except OfficialMatchPending as error:
+                    return "waiting", str(error)
                 except (OSError, ValueError, KeyError) as error:
-                    print(f"twitch:{entry['id']} alignment unavailable - {clean_text(error)}; using OCR", flush=True)
-                    aligned_source_id = None
-                    alignment = None
-                    job.pop("fingerprintOnly", None)
-                    job["fingerprintInterval"] = 2 if channel.get("alignmentSource") else 0
-                    reset_analysis_job(job)
+                    return False, "Official match alignment failed: " + clean_text(error)
             if aligned_source_id is None:
                 server.index_job(identifier)
                 accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
                 if not accepted and job.get("adaptiveAnalysis"):
-                    print(f"twitch:{entry['id']} adaptive analysis held - {clean_text(reason)}; retrying full 720p OCR",
-                          flush=True)
-                    job["adaptiveAnalysis"] = False
-                    job["analysisHeight"] = 720
-                    reset_analysis_job(job)
-                    server.index_job(identifier)
-                    accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
+                    gap = isolated_gap(job)
+                    if gap:
+                        original_rounds = [dict(item) for item in job["rounds"]]
+                        original_fingerprints = list(job.get("fingerprints", []))
+                        previous, following = gap
+                        analysis_start = max(0, float(previous["start"]) - 30)
+                        analysis_end = min(float(job["duration"]), float(following["start"]) + 30)
+                        print(f"twitch:{entry['id']} checking {analysis_start:.0f}-{analysis_end:.0f}s at 720p to repair one gap",
+                              flush=True)
+                        job["adaptiveAnalysis"] = False
+                        job["analysisHeight"] = 720
+                        job["analysisWindow"] = [analysis_start, analysis_end]
+                        job["seedRound"] = dict(previous)
+                        reset_analysis_job(job)
+                        server.index_job(identifier)
+                        repaired_rounds = list(job.get("rounds", []))
+                        merged = merge_gap_repair(original_rounds, repaired_rounds, gap)
+                        job.update(status="ready", rounds=merged, warnings=sequence_warnings(merged),
+                                   fingerprints=original_fingerprints)
+                        accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
+                    else:
+                        print(f"twitch:{entry['id']} adaptive analysis broadly unreliable - {clean_text(reason)}; retrying full 720p OCR",
+                              flush=True)
+                        job["adaptiveAnalysis"] = False
+                        job["analysisHeight"] = 720
+                        reset_analysis_job(job)
+                        server.index_job(identifier)
+                        accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
                 if not accepted:
                     preserve_diagnostics(provider, entry["id"], server.DATA / identifier)
                     return False, reason
@@ -629,23 +686,24 @@ def main():
     def record_result(result):
         channel, entry, published, message = result
         key = source_key(channel["provider"], entry["id"])
-        status = published if published in {"indexed", "published", "held", "superseded"} else ("published" if published else "held")
+        status = published if published in {"indexed", "published", "waiting", "held", "superseded"} else ("published" if published else "held")
         state["videos"][key] = {"status": status,
                                 "provider": channel["provider"], "channel": channel["name"],
                                 "title": clean_text(entry["title"]), "message": clean_text(message),
                                 "publishedAt": entry.get("published") or entry.get("created_at"),
                                 "detectorVersion": DETECTOR_VERSION,
                                 "pipelineVersion": PIPELINE_VERSION,
-                                "retryClass": "none" if status in {"published", "indexed", "superseded"} else retry_class(message),
+                                "retryClass": ("none" if status in {"published", "indexed", "superseded"}
+                                               else "dependency" if status == "waiting" else retry_class(message)),
                                 "checkedAt": datetime.now(timezone.utc).isoformat()}
         write_json(STATE_PATH, state)
         print(f"{key}: {state['videos'][key]['status']} - {message}", flush=True)
 
     prerequisites = [(channel, entry) for channel, entry in candidates if channel.get("alignmentSource")]
     youtube_candidates = [(channel, entry) for channel, entry in candidates
-                          if prerequisites and channel["provider"] == "youtube"]
+                          if has_alignment_archive and channel["provider"] == "youtube"]
     remaining = [(channel, entry) for channel, entry in candidates
-                 if not channel.get("alignmentSource") and (not prerequisites or channel["provider"] != "youtube")]
+                 if not channel.get("alignmentSource") and (not has_alignment_archive or channel["provider"] != "youtube")]
     for channel, entry in prerequisites:
         record_result(run_candidate(channel, entry))
     for channel, entry in youtube_candidates:

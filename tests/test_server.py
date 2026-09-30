@@ -158,6 +158,12 @@ class ServerTests(unittest.TestCase):
         self.assertEqual(command[command.index("--output") + 1], "-")
         self.assertEqual(command[-1], "https://www.twitch.tv/videos/1234567890")
 
+    def test_remote_window_downloads_only_the_requested_section(self):
+        job = {"kind": "twitch", "twitchVideoId": "1234567890", "analysisWindow": [1000, 1250]}
+        command = server.stream_command(job, {"format": "bestvideo[height<=720]", "playerClient": None})
+        self.assertEqual(command[command.index("--download-sections") + 1], "*1000-1250")
+        self.assertIn("--force-keyframes-at-cuts", command)
+
     def test_youtube_hosted_worker_tries_supported_player_clients(self):
         identifier = "e" * 32
         job = {"id": identifier, "kind": "youtube", "videoId": "ZphbktbT26k", "status": "downloading", "progress": 0}

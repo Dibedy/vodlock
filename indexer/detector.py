@@ -46,13 +46,13 @@ def parse_hud(time, lines, replay_lines=()):
 
 
 class RoundDetector:
-    def __init__(self, allow_preroll=False):
-        self.rounds = []
+    def __init__(self, allow_preroll=False, seed=None):
+        self.rounds = [dict(seed)] if seed else []
         self.pending = []
         self.preroll_rounds = []
         self.preroll_sequence = False
         self.allow_preroll = allow_preroll
-        self.map_number = 1
+        self.map_number = int(seed["map"]) if seed else 1
         self.warnings = []
 
     def finalize(self):

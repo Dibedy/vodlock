@@ -61,7 +61,7 @@ def size_limit_message(max_bytes):
 
 
 def compact_analysis_filter():
-    return ("fps=fps=1:start_time=0:round=up,scale=1280:720,split=3[canvas][thumbnail][replay];"
+    return ("setpts=PTS-STARTPTS,fps=fps=1:start_time=0:round=up,scale=1280:720,split=3[canvas][thumbnail][replay];"
             "[canvas]crop=1280:144:0:0[top];[thumbnail]scale=320:180[thumb];"
             "[replay]crop=346:116:934:604,pad=960:180:614:64:black[replaypad];"
             "[thumb][replaypad]hstack[bottom];[top][bottom]vstack")
@@ -69,10 +69,10 @@ def compact_analysis_filter():
 
 def analysis_video_filter(adaptive=False, fingerprint_interval=0):
     if fingerprint_interval:
-        return f"fps=fps=1/{fingerprint_interval}:start_time=0:round=up,scale=320:180"
+        return f"setpts=PTS-STARTPTS,fps=fps=1/{fingerprint_interval}:start_time=0:round=up,scale=320:180"
     if adaptive:
         return compact_analysis_filter()
-    return ("fps=fps=1:start_time=0:round=up,select='lt(n\\," + str(INITIAL_DENSE_SAMPLE_SECONDS)
+    return ("setpts=PTS-STARTPTS,fps=fps=1:start_time=0:round=up,select='lt(n\\," + str(INITIAL_DENSE_SAMPLE_SECONDS)
             + ")+gte(n\\," + str(INITIAL_DENSE_SAMPLE_SECONDS) + ")*not(mod(n\\," + str(COARSE_SAMPLE_INTERVAL)
             + "))',scale=1280:720:force_original_aspect_ratio=decrease,pad=1280:720:(ow-iw)/2:(oh-ih)/2")
 
@@ -236,6 +236,10 @@ def download_youtube(job, work, hook, yt_dlp):
 def stream_command(job, remote):
     command = [sys.executable, "-m", "yt_dlp", "--quiet", "--no-warnings", "--no-progress",
                "--no-part", "--format", remote["format"], "--output", "-", remote_url(job)]
+    analysis_window = job.get("analysisWindow")
+    if analysis_window:
+        command[3:3] = ["--download-sections", f"*{analysis_window[0]}-{analysis_window[1]}",
+                        "--force-keyframes-at-cuts"]
     if job.get("kind", "youtube") == "youtube":
         cookiefile = os.environ.get("VODLOCK_YOUTUBE_COOKIES", "")
         if cookiefile:
@@ -291,7 +295,9 @@ def index_job(identifier):
         fingerprint_only = bool(job.get("fingerprintOnly"))
         adaptive = bool(job.get("adaptiveAnalysis")) and not fingerprint_only
         reader = None if fingerprint_only else HudReader()
-        detector = None if fingerprint_only else RoundDetector(allow_preroll=bool(job.get("allowPreroll")))
+        detector = None if fingerprint_only else RoundDetector(allow_preroll=bool(job.get("allowPreroll") or
+                                                                                  job.get("multiSeriesArchive")),
+                                                                seed=job.get("seedRound"))
         fingerprint_interval = int(job.get("fingerprintInterval", 0))
         fingerprints = []
         diagnostic_directory = work / "diagnostics"
@@ -305,9 +311,17 @@ def index_job(identifier):
             capture.release()
             if not opened or not math.isfinite(duration) or duration <= 0:
                 raise ValueError("Could not read this video. Try an MP4, MKV or WebM recording.")
+        analysis_window = job.get("analysisWindow")
+        analysis_start = float(analysis_window[0]) if analysis_window else 0
+        analysis_end = float(analysis_window[1]) if analysis_window else duration
+        if not 0 <= analysis_start < analysis_end <= duration:
+            raise ValueError("The requested analysis window is outside the recording.")
+        analysis_duration = analysis_end - analysis_start
         command = [imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error", "-i", str(source),
                    "-an", "-vf", analysis_video_filter(adaptive, fingerprint_interval if fingerprint_only else 0),
                    "-f", "rawvideo", "-pix_fmt", "bgr24", "pipe:1"]
+        if analysis_window and not remote:
+            command[4:4] = ["-ss", str(analysis_start), "-t", str(analysis_duration)]
         error_path = work / "ffmpeg.log"
         stream_error_path = work / "stream.log"
         with error_path.open("wb") as error_log, stream_error_path.open("wb") as stream_error_log:
@@ -341,15 +355,16 @@ def index_job(identifier):
                 if len(chunk) != frame_size:
                     raise ValueError("Video decoding stopped in the middle of a frame.")
                 frame = np.frombuffer(chunk, dtype=np.uint8).reshape(frame_height, frame_width, 3)
-                sample_time = (frame_number * fingerprint_interval if fingerprint_only else
-                               frame_number if adaptive else analysis_sample_time(frame_number))
+                sample_time = analysis_start + (frame_number * fingerprint_interval if fingerprint_only else
+                                                frame_number if adaptive or analysis_window
+                                                else analysis_sample_time(frame_number))
                 fingerprint_frame = frame if fingerprint_only else (frame[144:324, :320] if adaptive else frame)
                 if fingerprint_only or fingerprint_interval and sample_time % fingerprint_interval == 0:
                     fingerprints.append({"time": sample_time, "hash": frame_hash(fingerprint_frame)})
                 if fingerprint_only:
                     frame_number += 1
                     with LOCK:
-                        job["progress"] = min(98, 35 + int(sample_time / duration * 63))
+                        job["progress"] = min(98, 35 + int((sample_time - analysis_start) / analysis_duration * 63))
                     continue
                 if adaptive and sample_time > dense_until:
                     if frame_number % ADAPTIVE_SCAN_INTERVAL:
@@ -371,7 +386,7 @@ def index_job(identifier):
                         diagnostic_count += 1
                 frame_number += 1
                 with LOCK:
-                    job["progress"] = min(98, 35 + int(sample_time / duration * 63))
+                    job["progress"] = min(98, 35 + int((sample_time - analysis_start) / analysis_duration * 63))
             return_code = process.wait()
             stream_return_code = stream.wait() if stream else 0
         if return_code:

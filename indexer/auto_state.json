@@ -160,12 +160,12 @@
       "provider": "youtube",
       "channel": "VALORANT Champions Tour",
       "title": "PRX vs. G2 - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "ERROR: [youtube] z_aPp2s4d_o: Sign in to confirm you’re not a bot. Use --cookies-from-browser or --cookies for the authentication. See https://github.com/yt-dlp/yt-dlp/wiki/FAQ#how-do-i-pass-cookies-to-yt-dlp for how to manually pass cookies. Also see https://github.com/yt-dlp/yt-dlp/wiki/Extractors#exporting-youtube-cookies for tips on effectively exporting YouTube cookies",
+      "message": "No verified official Twitch broadcast matches this YouTube full match",
       "publishedAt": "2026-09-29T12:35:12+00:00",
-      "detectorVersion": "vct-clock-ocr-v8",
-      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v5",
       "retryClass": "cooldown",
-      "checkedAt": "2026-09-30T00:25:17.735747+00:00"
+      "checkedAt": "2026-09-30T18:42:43.389509+00:00"
     },
     "twitch:2867033974": {
       "status": "published",
@@ -237,7 +237,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v5",
       "retryClass": "dependency",
-      "checkedAt": "2026-09-30T18:15:56.907643+00:00"
+      "checkedAt": "2026-09-30T18:42:43.391506+00:00"
     },
     "youtube:XdGX65LMxig": {
       "status": "published",

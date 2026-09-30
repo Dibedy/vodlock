@@ -138,12 +138,12 @@
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | LOUD vs 100T - VCT Americas Grand Finals #VCTWatchparty | !vote !inzone",
-      "message": "No reliable round starts were found. This version needs the VCT top-centre ROUND label and timer; a different layout may need detector changes.",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-09T20:54:30Z",
-      "detectorVersion": "vct-clock-ocr-v8",
-      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
-      "retryClass": "pipeline-update",
-      "checkedAt": "2026-09-29T14:20:26.262828+00:00"
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-09-30T23:19:33.553122+00:00"
     },
     "twitch:2877469732": {
       "status": "held",
@@ -198,12 +198,12 @@
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | NRG vs LOUD - VCT Americas Stage 2 Playoffs #VCTWatchparty | !vote !inzone",
-      "message": "Map 5: check the gap before round 14.",
+      "message": "Official match alignment failed: The video service stream ended with an error: ERROR: Unable to download video: [Errno 2] No such file or directory: '--Frag5'",
       "publishedAt": "2026-09-05T18:21:21Z",
-      "detectorVersion": "vct-clock-ocr-v8",
-      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
       "retryClass": "cooldown",
-      "checkedAt": "2026-09-29T16:21:17.990348+00:00"
+      "checkedAt": "2026-09-30T23:12:51.574165+00:00"
     },
     "youtube:y6wwIZysHns": {
       "status": "published",

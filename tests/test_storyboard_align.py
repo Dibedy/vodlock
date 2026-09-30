@@ -99,6 +99,15 @@ class StoryboardAlignmentTests(unittest.TestCase):
         self.assertEqual([item["offset"] for item in result["segments"]], [1000.0, 1600.0])
         self.assertEqual(result["anchors"], 120)
 
+    def test_alignment_accepts_small_verified_timebase_drift(self):
+        target = {"duration": 600, "interval": 10,
+                  "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}
+        reference = {"duration": 2000, "interval": 10,
+                     "frames": [{"time": 1000 + index * 10.19, "hash": unique_hash(index)}
+                                for index in range(60)]}
+        result = align_storyboards(reference, target)
+        self.assertAlmostEqual(result["timelineScale"], 1.019, places=3)
+
     def test_short_reference_can_be_located_inside_a_long_watch_party(self):
         reference = {"duration": 600, "interval": 10,
                      "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}

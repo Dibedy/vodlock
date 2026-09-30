@@ -10,7 +10,7 @@ import imageio_ffmpeg
 import numpy as np
 
 
-ALIGNER_VERSION = "storyboard-v1"
+ALIGNER_VERSION = "storyboard-v2"
 
 
 def frame_hash(image):
@@ -179,7 +179,7 @@ def align_storyboards(reference, target, maximum_distance=12, require_target_cov
                 if len(segment["matches"]) < 5:
                     raise ValueError("The videos do not have enough precise visual anchors")
     scale = float(coefficients[0])
-    if not 0.99 <= scale <= 1.01:
+    if not 0.95 <= scale <= 1.05:
         raise ValueError("The videos do not share a stable timeline scale")
     for index, segment in enumerate(segments):
         segment["offset"] = float(coefficients[index + 1])

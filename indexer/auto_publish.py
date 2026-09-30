@@ -396,6 +396,7 @@ def youtube_alignment(channel, entry, config, state, yt_dlp):
         try:
             reference = storyboard("twitch", source_id, yt_dlp)
             reference, timebase_scale = normalize_storyboard_timeline(reference)
+            reference = compact_reference(reference, target.get("interval", 10))
             alignment = align_storyboards(reference, target)
             index = read_json(SITE / "indexes" / f"twitch-{source_id}.json")
             if timebase_scale != 1:

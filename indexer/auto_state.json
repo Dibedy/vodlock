@@ -165,7 +165,7 @@
       "detectorVersion": "vct-clock-ocr-v8",
       "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
       "retryClass": "cooldown",
-      "checkedAt": "2026-09-29T16:21:18.988810+00:00"
+      "checkedAt": "2026-09-30T00:25:17.735747+00:00"
     },
     "twitch:2867033974": {
       "status": "published",
@@ -214,6 +214,30 @@
       "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
       "retryClass": "none",
       "checkedAt": "2026-09-29T19:38:38.064445+00:00"
+    },
+    "twitch:2887052196": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "VALORANT on Twitch",
+      "title": "PRX vs. G2 - VALORANT Champions Shanghai - Group Stage",
+      "message": "A round sequence was detected before round 1. Check whether this recording starts mid-match.",
+      "publishedAt": "2026-09-29T08:30:43Z",
+      "detectorVersion": "vct-clock-ocr-v8",
+      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
+      "retryClass": "pipeline-update",
+      "checkedAt": "2026-09-29T23:29:31.748815+00:00"
+    },
+    "twitch:2887057207": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | PRX vs G2 - VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
+      "message": "A round sequence was detected before round 1. Check whether this recording starts mid-match.; Map 3: check the gap before round 21.",
+      "publishedAt": "2026-09-29T08:45:31Z",
+      "detectorVersion": "vct-clock-ocr-v8",
+      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
+      "retryClass": "pipeline-update",
+      "checkedAt": "2026-09-30T00:25:16.838664+00:00"
     }
   }
 }

@@ -71,6 +71,22 @@ class StoryboardAlignmentTests(unittest.TestCase):
         self.assertEqual([item["offset"] for item in result["segments"]], [1000.0, 1600.0])
         self.assertEqual(result["anchors"], 120)
 
+    def test_short_reference_can_be_located_inside_a_long_watch_party(self):
+        reference = {"duration": 600, "interval": 10,
+                     "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}
+        target = {"duration": 3600, "interval": 10,
+                  "frames": [{"time": (index + 120) * 10, "hash": unique_hash(index)} for index in range(60)]
+                  + [{"time": index * 10, "hash": unique_hash(index + 1000)} for index in range(300)]}
+        result = align_storyboards(reference, target, require_target_coverage=False)
+        self.assertEqual(result["offset"], -1200)
+        self.assertEqual(result["coverage"], [20, 20, 20])
+
+    def test_index_translation_accounts_for_timeline_scale(self):
+        rounds = [{"map": 1, "round": number, "start": number * 100} for number in range(1, 14)]
+        translated = translate_index({"rounds": rounds}, {"duration": 2000},
+                                     {"offset": 50, "timelineScale": 1.01})
+        self.assertEqual(translated[0]["start"], round(50 / 1.01, 2))
+
     def test_index_translation_selects_and_renumbers_aligned_maps(self):
         rounds = []
         for map_number, base in [(1, 100), (2, 900), (3, 2100), (4, 2900)]:

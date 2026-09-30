@@ -46,11 +46,12 @@ def parse_hud(time, lines, replay_lines=()):
 
 
 class RoundDetector:
-    def __init__(self):
+    def __init__(self, allow_preroll=False):
         self.rounds = []
         self.pending = []
         self.preroll_rounds = []
         self.preroll_sequence = False
+        self.allow_preroll = allow_preroll
         self.map_number = 1
         self.warnings = []
 
@@ -110,7 +111,7 @@ class RoundDetector:
                 self.map_number += 1
             elif sample.round != previous["round"] + 1:
                 self.warnings.append(f"Map {self.map_number}: check the gap before round {sample.round}.")
-        elif self.preroll_sequence:
+        elif self.preroll_sequence and not self.allow_preroll:
             self.warnings.append("A round sequence was detected before round 1. Check whether this recording starts mid-match.")
         self.rounds.append({"map": self.map_number, "round": sample.round, "start": round(start, 2),
                             "confidence": round(min(s.confidence for s in self.pending), 3), "verified": False})

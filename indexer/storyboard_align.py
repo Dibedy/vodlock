@@ -115,7 +115,7 @@ def hamming(left, right):
     return sum((first ^ second).bit_count() for first, second in zip(bytes.fromhex(left), bytes.fromhex(right)))
 
 
-def align_storyboards(reference, target, maximum_distance=12):
+def align_storyboards(reference, target, maximum_distance=12, require_target_coverage=True):
     if len(reference.get("frames", [])) < 30 or len(target.get("frames", [])) < 30:
         raise ValueError("Not enough storyboard frames for a verified alignment")
     reference_frames = reference["frames"]
@@ -189,8 +189,9 @@ def align_storyboards(reference, target, maximum_distance=12):
         segment["targetStart"] = 0 if index == 0 else round(scale * (segments[index - 1]["anchorEnd"] + segment["anchorStart"]) / 2, 3)
         segment["targetEnd"] = round(float(target["duration"]), 3) if index + 1 == len(segments) else round(scale * (segment["anchorEnd"] + segments[index + 1]["anchorStart"]) / 2, 3)
     verified = [match for segment in segments for match in segment["matches"]]
-    duration = float(target["duration"])
-    thirds = [sum(1 for item in verified if lower <= item["target"] < upper)
+    duration = float(target["duration"] if require_target_coverage else reference["duration"])
+    coverage_key = "target" if require_target_coverage else "reference"
+    thirds = [sum(1 for item in verified if lower <= item[coverage_key] < upper)
               for lower, upper in [(0, duration / 3), (duration / 3, duration * 2 / 3), (duration * 2 / 3, duration + 1)]]
     if len(verified) < 12 or min(thirds) < 2:
         raise ValueError("Visual anchors do not cover the beginning, middle, and end of the match")
@@ -209,7 +210,7 @@ def translate_index(index, target, alignment):
     selected = []
     for item in index["rounds"]:
         for segment in segments:
-            start = float(item["start"]) - float(segment["offset"])
+            start = (float(item["start"]) - float(segment["offset"])) / float(alignment.get("timelineScale", 1))
             if max(0, float(segment["targetStart"])) <= start < min(duration, float(segment["targetEnd"])):
                 selected.append({**item, "translatedStart": start})
                 break

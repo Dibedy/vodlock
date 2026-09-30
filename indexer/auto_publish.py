@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v3"
+PUBLISHER_VERSION = "publisher-v4"
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 PUBLISH_LOCK = threading.Lock()
 
@@ -83,7 +83,7 @@ def should_attempt(key, published, state, retry_hours, now):
     previous = state.get(key)
     if not previous:
         return True
-    if previous.get("status") == "superseded":
+    if previous.get("status") in {"superseded", "indexed"}:
         return False
     if previous.get("status") == "published":
         return True
@@ -187,17 +187,29 @@ def catalog_played_at(entry, rounds, source=None, alignment=None):
     return played.isoformat(timespec="seconds").replace("+00:00", "Z")
 
 
-def pipeline_summary(state):
+def pipeline_summary(state, config=None):
     videos = state.get("videos", {})
+    if config:
+        channels = {item["name"]: item for item in config["channels"]}
+
+        def tracked(item):
+            channel = channels.get(item.get("channel"))
+            if not channel:
+                return False
+            title = clean_text(item.get("title", ""))
+            return bool(re.search(channel["includeTitle"], title, re.IGNORECASE)
+                        and not re.search(channel["excludeTitle"], title, re.IGNORECASE))
+
+        videos = {key: item for key, item in videos.items() if tracked(item)}
     counts = {status: sum(1 for item in videos.values() if item.get("status") == status)
-              for status in ("published", "held", "superseded")}
+              for status in ("published", "indexed", "held", "superseded")}
     recent = sorted(videos.items(), key=lambda item: item[1].get("checkedAt", ""), reverse=True)[:20]
 
     def cell(value):
         return clean_text(value).replace("|", "\\|")
 
     lines = ["## VOD pipeline health", "",
-             f"Published: **{counts['published']}** · Held: **{counts['held']}** · Superseded: **{counts['superseded']}**",
+             f"Published: **{counts['published']}** · Indexed: **{counts['indexed']}** · Held: **{counts['held']}** · Superseded: **{counts['superseded']}**",
              "", "| Source | Status | Channel | Last checked | Result |", "|---|---|---|---|---|"]
     for key, item in recent:
         lines.append(f"| `{cell(key)}` | {cell(item.get('status', 'unknown'))} | {cell(item.get('channel', ''))} | "
@@ -311,7 +323,7 @@ def youtube_alignment(channel, entry, config, state, yt_dlp):
     source_names = {item["name"] for item in config["channels"]
                     if item["provider"] == "twitch" and item.get("alignmentSource")}
     source_ids = [key.split(":", 1)[1] for key, value in state["videos"].items()
-                  if key.startswith("twitch:") and value.get("status") in {"published", "superseded"}
+                  if key.startswith("twitch:") and value.get("status") in {"published", "superseded", "indexed"}
                   and value.get("channel") in source_names
                   and (SITE / "indexes" / f"twitch-{key.split(':', 1)[1]}.json").is_file()]
     source_ids = source_ids[-int(config.get("alignmentLookback", 8)):]
@@ -358,15 +370,12 @@ def watchparty_alignment(job, entry, config, state, yt_dlp):
     target_match = matchup_key(entry.get("title", ""))
     if not target_match:
         raise ValueError("The watch-party title does not identify a matchup for alignment")
-    source_names = {item["name"] for item in config["channels"]
-                    if item["provider"] == "twitch" and item.get("alignmentSource")}
     candidates = [(key.split(":", 1)[1], value) for key, value in state["videos"].items()
-                  if key.startswith("twitch:") and value.get("status") in {"published", "superseded"}
-                  and value.get("channel") in source_names and matchup_key(value.get("title", "")) == target_match
-                  and (SITE / "indexes" / f"twitch-{key.split(':', 1)[1]}.json").is_file()
-                  and storyboard_path("twitch", key.split(":", 1)[1]).is_file()]
+                  if key.startswith("youtube:") and value.get("status") == "published"
+                  and matchup_key(value.get("title", "")) == target_match
+                  and (SITE / "indexes" / f"youtube-{key.split(':', 1)[1]}.json").is_file()]
     if not candidates:
-        raise ValueError("No indexed official Twitch broadcast matches this watch party")
+        raise ValueError("No indexed official full match matches this watch party")
     interval = int(config.get("watchPartyFingerprintInterval", 10))
     job.update(fingerprintOnly=True, fingerprintInterval=interval, analysisHeight=540)
     server.index_job(job["id"])
@@ -378,10 +387,11 @@ def watchparty_alignment(job, entry, config, state, yt_dlp):
     matches = []
     for source_id, _ in reversed(candidates[-int(config.get("alignmentLookback", 8)):]):
         try:
-            reference = compact_reference(load_storyboard(storyboard_path("twitch", source_id)), interval)
+            reference = storyboard("youtube", source_id, yt_dlp)
             alignment = align_storyboards(reference, target,
-                                          maximum_distance=int(config.get("watchPartyMaximumDistance", 18)))
-            index = read_json(SITE / "indexes" / f"twitch-{source_id}.json")
+                                          maximum_distance=int(config.get("watchPartyMaximumDistance", 18)),
+                                          require_target_coverage=False)
+            index = read_json(SITE / "indexes" / f"youtube-{source_id}.json")
             rounds = translate_index(index, target, alignment)
             matches.append((alignment["anchors"], source_id, alignment, rounds))
         except (OSError, ValueError, KeyError):
@@ -392,7 +402,7 @@ def watchparty_alignment(job, entry, config, state, yt_dlp):
     if len(matches) > 1 and matches[1][0] >= matches[0][0] * 0.8:
         raise ValueError("More than one official broadcast matches this watch party")
     _, source_id, alignment, rounds = matches[0]
-    return source_id, alignment, rounds
+    return "youtube:" + source_id, alignment, rounds
 
 
 def process(channel, entry, config, state=None, yt_dlp=None):
@@ -407,6 +417,8 @@ def process(channel, entry, config, state=None, yt_dlp=None):
     if provider == "twitch":
         job["adaptiveAnalysis"] = True
         job["analysisHeight"] = 540
+        if channel.get("archiveOnly"):
+            job["allowPreroll"] = True
     if provider == "twitch" and channel.get("alignmentSource"):
         job["fingerprintInterval"] = 2
     if provider == "youtube":
@@ -431,7 +443,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                     aligned_source_id, alignment, rounds = watchparty_alignment(job, entry, config, state, yt_dlp)
                     exported = {"schemaVersion": 2, "provider": "twitch", "sourceId": entry["id"], "label": title,
                                 "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION,
-                                "rounds": rounds, "alignment": {**alignment, "source": "twitch:" + aligned_source_id}}
+                                "rounds": rounds, "alignment": {**alignment, "source": aligned_source_id if ":" in aligned_source_id else "twitch:" + aligned_source_id}}
                 except (OSError, ValueError, KeyError) as error:
                     print(f"twitch:{entry['id']} alignment unavailable - {clean_text(error)}; using OCR", flush=True)
                     aligned_source_id = None
@@ -453,23 +465,26 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                 if not accepted:
                     preserve_diagnostics(provider, entry["id"], server.DATA / identifier)
                     return False, reason
-                if provider == "twitch" and channel.get("alignmentSource"):
-                    save_storyboard(storyboard_path("twitch", entry["id"]),
-                                    {"version": 1, "provider": "twitch", "sourceId": entry["id"],
-                                     "duration": round(float(job["duration"]), 3), "interval": job["fingerprintInterval"],
-                                     "frames": job["fingerprints"]})
                 exported = server.export(job)
                 exported["rounds"] = [{"map": item["map"], "round": item["round"], "start": item["start"]}
                                       for item in exported["rounds"]]
         filename = f"{provider}-{entry['id']}.json"
         write_json(SITE / "indexes" / filename, exported)
+        if provider == "twitch" and channel.get("alignmentSource"):
+            save_storyboard(storyboard_path("twitch", entry["id"]),
+                            {"version": 1, "provider": "twitch", "sourceId": entry["id"],
+                             "duration": round(float(job["duration"]), 3), "interval": job["fingerprintInterval"],
+                             "frames": job["fingerprints"]})
+        if channel.get("archiveOnly"):
+            return "indexed", "Indexed official day broadcast"
         chat_path = None
         if provider == "twitch":
             try:
                 chat_path = chat_archive.archive_chat(entry["id"])
             except Exception as error:
                 print(f"twitch:{entry['id']} chat unavailable - {clean_text(error)}", file=sys.stderr)
-        supersede_source = provider == "youtube" and aligned_source_id
+        supersede_source = provider == "youtube" and aligned_source_id and state is not None \
+            and state["videos"].get(source_key("twitch", aligned_source_id), {}).get("status") in {"published", "superseded"}
         with PUBLISH_LOCK:
             catalog_path = SITE / "catalog.json"
             catalog = read_json(catalog_path)
@@ -480,9 +495,9 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                                  and not (supersede_source and item.get("provider") == "twitch"
                                           and str(item.get("sourceId", "")) == aligned_source_id)]
             source = (state["videos"].get(source_key("twitch", aligned_source_id))
-                      if supersede_source and state is not None else None)
+                      if provider == "youtube" and aligned_source_id and state is not None else None)
             played_at = catalog_played_at(entry, exported["rounds"], source,
-                                          alignment if supersede_source else None)
+                                          alignment if source else None)
             catalog_entry = {"provider": provider, "sourceId": entry["id"], "title": title,
                              "event": event, "label": "Full match" if provider == "youtube" else "Full broadcast",
                              "index": f"/indexes/{filename}", "playedAt": played_at, **tournament_metadata(event, title)}
@@ -512,7 +527,7 @@ def main():
     config = read_json(CONFIG_PATH)
     state = read_json(STATE_PATH)
     if arguments.summary_only:
-        summary = pipeline_summary(state)
+        summary = pipeline_summary(state, config)
         destination = os.environ.get("GITHUB_STEP_SUMMARY")
         if destination:
             Path(destination).write_text(summary, encoding="utf-8")
@@ -564,14 +579,21 @@ def main():
             candidates.append((1 if key in state["videos"] else 0, channel.get("priority", 0),
                                channel_index, entry_index, channel, entry))
     candidates.sort(key=lambda item: item[:4])
+    alignment_sources = {channel["name"] for channel in config["channels"] if channel.get("alignmentSource")}
+    has_alignment_archive = any(channel.get("alignmentSource") for *_, channel, _ in candidates) or any(
+        item.get("status") == "indexed" and item.get("channel") in alignment_sources
+        for item in state["videos"].values())
     selected = []
     retry_count = 0
     for candidate in candidates:
         retrying = candidate[0]
-        if retrying and retry_count >= config.get("maxRetriesPerRun", 1):
+        channel = candidate[-2]
+        dependent = has_alignment_archive and (channel.get("alignmentSource") or channel.get("reuseOfficialIndex")
+                                                or channel["provider"] == "youtube")
+        if retrying and retry_count >= config.get("maxRetriesPerRun", 1) and not dependent:
             continue
         selected.append(candidate)
-        retry_count += retrying
+        retry_count += retrying and not dependent
         if len(selected) >= config["maxPerRun"]:
             break
     candidates = [(channel, entry) for *_, channel, entry in selected]
@@ -590,20 +612,26 @@ def main():
     def record_result(result):
         channel, entry, published, message = result
         key = source_key(channel["provider"], entry["id"])
-        state["videos"][key] = {"status": "published" if published else "held",
+        status = published if published in {"indexed", "published", "held", "superseded"} else ("published" if published else "held")
+        state["videos"][key] = {"status": status,
                                 "provider": channel["provider"], "channel": channel["name"],
                                 "title": clean_text(entry["title"]), "message": clean_text(message),
                                 "publishedAt": entry.get("published") or entry.get("created_at"),
                                 "detectorVersion": DETECTOR_VERSION,
                                 "pipelineVersion": PIPELINE_VERSION,
-                                "retryClass": "none" if published else retry_class(message),
+                                "retryClass": "none" if status in {"published", "indexed", "superseded"} else retry_class(message),
                                 "checkedAt": datetime.now(timezone.utc).isoformat()}
         write_json(STATE_PATH, state)
         print(f"{key}: {state['videos'][key]['status']} - {message}", flush=True)
 
     prerequisites = [(channel, entry) for channel, entry in candidates if channel.get("alignmentSource")]
-    remaining = [(channel, entry) for channel, entry in candidates if not channel.get("alignmentSource")]
+    youtube_candidates = [(channel, entry) for channel, entry in candidates
+                          if prerequisites and channel["provider"] == "youtube"]
+    remaining = [(channel, entry) for channel, entry in candidates
+                 if not channel.get("alignmentSource") and (not prerequisites or channel["provider"] != "youtube")]
     for channel, entry in prerequisites:
+        record_result(run_candidate(channel, entry))
+    for channel, entry in youtube_candidates:
         record_result(run_candidate(channel, entry))
     workers = min(max(1, int(config.get("maxWorkers", 1))), len(remaining)) if remaining else 0
     if workers == 1:

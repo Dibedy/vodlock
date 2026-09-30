@@ -271,7 +271,7 @@ def index_job(identifier):
         fingerprint_only = bool(job.get("fingerprintOnly"))
         adaptive = bool(job.get("adaptiveAnalysis")) and not fingerprint_only
         reader = None if fingerprint_only else HudReader()
-        detector = None if fingerprint_only else RoundDetector()
+        detector = None if fingerprint_only else RoundDetector(allow_preroll=bool(job.get("allowPreroll")))
         fingerprint_interval = int(job.get("fingerprintInterval", 0))
         fingerprints = []
         diagnostic_directory = work / "diagnostics"

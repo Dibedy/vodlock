@@ -32,6 +32,7 @@
       "priority": 0,
       "requireMatchup": true,
       "alignmentSource": true,
+      "archiveOnly": true,
       "includeTitle": "\\b(CHAMPIONS|SHANGHAI)\\b",
       "excludeTitle": "\\b(RERUN|REBROADCAST)\\b",
       "minimumDuration": 3600,

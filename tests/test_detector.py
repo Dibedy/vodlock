@@ -153,6 +153,15 @@ class DetectorTests(unittest.TestCase):
         self.assertEqual(detector.warnings,
                          ["A round sequence was detected before round 1. Check whether this recording starts mid-match."])
 
+    def test_official_day_archive_can_discard_preroll_before_its_first_complete_map(self):
+        detector = RoundDetector(allow_preroll=True)
+        for time, number, timer in [(100, 8, 100), (102, 8, 98),
+                                    (200, 9, 100), (202, 9, 98),
+                                    (500, 1, 100), (502, 1, 98)]:
+            detector.observe(Observation(time, number, timer, .99))
+        self.assertEqual([entry["round"] for entry in detector.rounds], [1])
+        self.assertEqual(detector.warnings, [])
+
     def test_map_reset_and_missing_round_warning(self):
         detector = RoundDetector()
         for number, time, samples in [(1, 100, 2), (12, 300, 3), (14, 500, 3), (1, 1000, 2)]:

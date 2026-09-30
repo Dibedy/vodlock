@@ -18,10 +18,14 @@
     T1: '/assets/teams/t1.png',
     NS: '/assets/teams/ns.png',
     NRG: '/assets/teams/nrg.png',
+    G2: '/assets/teams/g2.png',
+    KC: '/assets/teams/kc.png',
     JDG: '/assets/teams/jdg.png',
     FUT: '/assets/teams/fut.png',
     LOUD: '/assets/teams/loud.png',
-    EDG: '/assets/teams/edg.png'
+    EDG: '/assets/teams/edg.png',
+    PRX: '/assets/teams/prx.png',
+    TL: '/assets/teams/tl.png'
   };
   const regions = [
     {id: 'americas', name: 'Americas'},

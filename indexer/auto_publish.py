@@ -77,6 +77,15 @@ def retry_class(message):
     return "cooldown"
 
 
+def recovery_message(channel, error):
+    message = str(error)
+    if channel["provider"] == "youtube" and "confirm you’re not a bot" in message:
+        if os.environ.get("VODLOCK_YOUTUBE_COOKIES"):
+            return "YouTube rejected the configured cookies. Refresh the YOUTUBE_COOKIES secret and retry."
+        return "YouTube blocked GitHub's shared runner. Add the YOUTUBE_COOKIES secret and retry."
+    return message
+
+
 def should_attempt(key, published, state, retry_hours, now):
     if key in published:
         return False
@@ -606,7 +615,7 @@ def main():
         try:
             published, message = process(channel, entry, config, state, yt_dlp)
         except Exception as error:
-            published, message = False, str(error)
+            published, message = False, recovery_message(channel, error)
         return channel, entry, published, message
 
     def record_result(result):

@@ -40,6 +40,34 @@ class StoryboardAlignmentTests(unittest.TestCase):
             with self.assertRaises(Expected):
                 extract_storyboard("https://youtube.com/watch?v=example", "youtube", YtDlp)
         self.assertEqual(captured["extractor_args"]["youtube"]["player_client"], ["web"])
+        self.assertEqual(captured["extractor_args"]["youtubepot-bgutilhttp"]["base_url"], ["http://127.0.0.1:4416"])
+
+    def test_youtube_storyboard_uses_optional_cookiefile(self):
+        captured = {}
+
+        class Expected(Exception):
+            pass
+
+        class Downloader:
+            def __init__(self, options):
+                captured.update(options)
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return False
+
+            def extract_info(self, *_, **__):
+                raise Expected()
+
+        class YtDlp:
+            YoutubeDL = Downloader
+
+        with patch.dict(os.environ, {"VODLOCK_YOUTUBE_COOKIES": "/tmp/youtube-cookies.txt"}):
+            with self.assertRaises(Expected):
+                extract_storyboard("https://youtube.com/watch?v=example", "youtube", YtDlp)
+        self.assertEqual(captured["cookiefile"], "/tmp/youtube-cookies.txt")
 
     def test_hamming_distance_counts_changed_bits(self):
         self.assertEqual(hamming("00ff", "01fe"), 2)

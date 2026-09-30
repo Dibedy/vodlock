@@ -162,6 +162,7 @@ class ServerTests(unittest.TestCase):
         identifier = "e" * 32
         job = {"id": identifier, "kind": "youtube", "videoId": "ZphbktbT26k", "status": "downloading", "progress": 0}
         clients = []
+        providers = []
 
         class DownloadError(Exception):
             pass
@@ -169,6 +170,7 @@ class ServerTests(unittest.TestCase):
         class YoutubeDL:
             def __init__(self, options):
                 clients.append(options.get("extractor_args", {}).get("youtube", {}).get("player_client", [None])[0])
+                providers.append(options.get("extractor_args", {}).get("youtubepot-bgutilhttp", {}).get("base_url", [None])[0])
 
             def __enter__(self):
                 return self
@@ -187,6 +189,14 @@ class ServerTests(unittest.TestCase):
             with self.assertRaises(DownloadError):
                 server.download_remote(job, work, lambda _: None, yt_dlp)
         self.assertEqual(clients, [None, "mweb", "web_safari", "web_embedded"])
+        self.assertEqual(providers, ["http://127.0.0.1:4416"] * 4)
+
+    def test_youtube_cookiefile_is_passed_to_downloader(self):
+        options = {}
+        with patch.dict(server.os.environ, {"VODLOCK_YOUTUBE_COOKIES": "/tmp/youtube-cookies.txt"}):
+            server.apply_youtube_options(options, "web")
+        self.assertEqual(options["cookiefile"], "/tmp/youtube-cookies.txt")
+        self.assertEqual(options["extractor_args"]["youtube"]["player_client"], ["web"])
 
     def test_size_filtered_download_tries_next_format(self):
         identifier = "f" * 32

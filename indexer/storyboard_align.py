@@ -44,7 +44,12 @@ def extract_storyboard(url, provider, yt_dlp, requester=None):
         options["js_runtimes"] = {"node": {"path": node}}
     if provider == "youtube":
         client = "web" if os.environ.get("VODLOCK_YOUTUBE_POT") == "1" else "web_embedded"
+        cookiefile = os.environ.get("VODLOCK_YOUTUBE_COOKIES", "")
+        if cookiefile:
+            options["cookiefile"] = cookiefile
         options["extractor_args"] = {"youtube": {"player_client": [client]}}
+        if os.environ.get("VODLOCK_YOUTUBE_POT") == "1":
+            options["extractor_args"]["youtubepot-bgutilhttp"] = {"base_url": ["http://127.0.0.1:4416"]}
     with yt_dlp.YoutubeDL(options) as downloader:
         info = downloader.extract_info(url, download=False)
     formats = [item for item in info.get("formats", [])

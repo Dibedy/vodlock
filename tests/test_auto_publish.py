@@ -18,6 +18,16 @@ class AutoPublishTests(unittest.TestCase):
                         "excludeTitle": r"\b(HIGHLIGHTS|MATCH POINT|SHOWMATCH|DRAW SHOW|DAY [0-9]+ FILM)\b",
                         "minimumDuration": 3600}
 
+    def test_youtube_bot_check_has_an_actionable_recovery_message(self):
+        channel = {"provider": "youtube"}
+        error = Exception("Sign in to confirm you’re not a bot")
+        with patch.dict(auto_publish.os.environ, {}, clear=True):
+            self.assertEqual(auto_publish.recovery_message(channel, error),
+                             "YouTube blocked GitHub's shared runner. Add the YOUTUBE_COOKIES secret and retry.")
+        with patch.dict(auto_publish.os.environ, {"VODLOCK_YOUTUBE_COOKIES": "/tmp/cookies.txt"}, clear=True):
+            self.assertEqual(auto_publish.recovery_message(channel, error),
+                             "YouTube rejected the configured cookies. Refresh the YOUTUBE_COOKIES secret and retry.")
+
     def test_global_channel_accepts_only_finished_full_matches(self):
         valid = {"id": "ZphbktbT26k", "title": "LOUD vs. EDG — FULL MATCH — Champions Shanghai", "duration": 4659}
         self.assertTrue(auto_publish.is_candidate(self.global_channel, valid))

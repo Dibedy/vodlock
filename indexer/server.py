@@ -158,6 +158,21 @@ def remote_url(job):
     return "https://www.twitch.tv/videos/" + job["twitchVideoId"]
 
 
+def apply_youtube_options(options, player_client=None):
+    cookiefile = os.environ.get("VODLOCK_YOUTUBE_COOKIES", "")
+    if cookiefile:
+        options["cookiefile"] = cookiefile
+    extractor_args = {}
+    if os.environ.get("VODLOCK_YOUTUBE_POT") == "1":
+        extractor_args["youtubepot-bgutilhttp"] = {"base_url": ["http://127.0.0.1:4416"]}
+    if player_client:
+        extractor_args["youtube"] = {"player_client": [player_client]}
+    if extractor_args:
+        options["extractor_args"] = extractor_args
+    else:
+        options.pop("extractor_args", None)
+
+
 def resolve_remote(job, yt_dlp):
     options = {"noplaylist": True, "quiet": True, "no_warnings": False, "socket_timeout": 20, "retries": 2}
     if shutil.which("node"):
@@ -165,10 +180,8 @@ def resolve_remote(job, yt_dlp):
     last_error = None
     for format_selector, player_client in remote_formats(job):
         options["format"] = format_selector
-        if player_client:
-            options["extractor_args"] = {"youtube": {"player_client": [player_client]}}
-        else:
-            options.pop("extractor_args", None)
+        if job.get("kind", "youtube") == "youtube":
+            apply_youtube_options(options, player_client)
         try:
             with yt_dlp.YoutubeDL(options) as downloader:
                 info = downloader.extract_info(remote_url(job), download=False)
@@ -198,10 +211,8 @@ def download_remote(job, work, hook, yt_dlp, max_bytes=None):
     formats = remote_formats(job)
     for attempt, (format_selector, player_client) in enumerate(formats):
         options["format"] = format_selector
-        if player_client:
-            options["extractor_args"] = {"youtube": {"player_client": [player_client]}}
-        else:
-            options.pop("extractor_args", None)
+        if job.get("kind", "youtube") == "youtube":
+            apply_youtube_options(options, player_client)
         try:
             with yt_dlp.YoutubeDL(options) as downloader:
                 info = downloader.extract_info(remote_url(job), download=True)
@@ -225,8 +236,17 @@ def download_youtube(job, work, hook, yt_dlp):
 def stream_command(job, remote):
     command = [sys.executable, "-m", "yt_dlp", "--quiet", "--no-warnings", "--no-progress",
                "--no-part", "--format", remote["format"], "--output", "-", remote_url(job)]
-    if remote.get("playerClient"):
-        command[3:3] = ["--extractor-args", "youtube:player_client=" + remote["playerClient"]]
+    if job.get("kind", "youtube") == "youtube":
+        cookiefile = os.environ.get("VODLOCK_YOUTUBE_COOKIES", "")
+        if cookiefile:
+            command[3:3] = ["--cookies", cookiefile]
+        extractor_args = []
+        if os.environ.get("VODLOCK_YOUTUBE_POT") == "1":
+            extractor_args.append("youtubepot-bgutilhttp:base_url=http://127.0.0.1:4416")
+        if remote.get("playerClient"):
+            extractor_args.append("youtube:player_client=" + remote["playerClient"])
+        for value in reversed(extractor_args):
+            command[3:3] = ["--extractor-args", value]
     return command
 
 

@@ -382,6 +382,7 @@ class AutoPublishTests(unittest.TestCase):
             job = auto_publish.server.JOBS[identifier]
             self.assertTrue(job["adaptiveAnalysis"])
             self.assertEqual(job["analysisHeight"], 540)
+            self.assertFalse(job["streamAnalysis"])
             job.update(status="ready", warnings=[], duration=2000, rounds=rounds)
 
         with tempfile.TemporaryDirectory() as temporary:

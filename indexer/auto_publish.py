@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v6"
+PUBLISHER_VERSION = "publisher-v7"
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 PUBLISH_LOCK = threading.Lock()
 
@@ -512,6 +512,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             except OfficialArchiveUnmatched as error:
                 print(f"youtube:{entry['id']} archive alignment unavailable - {clean_text(error)}; using adaptive official OCR",
                       flush=True)
+                job["streamAnalysis"] = False
         if aligned_source_id is None:
             if state is not None and yt_dlp is not None and channel.get("reuseOfficialIndex"):
                 try:

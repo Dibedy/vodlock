@@ -150,10 +150,12 @@
       "provider": "twitch",
       "channel": "Ohnepixel on Twitch",
       "title": "🔴$50K VALORANT TOURNEY PREP... HELP!🔴",
-      "message": "[Errno 28] No space left on device",
+      "message": "Official match alignment failed: The watch-party title does not identify a matchup for alignment",
       "publishedAt": "2026-09-18T15:04:36Z",
-      "detectorVersion": "vct-clock-ocr-v6",
-      "checkedAt": "2026-09-28T02:02:54.641721+00:00"
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-09-30T21:10:22.051624+00:00"
     },
     "youtube:z_aPp2s4d_o": {
       "status": "published",
@@ -235,9 +237,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-29T08:45:31Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v8",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
       "retryClass": "cooldown",
-      "checkedAt": "2026-09-30T20:32:02.023938+00:00"
+      "checkedAt": "2026-09-30T21:16:11.490062+00:00"
     },
     "youtube:XdGX65LMxig": {
       "status": "published",
@@ -283,9 +285,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-30T08:51:39Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v8",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
       "retryClass": "cooldown",
-      "checkedAt": "2026-09-30T20:30:14.354867+00:00"
+      "checkedAt": "2026-09-30T21:10:22.050208+00:00"
     }
   }
 }

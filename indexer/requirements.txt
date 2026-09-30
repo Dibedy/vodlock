@@ -1,5 +1,4 @@
 rapidocr-onnxruntime==1.4.4
 imageio-ffmpeg==0.6.0
 yt-dlp[default]==2026.8.19
-bgutil-ytdlp-pot-provider==2.0.0
 opencv-python-headless==5.0.0.93

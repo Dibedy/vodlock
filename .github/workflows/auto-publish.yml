@@ -102,6 +102,11 @@ jobs:
           git config user.name "vodlock-bot"
           git config user.email "vodlock-bot@users.noreply.github.com"
           git pull --rebase --autostash origin main
+          if git diff --name-only --diff-filter=U | grep -q .; then
+            echo "Generated files conflict with a newer repository update."
+            exit 1
+          fi
+          python -m json.tool indexer/auto_state.json > /dev/null
           git add site/catalog.json site/indexes site/chats indexer/auto_state.json indexer/storyboards
           git diff --cached --quiet || git commit -m "Publish automatic VOD index"
           git push

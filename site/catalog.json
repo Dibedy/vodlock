@@ -37,6 +37,17 @@
     },
     {
       "provider": "youtube",
+      "sourceId": "z_aPp2s4d_o",
+      "title": "PRX vs G2",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-z_aPp2s4d_o.json",
+      "playedAt": "2026-09-29T09:02:16Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai"
+    },
+    {
+      "provider": "youtube",
       "sourceId": "fFfCJDNHEvc",
       "title": "JDG vs FUT",
       "event": "VALORANT Champions Shanghai | Group Stage",

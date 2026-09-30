@@ -156,16 +156,16 @@
       "checkedAt": "2026-09-28T02:02:54.641721+00:00"
     },
     "youtube:z_aPp2s4d_o": {
-      "status": "held",
+      "status": "published",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour",
       "title": "PRX vs. G2 - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "No reliable round starts were found. This version needs the VCT top-centre ROUND label and timer; a different layout may need detector changes.",
+      "message": "Published",
       "publishedAt": "2026-09-29T12:35:12+00:00",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v8",
-      "retryClass": "pipeline-update",
-      "checkedAt": "2026-09-30T19:55:20.651028+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v8",
+      "retryClass": "none",
+      "checkedAt": "2026-09-30T20:19:23.305342+00:00"
     },
     "twitch:2867033974": {
       "status": "published",
@@ -228,16 +228,16 @@
       "checkedAt": "2026-09-30T15:06:37.780662+00:00"
     },
     "twitch:2887057207": {
-      "status": "waiting",
+      "status": "held",
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | PRX vs G2 - VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
-      "message": "Waiting for the indexed official YouTube full match",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-29T08:45:31Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v8",
-      "retryClass": "dependency",
-      "checkedAt": "2026-09-30T19:55:20.654640+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v8",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-09-30T20:32:02.023938+00:00"
     },
     "youtube:XdGX65LMxig": {
       "status": "published",
@@ -283,9 +283,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-30T08:51:39Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v8",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v8",
       "retryClass": "cooldown",
-      "checkedAt": "2026-09-30T20:05:57.694219+00:00"
+      "checkedAt": "2026-09-30T20:30:14.354867+00:00"
     }
   }
 }

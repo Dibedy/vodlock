@@ -25,12 +25,16 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v5"
+PUBLISHER_VERSION = "publisher-v6"
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 PUBLISH_LOCK = threading.Lock()
 
 
 class OfficialMatchPending(ValueError):
+    pass
+
+
+class OfficialArchiveUnmatched(ValueError):
     pass
 
 
@@ -402,7 +406,7 @@ def youtube_alignment(channel, entry, config, state, yt_dlp):
         except (OSError, ValueError, KeyError):
             continue
     if not matches:
-        raise ValueError("No verified official Twitch broadcast matches this YouTube full match")
+        raise OfficialArchiveUnmatched("No verified official Twitch broadcast matches this YouTube full match")
     matches.sort(reverse=True, key=lambda item: item[0])
     if len(matches) > 1 and matches[1][0] >= matches[0][0] * 0.8:
         raise ValueError("More than one official broadcast matches this YouTube upload")
@@ -483,6 +487,9 @@ def process(channel, entry, config, state=None, yt_dlp=None):
         job["analysisHeight"] = 540
         if channel.get("archiveOnly"):
             job["multiSeriesArchive"] = True
+    if provider == "youtube":
+        job["adaptiveAnalysis"] = True
+        job["analysisHeight"] = 540
     if provider == "twitch" and channel.get("alignmentSource"):
         job["fingerprintInterval"] = 2
     if provider == "youtube":
@@ -497,11 +504,15 @@ def process(channel, entry, config, state=None, yt_dlp=None):
     try:
         print(f"Processing {provider}:{entry['id']} - {clean_text(entry['title'])}", flush=True)
         if provider == "youtube" and state is not None and yt_dlp is not None:
-            aligned_source_id, alignment, rounds = youtube_alignment(channel, entry, config, state, yt_dlp)
-            exported = {"schemaVersion": 2, "provider": "youtube", "sourceId": entry["id"], "label": title,
-                        "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION,
-                        "rounds": rounds, "alignment": {**alignment, "source": "twitch:" + aligned_source_id}}
-        else:
+            try:
+                aligned_source_id, alignment, rounds = youtube_alignment(channel, entry, config, state, yt_dlp)
+                exported = {"schemaVersion": 2, "provider": "youtube", "sourceId": entry["id"], "label": title,
+                            "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION,
+                            "rounds": rounds, "alignment": {**alignment, "source": "twitch:" + aligned_source_id}}
+            except OfficialArchiveUnmatched as error:
+                print(f"youtube:{entry['id']} archive alignment unavailable - {clean_text(error)}; using adaptive official OCR",
+                      flush=True)
+        if aligned_source_id is None:
             if state is not None and yt_dlp is not None and channel.get("reuseOfficialIndex"):
                 try:
                     aligned_source_id, alignment, rounds = watchparty_alignment(job, entry, config, state, yt_dlp)
@@ -523,7 +534,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                         previous, following = gap
                         analysis_start = max(0, float(previous["start"]) - 30)
                         analysis_end = min(float(job["duration"]), float(following["start"]) + 30)
-                        print(f"twitch:{entry['id']} checking {analysis_start:.0f}-{analysis_end:.0f}s at 720p to repair one gap",
+                        print(f"{provider}:{entry['id']} checking {analysis_start:.0f}-{analysis_end:.0f}s at 720p to repair one gap",
                               flush=True)
                         job["adaptiveAnalysis"] = False
                         job["analysisHeight"] = 720
@@ -537,7 +548,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                                    fingerprints=original_fingerprints)
                         accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
                     else:
-                        print(f"twitch:{entry['id']} adaptive analysis broadly unreliable - {clean_text(reason)}; retrying full 720p OCR",
+                        print(f"{provider}:{entry['id']} adaptive analysis broadly unreliable - {clean_text(reason)}; retrying full 720p OCR",
                               flush=True)
                         job["adaptiveAnalysis"] = False
                         job["analysisHeight"] = 720

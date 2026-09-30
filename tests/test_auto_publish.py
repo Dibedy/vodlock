@@ -372,6 +372,32 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(state["videos"]["twitch:1234567890"]["status"], "superseded")
         self.assertEqual(state["videos"]["twitch:1234567890"]["supersededBy"], "youtube:abcdefghijk")
 
+    def test_unmatched_official_youtube_match_uses_adaptive_official_ocr(self):
+        channel = {"provider": "youtube", "name": "YouTube", "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH", "published": "2026-09-30T10:00:00Z"}
+        rounds = [{"map": 1, "round": number, "start": number * 100, "confidence": .9}
+                  for number in range(1, 14)]
+
+        def index_job(identifier):
+            job = auto_publish.server.JOBS[identifier]
+            self.assertTrue(job["adaptiveAnalysis"])
+            self.assertEqual(job["analysisHeight"], 540)
+            job.update(status="ready", warnings=[], duration=2000, rounds=rounds)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "catalog.json").write_text('{"version":2,"videos":[]}', encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), \
+                    patch.object(auto_publish, "youtube_alignment",
+                                 side_effect=auto_publish.OfficialArchiveUnmatched("No matching archive")), \
+                    patch.object(auto_publish.server, "index_job", side_effect=index_job):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13},
+                                              {"videos": {}}, object())
+        self.assertEqual(result, (True, "Published"))
+
     def test_youtube_alignment_uses_an_indexed_official_day_archive(self):
         channel = {"provider": "youtube", "name": "YouTube", "minimumDuration": 3600}
         config = {"channels": [channel, {"provider": "twitch", "name": "Official", "alignmentSource": True}],

@@ -160,12 +160,12 @@
       "provider": "youtube",
       "channel": "VALORANT Champions Tour",
       "title": "PRX vs. G2 - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official Twitch broadcast matches this YouTube full match",
+      "message": "ERROR: [youtube] z_aPp2s4d_o: Requested format is not available. Use --list-formats for a list of available formats",
       "publishedAt": "2026-09-29T12:35:12+00:00",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v5",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v6",
       "retryClass": "cooldown",
-      "checkedAt": "2026-09-30T18:52:50.708976+00:00"
+      "checkedAt": "2026-09-30T19:10:12.661275+00:00"
     },
     "twitch:2867033974": {
       "status": "published",
@@ -235,9 +235,9 @@
       "message": "Waiting for the indexed official YouTube full match",
       "publishedAt": "2026-09-29T08:45:31Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v5",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v6",
       "retryClass": "dependency",
-      "checkedAt": "2026-09-30T18:52:50.712511+00:00"
+      "checkedAt": "2026-09-30T19:10:12.664502+00:00"
     },
     "youtube:XdGX65LMxig": {
       "status": "published",
@@ -283,9 +283,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-30T08:51:39Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v5",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v6",
       "retryClass": "cooldown",
-      "checkedAt": "2026-09-30T19:03:26.820151+00:00"
+      "checkedAt": "2026-09-30T19:20:24.057815+00:00"
     }
   }
 }

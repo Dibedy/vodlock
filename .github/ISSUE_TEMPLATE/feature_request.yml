@@ -1,0 +1,25 @@
+name: Feature request
+description: Suggest an improvement that preserves spoiler-safe behavior.
+title: "[Feature] "
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: What viewing or indexing problem should this solve?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed behavior
+      description: Describe the experience rather than only the implementation.
+    validations:
+      required: true
+  - type: textarea
+    id: spoilers
+    attributes:
+      label: Spoiler-safety considerations
+      description: Could this reveal a winner, score, series length, tournament advancement, or future opponent?
+    validations:
+      required: true

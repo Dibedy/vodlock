@@ -1,48 +1,112 @@
-# SPOILLESS · Round Studio
+<div align="center">
+  <img src="site/favicon.svg" width="72" height="72" alt="SPOILLESS crossed-eye mark">
+  <h1>SPOILLESS</h1>
+  <p><strong>Watch VALORANT VODs without learning the result first.</strong></p>
+  <p>Round-by-round navigation for official broadcasts and watch parties, with timelines, scores, durations, brackets, and future matches kept out of sight.</p>
+  <p>
+    <a href="https://spoilless.vercel.app/"><strong>Open SPOILLESS</strong></a>
+    ·
+    <a href="site/README.md">Website documentation</a>
+    ·
+    <a href="vodlock/README.md">Extension documentation</a>
+  </p>
+</div>
 
-A local, independent Valorant round indexer paired with the SPOILLESS spoiler-safe browser extension. No subscription, server account or vods.space timestamp database is used.
+## What is included
 
-## Standalone website
+SPOILLESS is built as three small, independent parts:
 
-The `site` folder contains a Vercel-ready viewer that requires no extension and performs no processing on the viewer's computer. It embeds the original YouTube or Twitch broadcast, fetches a precomputed JSON index, starts at the opening round and provides previous/next map and round controls.
+| Component | Purpose |
+| --- | --- |
+| `site/` | Static, account-free viewer for the published match library |
+| `vodlock/` | Manifest V3 browser extension for spoiler-safe YouTube, Twitch, and vods.space viewing |
+| `indexer/` | Local Round Studio and the automatic VOD indexing pipeline |
 
-The website is seeded with the supplied `ZphbktbT26k` index. See `site/README.md` for local preview, deployment and catalog publishing instructions. Round Studio remains the private tool used by the catalog owner to generate and review new indexes once before publishing them for everyone.
+The website embeds the original YouTube or Twitch broadcast. It does not host or redistribute video. Each match uses a compact JSON index of verified round starts, so navigation is immediate and no analysis runs on a viewer's device.
 
-## Try your supplied VOD immediately
+## Spoiler-safe by design
 
-The package includes `vodlock-ZphbktbT26k.json`, already built and clock-checked for your YouTube link. Load the updated `vodlock` extension folder, open its popup and choose **Import round index**, then select that JSON. Open the same video and press Down Arrow. You do not need to start Round Studio or process this video again to use the included index.
+- No scores, results, map totals, round totals, VOD durations, thumbnails, or exposed progress bars.
+- Matches are ordered by when they were played, not when a permanent upload appeared.
+- Favourite teams surface unwatched matches without revealing tournament advancement.
+- Official broadcasts and creator watch parties are grouped under the same match.
+- Previous and next controls remain visually consistent instead of revealing when the final round or map has been reached.
+- Playback preferences and watch progress stay in browser storage; there are no SPOILLESS accounts or analytics.
 
-## Start
+SPOILLESS can hide interface spoilers, not information already visible inside the broadcast image.
 
-1. Load the `vodlock` folder using **Load unpacked** on `chrome://extensions`. Remove or reload your older SPOILLESS installation, then refresh your video tabs.
-2. Double-click **Start Round Studio.cmd**. The first launch creates a project-local Python environment and installs the packages in `indexer/requirements.txt`. Python 3.10–3.12 is required; Python 3.12 is recommended. The bundled Codex Python runtime is also supported when available.
-3. Paste a public YouTube VOD link, or choose **Local recording** and paste the full path to a video file. A local recording must be the exact, uncut version of its linked YouTube VOD for timestamps to line up.
-4. Build the index. Downloading and analysis happen outside your viewing player. Keep Round Studio running until it finishes.
-5. Use **Review index** to check detections. This view deliberately reveals timestamps and detected round numbers. Save corrections, add missed rounds, or exclude false detections. Exclusion is reversible. Then press **Use in SPOILLESS**.
-6. Open the matching YouTube video. **Down Arrow** jumps to the next indexed round with five seconds of lead-in. The toolbar also has previous/next round controls. **Right Arrow** retains the configurable replay jump, defaulting to 31 seconds.
+## Use the website
 
-If the extension is not detected, reload the Round Studio page after installing it. Alternatively, export the JSON and import it in the extension popup. Once imported, round navigation works without Round Studio running.
+Open [spoilless.vercel.app](https://spoilless.vercel.app/), choose a match and select a broadcast. The player begins at the opening round and provides spoiler-safe round and map navigation.
 
-Use **Stop Round Studio.cmd** to stop an instance started by the launcher. Stopping during analysis interrupts that job; add its source again to retry. Closing the browser tab alone does not stop the local server.
+The viewer is plain HTML, CSS, and JavaScript. To preview it locally:
 
-## Accuracy and performance
+```powershell
+python -m http.server 4173 --bind 127.0.0.1 --directory site
+```
 
-The detector is experimental. It reads the VCT top-centre `ROUND` label and countdown, checks the bottom-right replay sign, and requires two consistent early-round clock observations. It estimates the actual round start from the countdown rather than using the later confirmation frame. The imported index applies a five-second lead-in.
+Then open `http://127.0.0.1:4173`.
 
-Different HUDs, low-resolution text, camera cuts, covered timers or late returns from replays can cause missed detections. Detected gaps are flagged for review, and SPOILLESS refuses a forward round jump across a known gap within one map. Gaps at the end of a recording cannot reliably be identified. This is not a claim of equivalent accuracy to vods.space. Review a new broadcast before relying on its index.
+## Install the browser extension
 
-Automatic Twitch analysis starts with a 540p source and sends a compact HUD image through FFmpeg instead of full frames. It checks the clock every four seconds, switches to one-second HUD analysis around possible round starts, and runs the more expensive round, score, and replay OCR only while the clock is between 1:40 and 1:25. If the adaptive pass is not confidently publishable, it automatically repeats the established full-frame analysis at 720p. A full match can still take several minutes or longer depending on CPU and video delivery speed. That cost is paid once; indexed navigation performs one direct seek with no gameplay search. Unindexed videos retain the existing long-break search as a fallback.
+1. Open `chrome://extensions` in a Chromium-based browser.
+2. Enable **Developer mode**.
+3. Choose **Load unpacked** and select the `vodlock` folder.
+4. Refresh any open YouTube, Twitch, or vods.space tabs.
 
-YouTube downloads require a public video accessible without cookies. Restricted or blocked downloads fail visibly; use an authorized local recording instead. Analysis sources are capped at 720p and preserve at least 2 GB of free disk space; hosted automation uses a 5 GB file cap and Round Studio allows up to 8 GB when space permits. YouTube may change its delivery system, so downloader compatibility can change.
+The extension adds a spoiler shield, configurable replay skipping, safe navigation for imported indexes, and a visual fallback for long breaks. See [`vodlock/README.md`](vodlock/README.md) for controls and limitations.
 
-## Privacy and files
+## Build an index locally
 
-The app listens only on `127.0.0.1:8766`. Videos and indexes are kept in `indexer/data`, dependencies in `indexer/.venv`, and imported indexes in the extension's local storage. The app does not upload video. YouTube requests and dependency installation still require an internet connection. If you place the package in OneDrive or another synced folder, that provider may independently sync generated files; use a non-synced folder if you do not want that.
+Round Studio currently has a Windows launcher and requires Python 3.10–3.12.
 
-Analysis copies are retained for inspection; they consume disk space. Stop Round Studio before manually removing unwanted job files from `indexer/data`. Local source recordings are never modified or deleted. Do not move the extension folder after loading it unpacked.
+1. Double-click **Start Round Studio.cmd**. The first launch creates `indexer/.venv` and installs the pinned dependencies.
+2. Add a public YouTube VOD or an exact local recording.
+3. Build and review the detected round starts.
+4. Correct or exclude uncertain detections, then export the index or send it directly to the extension.
+5. Use **Stop Round Studio.cmd** when finished.
 
-Spoiler protection hides website timelines, durations, metadata and end screens according to your popup settings. It does not hide scores baked into the broadcast itself. Round Studio's library does not show round totals or timestamps unless you open review mode.
+Round Studio listens only on `127.0.0.1:8766`. Generated data stays under `indexer/data/`, and local recordings are never modified or deleted.
 
-## Development checks
+## Automatic indexing
 
-Run `node --test tests/*.test.cjs` for website and extension logic, and `indexer/.venv/Scripts/python.exe -m unittest discover -s tests -p "test_*.py"` for the clock detector and local API checks. Run `indexer/.venv/Scripts/python.exe indexer/server.py` to start the server from a terminal.
+The publishing pipeline monitors configured official and watch-party sources after their broadcasts finish. It:
+
+1. Tries a 540p adaptive pass using compact HUD regions and clock-first OCR.
+2. Samples possible gameplay cheaply, then increases analysis around potential round starts.
+3. Retries with the established 720p full-frame pass if confidence is insufficient.
+4. Reuses a verified official index for matching watch parties when visual alignment is unambiguous.
+5. Rejects alignments with gaps, cuts, reconnects, or missing round sequences and falls back to independent OCR.
+6. Publishes only complete, high-confidence indexes with no detector warnings.
+
+The scheduled workflow can process two independent sources concurrently. Detailed publishing and deployment instructions are in [`site/README.md`](site/README.md).
+
+## Development
+
+Install the indexer dependencies in a Python 3.10–3.12 virtual environment:
+
+```powershell
+python -m venv indexer/.venv
+indexer/.venv/Scripts/python.exe -m pip install -r indexer/requirements.txt
+```
+
+Run the full test suites:
+
+```powershell
+node --test tests/*.test.cjs
+indexer/.venv/Scripts/python.exe -m unittest discover -s tests -p "test_*.py"
+```
+
+The repository contains no build step for the website or extension. Please read [`CONTRIBUTING.md`](CONTRIBUTING.md) before proposing behavior that could reveal match or tournament progression.
+
+## Accuracy and limitations
+
+The OCR detector targets the VCT top-centre `ROUND` label and timer. Different HUDs, low-resolution text, covered clocks, camera cuts, and late replay returns can produce missed detections. Automatic publication is deliberately strict, and locally generated indexes should be reviewed before use.
+
+YouTube and Twitch can change their players, delivery systems, or page markup at any time. Provider updates may temporarily affect downloading, embedding, or extension behavior.
+
+## Privacy and third-party services
+
+The website has no first-party analytics, advertising, accounts, payments, or forms. Starting an embedded player loads the selected provider and is then subject to that provider's policies. Selected Twitch broadcasts include a read-only archive of public VOD chat. See the live [Privacy Policy](https://spoilless.vercel.app/privacy.html) and [Terms](https://spoilless.vercel.app/terms.html).
+
+VALORANT and VCT are trademarks of Riot Games. YouTube, Twitch, team names, event names, broadcasts, and related assets belong to their respective owners. SPOILLESS is an independent project and is not affiliated with or endorsed by Riot Games, YouTube, or Twitch.

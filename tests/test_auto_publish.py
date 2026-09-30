@@ -285,6 +285,23 @@ class AutoPublishTests(unittest.TestCase):
             self.assertEqual(auto_publish.main(), 0)
         self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["abcdefghijk", "lmnopqrstuv"])
 
+    def test_held_twitch_watch_party_remains_eligible_after_it_leaves_discovery(self):
+        now = datetime.now(timezone.utc).isoformat()
+        channel = {"provider": "twitch", "name": "FNS", "login": "fns", "priority": 2}
+        config = {"channels": [channel], "lookback": 30, "maxPerRun": 4, "maxPerChannelPerRun": 2,
+                  "maxRetriesPerRun": 1, "retryHours": 0}
+        state = {"videos": {
+            "twitch:1234567890": {"status": "held", "channel": "FNS", "title": "A vs B - Champions",
+                                   "publishedAt": now, "checkedAt": now, "retryClass": "cooldown"}}}
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, {"videos": []}]), \
+                patch.object(auto_publish, "discover_twitch", return_value={"fns": []}), \
+                patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \
+                patch.object(auto_publish, "write_json"), \
+                patch.dict(auto_publish.os.environ, {"TWITCH_CLIENT_ID": "client", "TWITCH_CLIENT_SECRET": "secret"}), \
+                patch.object(sys, "argv", ["auto_publish.py", "--retry-held"]), patch("sys.stdout", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["1234567890"])
+
     def test_match_dependency_chain_can_retry_in_one_run(self):
         channels = [{"provider": "twitch", "name": "Official", "login": "official", "priority": 0,
                      "alignmentSource": True},

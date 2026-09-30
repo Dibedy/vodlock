@@ -720,7 +720,16 @@ def main():
         else:
             print("Twitch discovery skipped: set TWITCH_CLIENT_ID and TWITCH_CLIENT_SECRET", file=sys.stderr)
     for channel_index, channel in enumerate(twitch_channels):
-        eligible = [item for item in twitch_results.get(channel["login"], [])
+        entries = list(twitch_results.get(channel["login"], []))
+        known_ids = {item["id"] for item in entries}
+        retained = [
+            {"id": key.split(":", 1)[1], "title": item["title"], "created_at": item.get("publishedAt")}
+            for key, item in state["videos"].items()
+            if key.startswith("twitch:") and item.get("status") in {"held", "waiting"}
+            and item.get("channel") == channel["name"] and key.split(":", 1)[1] not in known_ids
+        ]
+        entries.extend(retained)
+        eligible = [item for item in entries
                     if should_process(source_key("twitch", item["id"]), published_ids, state["videos"],
                                       config.get("retryHours", 6), now, arguments.retry_held)]
         for entry_index, entry in enumerate(eligible[:per_channel]):

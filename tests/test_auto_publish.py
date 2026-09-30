@@ -1,3 +1,4 @@
+import json
 import sys
 import io
 import threading
@@ -469,6 +470,39 @@ class AutoPublishTests(unittest.TestCase):
         index_job.assert_not_called()
         self.assertEqual({item["sourceId"] for item in catalog["videos"]}, {"1234567890", "1234567891"})
         self.assertEqual(state["videos"]["twitch:1234567890"]["status"], "published")
+
+    def test_watch_party_archive_publishes_each_complete_aligned_match(self):
+        channel = {"provider": "twitch", "name": "FNS on Twitch", "reuseOfficialIndex": True,
+                   "multiSeriesArchive": True}
+        entry = {"id": "1234567891", "title": "FNS | A vs B - Champions", "created_at": "2026-09-29T10:00:00Z"}
+        state = {"videos": {
+            "youtube:abcdefghijk": {"status": "published", "title": "A vs B - FULL MATCH"},
+            "youtube:zyxwvutsrqp": {"status": "published", "title": "C vs D - FULL MATCH"},
+        }}
+        rounds = [{"map": 1, "round": number, "start": number * 100} for number in range(1, 14)]
+        matches = [("abcdefghijk", {"offset": 10}, rounds), ("zyxwvutsrqp", {"offset": 20}, rounds)]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "catalog.json").write_text(json.dumps({"version": 2, "videos": [
+                {"provider": "youtube", "sourceId": "abcdefghijk", "title": "A vs B", "event": "Champions",
+                 "playedAt": "2026-09-29T10:10:00Z", "tournament": "Champions", "tournamentKey": "champions"},
+                {"provider": "youtube", "sourceId": "zyxwvutsrqp", "title": "C vs D", "event": "Champions",
+                 "playedAt": "2026-09-29T14:10:00Z", "tournament": "Champions", "tournamentKey": "champions"},
+            ]}), encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), patch.object(auto_publish.chat_archive, "archive_chat", return_value=None), \
+                    patch.object(auto_publish, "watchparty_alignments", return_value=matches):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13}, state, object())
+            catalog = auto_publish.read_json(site / "catalog.json")
+            files_written = [(site / "indexes" / "twitch-1234567891-abcdefghijk.json").is_file(),
+                             (site / "indexes" / "twitch-1234567891-zyxwvutsrqp.json").is_file()]
+        self.assertEqual(result, (True, "Published 2 complete matches from the watch-party archive"))
+        watch_parties = [item for item in catalog["videos"] if item.get("provider") == "twitch"]
+        self.assertEqual([item["catalogId"] for item in watch_parties],
+                         ["twitch:1234567891:zyxwvutsrqp", "twitch:1234567891:abcdefghijk"])
+        self.assertEqual(files_written, [True, True])
 
     def test_uncertain_adaptive_analysis_retries_with_720p_full_frames(self):
         channel = {"provider": "twitch", "name": "Official"}

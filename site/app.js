@@ -269,7 +269,7 @@
   }
 
   function entryKey(entry) {
-    return VodlockSite.sourceKey(entry.provider, entry.sourceId);
+    return entry.catalogId || VodlockSite.sourceKey(entry.provider, entry.sourceId);
   }
 
   function matchup(entry) {
@@ -303,7 +303,7 @@
   }
 
   function creatorName(entry) {
-    return entry.title.replace(/^EG\s+/i, '').trim() || 'Creator';
+    return entry.creator || entry.title.replace(/^EG\s+/i, '').trim() || 'Creator';
   }
 
   function sourceName(entry) {
@@ -654,6 +654,7 @@
     }).filter(entry => {
       const parsed = VodlockSite.mediaSource(VodlockSite.sourceKey(entry.provider, entry.sourceId));
       return parsed && typeof entry.index === 'string' && /^\/indexes\/[A-Za-z0-9_-]+\.json$/.test(entry.index) &&
+        (entry.catalogId === undefined || /^(youtube|twitch):[A-Za-z0-9_-]{6,20}:[A-Za-z0-9_-]{6,20}$/.test(entry.catalogId)) &&
         typeof entry.title === 'string' && typeof entry.event === 'string' && VodlockSite.playedTime(entry.playedAt) > 0;
     });
     renderFilters();
@@ -696,8 +697,7 @@
   }
 
   async function openVideo(key, updateHistory = true, resumeTime = null) {
-    const source = VodlockSite.mediaSource(key);
-    const entry = source && state.catalog.find(candidate => entryKey(candidate) === VodlockSite.sourceKey(source.provider, source.sourceId));
+    const entry = state.catalog.find(candidate => entryKey(candidate) === key);
     if (!entry) {
       toast('This VOD has not been processed yet.');
       return;
@@ -1153,8 +1153,8 @@
 
   applySettings();
   loadCatalog().then(() => {
-    const source = VodlockSite.mediaSource(new URL(location.href).searchParams.get('v'));
-    if (source) return openVideo(VodlockSite.sourceKey(source.provider, source.sourceId), false);
+    const source = new URL(location.href).searchParams.get('v');
+    if (source) return openVideo(source, false);
   }).catch(error => {
     $('catalog').replaceChildren();
     const message = document.createElement('p');

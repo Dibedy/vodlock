@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v8"
+PUBLISHER_VERSION = "publisher-v9"
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 PUBLISH_LOCK = threading.Lock()
 
@@ -435,13 +435,13 @@ def compact_reference(reference, interval):
     return {**reference, "interval": source_interval * step, "frames": reference.get("frames", [])[::step]}
 
 
-def watchparty_alignment(job, entry, config, state, yt_dlp):
+def watchparty_alignments(job, entry, config, state, yt_dlp, multi_series=False):
     target_match = matchup_key(entry.get("title", ""))
-    if not target_match:
+    if not multi_series and not target_match:
         raise ValueError("The watch-party title does not identify a matchup for alignment")
     candidates = [(key.split(":", 1)[1], value) for key, value in state["videos"].items()
                   if key.startswith("youtube:") and value.get("status") == "published"
-                  and matchup_key(value.get("title", "")) == target_match
+                  and (multi_series or matchup_key(value.get("title", "")) == target_match)
                   and (SITE / "indexes" / f"youtube-{key.split(':', 1)[1]}.json").is_file()]
     if not candidates:
         raise OfficialMatchPending("Waiting for the indexed official YouTube full match")
@@ -468,10 +468,52 @@ def watchparty_alignment(job, entry, config, state, yt_dlp):
     if not matches:
         raise ValueError("No verified official-broadcast alignment was found for this watch party")
     matches.sort(reverse=True, key=lambda item: item[0])
-    if len(matches) > 1 and matches[1][0] >= matches[0][0] * 0.8:
+    if not multi_series and len(matches) > 1 and matches[1][0] >= matches[0][0] * 0.8:
         raise ValueError("More than one official broadcast matches this watch party")
-    _, source_id, alignment, rounds = matches[0]
+    return [(source_id, alignment, rounds) for _, source_id, alignment, rounds in matches]
+
+
+def watchparty_alignment(job, entry, config, state, yt_dlp):
+    matches = watchparty_alignments(job, entry, config, state, yt_dlp)
+    source_id, alignment, rounds = matches[0]
     return "youtube:" + source_id, alignment, rounds
+
+
+def publish_watchparty_archive(channel, entry, state, matches):
+    chat_path = None
+    try:
+        chat_path = chat_archive.archive_chat(entry["id"])
+    except Exception as error:
+        print(f"twitch:{entry['id']} chat unavailable - {clean_text(error)}", file=sys.stderr)
+    catalog_path = SITE / "catalog.json"
+    catalog = read_json(catalog_path)
+    catalog["version"] = 2
+    published = {item.get("sourceId"): item for item in catalog["videos"] if item.get("provider") == "youtube"}
+    records = []
+    for source_id, alignment, rounds in matches:
+        official = published.get(source_id, {})
+        title = clean_text(official.get("title") or state["videos"]["youtube:" + source_id]["title"])
+        event = clean_text(official.get("event") or channel["name"])
+        catalog_id = f"twitch:{entry['id']}:{source_id}"
+        exported = {"schemaVersion": 2, "provider": "twitch", "sourceId": entry["id"], "label": title,
+                    "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION,
+                    "rounds": rounds, "alignment": {**alignment, "source": "youtube:" + source_id}}
+        filename = f"twitch-{entry['id']}-{source_id}.json"
+        write_json(SITE / "indexes" / filename, exported)
+        catalog["videos"] = [item for item in catalog["videos"] if item.get("catalogId") != catalog_id]
+        record = {"provider": "twitch", "sourceId": entry["id"], "catalogId": catalog_id,
+                  "kind": "watch-party", "creator": channel["name"].replace(" on Twitch", ""),
+                  "title": title, "event": event, "label": "Watch party", "index": f"/indexes/{filename}",
+                  "playedAt": official.get("playedAt") or catalog_played_at(entry, rounds),
+                  **({key: official[key] for key in ("tournament", "tournamentKey") if key in official} or tournament_metadata(event, title))}
+        if chat_path:
+            record["chat"] = "/chats/" + chat_path.name
+        records.append(record)
+    catalog["videos"].extend(records)
+    catalog["videos"].sort(key=lambda item: item.get("playedAt", ""), reverse=True)
+    catalog["updatedAt"] = datetime.now(timezone.utc).date().isoformat()
+    write_json(catalog_path, catalog)
+    return True, f"Published {len(records)} complete matches from the watch-party archive"
 
 
 def process(channel, entry, config, state=None, yt_dlp=None):
@@ -517,6 +559,10 @@ def process(channel, entry, config, state=None, yt_dlp=None):
         if aligned_source_id is None:
             if state is not None and yt_dlp is not None and channel.get("reuseOfficialIndex"):
                 try:
+                    if channel.get("multiSeriesArchive"):
+                        matches = watchparty_alignments(job, entry, config, state, yt_dlp, multi_series=True)
+                        with PUBLISH_LOCK:
+                            return publish_watchparty_archive(channel, entry, state, matches)
                     aligned_source_id, alignment, rounds = watchparty_alignment(job, entry, config, state, yt_dlp)
                     exported = {"schemaVersion": 2, "provider": "twitch", "sourceId": entry["id"], "label": title,
                                 "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION,

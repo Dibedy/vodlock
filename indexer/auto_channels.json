@@ -19,6 +19,7 @@
       "login": "gofns",
       "priority": 2,
       "reuseOfficialIndex": true,
+      "multiSeriesArchive": true,
       "requireMatchup": true,
       "includeTitle": "\\b(CHAMPIONS|SHANGHAI)\\b",
       "excludeTitle": "\\b(JUST CHATTING|WATCH PARTY WITHOUT VALORANT)\\b",

@@ -360,7 +360,9 @@ def storyboard_path(provider, identifier):
 def storyboard(provider, identifier, yt_dlp):
     path = storyboard_path(provider, identifier)
     if path.is_file():
-        return load_storyboard(path)
+        value = load_storyboard(path)
+        if value.get("version") >= 2:
+            return value
     url = ("https://www.youtube.com/watch?v=" + identifier if provider == "youtube"
            else "https://www.twitch.tv/videos/" + identifier)
     value = extract_storyboard(url, provider, yt_dlp)
@@ -450,10 +452,11 @@ def watchparty_alignments(job, entry, config, state, yt_dlp, multi_series=False)
     server.index_job(job["id"])
     if job.get("status") != "ready" or len(job.get("fingerprints", [])) < 30:
         raise ValueError(job.get("message", "The watch-party fingerprint could not be created"))
-    target = {"version": 1, "provider": "twitch", "sourceId": entry["id"],
+    target = {"version": 2, "provider": "twitch", "sourceId": entry["id"],
               "duration": round(float(job["duration"]), 3), "interval": interval,
               "frames": job["fingerprints"]}
     matches = []
+    failures = []
     for source_id, _ in reversed(candidates[-int(config.get("alignmentLookback", 8)):]):
         try:
             reference = storyboard("youtube", source_id, yt_dlp)
@@ -463,9 +466,12 @@ def watchparty_alignments(job, entry, config, state, yt_dlp, multi_series=False)
             index = read_json(SITE / "indexes" / f"youtube-{source_id}.json")
             rounds = translate_index(index, target, alignment)
             matches.append((alignment["anchors"], source_id, alignment, rounds))
-        except (OSError, ValueError, KeyError):
-            continue
+        except (OSError, ValueError, KeyError) as error:
+            failures.append({"sourceId": source_id, "reason": clean_text(error)})
     if not matches:
+        DIAGNOSTICS.mkdir(exist_ok=True)
+        write_json(DIAGNOSTICS / f"watchparty-{entry['id']}.json",
+                   {"version": 1, "watchPartyId": entry["id"], "candidates": failures})
         raise ValueError("No verified official-broadcast alignment was found for this watch party")
     matches.sort(reverse=True, key=lambda item: item[0])
     if not multi_series and len(matches) > 1 and matches[1][0] >= matches[0][0] * 0.8:
@@ -613,7 +619,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
         write_json(SITE / "indexes" / filename, exported)
         if provider == "twitch" and channel.get("alignmentSource"):
             save_storyboard(storyboard_path("twitch", entry["id"]),
-                            {"version": 1, "provider": "twitch", "sourceId": entry["id"],
+                            {"version": 2, "provider": "twitch", "sourceId": entry["id"],
                              "duration": round(float(job["duration"]), 3), "interval": job["fingerprintInterval"],
                              "frames": job["fingerprints"]})
         if channel.get("archiveOnly"):

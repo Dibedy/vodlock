@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "indexer"))
-from storyboard_align import align_storyboards, extract_storyboard, hamming, translate_index
+from storyboard_align import align_storyboards, extract_storyboard, frame_distance, hamming, translate_index
 
 
 def unique_hash(value):
@@ -71,6 +71,17 @@ class StoryboardAlignmentTests(unittest.TestCase):
 
     def test_hamming_distance_counts_changed_bits(self):
         self.assertEqual(hamming("00ff", "01fe"), 2)
+
+    def test_alignment_uses_gameplay_hash_when_overlays_change_full_frame(self):
+        reference = {"duration": 600, "interval": 10,
+                     "frames": [{"time": index * 10, "hash": unique_hash(index), "gameplayHash": unique_hash(index + 100)}
+                                for index in range(60)]}
+        target = {"duration": 600, "interval": 10,
+                  "frames": [{"time": index * 10, "hash": unique_hash(index + 1000), "gameplayHash": unique_hash(index + 100)}
+                             for index in range(60)]}
+        self.assertEqual(frame_distance(reference["frames"][0], target["frames"][0]), 0)
+        result = align_storyboards(reference, target, maximum_distance=0)
+        self.assertEqual(result["anchors"], 60)
 
     def test_alignment_requires_consistent_anchors_across_full_video(self):
         reference = {"duration": 3000, "interval": 10,

@@ -10,7 +10,7 @@ import imageio_ffmpeg
 import numpy as np
 
 
-ALIGNER_VERSION = "storyboard-v2"
+ALIGNER_VERSION = "storyboard-v3"
 
 
 def frame_hash(image):
@@ -19,6 +19,12 @@ def frame_hash(image):
     values = cv2.dct(np.float32(gray))[:8, :8]
     bits = values > np.median(values[1:])
     return np.packbits(bits.reshape(-1)).tobytes().hex()
+
+
+def frame_hashes(image):
+    height, width = image.shape[:2]
+    gameplay = image[int(height * .14):int(height * .86), int(width * .16):int(width * .84)]
+    return {"hash": frame_hash(image), "gameplayHash": frame_hash(gameplay)}
 
 
 def split_sheet(image, rows, columns, start, duration, interval):
@@ -33,7 +39,7 @@ def split_sheet(image, rows, columns, start, duration, interval):
         row, column = divmod(index, columns)
         tile = image[row * tile_height:(row + 1) * tile_height,
                      column * tile_width:(column + 1) * tile_width]
-        frames.append({"time": round(time, 3), "hash": frame_hash(tile)})
+        frames.append({"time": round(time, 3), **frame_hashes(tile)})
     return frames
 
 
@@ -76,7 +82,7 @@ def extract_storyboard(url, provider, yt_dlp, requester=None):
         duration = float(fragment.get("duration") or rows * columns * interval)
         frames.extend(split_sheet(image, rows, columns, position, duration, interval))
         position += duration
-    return {"version": 1, "provider": provider, "sourceId": str(info["id"]).removeprefix("v"),
+    return {"version": 2, "provider": provider, "sourceId": str(info["id"]).removeprefix("v"),
             "duration": round(float(info.get("duration") or position), 3),
             "interval": round(interval, 6), "frames": frames}
 
@@ -104,7 +110,7 @@ def fingerprint_video(path, source_id, interval=10):
             if len(data) != frame_size:
                 raise ValueError("Video fingerprinting stopped in the middle of a frame")
             image = np.frombuffer(data, dtype=np.uint8).reshape(180, 320, 3)
-            frames.append({"time": len(frames) * interval, "hash": frame_hash(image)})
+            frames.append({"time": len(frames) * interval, **frame_hashes(image)})
         if process.wait():
             raise ValueError("FFmpeg could not fingerprint the source video")
     finally:
@@ -112,12 +118,19 @@ def fingerprint_video(path, source_id, interval=10):
             process.terminate()
         if process.stdout:
             process.stdout.close()
-    return {"version": 1, "provider": "twitch", "sourceId": str(source_id),
+    return {"version": 2, "provider": "twitch", "sourceId": str(source_id),
             "duration": round(float(duration), 3), "interval": interval, "frames": frames}
 
 
 def hamming(left, right):
     return sum((first ^ second).bit_count() for first, second in zip(bytes.fromhex(left), bytes.fromhex(right)))
+
+
+def frame_distance(left, right):
+    distances = [hamming(left["hash"], right["hash"])]
+    if left.get("gameplayHash") and right.get("gameplayHash"):
+        distances.append(hamming(left["gameplayHash"], right["gameplayHash"]))
+    return min(distances)
 
 
 def align_storyboards(reference, target, maximum_distance=12, require_target_coverage=True):
@@ -127,7 +140,7 @@ def align_storyboards(reference, target, maximum_distance=12, require_target_cov
     target_frames = target["frames"]
     matches = []
     for target_frame in target_frames:
-        distances = [(hamming(target_frame["hash"], item["hash"]), item["time"])
+        distances = [(frame_distance(target_frame, item), item["time"])
                      for item in reference_frames]
         distances.sort(key=lambda item: item[0])
         if distances[0][0] <= maximum_distance and (len(distances) == 1 or distances[1][0] - distances[0][0] >= 2):

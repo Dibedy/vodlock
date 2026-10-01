@@ -14,7 +14,7 @@ from pathlib import Path
 from urllib.parse import parse_qs, urlparse
 
 from detector import DETECTOR_VERSION, HudReader, Observation, RoundDetector
-from storyboard_align import frame_hash
+from storyboard_align import frame_hashes
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
@@ -360,7 +360,7 @@ def index_job(identifier):
                                                 else analysis_sample_time(frame_number))
                 fingerprint_frame = frame if fingerprint_only else (frame[144:324, :320] if adaptive else frame)
                 if fingerprint_only or fingerprint_interval and sample_time % fingerprint_interval == 0:
-                    fingerprints.append({"time": sample_time, "hash": frame_hash(fingerprint_frame)})
+                    fingerprints.append({"time": sample_time, **frame_hashes(fingerprint_frame)})
                 if fingerprint_only:
                     frame_number += 1
                     with LOCK:

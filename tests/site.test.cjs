@@ -75,7 +75,7 @@ test('website validates compact synchronized Twitch chat without future data', (
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   const vercel = readFileSync(resolve(__dirname, '../site/vercel.json'), 'utf8');
   assert.match(app, /https:\/\/cdn\.7tv\.app\/emote\//);
-  assert.match(app, /document\.fullscreenElement === \$\('watch-layout'\) \? 5 : 120/);
+  assert.match(app, /const maxMessages = fullscreen \? 5 : 120/);
   assert.match(vercel, /https:\/\/cdn\.7tv\.app/);
   assert.throws(() => validateChat({v: 1, source: '1234567890', messages: [
     {t: 12, u: 'viewer', c: '', f: [['later']]}, {t: 10, u: 'viewer', c: '', f: [['earlier']]}
@@ -129,6 +129,8 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.match(app, /requestFullscreen\) \$\('watch-layout'\)\.requestFullscreen/);
   assert.match(index, /setting-hide-twitch-timeline/);
   assert.match(index, /setting-show-chat/);
+  assert.match(index, /setting-fullscreen-chat-position/);
+  assert.match(index, /setting-auto-skip-downtime/);
   assert.match(index, /id="watch-layout" class="watch-layout"/);
   assert.match(index, /id="chat-toggle"/);
   assert.doesNotMatch(index, /SYNCED/);
@@ -146,7 +148,10 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.match(styles, /\.library-summary \{[^}]+transform: translateY\(clamp\(12px, 2vw, 28px\)\)/);
   assert.match(styles, /twitch-timeline-hidden #media-player iframe[^}]+top: -90px[^}]+height: calc\(100% \+ 180px\)/);
   assert.match(styles, /watch-layout:fullscreen \.chat-panel/);
-  assert.match(styles, /watch-layout:fullscreen \.chat-panel \{[^}]+width: clamp\(260px, 17vw, 330px\)[^}]+height: 16vh[^}]+top: 34vh[^}]+left: clamp/);
+  assert.match(styles, /watch-layout:fullscreen \.chat-panel \{[^}]+width: clamp\(340px, 22vw, 430px\)[^}]+height: 16vh[^}]+top: 34vh[^}]+left: clamp/);
+  assert.match(styles, /fullscreen-chat-right \.chat-panel/);
+  assert.match(app, /function autoSkipDowntime\(\)/);
+  assert.match(app, /Skipped ' \+ formatTime\(destination - now\) \+ ' of downtime/);
   assert.match(styles, /watch-layout:fullscreen \.chat-message \{[^}]+font-size: clamp\(12px, \.85vw, 16px\)/);
   assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);
 });

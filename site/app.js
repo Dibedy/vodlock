@@ -2,14 +2,16 @@
   'use strict';
 
   const $ = id => document.getElementById(id);
-  const defaultSettings = {hideTwitchTimeline: true, hideMetadata: false, hideRoundStatus: false, showChat: true, showChatTimestamps: false, endScreenProtection: true};
+  const defaultSettings = {hideTwitchTimeline: true, hideMetadata: false, hideRoundStatus: false, showChat: true, fullscreenChatPosition: 'left', showChatTimestamps: false, autoSkipDowntime: 'off', endScreenProtection: true};
   const defaultKeybinds = {previousRound: 'ArrowUp', nextRound: 'ArrowDown', skipBackward: 'ArrowLeft', skipForward: 'ArrowRight'};
   const settingIds = {
     hideTwitchTimeline: 'setting-hide-twitch-timeline',
     hideMetadata: 'setting-hide-metadata',
     hideRoundStatus: 'setting-hide-round-status',
     showChat: 'setting-show-chat',
+    fullscreenChatPosition: 'setting-fullscreen-chat-position',
     showChatTimestamps: 'setting-show-chat-timestamps',
+    autoSkipDowntime: 'setting-auto-skip-downtime',
     endScreenProtection: 'setting-end-screen-protection'
   };
   const teamLogos = {
@@ -87,7 +89,7 @@
   const teamKey = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   const teamAliases = new Map(vctTeams.flatMap(team => [team.code, team.name, ...(team.aliases || [])].map(value => [teamKey(value), team.code])));
   const teamsByCode = new Map(vctTeams.map(team => [team.code, team]));
-  const state = {catalog: [], entry: null, index: null, chat: [], chatIndex: null, chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null, teamPickerMode: 'favourites'};
+  const state = {catalog: [], entry: null, index: null, chat: [], chatIndex: null, chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, autoSkipTarget: null, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null, teamPickerMode: 'favourites'};
   let settings = readSettings();
   let keybinds = readKeybinds();
 
@@ -112,7 +114,11 @@
   function readSettings() {
     try {
       const saved = JSON.parse(localStorage.getItem('vodlock-settings') || '{}');
-      return Object.fromEntries(Object.keys(defaultSettings).map(key => [key, typeof saved[key] === 'boolean' ? saved[key] : defaultSettings[key]]));
+      return {...defaultSettings,
+        ...Object.fromEntries(['hideTwitchTimeline', 'hideMetadata', 'hideRoundStatus', 'showChat', 'showChatTimestamps', 'endScreenProtection']
+          .map(key => [key, typeof saved[key] === 'boolean' ? saved[key] : defaultSettings[key]])),
+        fullscreenChatPosition: ['left', 'right', 'hidden'].includes(saved.fullscreenChatPosition) ? saved.fullscreenChatPosition : defaultSettings.fullscreenChatPosition,
+        autoSkipDowntime: ['off', 'long', 'everything'].includes(saved.autoSkipDowntime) ? saved.autoSkipDowntime : defaultSettings.autoSkipDowntime};
     } catch {
       return {...defaultSettings};
     }
@@ -153,7 +159,11 @@
   }
 
   function applySettings() {
-    for (const [key, identifier] of Object.entries(settingIds)) $(identifier).checked = settings[key];
+    for (const [key, identifier] of Object.entries(settingIds)) {
+      const control = $(identifier);
+      if (control.type === 'checkbox') control.checked = settings[key];
+      else control.value = settings[key];
+    }
     const twitchTimelineHidden = state.entry?.provider === 'twitch' && settings.hideTwitchTimeline;
     $('player-shell').classList.toggle('twitch-timeline-hidden', twitchTimelineHidden);
     $('watch-metadata').hidden = settings.hideMetadata;
@@ -212,6 +222,7 @@
     state.player = null;
     state.ready = false;
     state.playing = false;
+    state.autoSkipTarget = null;
     $('quality-control').hidden = true;
     $('quality').disabled = true;
     $('quality').replaceChildren();
@@ -219,12 +230,15 @@
 
   function renderChat(force = false) {
     const available = state.chat.length > 0;
-    const visible = available && settings.showChat;
+    const fullscreen = document.fullscreenElement === $('watch-layout');
+    const visible = available && settings.showChat && !(fullscreen && settings.fullscreenChatPosition === 'hidden');
     $('chat-panel').hidden = !visible;
     $('chat-toggle').hidden = !available;
     $('chat-toggle').textContent = visible ? 'Chat off' : 'Chat on';
     $('chat-toggle').setAttribute('aria-label', visible ? 'Turn chat off' : 'Turn chat on');
-    document.querySelector('.watch-layout').classList.toggle('chat-visible', visible);
+    const layout = $('watch-layout');
+    layout.classList.toggle('chat-visible', visible);
+    layout.classList.toggle('fullscreen-chat-right', settings.fullscreenChatPosition === 'right');
     syncFullscreenButton();
     if (!visible) return;
     const playbackPosition = currentTime();
@@ -232,7 +246,7 @@
     const position = Math.floor(playbackPosition);
     if (!force && state.chatPosition === position) return;
     state.chatPosition = position;
-    const maxMessages = document.fullscreenElement === $('watch-layout') ? 5 : 120;
+    const maxMessages = fullscreen ? 5 : 120;
     const messages = state.chat.filter(message => message.time <= now && message.time >= now - 90).slice(-maxMessages);
     const host = $('chat-messages');
     host.replaceChildren();
@@ -991,6 +1005,7 @@
       return;
     }
     $('end-shield').hidden = true;
+    state.autoSkipTarget = null;
     const resume = state.playing;
     seekPlayer(destination);
     if (resume) setTimeout(() => state.player && playPlayer(), 200);
@@ -1000,6 +1015,7 @@
 
   function updateStatus() {
     if (!state.index) return;
+    autoSkipDowntime();
     const position = VodlockSite.position(state.index, currentTime());
     const round = state.index.rounds[Math.max(position, 0)];
     if (settings.hideRoundStatus) {
@@ -1011,6 +1027,28 @@
     }
     saveResume();
     renderChat();
+  }
+
+  function autoSkipDowntime() {
+    if (!state.ready || !state.playing || settings.autoSkipDowntime === 'off') return;
+    const now = currentTime();
+    if (state.autoSkipTarget !== null) {
+      if (now < state.autoSkipTarget - 1) return;
+      state.autoSkipTarget = null;
+    }
+    const position = VodlockSite.position(state.index, now);
+    const round = state.index.rounds[position];
+    const nextRound = state.index.rounds[position + 1];
+    if (!round || !nextRound) return;
+    const interval = nextRound.start - round.start;
+    const longBreakOnly = settings.autoSkipDowntime === 'long';
+    const earliestSkip = round.start + (longBreakOnly ? 165 : 145);
+    const minimumInterval = longBreakOnly ? 240 : 190;
+    const destination = Math.max(0, nextRound.start - state.index.leadSeconds);
+    if (interval < minimumInterval || now < earliestSkip || destination <= now + 1) return;
+    state.autoSkipTarget = destination;
+    seekPlayer(destination);
+    toast('Skipped ' + formatTime(destination - now) + ' of downtime.');
   }
 
   function navigateRound(direction) {
@@ -1085,7 +1123,7 @@
   });
   for (const [key, identifier] of Object.entries(settingIds)) {
     $(identifier).addEventListener('change', event => {
-      settings = {...settings, [key]: event.target.checked};
+      settings = {...settings, [key]: event.target.type === 'checkbox' ? event.target.checked : event.target.value};
       saveSettings();
       applySettings();
     });

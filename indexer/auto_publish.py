@@ -881,7 +881,7 @@ def main():
         channel = candidate[-2]
         dependent = has_alignment_archive and (channel.get("alignmentSource") or channel.get("reuseOfficialIndex")
                                                 or channel["provider"] == "youtube")
-        if retrying and retry_count >= config.get("maxRetriesPerRun", 1) and not dependent:
+        if retrying and not arguments.retry_held and retry_count >= config.get("maxRetriesPerRun", 1) and not dependent:
             continue
         selected.append(candidate)
         retry_count += retrying and not dependent

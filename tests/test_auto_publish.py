@@ -285,6 +285,28 @@ class AutoPublishTests(unittest.TestCase):
             self.assertEqual(auto_publish.main(), 0)
         self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["abcdefghijk", "lmnopqrstuv"])
 
+    def test_explicit_held_retry_bypasses_the_automatic_retry_cap(self):
+        now = datetime.now(timezone.utc)
+        channel = {"provider": "youtube", "name": "YouTube"}
+        config = {"channels": [channel], "lookback": 30, "maxPerRun": 4,
+                  "maxPerChannelPerRun": 4, "maxRetriesPerRun": 1, "youtubeRetryHours": 6}
+        entries = [{"id": "abcdefghijk", "title": "Retry one"},
+                   {"id": "lmnopqrstuv", "title": "Retry two"}]
+        state = {"videos": {
+            "youtube:abcdefghijk": {"status": "held", "message": "network", "checkedAt": now.isoformat(),
+                                     "detectorVersion": auto_publish.DETECTOR_VERSION,
+                                     "pipelineVersion": auto_publish.PIPELINE_VERSION},
+            "youtube:lmnopqrstuv": {"status": "held", "message": "network", "checkedAt": now.isoformat(),
+                                      "detectorVersion": auto_publish.DETECTOR_VERSION,
+                                      "pipelineVersion": auto_publish.PIPELINE_VERSION}}}
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, {"videos": []}]), \
+                patch.object(auto_publish, "discover_youtube", return_value=entries), \
+                patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \
+                patch.object(auto_publish, "write_json"), patch.object(sys, "argv", ["auto_publish.py", "--retry-held"]), \
+                patch("sys.stdout", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["abcdefghijk", "lmnopqrstuv"])
+
     def test_held_twitch_watch_party_remains_eligible_after_it_leaves_discovery(self):
         now = datetime.now(timezone.utc).isoformat()
         channel = {"provider": "twitch", "name": "FNS", "login": "fns", "priority": 2}

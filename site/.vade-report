@@ -1,0 +1,53 @@
+# Vercel Web Analytics Installation
+
+Successfully installed and configured Vercel Web Analytics for this static HTML project.
+
+## Changes Made
+
+### Modified Files:
+
+1. **site/index.html** - Added Vercel Analytics script tag
+2. **site/privacy.html** - Added Vercel Analytics script tag
+3. **site/terms.html** - Added Vercel Analytics script tag
+4. **site/vercel.json** - Updated Content Security Policy to allow analytics
+
+## Implementation Details
+
+### Analytics Script
+Added the following script tag to the `<head>` section of all HTML pages:
+```html
+<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>
+```
+
+This implements Vercel Web Analytics using the CDN method, which is the recommended approach for static HTML sites without npm/build tooling.
+
+### Content Security Policy Updates
+Updated the CSP headers in `vercel.json` to allow:
+- `script-src`: Added `https://cdn.vercel-insights.com` to allow loading the analytics script
+- `connect-src`: Added `https://vitals.vercel-insights.com` to allow sending analytics data
+
+## Why This Approach
+
+This project is a vanilla JavaScript static site without a package.json or build process. According to the official Vercel documentation, the recommended method for such projects is to:
+
+1. Add the analytics script tag via CDN: `<script defer src="https://cdn.vercel-insights.com/v1/script.js"></script>`
+2. Update the Content Security Policy to allow the script and data endpoints
+
+This approach:
+- Requires no package installation or build process
+- Works immediately upon deployment to Vercel
+- Automatically tracks page views and Web Vitals
+- Is non-blocking (uses `defer` attribute)
+
+## Next Steps
+
+After deployment to Vercel:
+1. Enable Web Analytics in the Vercel dashboard (Project Settings > Analytics)
+2. Verify analytics are working by checking the Network tab for requests to `vitals.vercel-insights.com`
+3. View analytics data in the Vercel dashboard after traffic accumulates
+
+## References
+
+- Vercel Web Analytics Quickstart: https://vercel.com/docs/analytics/quickstart
+- Vercel Analytics Package Documentation: https://vercel.com/docs/analytics/package
+- Implementation based on official Vercel documentation retrieved October 1, 2026

@@ -233,13 +233,16 @@ body.theater-mode main { width: 100%; }
 .player-view.theater-active .watch-layout.chat-visible { grid-template-columns: minmax(0, 1fr) clamp(320px, 24vw, 420px); }
 .player-view.theater-active .player-topline, .player-view.theater-active .watch-heading { max-width: none; }
 
-.watch-layout:fullscreen { width: 100vw; height: 100vh; padding: 0; grid-template-columns: minmax(0, 1fr) clamp(300px, 24vw, 420px); gap: 0; background: #000; }
-.watch-layout:fullscreen:not(.chat-visible) { grid-template-columns: 1fr; }
-.watch-layout:fullscreen .video-column { min-height: 0; display: flex; flex-direction: column; background: #000; }
+.watch-layout:fullscreen { width: 100vw; height: 100vh; padding: 0; display: block; position: relative; background: #000; }
+.watch-layout:fullscreen .video-column { width: 100%; height: 100%; min-height: 0; display: flex; flex-direction: column; background: #000; }
 .watch-layout:fullscreen .player-shell { width: 100%; min-height: 0; height: 100%; flex: 1 1 auto; aspect-ratio: auto; border: 0; }
 .watch-layout:fullscreen .round-dock { display: none; }
 .watch-layout:fullscreen .player-controls { display: none; }
-.watch-layout:fullscreen .chat-panel { height: 100vh; min-height: 0; border-top: 0; border-right: 0; border-bottom: 0; }
+.watch-layout:fullscreen .chat-panel { width: clamp(300px, 28vw, 520px); height: min(52vh, 520px); min-height: 0; position: absolute; z-index: 4; top: 50%; left: clamp(16px, 2.2vw, 38px); transform: translateY(-50%); border: 0; background: transparent; overflow: hidden; pointer-events: none; }
+.watch-layout:fullscreen .chat-heading { display: none; }
+.watch-layout:fullscreen .chat-messages { height: 100%; max-height: none; padding: 18px 4px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+.watch-layout:fullscreen .chat-message { margin-bottom: 7px; color: #fff; font-size: clamp(13px, 1vw, 18px); font-weight: 800; line-height: 1.35; text-shadow: -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000, 0 2px 4px #000; }
+.watch-layout:fullscreen .chat-message strong { color: #fff; }
 
 .settings-dialog { width: min(610px, calc(100% - 32px)); max-height: calc(100vh - 40px); padding: 0; border: 1px solid #39443d; background: var(--surface); color: var(--text); box-shadow: 0 24px 90px #000; }
 .settings-dialog::backdrop { background: rgba(0, 0, 0, .82); }

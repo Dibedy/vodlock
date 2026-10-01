@@ -42,6 +42,25 @@
     return provider + ':' + sourceId;
   }
 
+  function validateAlignment(value) {
+    if (value === undefined) return null;
+    const source = mediaSource(value?.source);
+    const scale = value?.timelineScale;
+    if (!source || !Number.isFinite(scale) || scale < 0.95 || scale > 1.05 || !Array.isArray(value.segments) || !value.segments.length || value.segments.length > 100) {
+      throw new Error('The hosted index has invalid timeline alignment.');
+    }
+    let previousEnd = 0;
+    const segments = value.segments.map((segment, index) => {
+      if (!segment || !Number.isFinite(segment.offset) || !Number.isFinite(segment.targetStart) || !Number.isFinite(segment.targetEnd) ||
+          segment.targetStart < 0 || segment.targetEnd <= segment.targetStart || index > 0 && segment.targetStart < previousEnd) {
+        throw new Error('The hosted index has invalid timeline alignment.');
+      }
+      previousEnd = segment.targetEnd;
+      return {offset: segment.offset, targetStart: segment.targetStart, targetEnd: segment.targetEnd};
+    });
+    return {source: sourceKey(source.provider, source.sourceId), timelineScale: scale, segments};
+  }
+
   function validateIndex(value) {
     const provider = value?.schemaVersion === 1 ? 'youtube' : value?.provider;
     const sourceId = value?.schemaVersion === 1 ? value?.videoId : value?.sourceId;
@@ -66,7 +85,24 @@
       seen.add(identity);
       return {map: round.map, round: round.round, start: round.start};
     });
-    return {schemaVersion: 2, provider, sourceId, label: String(value.label || 'Indexed VOD').slice(0, 100), leadSeconds: 5, rounds};
+    const alignment = value.schemaVersion === 2 ? validateAlignment(value.alignment) : null;
+    return {schemaVersion: 2, provider, sourceId, label: String(value.label || 'Indexed VOD').slice(0, 100), leadSeconds: 5, rounds, ...(alignment ? {alignment} : {})};
+  }
+
+  function sourceTime(index, time) {
+    if (!index?.alignment || !Number.isFinite(time)) return time;
+    const segments = index.alignment.segments;
+    const segment = segments.find(item => time >= item.targetStart && time < item.targetEnd) ||
+      (time < segments[0].targetStart ? segments[0] : segments[segments.length - 1]);
+    return index.alignment.timelineScale * time + segment.offset;
+  }
+
+  function playbackTime(index, time, position) {
+    if (!index?.alignment || !Number.isFinite(time)) return time;
+    const segments = index.alignment.segments;
+    const segment = segments.find(item => position >= item.targetStart && position < item.targetEnd) ||
+      (position < segments[0].targetStart ? segments[0] : segments[segments.length - 1]);
+    return (time - segment.offset) / index.alignment.timelineScale;
   }
 
   function position(index, time) {
@@ -127,5 +163,5 @@
     return Number.isFinite(time) ? time : 0;
   }
 
-  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, playedTime, position, roundDestination, mapDestination});
+  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, playedTime, position, roundDestination, mapDestination, sourceTime, playbackTime});
 })();

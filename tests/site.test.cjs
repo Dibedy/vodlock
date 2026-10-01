@@ -6,7 +6,7 @@ const {test} = require('node:test');
 
 const context = vm.createContext({URL, URLSearchParams});
 vm.runInContext(readFileSync(resolve(__dirname, '../site/core.js'), 'utf8'), context);
-const {videoId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, playedTime, position, roundDestination, mapDestination} = context.VodlockSite;
+const {videoId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, playedTime, position, roundDestination, mapDestination, sourceTime, playbackTime} = context.VodlockSite;
 const sample = () => ({schemaVersion: 1, videoId: 'ZphbktbT26k', rounds: [
   {map: 1, round: 1, start: 100}, {map: 1, round: 2, start: 250},
   {map: 2, round: 1, start: 700}, {map: 2, round: 2, start: 850}
@@ -42,6 +42,26 @@ test('website validates provider-neutral Twitch indexes', () => {
   const index = validateIndex({schemaVersion: 2, provider: 'twitch', sourceId: '1234567890', rounds: sample().rounds});
   assert.equal(index.provider, 'twitch');
   assert.equal(index.sourceId, '1234567890');
+});
+
+test('website maps official Twitch chat onto aligned YouTube playback', () => {
+  const index = validateIndex({schemaVersion: 2, provider: 'youtube', sourceId: 'ZphbktbT26k', rounds: sample().rounds,
+    alignment: {source: 'twitch:1234567890', timelineScale: 1.002, segments: [
+      {offset: 120, targetStart: 0, targetEnd: 500}, {offset: 300, targetStart: 500, targetEnd: 1000}
+    ]}});
+  assert.equal(sourceTime(index, 100), 220.2);
+  assert.equal(sourceTime(index, 600), 901.2);
+  assert.equal(Math.round(playbackTime(index, 901.2, 600)), 600);
+  assert.throws(() => validateIndex({...sample(), schemaVersion: 2, provider: 'youtube', sourceId: 'ZphbktbT26k',
+    alignment: {source: 'twitch:1234567890', timelineScale: 2, segments: []}}));
+  const catalog = JSON.parse(readFileSync(resolve(__dirname, '../site/catalog.json'), 'utf8'));
+  const aligned = catalog.videos.filter(entry => entry.provider === 'youtube' && entry.chat);
+  assert.ok(aligned.length > 0);
+  for (const entry of aligned) {
+    const hosted = validateIndex(JSON.parse(readFileSync(resolve(__dirname, '../site' + entry.index), 'utf8')));
+    assert.equal(hosted.alignment.source, 'twitch:' + entry.chatSourceId);
+    assert.equal(entry.chat, '/chats/twitch-' + entry.chatSourceId + '.json');
+  }
 });
 
 test('website validates compact synchronized Twitch chat without future data', () => {
@@ -125,6 +145,7 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.match(styles, /\.library-summary \{[^}]+transform: translateY\(clamp\(12px, 2vw, 28px\)\)/);
   assert.match(styles, /twitch-timeline-hidden #media-player iframe[^}]+top: -90px[^}]+height: calc\(100% \+ 180px\)/);
   assert.match(styles, /watch-layout:fullscreen \.chat-panel/);
+  assert.match(styles, /watch-layout:fullscreen \.chat-panel \{[^}]+position: absolute[^}]+left: clamp/);
   assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);
 });
 

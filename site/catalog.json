@@ -55,6 +55,8 @@
       "tournamentKey": "valorant-champions-shanghai",
       "label": "Full match",
       "index": "/indexes/youtube-fFfCJDNHEvc.json",
+      "chat": "/chats/twitch-2885318675.json",
+      "chatSourceId": "2885318675",
       "playedAt": "2026-09-27T11:36:45Z"
     },
     {
@@ -89,6 +91,8 @@
       "tournamentKey": "valorant-champions-shanghai",
       "label": "Full match",
       "index": "/indexes/youtube-ZWhEMQVk4x0.json",
+      "chat": "/chats/twitch-2885318675.json",
+      "chatSourceId": "2885318675",
       "playedAt": "2026-09-27T09:11:40Z"
     },
     {
@@ -112,6 +116,8 @@
       "tournamentKey": "valorant-champions-shanghai",
       "label": "Full match",
       "index": "/indexes/youtube-TWjd0AoZdaY.json",
+      "chat": "/chats/twitch-2884367669.json",
+      "chatSourceId": "2884367669",
       "playedAt": "2026-09-26T09:09:12Z"
     },
     {

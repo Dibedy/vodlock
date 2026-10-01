@@ -624,6 +624,12 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                 chat_path = chat_archive.archive_chat(entry["id"])
             except Exception as error:
                 print(f"twitch:{entry['id']} chat unavailable - {clean_text(error)}", file=sys.stderr)
+        elif aligned_source_id:
+            try:
+                existing_chat = SITE / "chats" / f"twitch-{aligned_source_id}.json"
+                chat_path = existing_chat if existing_chat.is_file() else chat_archive.archive_chat(aligned_source_id)
+            except Exception as error:
+                print(f"twitch:{aligned_source_id} chat unavailable - {clean_text(error)}", file=sys.stderr)
         supersede_source = provider == "youtube" and aligned_source_id and state is not None \
             and state["videos"].get(source_key("twitch", aligned_source_id), {}).get("status") in {"published", "superseded"}
         with PUBLISH_LOCK:
@@ -644,6 +650,8 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                              "index": f"/indexes/{filename}", "playedAt": played_at, **tournament_metadata(event, title)}
             if chat_path:
                 catalog_entry["chat"] = "/chats/" + chat_path.name
+                if provider == "youtube":
+                    catalog_entry["chatSourceId"] = aligned_source_id
             catalog["videos"].insert(0, catalog_entry)
             catalog["videos"].sort(key=lambda item: item.get("playedAt", ""), reverse=True)
             catalog["updatedAt"] = datetime.now(timezone.utc).date().isoformat()

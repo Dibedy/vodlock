@@ -381,12 +381,16 @@ class AutoPublishTests(unittest.TestCase):
             (site / "catalog.json").write_text('{"version":2,"videos":[{"provider":"twitch","sourceId":"1234567890"}]}')
             with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
                     patch.object(auto_publish.server, "save"), \
+                    patch.object(auto_publish.chat_archive, "archive_chat",
+                                 return_value=site / "chats" / "twitch-1234567890.json"), \
                     patch.object(auto_publish, "youtube_alignment", return_value=("1234567890", {"offset": 10}, rounds)):
                 self.assertEqual(auto_publish.process(channel, entry, {"minimumConfidence": 0.65, "minimumRounds": 13},
                                                       state, object()), (True, "Published"))
             catalog = auto_publish.read_json(site / "catalog.json")
         self.assertEqual([item["sourceId"] for item in catalog["videos"]], ["abcdefghijk"])
         self.assertEqual(catalog["videos"][0]["playedAt"], "2026-09-29T10:01:50Z")
+        self.assertEqual(catalog["videos"][0]["chat"], "/chats/twitch-1234567890.json")
+        self.assertEqual(catalog["videos"][0]["chatSourceId"], "1234567890")
         self.assertEqual(state["videos"]["twitch:1234567890"]["status"], "superseded")
         self.assertEqual(state["videos"]["twitch:1234567890"]["supersededBy"], "youtube:abcdefghijk")
 

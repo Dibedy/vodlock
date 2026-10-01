@@ -87,7 +87,7 @@
   const teamKey = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   const teamAliases = new Map(vctTeams.flatMap(team => [team.code, team.name, ...(team.aliases || [])].map(value => [teamKey(value), team.code])));
   const teamsByCode = new Map(vctTeams.map(team => [team.code, team]));
-  const state = {catalog: [], entry: null, index: null, chat: [], chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null, teamPickerMode: 'favourites'};
+  const state = {catalog: [], entry: null, index: null, chat: [], chatIndex: null, chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null, teamPickerMode: 'favourites'};
   let settings = readSettings();
   let keybinds = readKeybinds();
 
@@ -218,7 +218,7 @@
   }
 
   function renderChat(force = false) {
-    const available = state.entry?.provider === 'twitch' && state.chat.length > 0;
+    const available = state.chat.length > 0;
     const visible = available && settings.showChat;
     $('chat-panel').hidden = !visible;
     $('chat-toggle').hidden = !available;
@@ -227,8 +227,9 @@
     document.querySelector('.watch-layout').classList.toggle('chat-visible', visible);
     syncFullscreenButton();
     if (!visible) return;
-    const now = currentTime();
-    const position = Math.floor(now);
+    const playbackPosition = currentTime();
+    const now = VodlockSite.sourceTime(state.chatIndex, playbackPosition);
+    const position = Math.floor(playbackPosition);
     if (!force && state.chatPosition === position) return;
     state.chatPosition = position;
     const messages = state.chat.filter(message => message.time <= now && message.time >= now - 90).slice(-120);
@@ -246,7 +247,7 @@
       row.className = 'chat-message';
       if (settings.showChatTimestamps) {
         const time = document.createElement('time');
-        time.textContent = formatTime(message.time);
+        time.textContent = formatTime(VodlockSite.playbackTime(state.chatIndex, message.time, playbackPosition));
         row.append(time);
       }
       const user = document.createElement('strong');
@@ -271,13 +272,23 @@
     host.scrollTop = host.scrollHeight;
   }
 
-  async function loadChat(entry) {
+  async function loadChat(entry, index) {
     state.chat = [];
+    state.chatIndex = null;
     state.chatPosition = null;
-    if (entry.provider !== 'twitch' || typeof entry.chat !== 'string' || !/^\/chats\/twitch-[0-9]{6,20}\.json$/.test(entry.chat)) return;
+    const chatMatch = typeof entry.chat === 'string' && entry.chat.match(/^\/chats\/twitch-([0-9]{6,20})\.json$/);
+    if (!chatMatch) return;
+    const sourceId = entry.chatSourceId || entry.sourceId;
+    if (sourceId !== chatMatch[1] || !VodlockSite.twitchId(sourceId)) return;
+    if (entry.provider === 'youtube') {
+      if (index.alignment?.source !== 'twitch:' + sourceId) return;
+      state.chatIndex = index;
+    } else if (entry.provider !== 'twitch' || sourceId !== entry.sourceId) {
+      return;
+    }
     const response = await fetch(entry.chat, {cache: 'no-store'});
     if (!response.ok) return;
-    state.chat = VodlockSite.validateChat(await response.json(), entry.sourceId);
+    state.chat = VodlockSite.validateChat(await response.json(), sourceId);
   }
 
   function resetPlayerHost() {
@@ -633,7 +644,7 @@
       const label = document.createElement('strong');
       label.textContent = sourceName(entry);
       const provider = document.createElement('span');
-      provider.textContent = entry.provider === 'youtube' ? 'YouTube' : entry.chat ? 'Twitch · archived chat' : 'Twitch';
+      provider.textContent = entry.provider === 'youtube' ? entry.chat ? 'YouTube · archived Twitch chat' : 'YouTube' : entry.chat ? 'Twitch · archived chat' : 'Twitch';
       watch.append(label, provider);
       watch.addEventListener('click', () => openVideo(entryKey(entry)));
       sources.append(watch);
@@ -699,6 +710,7 @@
     state.index = null;
     state.resumeTime = null;
     state.chat = [];
+    state.chatIndex = null;
     state.chatPosition = null;
     setPlaybackControlsDisabled(true);
     resetPlayerHost();
@@ -730,7 +742,7 @@
     if (!response.ok) throw new Error('This round index is temporarily unavailable.');
     const index = VodlockSite.validateIndex(await response.json());
     if (index.provider !== entry.provider || index.sourceId !== entry.sourceId) throw new Error('The catalog and round index do not match.');
-    await loadChat(entry);
+    await loadChat(entry, index);
     setPlaybackControlsDisabled(true);
     state.entry = entry;
     state.index = index;

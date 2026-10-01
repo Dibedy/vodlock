@@ -143,7 +143,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
       "retryClass": "cooldown",
-      "checkedAt": "2026-09-30T23:19:33.553122+00:00"
+      "checkedAt": "2026-10-01T16:18:30.306762+00:00"
     },
     "twitch:2877469732": {
       "status": "held",
@@ -288,6 +288,42 @@
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
       "retryClass": "cooldown",
       "checkedAt": "2026-10-01T09:02:55.699182+00:00"
+    },
+    "twitch:2888772554": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "VALORANT on Twitch",
+      "title": "TL vs. TYL - VALORANT Champions Shanghai - Group Stage",
+      "message": "Map 3: check the gap before round 18.",
+      "publishedAt": "2026-10-01T08:30:41Z",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-01T15:55:49.609609+00:00"
+    },
+    "youtube:m29QjckzB7w": {
+      "status": "published",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour",
+      "title": "TL vs. TYL - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
+      "message": "Published",
+      "publishedAt": "2026-10-01T12:13:18+00:00",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
+      "retryClass": "none",
+      "checkedAt": "2026-10-01T16:11:36.633901+00:00"
+    },
+    "twitch:2888778875": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | TYLOO vs Team Liquid - VCT Champions Group Stage Elimination #VCTWatchparty | !vote !inzone !voice !noYT",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
+      "publishedAt": "2026-10-01T08:51:45Z",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-01T16:23:12.375071+00:00"
     }
   }
 }

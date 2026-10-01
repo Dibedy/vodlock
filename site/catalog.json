@@ -1,7 +1,18 @@
 {
   "version": 2,
-  "updatedAt": "2026-09-30",
+  "updatedAt": "2026-10-01",
   "videos": [
+    {
+      "provider": "youtube",
+      "sourceId": "m29QjckzB7w",
+      "title": "TL vs TYL",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-m29QjckzB7w.json",
+      "playedAt": "2026-10-01T12:14:20Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai"
+    },
     {
       "provider": "youtube",
       "sourceId": "2y9ne_hMZts",

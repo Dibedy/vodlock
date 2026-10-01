@@ -103,16 +103,16 @@
       "checkedAt": "2026-09-29T07:16:33.581004+00:00"
     },
     "twitch:2882594925": {
-      "status": "published",
+      "status": "held",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "TL vs. PRX - VALORANT Champions Shanghai - Opening Day",
-      "message": "Published",
+      "message": "No verified official YouTube stream archive aligns with this Twitch chat",
       "publishedAt": "2026-09-24T07:50:45Z",
-      "detectorVersion": "vct-clock-ocr-v8",
-      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
-      "retryClass": "none",
-      "checkedAt": "2026-09-29T03:51:29.394342+00:00"
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-01T23:21:14.195997+00:00"
     },
     "youtube:ZWhEMQVk4x0": {
       "status": "published",
@@ -218,16 +218,16 @@
       "checkedAt": "2026-09-29T19:38:38.064445+00:00"
     },
     "twitch:2887052196": {
-      "status": "indexed",
+      "status": "held",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "PRX vs. G2 - VALORANT Champions Shanghai - Group Stage",
-      "message": "Indexed official day broadcast",
+      "message": "No verified official YouTube stream archive aligns with this Twitch chat",
       "publishedAt": "2026-09-29T08:30:43Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v4",
-      "retryClass": "none",
-      "checkedAt": "2026-09-30T15:06:37.780662+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-01T22:49:24.174748+00:00"
     },
     "twitch:2887057207": {
       "status": "held",
@@ -254,16 +254,16 @@
       "checkedAt": "2026-09-30T18:15:56.904877+00:00"
     },
     "twitch:2887911255": {
-      "status": "indexed",
+      "status": "held",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "LOUD vs. VIT - VALORANT Champions Shanghai - Group Stage",
-      "message": "Indexed official day broadcast",
+      "message": "No verified official YouTube stream archive aligns with this Twitch chat",
       "publishedAt": "2026-09-30T08:30:14Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v1+publisher-v5",
-      "retryClass": "none",
-      "checkedAt": "2026-09-30T17:28:24.652586+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-01T22:30:01.698781+00:00"
     },
     "youtube:2y9ne_hMZts": {
       "status": "published",
@@ -287,55 +287,103 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T21:24:46.622222+00:00"
+      "checkedAt": "2026-10-01T23:27:53.754735+00:00"
     },
     "twitch:2888772554": {
       "status": "held",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "TL vs. TYL - VALORANT Champions Shanghai - Group Stage",
-      "message": "Waiting for an indexed official YouTube stream archive",
+      "message": "No verified official YouTube stream archive aligns with this Twitch chat",
       "publishedAt": "2026-10-01T08:30:41Z",
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T21:13:22.109076+00:00"
+      "checkedAt": "2026-10-01T22:17:17.576430+00:00"
     },
     "youtube:m29QjckzB7w": {
-      "status": "published",
+      "status": "held",
       "provider": "youtube",
-      "channel": "VALORANT Champions Tour",
+      "channel": "VALORANT Champions Tour full matches",
       "title": "TL vs. TYL - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "Published",
+      "message": "FFmpeg could not finish reading the video: [in#0 @ 0x1f5e0f00] Error opening input: Invalid data found when processing input Error opening input file pipe:0. Error opening input files: Invalid data found when processing input",
       "publishedAt": "2026-10-01T12:13:18+00:00",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
-      "retryClass": "none",
-      "checkedAt": "2026-10-01T16:11:36.633901+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-01T21:46:36.791554+00:00"
     },
     "twitch:2888778875": {
       "status": "held",
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | TYLOO vs Team Liquid - VCT Champions Group Stage Elimination #VCTWatchparty | !vote !inzone !voice !noYT",
-      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
+      "message": "Official match alignment failed: The video service stream ended with an error: ERROR: Unable to download video: [Errno 2] No such file or directory: '--Frag25'",
       "publishedAt": "2026-10-01T08:51:45Z",
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T21:26:42.859277+00:00"
+      "checkedAt": "2026-10-01T23:21:21.297101+00:00"
     },
     "youtube:WdGW0L-3iCc": {
-      "status": "published",
+      "status": "held",
       "provider": "youtube",
-      "channel": "VALORANT Champions Tour",
+      "channel": "VALORANT Champions Tour full matches",
       "title": "NS vs. XLG - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "Published",
+      "message": "FFmpeg could not finish reading the video: [in#0 @ 0x41b4cf00] Error opening input: Invalid data found when processing input Error opening input file pipe:0. Error opening input files: Invalid data found when processing input",
       "publishedAt": "2026-10-01T14:37:25+00:00",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-01T21:46:32.258136+00:00"
+    },
+    "youtube:P8Td3k1gem8": {
+      "status": "indexed",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour streams",
+      "title": "VALORANT Champions Shanghai - Group Stage - Day 7",
+      "message": "Stored official YouTube stream archive",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "none",
-      "checkedAt": "2026-10-01T16:37:06.766279+00:00"
+      "checkedAt": "2026-10-01T21:44:49.901087+00:00"
+    },
+    "youtube:gYE4F6g9f9s": {
+      "status": "indexed",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour streams",
+      "title": "VALORANT Champions Shanghai - Group Stage - Day 6",
+      "message": "Stored official YouTube stream archive",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "retryClass": "none",
+      "checkedAt": "2026-10-01T21:45:19.718143+00:00"
+    },
+    "youtube:w5O5vwuHwXY": {
+      "status": "indexed",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour streams",
+      "title": "VALORANT Champions Shanghai - Group Stage - Day 5",
+      "message": "Stored official YouTube stream archive",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "retryClass": "none",
+      "checkedAt": "2026-10-01T21:45:55.197224+00:00"
+    },
+    "youtube:XsORTuEh7Z4": {
+      "status": "indexed",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour streams",
+      "title": "VALORANT Champions Shanghai - Group Stage - Day 4",
+      "message": "Stored official YouTube stream archive",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "retryClass": "none",
+      "checkedAt": "2026-10-01T21:46:23.796544+00:00"
     }
   }
 }

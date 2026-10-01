@@ -141,9 +141,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-09T20:54:30Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T16:18:30.306762+00:00"
+      "checkedAt": "2026-10-01T21:33:33.823783+00:00"
     },
     "twitch:2877469732": {
       "status": "held",
@@ -153,9 +153,9 @@
       "message": "Official match alignment failed: The watch-party title does not identify a matchup for alignment",
       "publishedAt": "2026-09-18T15:04:36Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T16:43:47.947125+00:00"
+      "checkedAt": "2026-10-01T21:33:33.825358+00:00"
     },
     "youtube:z_aPp2s4d_o": {
       "status": "published",
@@ -237,9 +237,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-29T08:45:31Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T16:49:25.154541+00:00"
+      "checkedAt": "2026-10-01T21:35:43.207403+00:00"
     },
     "youtube:XdGX65LMxig": {
       "status": "published",
@@ -285,9 +285,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-30T08:51:39Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T16:43:47.946099+00:00"
+      "checkedAt": "2026-10-01T21:24:46.622222+00:00"
     },
     "twitch:2888772554": {
       "status": "held",
@@ -299,7 +299,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T21:10:10.988457+00:00"
+      "checkedAt": "2026-10-01T21:13:22.109076+00:00"
     },
     "youtube:m29QjckzB7w": {
       "status": "published",
@@ -321,9 +321,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-10-01T08:51:45Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T16:23:12.375071+00:00"
+      "checkedAt": "2026-10-01T21:26:42.859277+00:00"
     },
     "youtube:WdGW0L-3iCc": {
       "status": "published",

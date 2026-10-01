@@ -3,13 +3,24 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
-  <meta name="description" content="Watch indexed VALORANT broadcasts from YouTube and Twitch with direct round and map navigation.">
+  <meta name="description" content="Watch VALORANT VODs without spoilers. Hide video length, jump round by round, and skip pauses, replays, and timeouts.">
   <meta name="theme-color" content="#070908">
-  <title>SPOILLESS | VALORANT VODs</title>
+  <meta name="robots" content="index,follow">
+  <link rel="canonical" href="https://spoilless.vercel.app/">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://spoilless.vercel.app/">
+  <meta property="og:title" content="SPOILLESS | Spoiler-free VALORANT VODs">
+  <meta property="og:description" content="Watch VALORANT VODs without spoilers. Jump round by round and hide the timeline.">
+  <meta property="og:site_name" content="SPOILLESS">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="SPOILLESS | Spoiler-free VALORANT VODs">
+  <meta name="twitter:description" content="Watch VALORANT VODs without spoilers. Jump round by round and hide the timeline.">
+  <title>SPOILLESS | Spoiler-free VALORANT VODs</title>
   <link rel="icon" href="/favicon.svg" type="image/svg+xml">
-  <link rel="stylesheet" href="/styles.css?v=20260930-31">
+  <link rel="stylesheet" href="/styles.css?v=20261001-32">
   <script defer src="/core.js?v=20260929-12"></script>
   <script defer src="/app.js?v=20260929-16"></script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"SPOILLESS","url":"https://spoilless.vercel.app/","description":"Spoiler-free VALORANT VOD viewing with round and map navigation.","inLanguage":"en"}</script>
 </head>
 <body>
   <a class="skip-link" href="#catalog-title">Skip to match index</a>
@@ -80,6 +91,16 @@
           </div>
         </div>
         <div id="catalog" class="catalog-library" aria-live="polite"><p class="loading-copy">Loading library...</p></div>
+      </section>
+      <section class="faq-section" aria-labelledby="faq-title">
+        <div class="section-heading">
+          <h2 id="faq-title" class="major-heading">Watch without spoilers</h2>
+        </div>
+        <div class="faq-grid">
+          <article><h3>How does SPOILLESS avoid spoilers?</h3><p>It keeps scores, video length, thumbnails, and the provider timeline out of the way, so you can choose what to reveal as you watch.</p></article>
+          <article><h3>Can I jump to the next round?</h3><p>Yes. Every indexed broadcast has round and map navigation, with controls for moving past pauses, replays, and timeouts.</p></article>
+          <article><h3>Which broadcasts are available?</h3><p>SPOILLESS indexes selected official VCT YouTube broadcasts and supported Twitch watch parties when a reliable round index is available.</p></article>
+        </div>
       </section>
     </section>
     <section id="player-view" class="player-view" hidden>

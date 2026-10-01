@@ -282,6 +282,22 @@ test('website uses the SPOILLESS public identity', () => {
   assert.match(header, /<svg[\s\S]*?M5 5l22 22/);
 });
 
+test('website is ready for crawling and sharing', () => {
+  const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  const privacy = readFileSync(resolve(__dirname, '../site/privacy.html'), 'utf8');
+  const terms = readFileSync(resolve(__dirname, '../site/terms.html'), 'utf8');
+  const robots = readFileSync(resolve(__dirname, '../site/robots.txt'), 'utf8');
+  const sitemap = readFileSync(resolve(__dirname, '../site/sitemap.xml'), 'utf8');
+  assert.match(index, /rel="canonical" href="https:\/\/spoilless\.vercel\.app\/"/);
+  assert.match(index, /property="og:title" content="SPOILLESS \| Spoiler-free VALORANT VODs"/);
+  assert.match(index, /application\/ld\+json/);
+  assert.match(index, /id="faq-title"/);
+  assert.match(privacy, /rel="canonical" href="https:\/\/spoilless\.vercel\.app\/privacy"/);
+  assert.match(terms, /rel="canonical" href="https:\/\/spoilless\.vercel\.app\/terms"/);
+  assert.match(robots, /Sitemap: https:\/\/spoilless\.vercel\.app\/sitemap\.xml/);
+  assert.match(sitemap, /https:\/\/spoilless\.vercel\.app\//);
+});
+
 test('website avoids the prohibited design and copy patterns', () => {
   const source = ['index.html', 'privacy.html', 'terms.html', 'styles.css', 'app.js']
     .map(file => readFileSync(resolve(__dirname, '../site/' + file), 'utf8')).join('\n');

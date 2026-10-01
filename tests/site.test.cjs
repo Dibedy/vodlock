@@ -145,7 +145,7 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.match(styles, /\.library-summary \{[^}]+transform: translateY\(clamp\(12px, 2vw, 28px\)\)/);
   assert.match(styles, /twitch-timeline-hidden #media-player iframe[^}]+top: -90px[^}]+height: calc\(100% \+ 180px\)/);
   assert.match(styles, /watch-layout:fullscreen \.chat-panel/);
-  assert.match(styles, /watch-layout:fullscreen \.chat-panel \{[^}]+position: absolute[^}]+left: clamp/);
+  assert.match(styles, /watch-layout:fullscreen \.chat-panel \{[^}]+width: clamp\(240px, 17vw, 330px\)[^}]+top: 33vh[^}]+left: clamp/);
   assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);
 });
 

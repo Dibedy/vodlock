@@ -125,6 +125,17 @@ def should_process(key, published, state, retry_hours, now, retry_held=False):
     return should_attempt(key, published, state, retry_hours, now)
 
 
+def stream_migration_needed(channel, entry, catalog):
+    if not channel.get("matchSource"):
+        return False
+    identifier = entry["id"]
+    migrated = any(str(item.get("catalogId", "")).startswith("youtube:" + identifier + ":")
+                   for item in catalog["videos"])
+    legacy = any(item.get("provider") == "youtube" and item.get("sourceId") == identifier
+                 for item in catalog["videos"])
+    return legacy and not migrated
+
+
 def is_candidate(channel, entry, require_duration=True):
     title = clean_text(entry.get("title", ""))
     identifier = str(entry.get("id", ""))
@@ -838,7 +849,8 @@ def main():
         ]
         entries.extend(retained)
         eligible = [item for item in entries
-                    if should_process(source_key("youtube", item["id"]), published_ids, state["videos"],
+                    if stream_migration_needed(channel, item, catalog)
+                    or should_process(source_key("youtube", item["id"]), published_ids, state["videos"],
                                       config.get("youtubeRetryHours", 0.5), now, arguments.retry_held)
                     or arguments.retry_held and should_attempt(source_key("youtube", item["id"]), published_ids,
                                                                state["videos"], config.get("youtubeRetryHours", 0.5), now)]

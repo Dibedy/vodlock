@@ -65,6 +65,14 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(auto_publish.discover_youtube(channel, 30, YtDlp),
                          [{"id": "abcdefghijk", "title": "Champions Shanghai - Day 1"}])
 
+    def test_stream_migration_detects_legacy_full_match_catalog_entries(self):
+        channel = {"matchSource": True}
+        entry = {"id": "abcdefghijk"}
+        legacy = {"videos": [{"provider": "youtube", "sourceId": "abcdefghijk"}]}
+        migrated = {"videos": [{"provider": "youtube", "sourceId": "streamvideo", "catalogId": "youtube:abcdefghijk:streamvideo"}]}
+        self.assertTrue(auto_publish.stream_migration_needed(channel, entry, legacy))
+        self.assertFalse(auto_publish.stream_migration_needed(channel, entry, migrated))
+
     def test_americas_channel_rejects_non_match_programming(self):
         valid = {"id": "TntlDvMFTX0", "title": "NRG vs 100T - VCT Americas Stage 2", "duration": 4835}
         self.assertTrue(auto_publish.is_candidate(self.americas_channel, valid))

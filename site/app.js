@@ -2,7 +2,7 @@
   'use strict';
 
   const $ = id => document.getElementById(id);
-  const defaultSettings = {hideTwitchTimeline: true, hideMetadata: false, hideRoundStatus: false, showChat: true, fullscreenChatPosition: 'left', showChatTimestamps: false, autoSkipDowntime: 'off', endScreenProtection: true};
+  const defaultSettings = {hideTwitchTimeline: true, hideMetadata: false, hideRoundStatus: false, showChat: true, fullscreenChatPosition: 'left', showChatTimestamps: false, endScreenProtection: true};
   const defaultKeybinds = {previousRound: 'ArrowUp', nextRound: 'ArrowDown', skipBackward: 'ArrowLeft', skipForward: 'ArrowRight'};
   const settingIds = {
     hideTwitchTimeline: 'setting-hide-twitch-timeline',
@@ -11,7 +11,6 @@
     showChat: 'setting-show-chat',
     fullscreenChatPosition: 'setting-fullscreen-chat-position',
     showChatTimestamps: 'setting-show-chat-timestamps',
-    autoSkipDowntime: 'setting-auto-skip-downtime',
     endScreenProtection: 'setting-end-screen-protection'
   };
   const teamLogos = {
@@ -89,7 +88,7 @@
   const teamKey = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   const teamAliases = new Map(vctTeams.flatMap(team => [team.code, team.name, ...(team.aliases || [])].map(value => [teamKey(value), team.code])));
   const teamsByCode = new Map(vctTeams.map(team => [team.code, team]));
-  const state = {catalog: [], entry: null, index: null, chat: [], chatIndex: null, chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, autoSkipTarget: null, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null, teamPickerMode: 'favourites'};
+  const state = {catalog: [], entry: null, index: null, chat: [], chatIndex: null, chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null, teamPickerMode: 'favourites'};
   let settings = readSettings();
   let keybinds = readKeybinds();
 
@@ -117,8 +116,7 @@
       return {...defaultSettings,
         ...Object.fromEntries(['hideTwitchTimeline', 'hideMetadata', 'hideRoundStatus', 'showChat', 'showChatTimestamps', 'endScreenProtection']
           .map(key => [key, typeof saved[key] === 'boolean' ? saved[key] : defaultSettings[key]])),
-        fullscreenChatPosition: ['left', 'right', 'hidden'].includes(saved.fullscreenChatPosition) ? saved.fullscreenChatPosition : defaultSettings.fullscreenChatPosition,
-        autoSkipDowntime: ['off', 'long', 'everything'].includes(saved.autoSkipDowntime) ? saved.autoSkipDowntime : defaultSettings.autoSkipDowntime};
+        fullscreenChatPosition: ['left', 'right', 'hidden'].includes(saved.fullscreenChatPosition) ? saved.fullscreenChatPosition : defaultSettings.fullscreenChatPosition};
     } catch {
       return {...defaultSettings};
     }
@@ -222,7 +220,6 @@
     state.player = null;
     state.ready = false;
     state.playing = false;
-    state.autoSkipTarget = null;
     $('quality-control').hidden = true;
     $('quality').disabled = true;
     $('quality').replaceChildren();
@@ -1005,7 +1002,6 @@
       return;
     }
     $('end-shield').hidden = true;
-    state.autoSkipTarget = null;
     const resume = state.playing;
     seekPlayer(destination);
     if (resume) setTimeout(() => state.player && playPlayer(), 200);
@@ -1015,7 +1011,6 @@
 
   function updateStatus() {
     if (!state.index) return;
-    autoSkipDowntime();
     const position = VodlockSite.position(state.index, currentTime());
     const round = state.index.rounds[Math.max(position, 0)];
     if (settings.hideRoundStatus) {
@@ -1029,27 +1024,6 @@
     renderChat();
   }
 
-  function autoSkipDowntime() {
-    if (!state.ready || !state.playing || settings.autoSkipDowntime === 'off') return;
-    const now = currentTime();
-    if (state.autoSkipTarget !== null) {
-      if (now < state.autoSkipTarget - 1) return;
-      state.autoSkipTarget = null;
-    }
-    const position = VodlockSite.position(state.index, now);
-    const round = state.index.rounds[position];
-    const nextRound = state.index.rounds[position + 1];
-    if (!round || !nextRound) return;
-    const interval = nextRound.start - round.start;
-    const longBreakOnly = settings.autoSkipDowntime === 'long';
-    const earliestSkip = round.start + (longBreakOnly ? 165 : 145);
-    const minimumInterval = longBreakOnly ? 240 : 190;
-    const destination = Math.max(0, nextRound.start - state.index.leadSeconds);
-    if (interval < minimumInterval || now < earliestSkip || destination <= now + 1) return;
-    state.autoSkipTarget = destination;
-    seekPlayer(destination);
-    toast('Skipped ' + formatTime(destination - now) + ' of downtime.');
-  }
 
   function navigateRound(direction) {
     seek(VodlockSite.roundDestination(state.index, currentTime(), direction), direction > 0 ? 'Next round' : 'Previous round');

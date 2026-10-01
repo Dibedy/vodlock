@@ -130,7 +130,6 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.match(index, /setting-hide-twitch-timeline/);
   assert.match(index, /setting-show-chat/);
   assert.match(index, /setting-fullscreen-chat-position/);
-  assert.match(index, /setting-auto-skip-downtime/);
   assert.match(index, /id="watch-layout" class="watch-layout"/);
   assert.match(index, /id="chat-toggle"/);
   assert.doesNotMatch(index, /SYNCED/);
@@ -150,8 +149,6 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.match(styles, /watch-layout:fullscreen \.chat-panel/);
   assert.match(styles, /watch-layout:fullscreen \.chat-panel \{[^}]+width: clamp\(340px, 22vw, 430px\)[^}]+height: 16vh[^}]+top: 34vh[^}]+left: clamp/);
   assert.match(styles, /fullscreen-chat-right \.chat-panel/);
-  assert.match(app, /function autoSkipDowntime\(\)/);
-  assert.match(app, /Skipped ' \+ formatTime\(destination - now\) \+ ' of downtime/);
   assert.match(styles, /watch-layout:fullscreen \.chat-message \{[^}]+font-size: clamp\(12px, \.85vw, 16px\)/);
   assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);
 });

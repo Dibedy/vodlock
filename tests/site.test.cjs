@@ -323,6 +323,16 @@ test('website is ready for crawling and sharing', () => {
   assert.match(sitemap, /https:\/\/spoilless\.vercel\.app\//);
 });
 
+test('website loads Vercel Web Analytics on every page', () => {
+  for (const page of ['index.html', 'privacy.html', 'terms.html']) {
+    const source = readFileSync(resolve(__dirname, '../site/' + page), 'utf8');
+    assert.match(source, /<script defer src="\/_vercel\/insights\/script\.js"><\/script>/);
+  }
+  const privacy = readFileSync(resolve(__dirname, '../site/privacy.html'), 'utf8');
+  assert.match(privacy, /Vercel Web Analytics/);
+  assert.doesNotMatch(privacy, /does not provide [^<]*analytics/);
+});
+
 test('website avoids the prohibited design and copy patterns', () => {
   const source = ['index.html', 'privacy.html', 'terms.html', 'styles.css', 'app.js']
     .map(file => readFileSync(resolve(__dirname, '../site/' + file), 'utf8')).join('\n');

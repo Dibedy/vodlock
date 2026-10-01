@@ -294,12 +294,12 @@
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "TL vs. TYL - VALORANT Champions Shanghai - Group Stage",
-      "message": "Map 3: check the gap before round 18.",
+      "message": "Waiting for an indexed official YouTube stream archive",
       "publishedAt": "2026-10-01T08:30:41Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T15:55:49.609609+00:00"
+      "checkedAt": "2026-10-01T20:59:30.083494+00:00"
     },
     "youtube:m29QjckzB7w": {
       "status": "published",

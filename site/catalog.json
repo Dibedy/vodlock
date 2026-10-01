@@ -4,6 +4,17 @@
   "videos": [
     {
       "provider": "youtube",
+      "sourceId": "WdGW0L-3iCc",
+      "title": "NS vs XLG",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-WdGW0L-3iCc.json",
+      "playedAt": "2026-10-01T14:38:33Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai"
+    },
+    {
+      "provider": "youtube",
       "sourceId": "m29QjckzB7w",
       "title": "TL vs TYL",
       "event": "VALORANT Champions Shanghai | Group Stage",

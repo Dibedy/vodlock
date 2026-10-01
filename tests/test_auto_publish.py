@@ -439,6 +439,64 @@ class AutoPublishTests(unittest.TestCase):
                 result = auto_publish.youtube_alignment(channel, {"id": "abcdefghijk"}, config, state, object())
         self.assertEqual(result[0], "1234567890")
 
+    def test_full_match_uses_the_matching_canonical_stream_as_its_playback_source(self):
+        channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH", "published": "2026-09-30T10:00:00Z"}
+        rounds = [{"map": 1, "round": number, "start": number * 100, "confidence": .9} for number in range(1, 14)]
+
+        def index_job(identifier):
+            auto_publish.server.JOBS[identifier].update(status="ready", warnings=[], duration=2000, rounds=rounds)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "catalog.json").write_text('{"version":2,"videos":[]}', encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), patch.object(auto_publish.server, "index_job", side_effect=index_job), \
+                    patch.object(auto_publish, "canonical_stream_alignment", return_value=("lmnopqrstuv", {"offset": 0}, rounds)):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13},
+                                              {"videos": {"youtube:lmnopqrstuv": {"publishedAt": "2026-09-30T08:00:00Z"}}}, object())
+            catalog = auto_publish.read_json(site / "catalog.json")
+            index = auto_publish.read_json(site / "indexes" / "youtube-abcdefghijk-lmnopqrstuv.json")
+        self.assertEqual(result, (True, "Published"))
+        self.assertEqual(catalog["videos"][0]["sourceId"], "lmnopqrstuv")
+        self.assertEqual(catalog["videos"][0]["catalogId"], "youtube:abcdefghijk:lmnopqrstuv")
+        self.assertEqual(index["sourceId"], "lmnopqrstuv")
+
+    def test_official_twitch_chat_attaches_to_canonical_stream_matches_without_round_ocr(self):
+        entry = {"id": "1234567890", "title": "A vs B - Champions"}
+        config = {"channels": [{"name": "Streams", "canonicalStream": True}], "alignmentLookback": 8,
+                  "watchPartyFingerprintInterval": 10, "watchPartyMaximumDistance": 18}
+        state = {"videos": {"youtube:abcdefghijk": {"status": "indexed", "channel": "Streams"}}}
+        alignment = {"timelineScale": 1, "segments": [{"offset": 120, "targetStart": 0, "targetEnd": 1000}], "anchors": 20}
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "indexes" / "match.json").write_text(json.dumps({"schemaVersion": 2, "provider": "youtube",
+                "sourceId": "abcdefghijk", "rounds": [{"map": 1, "round": 1, "start": 100}]}), encoding="utf-8")
+            (site / "catalog.json").write_text(json.dumps({"version": 2, "videos": [{"provider": "youtube",
+                "sourceId": "abcdefghijk", "index": "/indexes/match.json"}]}), encoding="utf-8")
+            job = {"id": "job", "status": "queued", "fingerprints": [], "duration": 0}
+
+            def index_job(_):
+                job.update(status="ready", duration=1200, fingerprints=[{"time": value, "hash": "00", "gameplayHash": "00"}
+                                                                            for value in range(0, 300, 10)])
+
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "JOBS", {"job": job}), \
+                    patch.object(auto_publish.server, "index_job", side_effect=index_job), \
+                    patch.object(auto_publish, "storyboard", return_value={"duration": 1200, "frames": [{"time": 0, "hash": "00"}]}), \
+                    patch.object(auto_publish, "align_storyboards", return_value=alignment), \
+                    patch.object(auto_publish.chat_archive, "archive_chat", return_value=site / "chats" / "twitch-1234567890.json"):
+                result = auto_publish.attach_stream_chat(entry, job, config, state, object())
+            catalog = auto_publish.read_json(site / "catalog.json")
+            index = auto_publish.read_json(site / "indexes" / "match.json")
+        self.assertEqual(result, ("indexed", "Attached Twitch chat to 1 official stream matches"))
+        self.assertEqual(catalog["videos"][0]["chatSourceId"], "1234567890")
+        self.assertEqual(index["alignment"]["source"], "twitch:1234567890")
+        self.assertEqual(index["alignment"]["segments"][0]["offset"], -120)
+
     def test_normalize_storyboard_timeline_corrects_a_doubled_archive_timeline(self):
         normalized, scale = auto_publish.normalize_storyboard_timeline(
             {"duration": 1000, "interval": 2, "frames": [{"time": 0}, {"time": 1998}]})

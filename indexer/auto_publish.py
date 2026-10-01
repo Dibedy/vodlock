@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v9"
+PUBLISHER_VERSION = "publisher-v10"
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 PUBLISH_LOCK = threading.Lock()
 
@@ -95,9 +95,11 @@ def recovery_message(channel, error):
 
 
 def should_attempt(key, published, state, retry_hours, now):
+    previous = state.get(key)
+    if previous and previous.get("pipelineVersion") and previous["pipelineVersion"] != PIPELINE_VERSION:
+        return True
     if key in published:
         return False
-    previous = state.get(key)
     if not previous:
         return True
     if previous.get("status") in {"superseded", "indexed"}:
@@ -437,6 +439,95 @@ def compact_reference(reference, interval):
     return {**reference, "interval": source_interval * step, "frames": reference.get("frames", [])[::step]}
 
 
+def canonical_streams(config, state):
+    names = {channel["name"] for channel in config["channels"] if channel.get("canonicalStream")}
+    return [key.split(":", 1)[1] for key, value in state["videos"].items()
+            if key.startswith("youtube:") and value.get("status") == "indexed" and value.get("channel") in names]
+
+
+def canonical_stream_alignment(entry, job, config, state, yt_dlp):
+    streams = canonical_streams(config, state)[-int(config.get("alignmentLookback", 8)):]
+    if not streams:
+        raise OfficialMatchPending("Waiting for an indexed official YouTube stream archive")
+    reference = storyboard("youtube", entry["id"], yt_dlp)
+    matches = []
+    for stream_id in reversed(streams):
+        try:
+            target = storyboard("youtube", stream_id, yt_dlp)
+            alignment = align_storyboards(reference, target)
+            rounds = translate_index({"rounds": job["rounds"]}, target, alignment)
+            matches.append((alignment["anchors"], stream_id, alignment, rounds))
+        except (OSError, ValueError, KeyError):
+            continue
+    if not matches:
+        raise OfficialArchiveUnmatched("No verified official YouTube stream archive matches this full match")
+    matches.sort(reverse=True, key=lambda item: item[0])
+    if len(matches) > 1 and matches[1][0] >= matches[0][0] * .8:
+        raise ValueError("More than one official YouTube stream archive matches this full match")
+    _, stream_id, alignment, rounds = matches[0]
+    return stream_id, alignment, rounds
+
+
+def inverted_alignment(value):
+    scale = float(value.get("timelineScale", 1))
+    segments = value.get("segments") or [{"offset": value["offset"], "targetStart": 0, "targetEnd": float("inf")}]
+    inverted = []
+    for segment in segments:
+        start = scale * float(segment["targetStart"]) + float(segment["offset"])
+        end = scale * float(segment["targetEnd"]) + float(segment["offset"])
+        if end > start:
+            inverted.append({"offset": -float(segment["offset"]) / scale,
+                             "targetStart": round(max(0, start), 3), "targetEnd": round(end, 3)})
+    return {"timelineScale": 1 / scale, "segments": inverted}
+
+
+def attach_stream_chat(entry, job, config, state, yt_dlp):
+    streams = canonical_streams(config, state)[-int(config.get("alignmentLookback", 8)):]
+    if not streams:
+        raise OfficialMatchPending("Waiting for an indexed official YouTube stream archive")
+    interval = int(config.get("watchPartyFingerprintInterval", 10))
+    job.update(fingerprintOnly=True, fingerprintInterval=interval, analysisHeight=540)
+    server.index_job(job["id"])
+    if job.get("status") != "ready" or len(job.get("fingerprints", [])) < 30:
+        raise ValueError(job.get("message", "The Twitch chat timeline could not be fingerprinted"))
+    target = {"version": 2, "provider": "twitch", "sourceId": entry["id"], "duration": round(float(job["duration"]), 3),
+              "interval": interval, "frames": job["fingerprints"]}
+    matches = []
+    for stream_id in reversed(streams):
+        try:
+            reference = storyboard("youtube", stream_id, yt_dlp)
+            alignment = align_storyboards(reference, target, maximum_distance=int(config.get("watchPartyMaximumDistance", 18)),
+                                          require_target_coverage=False)
+            matches.append((alignment["anchors"], stream_id, inverted_alignment(alignment)))
+        except (OSError, ValueError, KeyError):
+            continue
+    if not matches:
+        raise ValueError("No verified official YouTube stream archive aligns with this Twitch chat")
+    matches.sort(reverse=True, key=lambda item: item[0])
+    if len(matches) > 1 and matches[1][0] >= matches[0][0] * .8:
+        raise ValueError("More than one official YouTube stream archive aligns with this Twitch chat")
+    chat_path = chat_archive.archive_chat(entry["id"])
+    with PUBLISH_LOCK:
+        catalog_path = SITE / "catalog.json"
+        catalog = read_json(catalog_path)
+        matched = 0
+        for _, stream_id, alignment in matches[:1]:
+            for record in catalog["videos"]:
+                if record.get("provider") != "youtube" or record.get("sourceId") != stream_id:
+                    continue
+                index_path = SITE / record["index"].lstrip("/")
+                index = read_json(index_path)
+                index["alignment"] = {**alignment, "source": "twitch:" + entry["id"]}
+                write_json(index_path, index)
+                record["chat"] = "/chats/" + chat_path.name
+                record["chatSourceId"] = entry["id"]
+                matched += 1
+        if matched:
+            catalog["updatedAt"] = datetime.now(timezone.utc).date().isoformat()
+            write_json(catalog_path, catalog)
+    return "indexed", f"Attached Twitch chat to {matched} official stream matches"
+
+
 def watchparty_alignments(job, entry, config, state, yt_dlp, multi_series=False):
     target_match = matchup_key(entry.get("title", ""))
     if not multi_series and not target_match:
@@ -550,9 +641,16 @@ def process(channel, entry, config, state=None, yt_dlp=None):
     server.save(job)
     aligned_source_id = None
     alignment = None
+    playback_source_id = entry["id"]
+    catalog_id = None
     try:
         print(f"Processing {provider}:{entry['id']} - {clean_text(entry['title'])}", flush=True)
-        if provider == "youtube" and state is not None and yt_dlp is not None:
+        if provider == "youtube" and channel.get("canonicalStream"):
+            storyboard("youtube", entry["id"], yt_dlp)
+            return "indexed", "Stored official YouTube stream archive"
+        if provider == "twitch" and channel.get("chatSource"):
+            return attach_stream_chat(entry, job, config, state, yt_dlp)
+        if provider == "youtube" and not channel.get("matchSource") and state is not None and yt_dlp is not None:
             try:
                 aligned_source_id, alignment, rounds = youtube_alignment(channel, entry, config, state, yt_dlp)
                 exported = {"schemaVersion": 2, "provider": "youtube", "sourceId": entry["id"], "label": title,
@@ -615,7 +713,18 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                 exported = server.export(job)
                 exported["rounds"] = [{"map": item["map"], "round": item["round"], "start": item["start"]}
                                       for item in exported["rounds"]]
-        filename = f"{provider}-{entry['id']}.json"
+        if provider == "youtube" and channel.get("matchSource"):
+            try:
+                stream_id, _, rounds = canonical_stream_alignment(entry, job, config, state, yt_dlp)
+            except OfficialMatchPending as error:
+                return "waiting", str(error)
+            except OfficialArchiveUnmatched as error:
+                return False, str(error)
+            playback_source_id = stream_id
+            catalog_id = f"youtube:{entry['id']}:{stream_id}"
+            exported = {"schemaVersion": 2, "provider": "youtube", "sourceId": stream_id, "label": title,
+                        "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION, "rounds": rounds}
+        filename = f"{provider}-{entry['id']}" + (f"-{playback_source_id}" if catalog_id else "") + ".json"
         write_json(SITE / "indexes" / filename, exported)
         if provider == "twitch" and channel.get("alignmentSource"):
             save_storyboard(storyboard_path("twitch", entry["id"]),
@@ -643,17 +752,21 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             catalog = read_json(catalog_path)
             catalog["version"] = 2
             catalog["videos"] = [item for item in catalog["videos"]
-                                 if source_key(item.get("provider", "youtube"), item.get("sourceId", item.get("videoId", "")))
-                                 != source_key(provider, entry["id"])
+                                 if (catalog_id and item.get("catalogId") != catalog_id) or (not catalog_id and
+                                 source_key(item.get("provider", "youtube"), item.get("sourceId", item.get("videoId", "")))
+                                 != source_key(provider, entry["id"]))
                                  and not (supersede_source and item.get("provider") == "twitch"
                                           and str(item.get("sourceId", "")) == aligned_source_id)]
-            source = (state["videos"].get(source_key("twitch", aligned_source_id))
+            source = (state["videos"].get(source_key("youtube", playback_source_id))
+                      if catalog_id and state is not None else state["videos"].get(source_key("twitch", aligned_source_id))
                       if provider == "youtube" and aligned_source_id and state is not None else None)
             played_at = catalog_played_at(entry, exported["rounds"], source,
                                           alignment if source else None)
-            catalog_entry = {"provider": provider, "sourceId": entry["id"], "title": title,
+            catalog_entry = {"provider": provider, "sourceId": playback_source_id, "title": title,
                              "event": event, "label": "Full match" if provider == "youtube" else "Full broadcast",
                              "index": f"/indexes/{filename}", "playedAt": played_at, **tournament_metadata(event, title)}
+            if catalog_id:
+                catalog_entry["catalogId"] = catalog_id
             if chat_path:
                 catalog_entry["chat"] = "/chats/" + chat_path.name
                 if provider == "youtube":
@@ -692,6 +805,8 @@ def main():
     catalog = read_json(SITE / "catalog.json")
     published_ids = {source_key(item.get("provider", "youtube"), item.get("sourceId", item.get("videoId", "")))
                      for item in catalog["videos"]}
+    published_ids.update("youtube:" + item["catalogId"].split(":")[1] for item in catalog["videos"]
+                         if isinstance(item.get("catalogId"), str) and re.fullmatch(r"youtube:[A-Za-z0-9_-]{11}:[A-Za-z0-9_-]{11}", item["catalogId"]))
     now = datetime.now(timezone.utc)
     try:
         import yt_dlp
@@ -797,15 +912,30 @@ def main():
         write_json(STATE_PATH, state)
         print(f"{key}: {state['videos'][key]['status']} - {message}", flush=True)
 
-    prerequisites = [(channel, entry) for channel, entry in candidates if channel.get("alignmentSource")]
-    youtube_candidates = [(channel, entry) for channel, entry in candidates
-                          if has_alignment_archive and channel["provider"] == "youtube"]
-    remaining = [(channel, entry) for channel, entry in candidates
-                 if not channel.get("alignmentSource") and (not has_alignment_archive or channel["provider"] != "youtube")]
-    for channel, entry in prerequisites:
-        record_result(run_candidate(channel, entry))
-    for channel, entry in youtube_candidates:
-        record_result(run_candidate(channel, entry))
+    stream_timeline = any(channel.get("canonicalStream") or channel.get("matchSource") or channel.get("chatSource")
+                          for channel in config["channels"])
+    if stream_timeline:
+        canonical_candidates = [(channel, entry) for channel, entry in candidates if channel.get("canonicalStream")]
+        match_candidates = [(channel, entry) for channel, entry in candidates if channel.get("matchSource")]
+        chat_candidates = [(channel, entry) for channel, entry in candidates if channel.get("chatSource")]
+        remaining = [(channel, entry) for channel, entry in candidates
+                     if not channel.get("canonicalStream") and not channel.get("matchSource") and not channel.get("chatSource")]
+        for channel, entry in canonical_candidates:
+            record_result(run_candidate(channel, entry))
+        for channel, entry in match_candidates:
+            record_result(run_candidate(channel, entry))
+        for channel, entry in chat_candidates:
+            record_result(run_candidate(channel, entry))
+    else:
+        prerequisites = [(channel, entry) for channel, entry in candidates if channel.get("alignmentSource")]
+        youtube_candidates = [(channel, entry) for channel, entry in candidates
+                              if has_alignment_archive and channel["provider"] == "youtube"]
+        remaining = [(channel, entry) for channel, entry in candidates
+                     if not channel.get("alignmentSource") and (not has_alignment_archive or channel["provider"] != "youtube")]
+        for channel, entry in prerequisites:
+            record_result(run_candidate(channel, entry))
+        for channel, entry in youtube_candidates:
+            record_result(run_candidate(channel, entry))
     workers = min(max(1, int(config.get("maxWorkers", 1))), len(remaining)) if remaining else 0
     if workers == 1:
         for channel, entry in remaining:

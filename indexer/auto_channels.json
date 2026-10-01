@@ -1,7 +1,7 @@
 {
   "version": 1,
   "lookback": 30,
-  "maxPerRun": 4,
+  "maxPerRun": 8,
   "maxPerChannelPerRun": 2,
   "maxWorkers": 2,
   "maxRetriesPerRun": 1,
@@ -32,8 +32,7 @@
       "login": "valorant",
       "priority": 0,
       "requireMatchup": true,
-      "alignmentSource": true,
-      "archiveOnly": true,
+      "chatSource": true,
       "includeTitle": "\\b(CHAMPIONS|SHANGHAI)\\b",
       "excludeTitle": "\\b(RERUN|REBROADCAST)\\b",
       "minimumDuration": 3600,
@@ -53,9 +52,20 @@
     },
     {
       "provider": "youtube",
-      "name": "VALORANT Champions Tour",
+      "name": "VALORANT Champions Tour streams",
+      "url": "https://www.youtube.com/@ValorantEsports/streams",
+      "priority": 0,
+      "canonicalStream": true,
+      "includeTitle": "(?=.*\\b(CHAMPIONS|SHANGHAI)\\b)(?!.*\\bFULL MATCH\\b)",
+      "excludeTitle": "\\b(HIGHLIGHTS|SHOWMATCH|REBROADCAST)\\b",
+      "minimumDuration": 3600
+    },
+    {
+      "provider": "youtube",
+      "name": "VALORANT Champions Tour full matches",
       "channelId": "UCA1d3HFGFUmkKr2JIUA5Vlw",
       "priority": 1,
+      "matchSource": true,
       "includeTitle": "(?=.*\\bFULL MATCH\\b)(?=.*\\b(CHAMPIONS|SHANGHAI)\\b)",
       "excludeTitle": "\\b(HIGHLIGHTS|SHOWMATCH)\\b",
       "minimumDuration": 3600

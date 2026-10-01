@@ -75,6 +75,7 @@ test('website validates compact synchronized Twitch chat without future data', (
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   const vercel = readFileSync(resolve(__dirname, '../site/vercel.json'), 'utf8');
   assert.match(app, /https:\/\/cdn\.7tv\.app\/emote\//);
+  assert.match(app, /document\.fullscreenElement === \$\('watch-layout'\) \? 5 : 120/);
   assert.match(vercel, /https:\/\/cdn\.7tv\.app/);
   assert.throws(() => validateChat({v: 1, source: '1234567890', messages: [
     {t: 12, u: 'viewer', c: '', f: [['later']]}, {t: 10, u: 'viewer', c: '', f: [['earlier']]}
@@ -145,7 +146,7 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.match(styles, /\.library-summary \{[^}]+transform: translateY\(clamp\(12px, 2vw, 28px\)\)/);
   assert.match(styles, /twitch-timeline-hidden #media-player iframe[^}]+top: -90px[^}]+height: calc\(100% \+ 180px\)/);
   assert.match(styles, /watch-layout:fullscreen \.chat-panel/);
-  assert.match(styles, /watch-layout:fullscreen \.chat-panel \{[^}]+width: clamp\(220px, 14vw, 280px\)[^}]+height: 20vh[^}]+top: 34vh[^}]+left: clamp/);
+  assert.match(styles, /watch-layout:fullscreen \.chat-panel \{[^}]+width: clamp\(260px, 17vw, 330px\)[^}]+height: 16vh[^}]+top: 34vh[^}]+left: clamp/);
   assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);
 });
 

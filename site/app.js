@@ -232,7 +232,8 @@
     const position = Math.floor(playbackPosition);
     if (!force && state.chatPosition === position) return;
     state.chatPosition = position;
-    const messages = state.chat.filter(message => message.time <= now && message.time >= now - 90).slice(-120);
+    const maxMessages = document.fullscreenElement === $('watch-layout') ? 5 : 120;
+    const messages = state.chat.filter(message => message.time <= now && message.time >= now - 90).slice(-maxMessages);
     const host = $('chat-messages');
     host.replaceChildren();
     if (!messages.length) {
@@ -1167,7 +1168,10 @@
   });
   $('fullscreen-button').addEventListener('click', toggleFullscreen);
   $('theater-button').addEventListener('click', toggleTheater);
-  document.addEventListener('fullscreenchange', syncFullscreenButton);
+  document.addEventListener('fullscreenchange', () => {
+    syncFullscreenButton();
+    renderChat(true);
+  });
   new MutationObserver(preventTwitchNativeFullscreen).observe($('player-shell'), {subtree: true, childList: true, attributes: true, attributeFilter: ['allow', 'allowfullscreen']});
   addEventListener('blur', reclaimPlayerFocus);
   addEventListener('pagehide', () => saveResume(true));

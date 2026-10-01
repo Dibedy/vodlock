@@ -559,7 +559,12 @@ class AutoPublishTests(unittest.TestCase):
             "youtube:zyxwvutsrqp": {"status": "published", "title": "C vs D - FULL MATCH"},
         }}
         rounds = [{"map": 1, "round": number, "start": number * 100} for number in range(1, 14)]
-        matches = [("abcdefghijk", {"offset": 10}, rounds), ("zyxwvutsrqp", {"offset": 20}, rounds)]
+        matches = [
+            ({"provider": "youtube", "sourceId": "abcdefghijk", "catalogId": "youtube:abcdefghijk:abcdefghijk",
+              "title": "A vs B", "event": "Champions", "playedAt": "2026-09-29T10:10:00Z"}, {"offset": 10}, rounds),
+            ({"provider": "youtube", "sourceId": "zyxwvutsrqp", "catalogId": "youtube:zyxwvutsrqp:zyxwvutsrqp",
+              "title": "C vs D", "event": "Champions", "playedAt": "2026-09-29T14:10:00Z"}, {"offset": 20}, rounds),
+        ]
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)
             site = root / "site"
@@ -678,7 +683,7 @@ class AutoPublishTests(unittest.TestCase):
             with patch.object(auto_publish, "SITE", root / "site"), patch.object(auto_publish.server, "DATA", root / "data"), \
                     patch.object(auto_publish.server, "save"), patch.object(auto_publish.server, "index_job") as index_job:
                 result = auto_publish.process(channel, entry, {"alignmentLookback": 8}, {"videos": {}}, object())
-        self.assertEqual(result, ("waiting", "Waiting for the indexed official YouTube full match"))
+        self.assertEqual(result, ("waiting", "Waiting for the indexed official YouTube stream match"))
         index_job.assert_not_called()
 
     def test_two_youtube_matches_can_reuse_one_superseded_twitch_broadcast(self):

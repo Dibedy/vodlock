@@ -532,12 +532,16 @@ def watchparty_alignments(job, entry, config, state, yt_dlp, multi_series=False)
     target_match = matchup_key(entry.get("title", ""))
     if not multi_series and not target_match:
         raise ValueError("The watch-party title does not identify a matchup for alignment")
-    candidates = [(key.split(":", 1)[1], value) for key, value in state["videos"].items()
-                  if key.startswith("youtube:") and value.get("status") == "published"
-                  and (multi_series or matchup_key(value.get("title", "")) == target_match)
-                  and (SITE / "indexes" / f"youtube-{key.split(':', 1)[1]}.json").is_file()]
+    catalog_path = SITE / "catalog.json"
+    if not catalog_path.is_file():
+        raise OfficialMatchPending("Waiting for the indexed official YouTube stream match")
+    catalog = read_json(catalog_path)
+    candidates = [item for item in catalog["videos"]
+                  if item.get("provider") == "youtube" and isinstance(item.get("index"), str)
+                  and (SITE / item["index"].lstrip("/")).is_file()
+                  and (multi_series or matchup_key(item.get("title", "")) == target_match)]
     if not candidates:
-        raise OfficialMatchPending("Waiting for the indexed official YouTube full match")
+        raise OfficialMatchPending("Waiting for the indexed official YouTube stream match")
     interval = int(config.get("watchPartyFingerprintInterval", 10))
     job.update(fingerprintOnly=True, fingerprintInterval=interval, analysisHeight=540)
     server.index_job(job["id"])
@@ -548,17 +552,17 @@ def watchparty_alignments(job, entry, config, state, yt_dlp, multi_series=False)
               "frames": job["fingerprints"]}
     matches = []
     failures = []
-    for source_id, _ in reversed(candidates[-int(config.get("alignmentLookback", 8)):]):
+    for candidate in reversed(candidates[-int(config.get("alignmentLookback", 8)):]):
         try:
-            reference = storyboard("youtube", source_id, yt_dlp)
+            reference = storyboard("youtube", candidate["sourceId"], yt_dlp)
             alignment = align_storyboards(reference, target,
                                           maximum_distance=int(config.get("watchPartyMaximumDistance", 18)),
                                           require_target_coverage=False)
-            index = read_json(SITE / "indexes" / f"youtube-{source_id}.json")
+            index = read_json(SITE / candidate["index"].lstrip("/"))
             rounds = translate_index(index, target, alignment)
-            matches.append((alignment["anchors"], source_id, alignment, rounds))
+            matches.append((alignment["anchors"], candidate, alignment, rounds))
         except (OSError, ValueError, KeyError) as error:
-            failures.append({"sourceId": source_id, "reason": clean_text(error)})
+            failures.append({"sourceId": candidate["sourceId"], "reason": clean_text(error)})
     if not matches:
         DIAGNOSTICS.mkdir(exist_ok=True)
         write_json(DIAGNOSTICS / f"watchparty-{entry['id']}.json",
@@ -567,13 +571,13 @@ def watchparty_alignments(job, entry, config, state, yt_dlp, multi_series=False)
     matches.sort(reverse=True, key=lambda item: item[0])
     if not multi_series and len(matches) > 1 and matches[1][0] >= matches[0][0] * 0.8:
         raise ValueError("More than one official broadcast matches this watch party")
-    return [(source_id, alignment, rounds) for _, source_id, alignment, rounds in matches]
+    return [(candidate, alignment, rounds) for _, candidate, alignment, rounds in matches]
 
 
 def watchparty_alignment(job, entry, config, state, yt_dlp):
     matches = watchparty_alignments(job, entry, config, state, yt_dlp)
-    source_id, alignment, rounds = matches[0]
-    return "youtube:" + source_id, alignment, rounds
+    official, alignment, rounds = matches[0]
+    return "youtube:" + official["sourceId"], alignment, rounds
 
 
 def publish_watchparty_archive(channel, entry, state, matches):
@@ -585,17 +589,17 @@ def publish_watchparty_archive(channel, entry, state, matches):
     catalog_path = SITE / "catalog.json"
     catalog = read_json(catalog_path)
     catalog["version"] = 2
-    published = {item.get("sourceId"): item for item in catalog["videos"] if item.get("provider") == "youtube"}
     records = []
-    for source_id, alignment, rounds in matches:
-        official = published.get(source_id, {})
+    for official, alignment, rounds in matches:
+        source_id = official["sourceId"]
+        match_id = str(official.get("catalogId", "")).split(":")[1] if official.get("catalogId") else source_id
         title = clean_text(official.get("title") or state["videos"]["youtube:" + source_id]["title"])
         event = clean_text(official.get("event") or channel["name"])
-        catalog_id = f"twitch:{entry['id']}:{source_id}"
+        catalog_id = f"twitch:{entry['id']}:{match_id}"
         exported = {"schemaVersion": 2, "provider": "twitch", "sourceId": entry["id"], "label": title,
                     "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION,
                     "rounds": rounds, "alignment": {**alignment, "source": "youtube:" + source_id}}
-        filename = f"twitch-{entry['id']}-{source_id}.json"
+        filename = f"twitch-{entry['id']}-{match_id}.json"
         write_json(SITE / "indexes" / filename, exported)
         catalog["videos"] = [item for item in catalog["videos"] if item.get("catalogId") != catalog_id]
         record = {"provider": "twitch", "sourceId": entry["id"], "catalogId": catalog_id,

@@ -198,12 +198,12 @@
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | NRG vs LOUD - VCT Americas Stage 2 Playoffs #VCTWatchparty | !vote !inzone",
-      "message": "Official match alignment failed: The video service stream ended with an error: ERROR: Unable to download video: [Errno 2] No such file or directory: '--Frag5'",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-05T18:21:21Z",
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v2+publisher-v9",
       "retryClass": "cooldown",
-      "checkedAt": "2026-09-30T23:12:51.574165+00:00"
+      "checkedAt": "2026-10-01T17:09:53.563062+00:00"
     },
     "youtube:y6wwIZysHns": {
       "status": "published",

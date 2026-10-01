@@ -45,6 +45,26 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(result, [{"id": "fFfCJDNHEvc", "title": "JDG vs. FUT - FULL MATCH - Champions Shanghai",
                                    "published": "2026-09-27T12:00:00Z"}])
 
+    def test_youtube_stream_page_accepts_entries_without_listing_durations(self):
+        channel = {"name": "Streams", "url": "https://example.test/streams", "canonicalStream": True,
+                   "includeTitle": r"\bCHAMPIONS\b", "excludeTitle": r"\bHIGHLIGHTS\b", "minimumDuration": 3600}
+
+        class Downloader:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return False
+
+            def extract_info(self, *_ , **__):
+                return {"entries": [{"id": "abcdefghijk", "title": "Champions Shanghai - Day 1"}]}
+
+        class YtDlp:
+            YoutubeDL = lambda *_: Downloader()
+
+        self.assertEqual(auto_publish.discover_youtube(channel, 30, YtDlp),
+                         [{"id": "abcdefghijk", "title": "Champions Shanghai - Day 1"}])
+
     def test_americas_channel_rejects_non_match_programming(self):
         valid = {"id": "TntlDvMFTX0", "title": "NRG vs 100T - VCT Americas Stage 2", "duration": 4835}
         self.assertTrue(auto_publish.is_candidate(self.americas_channel, valid))
@@ -299,6 +319,20 @@ class AutoPublishTests(unittest.TestCase):
             "youtube:lmnopqrstuv": {"status": "held", "message": "network", "checkedAt": now.isoformat(),
                                       "detectorVersion": auto_publish.DETECTOR_VERSION,
                                       "pipelineVersion": auto_publish.PIPELINE_VERSION}}}
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, {"videos": []}]), \
+                patch.object(auto_publish, "discover_youtube", return_value=entries), \
+                patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \
+                patch.object(auto_publish, "write_json"), patch.object(sys, "argv", ["auto_publish.py", "--retry-held"]), \
+                patch("sys.stdout", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["abcdefghijk", "lmnopqrstuv"])
+
+    def test_explicit_held_retry_keeps_new_candidates_eligible(self):
+        channel = {"provider": "youtube", "name": "YouTube"}
+        config = {"channels": [channel], "lookback": 30, "maxPerRun": 4, "maxPerChannelPerRun": 4}
+        entries = [{"id": "abcdefghijk", "title": "New"}, {"id": "lmnopqrstuv", "title": "Held"}]
+        state = {"videos": {"youtube:lmnopqrstuv": {"status": "held", "message": "network",
+                                                        "checkedAt": datetime.now(timezone.utc).isoformat()}}}
         with patch.object(auto_publish, "read_json", side_effect=[config, state, {"videos": []}]), \
                 patch.object(auto_publish, "discover_youtube", return_value=entries), \
                 patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \

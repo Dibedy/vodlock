@@ -310,7 +310,8 @@ def discover_youtube(channel, lookback, yt_dlp=None, requester=None):
     options = {"extract_flat": "in_playlist", "playlistend": lookback, "quiet": True, "no_warnings": True}
     with yt_dlp.YoutubeDL(options) as downloader:
         result = downloader.extract_info(channel["url"], download=False)
-    return [entry for entry in result.get("entries", []) if entry and is_candidate(channel, entry)]
+    return [entry for entry in result.get("entries", [])
+            if entry and is_candidate(channel, entry, require_duration=not channel.get("canonicalStream"))]
 
 
 def request_json(url, headers=None, data=None):
@@ -650,7 +651,9 @@ def process(channel, entry, config, state=None, yt_dlp=None):
     try:
         print(f"Processing {provider}:{entry['id']} - {clean_text(entry['title'])}", flush=True)
         if provider == "youtube" and channel.get("canonicalStream"):
-            storyboard("youtube", entry["id"], yt_dlp)
+            archive = storyboard("youtube", entry["id"], yt_dlp)
+            if archive["duration"] < channel["minimumDuration"]:
+                raise ValueError("The official YouTube stream archive is shorter than the configured minimum")
             return "indexed", "Stored official YouTube stream archive"
         if provider == "twitch" and channel.get("chatSource"):
             return attach_stream_chat(entry, job, config, state, yt_dlp)
@@ -836,7 +839,9 @@ def main():
         entries.extend(retained)
         eligible = [item for item in entries
                     if should_process(source_key("youtube", item["id"]), published_ids, state["videos"],
-                                      config.get("youtubeRetryHours", 0.5), now, arguments.retry_held)]
+                                      config.get("youtubeRetryHours", 0.5), now, arguments.retry_held)
+                    or arguments.retry_held and should_attempt(source_key("youtube", item["id"]), published_ids,
+                                                               state["videos"], config.get("youtubeRetryHours", 0.5), now)]
         for entry_index, entry in enumerate(eligible[:per_channel]):
             key = source_key("youtube", entry["id"])
             candidates.append((1 if key in state["videos"] else 0, channel.get("priority", 1),
@@ -864,7 +869,9 @@ def main():
         entries.extend(retained)
         eligible = [item for item in entries
                     if should_process(source_key("twitch", item["id"]), published_ids, state["videos"],
-                                      config.get("retryHours", 6), now, arguments.retry_held)]
+                                      config.get("retryHours", 6), now, arguments.retry_held)
+                    or arguments.retry_held and should_attempt(source_key("twitch", item["id"]), published_ids,
+                                                               state["videos"], config.get("retryHours", 6), now)]
         for entry_index, entry in enumerate(eligible[:per_channel]):
             key = source_key("twitch", entry["id"])
             candidates.append((1 if key in state["videos"] else 0, channel.get("priority", 0),

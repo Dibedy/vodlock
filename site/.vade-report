@@ -1,0 +1,67 @@
+# Vercel Web Analytics Implementation
+
+## Summary
+Successfully configured Vercel Web Analytics for this vanilla HTML/JavaScript project by adding the analytics script to all HTML pages and updating the Content Security Policy.
+
+## Changes Made
+
+### Modified Files:
+
+1. **site/index.html**
+   - Added Vercel Analytics initialization script in the `<head>` section
+   - Script creates a global `window.va` function with a queue pattern for analytics events
+   - Added deferred loading of the analytics script from `/_vercel/insights/script.js`
+
+2. **site/privacy.html**
+   - Added the same Vercel Analytics initialization and script loading
+   - Ensures analytics tracking on the privacy policy page
+
+3. **site/terms.html**
+   - Added the same Vercel Analytics initialization and script loading
+   - Ensures analytics tracking on the terms and conditions page
+
+4. **site/vercel.json**
+   - Updated Content-Security-Policy header to allow Vercel Analytics:
+     - Added `https://va.vercel-scripts.com` to `script-src` directive
+     - Added `https://va.vercel-analytics.com` to `connect-src` directive
+   - These CSP updates are required for the analytics script to load and send data
+
+## Implementation Details
+
+### Approach
+Since this is a vanilla HTML/JavaScript project without a build system or package.json, I used the recommended script injection method from the official Vercel Analytics documentation. This approach:
+- Does not require npm package installation
+- Works seamlessly with static HTML pages
+- Uses Vercel's CDN-hosted analytics script
+- Automatically tracks page views when deployed to Vercel
+
+### Script Pattern
+The analytics implementation follows Vercel's recommended pattern:
+```javascript
+window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+```
+
+This creates a queue that buffers analytics calls until the actual analytics script loads, ensuring no events are lost during the initial page load.
+
+### Security
+The Content Security Policy was updated to maintain security while allowing the analytics functionality:
+- Analytics scripts are only allowed from Vercel's official domains
+- No inline script execution is permitted (maintaining 'self' without 'unsafe-inline')
+- All analytics data is sent only to Vercel's analytics endpoint
+
+## Next Steps
+
+After deployment to Vercel:
+1. Enable Web Analytics in the Vercel project dashboard (Analytics section)
+2. Wait a few minutes for data to start appearing
+3. Verify analytics are working by checking the Network tab for requests to `/_vercel/insights/view`
+4. View analytics data in the Vercel dashboard
+
+## Testing
+
+All files were validated:
+- HTML structure validated for all three pages
+- JSON syntax validated for vercel.json
+- No build errors or linting issues
+
+The implementation is production-ready and will begin tracking analytics immediately upon deployment to Vercel with Web Analytics enabled in the dashboard.

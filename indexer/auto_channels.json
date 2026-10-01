@@ -2,7 +2,7 @@
   "version": 1,
   "lookback": 30,
   "maxPerRun": 8,
-  "maxPerChannelPerRun": 2,
+  "maxPerChannelPerRun": 4,
   "maxWorkers": 2,
   "maxRetriesPerRun": 1,
   "retryHours": 6,

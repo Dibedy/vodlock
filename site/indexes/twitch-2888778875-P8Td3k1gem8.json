@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 2,
+  "provider": "twitch",
+  "sourceId": "2888778875",
+  "label": "VALORANT Champions Shanghai",
+  "leadSeconds": 5,
+  "detector": "vct-clock-ocr-v9+storyboard-v4",
+  "rounds": [
+    {
+      "map": 1,
+      "round": 1,
+      "start": 12020.42
+    },
+    {
+      "map": 1,
+      "round": 2,
+      "start": 12129.07
+    },
+    {
+      "map": 1,
+      "round": 3,
+      "start": 12309.01
+    },
+    {
+      "map": 1,
+      "round": 4,
+      "start": 12382.29
+    },
+    {
+      "map": 1,
+      "round": 5,
+      "start": 12485.96
+    },
+    {
+      "map": 1,
+      "round": 6,
+      "start": 12583.66
+    },
+    {
+      "map": 1,
+      "round": 7,
+      "start": 12752.14
+    },
+    {
+      "map": 1,
+      "round": 8,
+      "start": 12883.72
+    },
+    {
+      "map": 1,
+      "round": 9,
+      "start": 13009.33
+    },
+    {
+      "map": 1,
+      "round": 10,
+      "start": 13125.97
+    },
+    {
+      "map": 1,
+      "round": 11,
+      "start": 13265.53
+    },
+    {
+      "map": 1,
+      "round": 12,
+      "start": 13388.15
+    },
+    {
+      "map": 1,
+      "round": 13,
+      "start": 13674.26
+    },
+    {
+      "map": 1,
+      "round": 14,
+      "start": 13807.84
+    },
+    {
+      "map": 1,
+      "round": 15,
+      "start": 13967.34
+    },
+    {
+      "map": 1,
+      "round": 16,
+      "start": 14070.02
+    },
+    {
+      "map": 1,
+      "round": 17,
+      "start": 14243.48
+    },
+    {
+      "map": 1,
+      "round": 18,
+      "start": 14358.13
+    },
+    {
+      "map": 1,
+      "round": 19,
+      "start": 14508.66
+    },
+    {
+      "map": 1,
+      "round": 20,
+      "start": 14683.11
+    },
+    {
+      "map": 1,
+      "round": 21,
+      "start": 14848.6
+    },
+    {
+      "map": 1,
+      "round": 22,
+      "start": 15075.89
+    },
+    {
+      "map": 1,
+      "round": 23,
+      "start": 15185.55
+    },
+    {
+      "map": 1,
+      "round": 24,
+      "start": 15545.43
+    },
+    {
+      "map": 2,
+      "round": 1,
+      "start": 15808.6
+    },
+    {
+      "map": 2,
+      "round": 2,
+      "start": 15927.23
+    },
+    {
+      "map": 2,
+      "round": 3,
+      "start": 16725.47
+    },
+    {
+      "map": 2,
+      "round": 4,
+      "start": 16821.18
+    },
+    {
+      "map": 2,
+      "round": 5,
+      "start": 16923.86
+    },
+    {
+      "map": 2,
+      "round": 6,
+      "start": 17084.36
+    },
+    {
+      "map": 2,
+      "round": 7,
+      "start": 17196.01
+    },
+    {
+      "map": 2,
+      "round": 8,
+      "start": 17305.66
+    },
+    {
+      "map": 2,
+      "round": 9,
+      "start": 17420.31
+    },
+    {
+      "map": 2,
+      "round": 10,
+      "start": 17506.04
+    },
+    {
+      "map": 2,
+      "round": 11,
+      "start": 17605.73
+    },
+    {
+      "map": 2,
+      "round": 12,
+      "start": 17694.46
+    },
+    {
+      "map": 2,
+      "round": 13,
+      "start": 17917.76
+    },
+    {
+      "map": 2,
+      "round": 14,
+      "start": 18038.38
+    },
+    {
+      "map": 2,
+      "round": 15,
+      "start": 18189.91
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 18317.51
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 18408.23
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 18507.92
+    },
+    {
+      "map": 2,
+      "round": 19,
+      "start": 18572.71
+    },
+    {
+      "map": 2,
+      "round": 20,
+      "start": 18639.5
+    },
+    {
+      "map": 2,
+      "round": 21,
+      "start": 18734.21
+    },
+    {
+      "map": 2,
+      "round": 22,
+      "start": 18892.72
+    },
+    {
+      "map": 2,
+      "round": 23,
+      "start": 19042.25
+    },
+    {
+      "map": 2,
+      "round": 24,
+      "start": 19110.04
+    }
+  ],
+  "alignment": {
+    "version": "storyboard-v4",
+    "offset": 1267.148,
+    "segments": [
+      {
+        "offset": 1267.148,
+        "anchors": 34,
+        "medianDistance": 10.0,
+        "maximumResidual": 44.957,
+        "targetStart": 0,
+        "targetEnd": 19570.0
+      }
+    ],
+    "timelineScale": 1.00400273,
+    "anchors": 34,
+    "coverage": [
+      11,
+      14,
+      9
+    ],
+    "medianDistance": 10.0,
+    "maximumResidual": 44.957,
+    "source": "youtube:P8Td3k1gem8"
+  }
+}

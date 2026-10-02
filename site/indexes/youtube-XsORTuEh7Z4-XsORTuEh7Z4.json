@@ -1,0 +1,195 @@
+{
+  "schemaVersion": 2,
+  "provider": "youtube",
+  "sourceId": "XsORTuEh7Z4",
+  "label": "VALORANT Champions Shanghai",
+  "leadSeconds": 5,
+  "detector": "vct-clock-ocr-v9+storyboard-v4",
+  "rounds": [
+    {
+      "map": 1,
+      "round": 1,
+      "start": 11136.93
+    },
+    {
+      "map": 1,
+      "round": 2,
+      "start": 11182.05
+    },
+    {
+      "map": 1,
+      "round": 3,
+      "start": 11593.07
+    },
+    {
+      "map": 1,
+      "round": 4,
+      "start": 11760.49
+    },
+    {
+      "map": 1,
+      "round": 5,
+      "start": 11871.77
+    },
+    {
+      "map": 1,
+      "round": 6,
+      "start": 11957.49
+    },
+    {
+      "map": 1,
+      "round": 7,
+      "start": 12115.38
+    },
+    {
+      "map": 1,
+      "round": 8,
+      "start": 12243.7
+    },
+    {
+      "map": 1,
+      "round": 9,
+      "start": 12428.16
+    },
+    {
+      "map": 1,
+      "round": 10,
+      "start": 12565.51
+    },
+    {
+      "map": 1,
+      "round": 11,
+      "start": 12682.8
+    },
+    {
+      "map": 1,
+      "round": 12,
+      "start": 12747.96
+    },
+    {
+      "map": 1,
+      "round": 13,
+      "start": 13003.6
+    },
+    {
+      "map": 1,
+      "round": 14,
+      "start": 13091.82
+    },
+    {
+      "map": 2,
+      "round": 1,
+      "start": 13272.21
+    },
+    {
+      "map": 2,
+      "round": 2,
+      "start": 13391.51
+    },
+    {
+      "map": 2,
+      "round": 3,
+      "start": 14225.18
+    },
+    {
+      "map": 2,
+      "round": 4,
+      "start": 14324.93
+    },
+    {
+      "map": 2,
+      "round": 5,
+      "start": 14459.76
+    },
+    {
+      "map": 2,
+      "round": 6,
+      "start": 14566.03
+    },
+    {
+      "map": 2,
+      "round": 7,
+      "start": 14852.75
+    },
+    {
+      "map": 2,
+      "round": 8,
+      "start": 14990.09
+    },
+    {
+      "map": 2,
+      "round": 9,
+      "start": 15110.39
+    },
+    {
+      "map": 2,
+      "round": 10,
+      "start": 15298.86
+    },
+    {
+      "map": 2,
+      "round": 11,
+      "start": 15418.16
+    },
+    {
+      "map": 2,
+      "round": 12,
+      "start": 15562.52
+    },
+    {
+      "map": 2,
+      "round": 13,
+      "start": 15774.05
+    },
+    {
+      "map": 2,
+      "round": 14,
+      "start": 15853.25
+    },
+    {
+      "map": 2,
+      "round": 15,
+      "start": 15911.4
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 16067.79
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 16242.22
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 16347.49
+    },
+    {
+      "map": 2,
+      "round": 19,
+      "start": 16507.89
+    },
+    {
+      "map": 2,
+      "round": 20,
+      "start": 16615.16
+    },
+    {
+      "map": 2,
+      "round": 21,
+      "start": 16707.39
+    },
+    {
+      "map": 2,
+      "round": 22,
+      "start": 16841.72
+    },
+    {
+      "map": 2,
+      "round": 23,
+      "start": 16980.07
+    }
+  ]
+}

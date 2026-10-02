@@ -132,6 +132,7 @@ def stream_migration_needed(channel, entry, catalog):
     migrated = any(str(item.get("catalogId", "")).startswith("youtube:" + identifier + ":")
                    for item in catalog["videos"])
     legacy = any(item.get("provider") == "youtube" and item.get("sourceId") == identifier
+                 and not item.get("catalogId")
                  for item in catalog["videos"])
     return legacy and not migrated
 

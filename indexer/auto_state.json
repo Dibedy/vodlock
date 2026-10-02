@@ -345,11 +345,11 @@
       "checkedAt": "2026-10-02T01:59:12.645015+00:00"
     },
     "youtube:P8Td3k1gem8": {
-      "status": "published",
+      "status": "indexed",
       "provider": "youtube",
-      "channel": "VALORANT Champions Tour full matches",
+      "channel": "VALORANT Champions Tour streams",
       "title": "VALORANT Champions Shanghai - Group Stage - Day 7",
-      "message": "Published",
+      "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v13",
@@ -357,11 +357,11 @@
       "checkedAt": "2026-10-02T02:22:20.078626+00:00"
     },
     "youtube:gYE4F6g9f9s": {
-      "status": "published",
+      "status": "indexed",
       "provider": "youtube",
-      "channel": "VALORANT Champions Tour full matches",
+      "channel": "VALORANT Champions Tour streams",
       "title": "VALORANT Champions Shanghai - Group Stage - Day 6",
-      "message": "Published",
+      "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v13",
@@ -369,11 +369,11 @@
       "checkedAt": "2026-10-02T02:23:53.704247+00:00"
     },
     "youtube:w5O5vwuHwXY": {
-      "status": "published",
+      "status": "indexed",
       "provider": "youtube",
-      "channel": "VALORANT Champions Tour full matches",
+      "channel": "VALORANT Champions Tour streams",
       "title": "VALORANT Champions Shanghai - Group Stage - Day 5",
-      "message": "Published",
+      "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v13",
@@ -381,11 +381,11 @@
       "checkedAt": "2026-10-02T02:25:28.178177+00:00"
     },
     "youtube:XsORTuEh7Z4": {
-      "status": "published",
+      "status": "indexed",
       "provider": "youtube",
-      "channel": "VALORANT Champions Tour full matches",
+      "channel": "VALORANT Champions Tour streams",
       "title": "VALORANT Champions Shanghai - Group Stage - Day 4",
-      "message": "Published",
+      "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v13",
@@ -393,11 +393,11 @@
       "checkedAt": "2026-10-02T02:26:16.759451+00:00"
     },
     "youtube:Lwi9Bd5ai5o": {
-      "status": "published",
+      "status": "indexed",
       "provider": "youtube",
-      "channel": "VALORANT Champions Tour full matches",
+      "channel": "VALORANT Champions Tour streams",
       "title": "VALORANT Champions Shanghai - Group Stage - Day 3",
-      "message": "Published",
+      "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v13",

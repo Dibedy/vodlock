@@ -70,8 +70,11 @@ class AutoPublishTests(unittest.TestCase):
         entry = {"id": "abcdefghijk"}
         legacy = {"videos": [{"provider": "youtube", "sourceId": "abcdefghijk"}]}
         migrated = {"videos": [{"provider": "youtube", "sourceId": "streamvideo", "catalogId": "youtube:abcdefghijk:streamvideo"}]}
+        playback = {"videos": [{"provider": "youtube", "sourceId": "streamvideo",
+                                  "catalogId": "youtube:abcdefghijk:streamvideo"}]}
         self.assertTrue(auto_publish.stream_migration_needed(channel, entry, legacy))
         self.assertFalse(auto_publish.stream_migration_needed(channel, entry, migrated))
+        self.assertFalse(auto_publish.stream_migration_needed(channel, {"id": "streamvideo"}, playback))
 
     def test_americas_channel_rejects_non_match_programming(self):
         valid = {"id": "TntlDvMFTX0", "title": "NRG vs 100T - VCT Americas Stage 2", "duration": 4835}

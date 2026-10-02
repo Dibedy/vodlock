@@ -5,18 +5,6 @@
     {
       "provider": "youtube",
       "sourceId": "P8Td3k1gem8",
-      "title": "VALORANT Champions Shanghai",
-      "event": "Group Stage | Day 7",
-      "label": "Full match",
-      "index": "/indexes/youtube-P8Td3k1gem8-P8Td3k1gem8.json",
-      "playedAt": "2026-10-01T14:38:33Z",
-      "tournament": "Group Stage | Day 7",
-      "tournamentKey": "group-stage-day-7",
-      "catalogId": "youtube:P8Td3k1gem8:P8Td3k1gem8"
-    },
-    {
-      "provider": "youtube",
-      "sourceId": "P8Td3k1gem8",
       "title": "NS vs XLG",
       "event": "VALORANT Champions Shanghai | Group Stage",
       "label": "Full match",
@@ -27,21 +15,6 @@
       "catalogId": "youtube:WdGW0L-3iCc:P8Td3k1gem8",
       "chat": "/chats/twitch-2888772554.json",
       "chatSourceId": "2888772554"
-    },
-    {
-      "provider": "twitch",
-      "sourceId": "2888778875",
-      "catalogId": "twitch:2888778875:P8Td3k1gem8",
-      "kind": "watch-party",
-      "creator": "FNS",
-      "title": "VALORANT Champions Shanghai",
-      "event": "Group Stage | Day 7",
-      "label": "Watch party",
-      "index": "/indexes/twitch-2888778875-P8Td3k1gem8.json",
-      "playedAt": "2026-10-01T14:38:33Z",
-      "tournament": "Group Stage | Day 7",
-      "tournamentKey": "group-stage-day-7",
-      "chat": "/chats/twitch-2888778875.json"
     },
     {
       "provider": "twitch",
@@ -90,18 +63,6 @@
     {
       "provider": "youtube",
       "sourceId": "gYE4F6g9f9s",
-      "title": "VALORANT Champions Shanghai",
-      "event": "Group Stage | Day 6",
-      "label": "Full match",
-      "index": "/indexes/youtube-gYE4F6g9f9s-gYE4F6g9f9s.json",
-      "playedAt": "2026-09-30T11:57:10Z",
-      "tournament": "Group Stage | Day 6",
-      "tournamentKey": "group-stage-day-6",
-      "catalogId": "youtube:gYE4F6g9f9s:gYE4F6g9f9s"
-    },
-    {
-      "provider": "youtube",
-      "sourceId": "gYE4F6g9f9s",
       "title": "100T vs FUT",
       "event": "VALORANT Champions Shanghai | Group Stage",
       "label": "Full match",
@@ -112,21 +73,6 @@
       "catalogId": "youtube:2y9ne_hMZts:gYE4F6g9f9s",
       "chat": "/chats/twitch-2887911255.json",
       "chatSourceId": "2887911255"
-    },
-    {
-      "provider": "twitch",
-      "sourceId": "2887917739",
-      "catalogId": "twitch:2887917739:gYE4F6g9f9s",
-      "kind": "watch-party",
-      "creator": "FNS",
-      "title": "VALORANT Champions Shanghai",
-      "event": "Group Stage | Day 6",
-      "label": "Watch party",
-      "index": "/indexes/twitch-2887917739-gYE4F6g9f9s.json",
-      "playedAt": "2026-09-30T11:57:10Z",
-      "tournament": "Group Stage | Day 6",
-      "tournamentKey": "group-stage-day-6",
-      "chat": "/chats/twitch-2887917739.json"
     },
     {
       "provider": "twitch",
@@ -175,18 +121,6 @@
     {
       "provider": "youtube",
       "sourceId": "w5O5vwuHwXY",
-      "title": "VALORANT Champions Shanghai",
-      "event": "Group Stage | Day 5",
-      "label": "Full match",
-      "index": "/indexes/youtube-w5O5vwuHwXY-w5O5vwuHwXY.json",
-      "playedAt": "2026-09-29T16:02:28Z",
-      "tournament": "Group Stage | Day 5",
-      "tournamentKey": "group-stage-day-5",
-      "catalogId": "youtube:w5O5vwuHwXY:w5O5vwuHwXY"
-    },
-    {
-      "provider": "youtube",
-      "sourceId": "w5O5vwuHwXY",
       "title": "NRG vs KC",
       "event": "VALORANT Champions Shanghai | Group Stage",
       "label": "Full match",
@@ -197,21 +131,6 @@
       "catalogId": "youtube:y6wwIZysHns:w5O5vwuHwXY",
       "chat": "/chats/twitch-2887052196.json",
       "chatSourceId": "2887052196"
-    },
-    {
-      "provider": "twitch",
-      "sourceId": "2887057207",
-      "catalogId": "twitch:2887057207:w5O5vwuHwXY",
-      "kind": "watch-party",
-      "creator": "FNS",
-      "title": "VALORANT Champions Shanghai",
-      "event": "Group Stage | Day 5",
-      "label": "Watch party",
-      "index": "/indexes/twitch-2887057207-w5O5vwuHwXY.json",
-      "playedAt": "2026-09-29T16:02:28Z",
-      "tournament": "Group Stage | Day 5",
-      "tournamentKey": "group-stage-day-5",
-      "chat": "/chats/twitch-2887057207.json"
     },
     {
       "provider": "twitch",
@@ -245,18 +164,6 @@
     {
       "provider": "youtube",
       "sourceId": "XsORTuEh7Z4",
-      "title": "VALORANT Champions Shanghai",
-      "event": "Group Stage | Day 4",
-      "label": "Full match",
-      "index": "/indexes/youtube-XsORTuEh7Z4-XsORTuEh7Z4.json",
-      "playedAt": "2026-09-27T11:36:45Z",
-      "tournament": "Group Stage | Day 4",
-      "tournamentKey": "group-stage-day-4",
-      "catalogId": "youtube:XsORTuEh7Z4:XsORTuEh7Z4"
-    },
-    {
-      "provider": "youtube",
-      "sourceId": "XsORTuEh7Z4",
       "title": "JDG vs FUT",
       "event": "VALORANT Champions Shanghai | Group Stage",
       "label": "Full match",
@@ -265,18 +172,6 @@
       "tournament": "VALORANT Champions Shanghai",
       "tournamentKey": "valorant-champions-shanghai",
       "catalogId": "youtube:fFfCJDNHEvc:XsORTuEh7Z4"
-    },
-    {
-      "provider": "youtube",
-      "sourceId": "Lwi9Bd5ai5o",
-      "title": "VALORANT Champions Shanghai",
-      "event": "Group Stage | Day 3",
-      "label": "Full match",
-      "index": "/indexes/youtube-Lwi9Bd5ai5o-Lwi9Bd5ai5o.json",
-      "playedAt": "2026-09-27T09:11:47Z",
-      "tournament": "Group Stage | Day 3",
-      "tournamentKey": "group-stage-day-3",
-      "catalogId": "youtube:Lwi9Bd5ai5o:Lwi9Bd5ai5o"
     },
     {
       "provider": "youtube",

@@ -597,6 +597,30 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(catalog["videos"][0]["sourceId"], "lmnopqrstuv")
         self.assertEqual(catalog["videos"][0]["catalogId"], "youtube:abcdefghijk:lmnopqrstuv")
 
+    def test_full_match_migration_preserves_the_legacy_catalog_time(self):
+        channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH",
+                 "published": None, "catalogPlayedAt": "2026-09-30T10:05:00Z"}
+        rounds = [{"map": 1, "round": number, "start": number * 100} for number in range(1, 14)]
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "indexes" / "legacy.json").write_text(json.dumps({"schemaVersion": 2, "provider": "youtube",
+                "sourceId": "abcdefghijk", "rounds": rounds}), encoding="utf-8")
+            (site / "catalog.json").write_text(json.dumps({"version": 2, "videos": [{"provider": "youtube",
+                "sourceId": "abcdefghijk", "index": "/indexes/legacy.json"}]}), encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), patch.object(auto_publish.server, "index_job"), \
+                    patch.object(auto_publish, "canonical_stream_alignment",
+                                 return_value=("lmnopqrstuv", {"offset": 0}, rounds)):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13},
+                                              {"videos": {"youtube:lmnopqrstuv": {"publishedAt": None}}}, object())
+            catalog = auto_publish.read_json(site / "catalog.json")
+        self.assertEqual(result, (True, "Published"))
+        self.assertEqual(catalog["videos"][0]["playedAt"], "2026-09-30T10:05:00Z")
+
     def test_official_twitch_chat_attaches_to_canonical_stream_matches_without_round_ocr(self):
         entry = {"id": "1234567890", "title": "A vs B - Champions"}
         config = {"channels": [{"name": "Streams", "canonicalStream": True}], "alignmentLookback": 8,

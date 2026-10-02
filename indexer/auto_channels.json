@@ -63,7 +63,7 @@
     {
       "provider": "youtube",
       "name": "VALORANT Champions Tour full matches",
-      "channelId": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "url": "https://www.youtube.com/@ValorantEsports/videos",
       "priority": 1,
       "matchSource": true,
       "includeTitle": "(?=.*\\bFULL MATCH\\b)(?=.*\\b(CHAMPIONS|SHANGHAI)\\b)",

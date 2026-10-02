@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v11"
+PUBLISHER_VERSION = "publisher-v12"
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 PUBLISH_LOCK = threading.Lock()
 
@@ -793,8 +793,8 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             source = (state["videos"].get(source_key("youtube", playback_source_id))
                       if catalog_id and state is not None else state["videos"].get(source_key("twitch", aligned_source_id))
                       if provider == "youtube" and aligned_source_id and state is not None else None)
-            played_at = catalog_played_at(entry, exported["rounds"], source,
-                                          alignment if source else None)
+            played_at = entry.get("catalogPlayedAt") or catalog_played_at(
+                entry, exported["rounds"], source, alignment if source else None)
             catalog_entry = {"provider": provider, "sourceId": playback_source_id, "title": title,
                              "event": event, "label": "Full match" if provider == "youtube" else "Full broadcast",
                              "index": f"/indexes/{filename}", "playedAt": played_at, **tournament_metadata(event, title)}
@@ -872,7 +872,8 @@ def main():
                 previous = state["videos"].get("youtube:" + identifier, {})
                 migration_entry = {"id": identifier,
                                    "title": previous.get("title") or item.get("title", "Indexed match"),
-                                   "published": previous.get("publishedAt") or item.get("playedAt")}
+                                   "published": previous.get("publishedAt"),
+                                   "catalogPlayedAt": item.get("playedAt")}
                 if stream_migration_needed(channel, migration_entry, catalog):
                     retained.append(migration_entry)
                     known_ids.add(identifier)

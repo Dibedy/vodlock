@@ -43,16 +43,16 @@
       "checkedAt": "2026-09-28T06:54:18.390210+00:00"
     },
     "youtube:fFfCJDNHEvc": {
-      "status": "published",
+      "status": "held",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "JDG vs. FUT - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "Published",
+      "message": "The match does not have enough timing information for the catalog",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v13",
-      "retryClass": "none",
-      "checkedAt": "2026-10-02T02:03:09.446827+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-02T07:35:48.257538+00:00"
     },
     "twitch:2884362905": {
       "status": "published",
@@ -120,16 +120,16 @@
       "checkedAt": "2026-10-02T03:53:19.298696+00:00"
     },
     "youtube:ZWhEMQVk4x0": {
-      "status": "published",
+      "status": "held",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "100T vs. T1 - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "Published",
+      "message": "The match does not have enough timing information for the catalog",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v13",
-      "retryClass": "none",
-      "checkedAt": "2026-10-02T02:03:43.293524+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-02T07:45:11.092505+00:00"
     },
     "youtube:_wWnQ7KG8no": {
       "status": "held",
@@ -148,9 +148,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-09T20:54:30Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T21:33:33.823783+00:00"
+      "checkedAt": "2026-10-02T07:45:22.200732+00:00"
     },
     "twitch:2877469732": {
       "status": "held",
@@ -165,16 +165,16 @@
       "checkedAt": "2026-10-02T04:00:39.819275+00:00"
     },
     "youtube:z_aPp2s4d_o": {
-      "status": "published",
+      "status": "held",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "PRX vs. G2 - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "Published",
+      "message": "The match does not have enough timing information for the catalog",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v13",
-      "retryClass": "none",
-      "checkedAt": "2026-10-02T02:02:41.773301+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-02T07:27:40.801126+00:00"
     },
     "twitch:2867033974": {
       "status": "published",
@@ -213,16 +213,16 @@
       "checkedAt": "2026-10-01T17:09:53.563062+00:00"
     },
     "youtube:y6wwIZysHns": {
-      "status": "published",
+      "status": "held",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "NRG vs. KC - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "Published",
+      "message": "The match does not have enough timing information for the catalog",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v13",
-      "retryClass": "none",
-      "checkedAt": "2026-10-02T02:01:53.792186+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-02T07:14:18.572789+00:00"
     },
     "twitch:2887052196": {
       "status": "indexed",
@@ -400,9 +400,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v13",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
       "retryClass": "none",
-      "checkedAt": "2026-10-02T02:26:59.371996+00:00"
+      "checkedAt": "2026-10-02T07:00:08.454481+00:00"
     },
     "youtube:UsFBKuZ_gX4": {
       "status": "indexed",
@@ -412,9 +412,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v13",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
       "retryClass": "none",
-      "checkedAt": "2026-10-02T02:20:33.131339+00:00"
+      "checkedAt": "2026-10-02T07:00:08.456244+00:00"
     },
     "youtube:ynKvUYpu1Qw": {
       "status": "indexed",
@@ -424,9 +424,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v13",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
       "retryClass": "none",
-      "checkedAt": "2026-10-02T02:20:33.133505+00:00"
+      "checkedAt": "2026-10-02T07:00:08.458126+00:00"
     },
     "youtube:ZphbktbT26k": {
       "status": "published",

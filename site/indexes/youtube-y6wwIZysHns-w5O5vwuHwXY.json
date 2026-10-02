@@ -324,7 +324,7 @@
     {
       "map": 3,
       "round": 20,
-      "start": 24979.67
+      "start": 24980.17
     },
     {
       "map": 3,
@@ -336,16 +336,5 @@
       "round": 22,
       "start": 25194.93
     }
-  ],
-  "alignment": {
-    "timelineScale": 0.9956363449401233,
-    "segments": [
-      {
-        "offset": 17.477400399078924,
-        "targetStart": 0,
-        "targetEnd": 26394.7
-      }
-    ],
-    "source": "twitch:2887052196"
-  }
+  ]
 }

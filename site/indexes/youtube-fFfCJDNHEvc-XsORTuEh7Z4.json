@@ -9,87 +9,87 @@
     {
       "map": 1,
       "round": 1,
-      "start": 11136.93
+      "start": 11136.37
     },
     {
       "map": 1,
       "round": 2,
-      "start": 11182.05
+      "start": 11181.48
     },
     {
       "map": 1,
       "round": 3,
-      "start": 11593.07
+      "start": 11592.51
     },
     {
       "map": 1,
       "round": 4,
-      "start": 11760.49
+      "start": 11759.93
     },
     {
       "map": 1,
       "round": 5,
-      "start": 11871.77
+      "start": 11872.21
     },
     {
       "map": 1,
       "round": 6,
-      "start": 11957.49
+      "start": 11957.43
     },
     {
       "map": 1,
       "round": 7,
-      "start": 12115.38
+      "start": 12114.82
     },
     {
       "map": 1,
       "round": 8,
-      "start": 12243.7
+      "start": 12243.14
     },
     {
       "map": 1,
       "round": 9,
-      "start": 12428.16
+      "start": 12428.6
     },
     {
       "map": 1,
       "round": 10,
-      "start": 12565.51
+      "start": 12564.95
     },
     {
       "map": 1,
       "round": 11,
-      "start": 12682.8
+      "start": 12682.24
     },
     {
       "map": 1,
       "round": 12,
-      "start": 12747.96
+      "start": 12747.4
     },
     {
       "map": 1,
       "round": 13,
-      "start": 13003.6
+      "start": 13003.04
     },
     {
       "map": 1,
       "round": 14,
-      "start": 13091.82
+      "start": 13091.26
     },
     {
       "map": 2,
       "round": 1,
-      "start": 13272.21
+      "start": 13272.72
     },
     {
       "map": 2,
       "round": 2,
-      "start": 13391.51
+      "start": 13391.01
     },
     {
       "map": 2,
       "round": 3,
-      "start": 14225.18
+      "start": 14225.68
     },
     {
       "map": 2,
@@ -99,37 +99,37 @@
     {
       "map": 2,
       "round": 5,
-      "start": 14459.76
+      "start": 14459.26
     },
     {
       "map": 2,
       "round": 6,
-      "start": 14566.03
+      "start": 14566.53
     },
     {
       "map": 2,
       "round": 7,
-      "start": 14852.75
+      "start": 14853.25
     },
     {
       "map": 2,
       "round": 8,
-      "start": 14990.09
+      "start": 14990.59
     },
     {
       "map": 2,
       "round": 9,
-      "start": 15110.39
+      "start": 15110.89
     },
     {
       "map": 2,
       "round": 10,
-      "start": 15298.86
+      "start": 15299.36
     },
     {
       "map": 2,
       "round": 11,
-      "start": 15418.16
+      "start": 15418.66
     },
     {
       "map": 2,
@@ -139,57 +139,57 @@
     {
       "map": 2,
       "round": 13,
-      "start": 15774.05
+      "start": 15774.55
     },
     {
       "map": 2,
       "round": 14,
-      "start": 15853.25
+      "start": 15852.75
     },
     {
       "map": 2,
       "round": 15,
-      "start": 15911.4
+      "start": 15910.9
     },
     {
       "map": 2,
       "round": 16,
-      "start": 16067.79
+      "start": 16067.29
     },
     {
       "map": 2,
       "round": 17,
-      "start": 16242.22
+      "start": 16242.73
     },
     {
       "map": 2,
       "round": 18,
-      "start": 16347.49
+      "start": 16347.99
     },
     {
       "map": 2,
       "round": 19,
-      "start": 16507.89
+      "start": 16508.39
     },
     {
       "map": 2,
       "round": 20,
-      "start": 16615.16
+      "start": 16614.66
     },
     {
       "map": 2,
       "round": 21,
-      "start": 16707.39
+      "start": 16707.89
     },
     {
       "map": 2,
       "round": 22,
-      "start": 16841.72
+      "start": 16842.23
     },
     {
       "map": 2,
       "round": 23,
-      "start": 16980.07
+      "start": 16979.57
     }
   ]
 }

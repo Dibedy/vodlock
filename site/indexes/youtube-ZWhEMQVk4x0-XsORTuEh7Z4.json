@@ -9,217 +9,217 @@
     {
       "map": 1,
       "round": 1,
-      "start": 2439.66
+      "start": 2438.61
     },
     {
       "map": 1,
       "round": 2,
-      "start": 2535.74
+      "start": 2534.69
     },
     {
       "map": 1,
       "round": 3,
-      "start": 2633.82
+      "start": 2632.77
     },
     {
       "map": 1,
       "round": 4,
-      "start": 2749.92
+      "start": 2749.87
     },
     {
       "map": 1,
       "round": 5,
-      "start": 2846.0
+      "start": 2845.95
     },
     {
       "map": 1,
       "round": 6,
-      "start": 2983.11
+      "start": 2983.06
     },
     {
       "map": 1,
       "round": 7,
-      "start": 3227.31
+      "start": 3226.26
     },
     {
       "map": 1,
       "round": 8,
-      "start": 3354.42
+      "start": 3354.37
     },
     {
       "map": 1,
       "round": 9,
-      "start": 3563.59
+      "start": 3562.54
     },
     {
       "map": 1,
       "round": 10,
-      "start": 3677.69
+      "start": 3677.64
     },
     {
       "map": 1,
       "round": 11,
-      "start": 3836.82
+      "start": 3836.77
     },
     {
       "map": 1,
       "round": 12,
-      "start": 3979.94
+      "start": 3979.89
     },
     {
       "map": 1,
       "round": 13,
-      "start": 4220.14
+      "start": 4219.08
     },
     {
       "map": 1,
       "round": 14,
-      "start": 4359.25
+      "start": 4359.2
     },
     {
       "map": 1,
       "round": 15,
-      "start": 4556.41
+      "start": 4556.36
     },
     {
       "map": 1,
       "round": 16,
-      "start": 4620.47
+      "start": 4620.42
     },
     {
       "map": 1,
       "round": 17,
-      "start": 4781.6
+      "start": 4781.05
     },
     {
       "map": 1,
       "round": 18,
-      "start": 4903.7
+      "start": 4902.65
     },
     {
       "map": 1,
       "round": 19,
-      "start": 5082.85
+      "start": 5082.8
     },
     {
       "map": 1,
       "round": 20,
-      "start": 5226.97
+      "start": 5226.92
     },
     {
       "map": 1,
       "round": 21,
-      "start": 5394.11
+      "start": 5393.06
     },
     {
       "map": 2,
       "round": 1,
-      "start": 5629.27
+      "start": 5629.25
     },
     {
       "map": 2,
       "round": 2,
-      "start": 5756.38
+      "start": 5757.36
     },
     {
       "map": 2,
       "round": 3,
-      "start": 6537.94
+      "start": 6537.92
     },
     {
       "map": 2,
       "round": 4,
-      "start": 6667.05
+      "start": 6668.03
     },
     {
       "map": 2,
       "round": 5,
-      "start": 6804.66
+      "start": 6805.14
     },
     {
       "map": 2,
       "round": 6,
-      "start": 7009.33
+      "start": 7009.31
     },
     {
       "map": 2,
       "round": 7,
-      "start": 7150.45
+      "start": 7150.43
     },
     {
       "map": 2,
       "round": 8,
-      "start": 7312.58
+      "start": 7313.56
     },
     {
       "map": 2,
       "round": 9,
-      "start": 7545.78
+      "start": 7545.76
     },
     {
       "map": 2,
       "round": 10,
-      "start": 7661.87
+      "start": 7661.85
     },
     {
       "map": 2,
       "round": 11,
-      "start": 7865.04
+      "start": 7865.02
     },
     {
       "map": 2,
       "round": 12,
-      "start": 8002.15
+      "start": 8002.13
     },
     {
       "map": 2,
       "round": 13,
-      "start": 8251.36
+      "start": 8251.34
     },
     {
       "map": 2,
       "round": 14,
-      "start": 8335.43
+      "start": 8335.41
     },
     {
       "map": 2,
       "round": 15,
-      "start": 8399.48
+      "start": 8399.46
     },
     {
       "map": 2,
       "round": 16,
-      "start": 8537.6
+      "start": 8537.58
     },
     {
       "map": 2,
       "round": 17,
-      "start": 8716.75
+      "start": 8716.73
     },
     {
       "map": 2,
       "round": 18,
-      "start": 8816.83
+      "start": 8816.81
     },
     {
       "map": 2,
       "round": 19,
-      "start": 8906.9
+      "start": 8906.88
     },
     {
       "map": 2,
       "round": 20,
-      "start": 9059.03
+      "start": 9059.01
     },
     {
       "map": 2,
       "round": 21,
-      "start": 9196.14
+      "start": 9196.12
     },
     {
       "map": 2,
       "round": 22,
-      "start": 9282.22
+      "start": 9282.2
     }
   ]
 }

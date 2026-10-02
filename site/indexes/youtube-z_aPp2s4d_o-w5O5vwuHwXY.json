@@ -9,308 +9,342 @@
     {
       "map": 1,
       "round": 1,
-      "start": 2294.25
+      "start": 2291.42
     },
     {
       "map": 1,
       "round": 2,
-      "start": 2374.18
+      "start": 2371.5
     },
     {
       "map": 1,
       "round": 3,
-      "start": 2498.59
+      "start": 2496.63
     },
     {
       "map": 1,
       "round": 4,
-      "start": 2562.54
+      "start": 2560.7
     },
     {
       "map": 1,
       "round": 5,
-      "start": 2647.98
+      "start": 2645.78
     },
     {
       "map": 1,
       "round": 6,
-      "start": 2801.86
+      "start": 2798.94
     },
     {
       "map": 1,
       "round": 7,
-      "start": 2894.29
+      "start": 2893.04
     },
     {
       "map": 1,
       "round": 8,
-      "start": 3019.69
+      "start": 3018.17
     },
     {
       "map": 1,
       "round": 9,
-      "start": 3133.61
+      "start": 3132.29
     },
     {
       "map": 1,
       "round": 10,
-      "start": 3321.96
+      "start": 3320.48
     },
     {
       "map": 1,
       "round": 11,
-      "start": 3415.39
+      "start": 3414.58
     },
     {
       "map": 1,
       "round": 12,
-      "start": 3499.83
+      "start": 3499.67
     },
     {
       "map": 1,
       "round": 13,
-      "start": 3763.62
+      "start": 3763.94
     },
     {
       "map": 1,
       "round": 14,
-      "start": 4060.9
+      "start": 4061.25
     },
     {
       "map": 1,
       "round": 15,
-      "start": 4172.82
+      "start": 4173.37
     },
     {
       "map": 1,
       "round": 16,
-      "start": 4252.75
+      "start": 4253.45
     },
     {
       "map": 1,
       "round": 17,
-      "start": 4362.66
+      "start": 4363.56
     },
     {
       "map": 1,
       "round": 18,
-      "start": 4567.02
+      "start": 4568.78
     },
     {
       "map": 1,
       "round": 19,
-      "start": 4712.4
+      "start": 4713.93
     },
     {
       "map": 1,
       "round": 20,
-      "start": 4818.32
+      "start": 4820.04
     },
     {
       "map": 1,
       "round": 21,
-      "start": 4900.75
+      "start": 4903.12
     },
     {
       "map": 1,
       "round": 22,
-      "start": 5008.17
+      "start": 5010.23
     },
     {
       "map": 2,
       "round": 1,
-      "start": 6507.53
+      "start": 5210.44
     },
     {
       "map": 2,
       "round": 2,
-      "start": 6597.46
+      "start": 5300.54
     },
     {
       "map": 2,
       "round": 3,
-      "start": 6713.37
+      "start": 6066.16
     },
     {
       "map": 2,
       "round": 4,
-      "start": 6813.29
+      "start": 6166.26
     },
     {
       "map": 2,
       "round": 5,
-      "start": 6944.69
+      "start": 6298.4
     },
     {
       "map": 2,
       "round": 6,
-      "start": 7117.06
+      "start": 6466.58
     },
     {
       "map": 2,
       "round": 7,
-      "start": 7212.99
+      "start": 6566.68
     },
     {
       "map": 2,
       "round": 8,
-      "start": 7316.91
+      "start": 6670.79
     },
     {
       "map": 2,
       "round": 9,
-      "start": 7446.81
+      "start": 6800.92
     },
     {
       "map": 2,
       "round": 10,
-      "start": 7592.2
+      "start": 6946.07
     },
     {
       "map": 2,
       "round": 11,
-      "start": 7744.58
+      "start": 7099.23
     },
     {
       "map": 2,
       "round": 12,
-      "start": 7842.01
+      "start": 7196.33
     },
     {
       "map": 2,
       "round": 13,
-      "start": 8083.82
+      "start": 7438.58
     },
     {
       "map": 2,
       "round": 14,
-      "start": 8175.76
+      "start": 7530.68
     },
     {
       "map": 2,
       "round": 15,
-      "start": 8285.67
+      "start": 7640.79
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 7840.0
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 7907.07
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 8034.2
+    },
+    {
+      "map": 2,
+      "round": 19,
+      "start": 8113.28
+    },
+    {
+      "map": 2,
+      "round": 20,
+      "start": 8266.44
+    },
+    {
+      "map": 2,
+      "round": 21,
+      "start": 8393.57
+    },
+    {
+      "map": 2,
+      "round": 22,
+      "start": 8525.71
+    },
+    {
+      "map": 2,
+      "round": 23,
+      "start": 8680.87
+    },
+    {
+      "map": 2,
+      "round": 24,
+      "start": 8792.99
     },
     {
       "map": 3,
       "round": 1,
-      "start": 8984.89
+      "start": 8996.2
     },
     {
       "map": 3,
       "round": 2,
-      "start": 9118.03
+      "start": 9129.33
     },
     {
       "map": 3,
       "round": 3,
-      "start": 9206.46
+      "start": 9217.43
     },
     {
       "map": 3,
       "round": 4,
-      "start": 9313.89
+      "start": 9304.52
     },
     {
       "map": 3,
       "round": 5,
-      "start": 10081.8
+      "start": 10073.29
     },
     {
       "map": 3,
       "round": 6,
-      "start": 10213.2
+      "start": 10204.42
     },
     {
       "map": 3,
       "round": 7,
-      "start": 10361.59
+      "start": 10373.6
     },
     {
       "map": 3,
       "round": 8,
-      "start": 10492.98
+      "start": 10504.73
     },
     {
       "map": 3,
       "round": 9,
-      "start": 10630.88
+      "start": 10642.88
     },
     {
       "map": 3,
       "round": 10,
-      "start": 10731.3
+      "start": 10743.98
     },
     {
       "map": 3,
       "round": 11,
-      "start": 10932.65
+      "start": 10945.19
     },
     {
       "map": 3,
       "round": 12,
-      "start": 11075.04
+      "start": 11088.34
     },
     {
       "map": 3,
       "round": 13,
-      "start": 11308.86
+      "start": 11322.58
     },
     {
       "map": 3,
       "round": 14,
-      "start": 11701.56
+      "start": 11714.99
     },
     {
       "map": 3,
       "round": 15,
-      "start": 11792.49
+      "start": 11807.08
     },
     {
       "map": 3,
       "round": 16,
-      "start": 11908.4
+      "start": 11923.2
     },
     {
       "map": 3,
       "round": 17,
-      "start": 12050.3
+      "start": 12065.35
     },
     {
       "map": 3,
       "round": 18,
-      "start": 12158.21
+      "start": 12173.46
     },
     {
       "map": 3,
       "round": 19,
-      "start": 12259.63
+      "start": 12274.57
     },
     {
       "map": 3,
       "round": 20,
-      "start": 12367.05
+      "start": 12382.68
     },
     {
       "map": 3,
       "round": 21,
-      "start": 12461.98
+      "start": 12477.78
     },
     {
       "map": 3,
       "round": 22,
-      "start": 12683.81
+      "start": 12700.01
     }
-  ],
-  "alignment": {
-    "timelineScale": 0.9956363449401233,
-    "segments": [
-      {
-        "offset": 17.477400399078924,
-        "targetStart": 0,
-        "targetEnd": 26394.7
-      }
-    ],
-    "source": "twitch:2887052196"
-  }
+  ]
 }

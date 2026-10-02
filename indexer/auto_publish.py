@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v12"
+PUBLISHER_VERSION = "publisher-v13"
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 PUBLISH_LOCK = threading.Lock()
 
@@ -864,19 +864,21 @@ def main():
         ]
         known_ids.update(item["id"] for item in retained)
         if channel.get("matchSource"):
+            existing_entries = {item["id"]: item for item in entries + retained}
             for item in catalog["videos"]:
                 identifier = str(item.get("sourceId", ""))
-                if (item.get("provider") != "youtube" or identifier in known_ids
-                        or not re.fullmatch(r"[A-Za-z0-9_-]{11}", identifier)):
+                if item.get("provider") != "youtube" or not re.fullmatch(r"[A-Za-z0-9_-]{11}", identifier):
                     continue
                 previous = state["videos"].get("youtube:" + identifier, {})
-                migration_entry = {"id": identifier,
-                                   "title": previous.get("title") or item.get("title", "Indexed match"),
-                                   "published": previous.get("publishedAt"),
-                                   "catalogPlayedAt": item.get("playedAt")}
+                migration_entry = existing_entries.get(identifier) or {
+                    "id": identifier,
+                    "title": previous.get("title") or item.get("title", "Indexed match"),
+                    "published": previous.get("publishedAt")}
                 if stream_migration_needed(channel, migration_entry, catalog):
-                    retained.append(migration_entry)
-                    known_ids.add(identifier)
+                    migration_entry["catalogPlayedAt"] = item.get("playedAt")
+                    if identifier not in known_ids:
+                        retained.append(migration_entry)
+                        known_ids.add(identifier)
         entries.extend(retained)
         eligible = [item for item in entries
                     if stream_migration_needed(channel, item, catalog)

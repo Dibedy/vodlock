@@ -375,6 +375,25 @@ class AutoPublishTests(unittest.TestCase):
             self.assertEqual(auto_publish.main(), 0)
         self.assertEqual([call.args[1]["id"] for call in process.call_args_list], identifiers)
 
+    def test_discovered_legacy_match_keeps_its_catalog_time_for_migration(self):
+        now = datetime.now(timezone.utc).isoformat()
+        channel = {"provider": "youtube", "name": "Full matches", "priority": 1, "matchSource": True}
+        config = {"channels": [channel], "lookback": 30, "maxPerRun": 4,
+                  "maxPerChannelPerRun": 1, "maxRetriesPerRun": 1, "youtubeRetryHours": 6}
+        state = {"videos": {"youtube:abcdefghijk": {"status": "held", "channel": "Full matches",
+                                                       "title": "A vs B - FULL MATCH", "checkedAt": now,
+                                                       "pipelineVersion": auto_publish.PIPELINE_VERSION}}}
+        catalog = {"videos": [{"provider": "youtube", "sourceId": "abcdefghijk", "title": "A vs B",
+                                "playedAt": "2026-09-30T10:05:00Z", "index": "/indexes/legacy.json"}]}
+        discovered = [{"id": "abcdefghijk", "title": "A vs B - FULL MATCH"}]
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, catalog]), \
+                patch.object(auto_publish, "discover_youtube", return_value=discovered), \
+                patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \
+                patch.object(auto_publish, "write_json"), patch.object(sys, "argv", ["auto_publish.py"]), \
+                patch("sys.stdout", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual(process.call_args.args[1]["catalogPlayedAt"], "2026-09-30T10:05:00Z")
+
     def test_explicit_held_retry_keeps_new_candidates_eligible(self):
         channel = {"provider": "youtube", "name": "YouTube"}
         config = {"channels": [channel], "lookback": 30, "maxPerRun": 4, "maxPerChannelPerRun": 4}

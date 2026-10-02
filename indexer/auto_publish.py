@@ -136,6 +136,23 @@ def stream_migration_needed(channel, entry, catalog):
     return legacy and not migrated
 
 
+def reusable_match_rounds(entry):
+    catalog_path = SITE / "catalog.json"
+    if not catalog_path.is_file():
+        return []
+    catalog = read_json(catalog_path)
+    for record in catalog["videos"]:
+        if record.get("provider") != "youtube" or record.get("sourceId") != entry["id"]:
+            continue
+        index_path = SITE / str(record.get("index", "")).lstrip("/")
+        if not index_path.is_file():
+            continue
+        index = read_json(index_path)
+        if index.get("provider") == "youtube" and index.get("sourceId") == entry["id"]:
+            return [{**item, "confidence": 1} for item in index.get("rounds", [])]
+    return []
+
+
 def is_candidate(channel, entry, require_duration=True):
     title = clean_text(entry.get("title", ""))
     identifier = str(entry.get("id", ""))
@@ -466,7 +483,7 @@ def canonical_stream_alignment(entry, job, config, state, yt_dlp):
     for stream_id in reversed(streams):
         try:
             target = storyboard("youtube", stream_id, yt_dlp)
-            alignment = align_storyboards(reference, target)
+            alignment = align_storyboards(reference, target, require_target_coverage=False)
             rounds = translate_index({"rounds": job["rounds"]}, target, alignment)
             matches.append((alignment["anchors"], stream_id, alignment, rounds))
         except (OSError, ValueError, KeyError):
@@ -497,13 +514,7 @@ def attach_stream_chat(entry, job, config, state, yt_dlp):
     streams = canonical_streams(config, state)[-int(config.get("alignmentLookback", 8)):]
     if not streams:
         raise OfficialMatchPending("Waiting for an indexed official YouTube stream archive")
-    interval = int(config.get("watchPartyFingerprintInterval", 10))
-    job.update(fingerprintOnly=True, fingerprintInterval=interval, analysisHeight=540)
-    server.index_job(job["id"])
-    if job.get("status") != "ready" or len(job.get("fingerprints", [])) < 30:
-        raise ValueError(job.get("message", "The Twitch chat timeline could not be fingerprinted"))
-    target = {"version": 2, "provider": "twitch", "sourceId": entry["id"], "duration": round(float(job["duration"]), 3),
-              "interval": interval, "frames": job["fingerprints"]}
+    target = storyboard("twitch", entry["id"], yt_dlp)
     matches = []
     for stream_id in reversed(streams):
         try:
@@ -554,17 +565,10 @@ def watchparty_alignments(job, entry, config, state, yt_dlp, multi_series=False)
                   and (multi_series or matchup_key(item.get("title", "")) == target_match)]
     if not candidates:
         raise OfficialMatchPending("Waiting for the indexed official YouTube stream match")
-    interval = int(config.get("watchPartyFingerprintInterval", 10))
-    job.update(fingerprintOnly=True, fingerprintInterval=interval, analysisHeight=540)
-    server.index_job(job["id"])
-    if job.get("status") != "ready" or len(job.get("fingerprints", [])) < 30:
-        raise ValueError(job.get("message", "The watch-party fingerprint could not be created"))
-    target = {"version": 2, "provider": "twitch", "sourceId": entry["id"],
-              "duration": round(float(job["duration"]), 3), "interval": interval,
-              "frames": job["fingerprints"]}
+    target = storyboard("twitch", entry["id"], yt_dlp)
     matches = []
     failures = []
-    for candidate in reversed(candidates[-int(config.get("alignmentLookback", 8)):]):
+    for candidate in candidates[:int(config.get("alignmentLookback", 8))]:
         try:
             reference = storyboard("youtube", candidate["sourceId"], yt_dlp)
             alignment = align_storyboards(reference, target,
@@ -659,6 +663,9 @@ def process(channel, entry, config, state=None, yt_dlp=None):
     alignment = None
     playback_source_id = entry["id"]
     catalog_id = None
+    reused_rounds = reusable_match_rounds(entry) if provider == "youtube" and channel.get("matchSource") else []
+    if reused_rounds:
+        job.update(status="ready", warnings=[], rounds=reused_rounds)
     try:
         print(f"Processing {provider}:{entry['id']} - {clean_text(entry['title'])}", flush=True)
         if provider == "youtube" and channel.get("canonicalStream"):
@@ -694,9 +701,10 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                 except (OSError, ValueError, KeyError) as error:
                     return False, "Official match alignment failed: " + clean_text(error)
             if aligned_source_id is None:
-                server.index_job(identifier)
+                if not reused_rounds:
+                    server.index_job(identifier)
                 accepted, reason = publishable(job, config["minimumConfidence"], config["minimumRounds"])
-                if not accepted and job.get("adaptiveAnalysis") and job.get("status") == "ready":
+                if not reused_rounds and not accepted and job.get("adaptiveAnalysis") and job.get("status") == "ready":
                     gap = isolated_gap(job)
                     if gap:
                         original_rounds = [dict(item) for item in job["rounds"]]
@@ -728,9 +736,10 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                 if not accepted:
                     preserve_diagnostics(provider, entry["id"], server.DATA / identifier)
                     return False, reason
-                exported = server.export(job)
-                exported["rounds"] = [{"map": item["map"], "round": item["round"], "start": item["start"]}
-                                      for item in exported["rounds"]]
+                if not reused_rounds:
+                    exported = server.export(job)
+                    exported["rounds"] = [{"map": item["map"], "round": item["round"], "start": item["start"]}
+                                          for item in exported["rounds"]]
         if provider == "youtube" and channel.get("matchSource"):
             try:
                 stream_id, _, rounds = canonical_stream_alignment(entry, job, config, state, yt_dlp)
@@ -769,12 +778,18 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             catalog_path = SITE / "catalog.json"
             catalog = read_json(catalog_path)
             catalog["version"] = 2
-            catalog["videos"] = [item for item in catalog["videos"]
-                                 if (catalog_id and item.get("catalogId") != catalog_id) or (not catalog_id and
-                                 source_key(item.get("provider", "youtube"), item.get("sourceId", item.get("videoId", "")))
-                                 != source_key(provider, entry["id"]))
-                                 and not (supersede_source and item.get("provider") == "twitch"
-                                          and str(item.get("sourceId", "")) == aligned_source_id)]
+            if catalog_id:
+                catalog["videos"] = [item for item in catalog["videos"]
+                                     if item.get("catalogId") != catalog_id
+                                     and not (item.get("provider") == provider and item.get("sourceId") == entry["id"]
+                                              and not item.get("catalogId"))]
+            else:
+                catalog["videos"] = [item for item in catalog["videos"]
+                                     if source_key(item.get("provider", "youtube"),
+                                                   item.get("sourceId", item.get("videoId", "")))
+                                     != source_key(provider, entry["id"])
+                                     and not (supersede_source and item.get("provider") == "twitch"
+                                              and str(item.get("sourceId", "")) == aligned_source_id)]
             source = (state["videos"].get(source_key("youtube", playback_source_id))
                       if catalog_id and state is not None else state["videos"].get(source_key("twitch", aligned_source_id))
                       if provider == "youtube" and aligned_source_id and state is not None else None)

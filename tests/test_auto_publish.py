@@ -6,7 +6,7 @@ import tempfile
 import unittest
 from pathlib import Path
 from datetime import datetime, timedelta, timezone
-from unittest.mock import patch
+from unittest.mock import ANY, patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "indexer"))
 import auto_publish
@@ -528,6 +528,35 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(catalog["videos"][0]["catalogId"], "youtube:abcdefghijk:lmnopqrstuv")
         self.assertEqual(index["sourceId"], "lmnopqrstuv")
 
+    def test_full_match_migration_reuses_its_published_round_index(self):
+        channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH", "published": "2026-09-30T10:00:00Z"}
+        rounds = [{"map": 1, "round": number, "start": number * 100} for number in range(1, 14)]
+
+        def alignment(_, job, *__):
+            self.assertEqual(job["rounds"], [{**item, "confidence": 1} for item in rounds])
+            return "lmnopqrstuv", {"offset": 0}, rounds
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "indexes" / "legacy.json").write_text(json.dumps({"schemaVersion": 2, "provider": "youtube",
+                "sourceId": "abcdefghijk", "rounds": rounds}), encoding="utf-8")
+            (site / "catalog.json").write_text(json.dumps({"version": 2, "videos": [{"provider": "youtube",
+                "sourceId": "abcdefghijk", "index": "/indexes/legacy.json"}]}), encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), patch.object(auto_publish.server, "index_job") as index_job, \
+                    patch.object(auto_publish, "canonical_stream_alignment", side_effect=alignment):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13},
+                                              {"videos": {"youtube:lmnopqrstuv": {}}}, object())
+            catalog = auto_publish.read_json(site / "catalog.json")
+        index_job.assert_not_called()
+        self.assertEqual(result, (True, "Published"))
+        self.assertEqual(len(catalog["videos"]), 1)
+        self.assertEqual(catalog["videos"][0]["sourceId"], "lmnopqrstuv")
+        self.assertEqual(catalog["videos"][0]["catalogId"], "youtube:abcdefghijk:lmnopqrstuv")
+
     def test_official_twitch_chat_attaches_to_canonical_stream_matches_without_round_ocr(self):
         entry = {"id": "1234567890", "title": "A vs B - Champions"}
         config = {"channels": [{"name": "Streams", "canonicalStream": True}], "alignmentLookback": 8,
@@ -544,22 +573,41 @@ class AutoPublishTests(unittest.TestCase):
                 "sourceId": "abcdefghijk", "index": "/indexes/match.json"}]}), encoding="utf-8")
             job = {"id": "job", "status": "queued", "fingerprints": [], "duration": 0}
 
-            def index_job(_):
-                job.update(status="ready", duration=1200, fingerprints=[{"time": value, "hash": "00", "gameplayHash": "00"}
-                                                                            for value in range(0, 300, 10)])
-
             with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "JOBS", {"job": job}), \
-                    patch.object(auto_publish.server, "index_job", side_effect=index_job), \
+                    patch.object(auto_publish.server, "index_job") as index_job, \
                     patch.object(auto_publish, "storyboard", return_value={"duration": 1200, "frames": [{"time": 0, "hash": "00"}]}), \
                     patch.object(auto_publish, "align_storyboards", return_value=alignment), \
                     patch.object(auto_publish.chat_archive, "archive_chat", return_value=site / "chats" / "twitch-1234567890.json"):
                 result = auto_publish.attach_stream_chat(entry, job, config, state, object())
             catalog = auto_publish.read_json(site / "catalog.json")
             index = auto_publish.read_json(site / "indexes" / "match.json")
+        index_job.assert_not_called()
         self.assertEqual(result, ("indexed", "Attached Twitch chat to 1 official stream matches"))
         self.assertEqual(catalog["videos"][0]["chatSourceId"], "1234567890")
         self.assertEqual(index["alignment"]["source"], "twitch:1234567890")
         self.assertEqual(index["alignment"]["segments"][0]["offset"], -120)
+
+    def test_watch_party_alignment_uses_twitch_storyboard_without_video_analysis(self):
+        entry = {"id": "1234567890", "title": "FNS | A vs B - Champions"}
+        config = {"alignmentLookback": 8, "watchPartyMaximumDistance": 18}
+        rounds = [{"map": 1, "round": number, "start": number * 100} for number in range(1, 14)]
+        alignment = {"anchors": 20, "offset": 100}
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "indexes" / "match.json").write_text(json.dumps({"rounds": rounds}), encoding="utf-8")
+            (site / "catalog.json").write_text(json.dumps({"version": 2, "videos": [{"provider": "youtube",
+                "sourceId": "abcdefghijk", "title": "A vs B", "index": "/indexes/match.json"}]}), encoding="utf-8")
+            job = {"id": "job"}
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "index_job") as index_job, \
+                    patch.object(auto_publish, "storyboard", return_value={"duration": 1200, "frames": []}) as storyboard, \
+                    patch.object(auto_publish, "align_storyboards", return_value=alignment), \
+                    patch.object(auto_publish, "translate_index", return_value=rounds):
+                result = auto_publish.watchparty_alignments(job, entry, config, {"videos": {}}, object())
+        index_job.assert_not_called()
+        storyboard.assert_any_call("twitch", "1234567890", ANY)
+        self.assertEqual(result[0][2], rounds)
 
     def test_normalize_storyboard_timeline_corrects_a_doubled_archive_timeline(self):
         normalized, scale = auto_publish.normalize_storyboard_timeline(

@@ -110,6 +110,27 @@ class StoryboardAlignmentTests(unittest.TestCase):
         self.assertEqual([item["offset"] for item in result["segments"]], [1000.0, 1600.0])
         self.assertEqual(result["anchors"], 120)
 
+    def test_alignment_accepts_decreasing_offsets_when_reference_removes_breaks(self):
+        reference = {"duration": 1200, "interval": 10,
+                     "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(120)]}
+        target_frames = [{"time": index * 10, "hash": unique_hash(index + 1000)} for index in range(300)]
+        for index in range(60):
+            target_frames[index + 100]["hash"] = unique_hash(index)
+            target_frames[index + 220]["hash"] = unique_hash(index + 60)
+        result = align_storyboards(reference, {"duration": 3000, "interval": 10, "frames": target_frames},
+                                   require_target_coverage=False)
+        self.assertEqual([item["offset"] for item in result["segments"]], [-1000.0, -1600.0])
+        self.assertEqual(result["coverage"], [40, 40, 40])
+
+    def test_alignment_accepts_sparse_storyboard_samples(self):
+        reference = {"duration": 18000, "interval": 10,
+                     "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(1800)]}
+        target = {"duration": 18000, "interval": 100,
+                  "frames": [{"time": index * 100, "hash": unique_hash(index * 10)} for index in range(180)]}
+        result = align_storyboards(reference, target, maximum_distance=0)
+        self.assertEqual(result["anchors"], 180)
+        self.assertEqual(result["coverage"], [60, 60, 60])
+
     def test_alignment_accepts_small_verified_timebase_drift(self):
         target = {"duration": 600, "interval": 10,
                   "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}

@@ -10,7 +10,7 @@ import imageio_ffmpeg
 import numpy as np
 
 
-ALIGNER_VERSION = "storyboard-v3"
+ALIGNER_VERSION = "storyboard-v4"
 
 
 def frame_hash(image):
@@ -165,37 +165,40 @@ def align_storyboards(reference, target, maximum_distance=12, require_target_cov
         cluster = item["matches"]
         offset = item["offset"]
         verified = [match for match in cluster if abs(match["offset"] - offset) <= tolerance]
+        if segments:
+            verified = [match for match in verified
+                        if match["target"] > segments[-1]["anchorEnd"]
+                        and match["reference"] > segments[-1]["referenceEnd"]]
+        if len(verified) < 5:
+            continue
         start = min(match["target"] for match in verified)
         end = max(match["target"] for match in verified)
-        if segments and (start <= segments[-1]["anchorEnd"] or
-                         min(match["reference"] for match in verified) <= segments[-1]["referenceEnd"] or
-                         offset < segments[-1]["offset"] - tolerance):
-            continue
         segments.append({"offset": offset, "anchors": len(verified), "anchorStart": start,
                          "anchorEnd": end, "referenceEnd": max(match["reference"] for match in verified),
                          "matches": verified})
     if not segments:
         raise ValueError("The videos do not have a consistent storyboard alignment")
-    coefficients = None
-    for attempt in range(2):
-        matrix = []
-        values = []
-        for group, segment in enumerate(segments):
-            for match in segment["matches"]:
-                matrix.append([match["target"], *[1 if index == group else 0 for index in range(len(segments))]])
-                values.append(match["reference"])
-        coefficients = np.linalg.lstsq(np.asarray(matrix), np.asarray(values), rcond=None)[0]
-        if attempt == 0:
-            for index, segment in enumerate(segments):
-                segment["matches"] = [match for match in segment["matches"]
-                                      if abs(match["reference"] - (coefficients[0] * match["target"] + coefficients[index + 1])) <= 3]
-                if len(segment["matches"]) < 5:
-                    raise ValueError("The videos do not have enough precise visual anchors")
-    scale = float(coefficients[0])
+    slopes = []
+    for segment in segments:
+        ordered = sorted(segment["matches"], key=lambda item: item["target"])
+        for left_index, left in enumerate(ordered):
+            for right in ordered[left_index + 1:]:
+                target_delta = right["target"] - left["target"]
+                if target_delta < 60:
+                    continue
+                slope = (right["reference"] - left["reference"]) / target_delta
+                if 0.9 <= slope <= 1.1:
+                    slopes.append(slope)
+    scale = float(np.median(slopes)) if slopes else 1.0
     if not 0.95 <= scale <= 1.05:
         raise ValueError("The videos do not share a stable timeline scale")
-    for index, segment in enumerate(segments):
-        segment["offset"] = float(coefficients[index + 1])
+    for segment in segments:
+        segment["offset"] = float(np.median([match["reference"] - scale * match["target"]
+                                              for match in segment["matches"]]))
+        segment["matches"] = [match for match in segment["matches"]
+                              if abs(match["reference"] - (scale * match["target"] + segment["offset"])) <= tolerance]
+        if len(segment["matches"]) < 5:
+            raise ValueError("The videos do not have enough precise visual anchors")
         segment["anchors"] = len(segment["matches"])
         residuals = [abs(match["reference"] - (scale * match["target"] + segment["offset"]))
                      for match in segment["matches"]]

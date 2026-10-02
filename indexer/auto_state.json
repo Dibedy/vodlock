@@ -330,12 +330,12 @@
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "NS vs. XLG - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "FFmpeg could not finish reading the video: [in#0 @ 0x41b4cf00] Error opening input: Invalid data found when processing input Error opening input file pipe:0. Error opening input files: Invalid data found when processing input",
+      "message": "FFmpeg could not finish reading the video: [in#0 @ 0x1ca27d00] Error opening input: Invalid data found when processing input Error opening input file pipe:0. Error opening input files: Invalid data found when processing input",
       "publishedAt": "2026-10-01T14:37:25+00:00",
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T21:46:32.258136+00:00"
+      "checkedAt": "2026-10-02T01:06:44.009029+00:00"
     },
     "youtube:P8Td3k1gem8": {
       "status": "indexed",
@@ -384,6 +384,42 @@
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
       "retryClass": "none",
       "checkedAt": "2026-10-01T21:46:23.796544+00:00"
+    },
+    "youtube:Lwi9Bd5ai5o": {
+      "status": "indexed",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour streams",
+      "title": "VALORANT Champions Shanghai - Group Stage - Day 3",
+      "message": "Stored official YouTube stream archive",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "retryClass": "none",
+      "checkedAt": "2026-10-02T01:05:54.643553+00:00"
+    },
+    "youtube:UsFBKuZ_gX4": {
+      "status": "indexed",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour streams",
+      "title": "VALORANT Champions Shanghai - Group Stage - Day 2",
+      "message": "Stored official YouTube stream archive",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "retryClass": "none",
+      "checkedAt": "2026-10-02T01:06:28.655428+00:00"
+    },
+    "youtube:ynKvUYpu1Qw": {
+      "status": "indexed",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour streams",
+      "title": "VALORANT Champions Shanghai - Opening Day",
+      "message": "Stored official YouTube stream archive",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "retryClass": "none",
+      "checkedAt": "2026-10-02T01:06:38.307152+00:00"
     }
   }
 }

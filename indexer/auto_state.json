@@ -258,7 +258,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T14:36:28.478148+00:00"
+      "checkedAt": "2026-10-02T20:35:20.369490+00:00"
     },
     "twitch:2887911255": {
       "status": "held",
@@ -282,19 +282,19 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T14:22:42.014997+00:00"
+      "checkedAt": "2026-10-02T20:19:35.632230+00:00"
     },
     "twitch:2887917739": {
-      "status": "published",
+      "status": "held",
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | VIT vs LOUD - VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice !noYT",
-      "message": "Published 2 complete matches from the watch-party archive",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-30T08:51:39Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
-      "retryClass": "none",
-      "checkedAt": "2026-10-02T04:00:27.143728+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-02T21:35:29.580066+00:00"
     },
     "twitch:2888772554": {
       "status": "held",
@@ -318,7 +318,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T14:12:38.841547+00:00"
+      "checkedAt": "2026-10-02T20:07:37.866026+00:00"
     },
     "twitch:2888778875": {
       "status": "held",
@@ -342,7 +342,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T13:58:52.225462+00:00"
+      "checkedAt": "2026-10-02T19:50:43.005466+00:00"
     },
     "youtube:P8Td3k1gem8": {
       "status": "indexed",
@@ -400,9 +400,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "none",
-      "checkedAt": "2026-10-02T07:00:08.454481+00:00"
+      "checkedAt": "2026-10-02T19:20:52.703796+00:00"
     },
     "youtube:UsFBKuZ_gX4": {
       "status": "indexed",
@@ -412,9 +412,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "none",
-      "checkedAt": "2026-10-02T07:00:08.456244+00:00"
+      "checkedAt": "2026-10-02T19:20:52.706019+00:00"
     },
     "youtube:ynKvUYpu1Qw": {
       "status": "indexed",
@@ -424,9 +424,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "none",
-      "checkedAt": "2026-10-02T07:00:08.458126+00:00"
+      "checkedAt": "2026-10-02T19:20:52.708547+00:00"
     },
     "youtube:ZphbktbT26k": {
       "status": "published",
@@ -474,7 +474,55 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T13:47:10.002125+00:00"
+      "checkedAt": "2026-10-02T20:45:07.467269+00:00"
+    },
+    "youtube:eKP_QB_H7F8": {
+      "status": "indexed",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour streams",
+      "title": "VALORANT Champions Shanghai - Group Stage - Day 8",
+      "message": "Stored official YouTube stream archive",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "retryClass": "none",
+      "checkedAt": "2026-10-02T19:20:52.700945+00:00"
+    },
+    "youtube:QL2P-AwdZjw": {
+      "status": "waiting",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour full matches",
+      "title": "T1 vs. JDG - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
+      "message": "No verified official YouTube stream archive matches this full match",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "retryClass": "dependency",
+      "checkedAt": "2026-10-02T19:36:38.141352+00:00"
+    },
+    "twitch:2889639463": {
+      "status": "indexed",
+      "provider": "twitch",
+      "channel": "VALORANT on Twitch",
+      "title": "EDG vs. GE - VALORANT Champions Shanghai - Group Stage",
+      "message": "Attached Twitch chat to 2 official stream matches",
+      "publishedAt": "2026-10-02T08:30:31Z",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "retryClass": "none",
+      "checkedAt": "2026-10-02T21:05:08.300698+00:00"
+    },
+    "twitch:2889647074": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | GE vs EDG - VCT Champions Group Stage Elimination #VCTWatchparty | !vote !inzone !noYT",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
+      "publishedAt": "2026-10-02T08:54:38Z",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-02T21:32:51.973102+00:00"
     }
   }
 }

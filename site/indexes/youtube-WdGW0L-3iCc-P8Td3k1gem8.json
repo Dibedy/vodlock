@@ -248,14 +248,24 @@
     }
   ],
   "alignment": {
-    "timelineScale": 0.995877376383758,
+    "timelineScale": 1.0004965063962643,
     "segments": [
       {
-        "offset": -12.4653971201955,
-        "targetStart": 12.517,
-        "targetEnd": 21640.682
+        "offset": -75.98370767477068,
+        "targetStart": 75.946,
+        "targetEnd": 4546.505
+      },
+      {
+        "offset": -3348.515734418362,
+        "targetStart": 7817.413,
+        "targetEnd": 17710.587
+      },
+      {
+        "offset": -2336.6625921779946,
+        "targetStart": 16699.236,
+        "targetEnd": 21385.419
       }
     ],
-    "source": "twitch:2888772554"
+    "source": "twitch:2889639463"
   }
 }

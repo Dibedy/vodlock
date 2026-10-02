@@ -590,6 +590,28 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(catalog["videos"][0]["catalogId"], "youtube:abcdefghijk:lmnopqrstuv")
         self.assertEqual(index["sourceId"], "lmnopqrstuv")
 
+    def test_full_match_waits_for_its_official_stream_archive(self):
+        channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH", "published": "2026-09-30T10:00:00Z"}
+        rounds = [{"map": 1, "round": number, "start": number * 100, "confidence": .9} for number in range(1, 14)]
+
+        def index_job(identifier):
+            auto_publish.server.JOBS[identifier].update(status="ready", warnings=[], duration=2000, rounds=rounds)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "catalog.json").write_text('{"version":2,"videos":[]}', encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), \
+                    patch.object(auto_publish.server, "index_job", side_effect=index_job), \
+                    patch.object(auto_publish, "canonical_stream_alignment",
+                                 side_effect=auto_publish.OfficialArchiveUnmatched("No matching stream archive")):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13},
+                                              {"videos": {}}, object())
+        self.assertEqual(result, ("waiting", "No matching stream archive"))
+
     def test_full_match_migration_reuses_its_published_round_index(self):
         channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
         entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH", "published": "2026-09-30T10:00:00Z"}

@@ -788,7 +788,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             except OfficialMatchPending as error:
                 return "waiting", str(error)
             except OfficialArchiveUnmatched as error:
-                return False, str(error)
+                return "waiting", str(error)
             playback_source_id = stream_id
             catalog_id = f"youtube:{entry['id']}:{stream_id}"
             exported = {"schemaVersion": 2, "provider": "youtube", "sourceId": stream_id, "label": title,

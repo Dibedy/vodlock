@@ -91,28 +91,28 @@
       "checkedAt": "2026-09-27T20:52:08.305870+00:00"
     },
     "twitch:2882589453": {
-      "status": "published",
+      "status": "held",
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | PRX vs Team Liquid - VCT Champions Group Stage #VCTWatchparty | !vote !inzone",
-      "message": "Published",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-24T07:32:31Z",
-      "detectorVersion": "vct-clock-ocr-v8",
-      "pipelineVersion": "vct-clock-ocr-v8+storyboard-v1+publisher-v2",
-      "retryClass": "none",
-      "checkedAt": "2026-09-29T07:16:33.581004+00:00"
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v10",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-02T01:30:49.176967+00:00"
     },
     "twitch:2882594925": {
-      "status": "held",
+      "status": "indexed",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "TL vs. PRX - VALORANT Champions Shanghai - Opening Day",
-      "message": "No verified official YouTube stream archive aligns with this Twitch chat",
+      "message": "Attached Twitch chat to 0 official stream matches",
       "publishedAt": "2026-09-24T07:50:45Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T23:21:14.195997+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v10",
+      "retryClass": "none",
+      "checkedAt": "2026-10-02T01:30:32.473765+00:00"
     },
     "youtube:ZWhEMQVk4x0": {
       "status": "published",
@@ -218,16 +218,16 @@
       "checkedAt": "2026-09-29T19:38:38.064445+00:00"
     },
     "twitch:2887052196": {
-      "status": "held",
+      "status": "indexed",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "PRX vs. G2 - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive aligns with this Twitch chat",
+      "message": "Attached Twitch chat to 0 official stream matches",
       "publishedAt": "2026-09-29T08:30:43Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T22:49:24.174748+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v10",
+      "retryClass": "none",
+      "checkedAt": "2026-10-02T01:29:03.191688+00:00"
     },
     "twitch:2887057207": {
       "status": "held",
@@ -237,9 +237,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-29T08:45:31Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T21:35:43.207403+00:00"
+      "checkedAt": "2026-10-02T01:30:44.709085+00:00"
     },
     "youtube:XdGX65LMxig": {
       "status": "published",
@@ -254,16 +254,16 @@
       "checkedAt": "2026-09-30T18:15:56.904877+00:00"
     },
     "twitch:2887911255": {
-      "status": "held",
+      "status": "indexed",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "LOUD vs. VIT - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive aligns with this Twitch chat",
+      "message": "Attached Twitch chat to 0 official stream matches",
       "publishedAt": "2026-09-30T08:30:14Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T22:30:01.698781+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v10",
+      "retryClass": "none",
+      "checkedAt": "2026-10-02T01:27:27.044366+00:00"
     },
     "youtube:2y9ne_hMZts": {
       "status": "published",
@@ -285,21 +285,21 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-30T08:51:39Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T23:27:53.754735+00:00"
+      "checkedAt": "2026-10-02T01:30:40.587758+00:00"
     },
     "twitch:2888772554": {
-      "status": "held",
+      "status": "indexed",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "TL vs. TYL - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive aligns with this Twitch chat",
+      "message": "Attached Twitch chat to 0 official stream matches",
       "publishedAt": "2026-10-01T08:30:41Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T22:17:17.576430+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v10",
+      "retryClass": "none",
+      "checkedAt": "2026-10-02T01:26:10.688336+00:00"
     },
     "youtube:m29QjckzB7w": {
       "status": "held",
@@ -318,12 +318,12 @@
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | TYLOO vs Team Liquid - VCT Champions Group Stage Elimination #VCTWatchparty | !vote !inzone !voice !noYT",
-      "message": "Official match alignment failed: The video service stream ended with an error: ERROR: Unable to download video: [Errno 2] No such file or directory: '--Frag25'",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-10-01T08:51:45Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v10",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-01T23:21:21.297101+00:00"
+      "checkedAt": "2026-10-02T01:30:40.550156+00:00"
     },
     "youtube:WdGW0L-3iCc": {
       "status": "held",
@@ -345,9 +345,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v10",
       "retryClass": "none",
-      "checkedAt": "2026-10-01T21:44:49.901087+00:00"
+      "checkedAt": "2026-10-02T01:24:57.805121+00:00"
     },
     "youtube:gYE4F6g9f9s": {
       "status": "indexed",
@@ -357,9 +357,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v10",
       "retryClass": "none",
-      "checkedAt": "2026-10-01T21:45:19.718143+00:00"
+      "checkedAt": "2026-10-02T01:24:57.807482+00:00"
     },
     "youtube:w5O5vwuHwXY": {
       "status": "indexed",
@@ -369,9 +369,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v10",
       "retryClass": "none",
-      "checkedAt": "2026-10-01T21:45:55.197224+00:00"
+      "checkedAt": "2026-10-02T01:24:57.810005+00:00"
     },
     "youtube:XsORTuEh7Z4": {
       "status": "indexed",
@@ -381,9 +381,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v3+publisher-v10",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v10",
       "retryClass": "none",
-      "checkedAt": "2026-10-01T21:46:23.796544+00:00"
+      "checkedAt": "2026-10-02T01:24:57.812030+00:00"
     },
     "youtube:Lwi9Bd5ai5o": {
       "status": "indexed",

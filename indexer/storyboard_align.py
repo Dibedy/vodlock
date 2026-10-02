@@ -133,7 +133,7 @@ def frame_distance(left, right):
     return min(distances)
 
 
-def align_storyboards(reference, target, maximum_distance=12, require_target_coverage=True):
+def align_storyboards(reference, target, maximum_distance=12, require_target_coverage=True, maximum_residual=None):
     if len(reference.get("frames", [])) < 30 or len(target.get("frames", [])) < 30:
         raise ValueError("Not enough storyboard frames for a verified alignment")
     reference_frames = reference["frames"]
@@ -204,7 +204,7 @@ def align_storyboards(reference, target, maximum_distance=12, require_target_cov
                      for match in segment["matches"]]
         segment["medianDistance"] = round(float(np.median([match["distance"] for match in segment["matches"]])), 3)
         segment["maximumResidual"] = round(max(residuals), 3)
-        if segment["maximumResidual"] > tolerance:
+        if segment["maximumResidual"] > (tolerance if maximum_residual is None else maximum_residual):
             raise ValueError("The videos do not have a precise storyboard alignment")
     for index, segment in enumerate(segments):
         segment["targetStart"] = 0 if index == 0 else round(scale * (segments[index - 1]["anchorEnd"] + segment["anchorStart"]) / 2, 3)

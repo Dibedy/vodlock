@@ -25,7 +25,9 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v15"
+PUBLISHER_VERSION = "publisher-v16"
+ROUND_TIMING_VERSION = "round-timing-v2"
+TWITCH_STORYBOARD_VERSION = 3
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 PUBLISH_LOCK = threading.Lock()
 
@@ -149,9 +151,25 @@ def reusable_match_rounds(entry):
         if not index_path.is_file():
             continue
         index = read_json(index_path)
-        if index.get("provider") == "youtube" and index.get("sourceId") == entry["id"]:
+        if index.get("provider") == "youtube" and index.get("sourceId") == entry["id"] \
+                and index.get("roundTimingVersion") == ROUND_TIMING_VERSION:
             return [{**item, "confidence": 1} for item in index.get("rounds", [])]
     return []
+
+
+def timeline_rebuild_needed(channel, entry, catalog):
+    if not channel.get("matchSource"):
+        return False
+    prefix = "youtube:" + entry["id"] + ":"
+    for record in catalog["videos"]:
+        if not str(record.get("catalogId", "")).startswith(prefix):
+            continue
+        index_path = SITE / str(record.get("index", "")).lstrip("/")
+        if not index_path.is_file():
+            return True
+        if read_json(index_path).get("roundTimingVersion") != ROUND_TIMING_VERSION:
+            return True
+    return False
 
 
 def is_candidate(channel, entry, require_duration=True):
@@ -402,6 +420,24 @@ def storyboard(provider, identifier, yt_dlp):
     return value
 
 
+def precise_twitch_storyboard(entry, job, config):
+    interval = int(config.get("watchPartyFingerprintInterval", 2))
+    path = storyboard_path("twitch", entry["id"])
+    if path.is_file():
+        value = load_storyboard(path)
+        if value.get("version", 0) >= TWITCH_STORYBOARD_VERSION and value.get("interval", interval + 1) <= interval:
+            return value
+    job.update(fingerprintOnly=True, fingerprintInterval=interval, streamAnalysis=False)
+    server.save(job)
+    server.index_job(job["id"])
+    if job.get("status") != "ready":
+        raise ValueError(job.get("message", "Could not create a precise Twitch timeline fingerprint"))
+    value = {"version": TWITCH_STORYBOARD_VERSION, "provider": "twitch", "sourceId": entry["id"],
+             "duration": round(float(job["duration"]), 3), "interval": interval, "frames": job["fingerprints"]}
+    save_storyboard(path, value)
+    return value
+
+
 def normalize_storyboard_timeline(value):
     frames = value.get("frames", [])
     duration = float(value.get("duration", 0))
@@ -484,7 +520,8 @@ def canonical_stream_alignment(entry, job, config, state, yt_dlp):
     for stream_id in reversed(streams):
         try:
             target = storyboard("youtube", stream_id, yt_dlp)
-            alignment = align_storyboards(reference, target, require_target_coverage=False)
+            alignment = align_storyboards(reference, target, require_target_coverage=False,
+                                          maximum_residual=float(config.get("roundAlignmentMaximumResidual", 5)))
             rounds = translate_index({"rounds": job["rounds"]}, target, alignment)
             matches.append((alignment["anchors"], stream_id, alignment, rounds))
         except (OSError, ValueError, KeyError):
@@ -515,13 +552,14 @@ def attach_stream_chat(entry, job, config, state, yt_dlp):
     streams = canonical_streams(config, state)[-int(config.get("alignmentLookback", 8)):]
     if not streams:
         raise OfficialMatchPending("Waiting for an indexed official YouTube stream archive")
-    target = storyboard("twitch", entry["id"], yt_dlp)
+    target = precise_twitch_storyboard(entry, job, config)
     matches = []
     for stream_id in reversed(streams):
         try:
             reference = storyboard("youtube", stream_id, yt_dlp)
             alignment = align_storyboards(reference, target, maximum_distance=int(config.get("watchPartyMaximumDistance", 18)),
-                                          require_target_coverage=False)
+                                          require_target_coverage=False,
+                                          maximum_residual=float(config.get("roundAlignmentMaximumResidual", 5)))
             matches.append((alignment["anchors"], stream_id, inverted_alignment(alignment)))
         except (OSError, ValueError, KeyError):
             continue
@@ -566,7 +604,7 @@ def watchparty_alignments(job, entry, config, state, yt_dlp, multi_series=False)
                   and (multi_series or matchup_key(item.get("title", "")) == target_match)]
     if not candidates:
         raise OfficialMatchPending("Waiting for the indexed official YouTube stream match")
-    target = storyboard("twitch", entry["id"], yt_dlp)
+    target = precise_twitch_storyboard(entry, job, config)
     matches = []
     failures = []
     for candidate in candidates[:int(config.get("alignmentLookback", 8))]:
@@ -574,7 +612,8 @@ def watchparty_alignments(job, entry, config, state, yt_dlp, multi_series=False)
             reference = storyboard("youtube", candidate["sourceId"], yt_dlp)
             alignment = align_storyboards(reference, target,
                                           maximum_distance=int(config.get("watchPartyMaximumDistance", 18)),
-                                          require_target_coverage=False)
+                                          require_target_coverage=False,
+                                          maximum_residual=float(config.get("roundAlignmentMaximumResidual", 5)))
             index = read_json(SITE / candidate["index"].lstrip("/"))
             rounds = translate_index(index, target, alignment)
             matches.append((alignment["anchors"], candidate, alignment, rounds))
@@ -753,7 +792,8 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             playback_source_id = stream_id
             catalog_id = f"youtube:{entry['id']}:{stream_id}"
             exported = {"schemaVersion": 2, "provider": "youtube", "sourceId": stream_id, "label": title,
-                        "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION, "rounds": rounds}
+                        "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION,
+                        "roundTimingVersion": ROUND_TIMING_VERSION, "rounds": rounds}
         filename = f"{provider}-{entry['id']}" + (f"-{playback_source_id}" if catalog_id else "") + ".json"
         write_json(SITE / "indexes" / filename, exported)
         if provider == "twitch" and channel.get("alignmentSource"):
@@ -882,17 +922,35 @@ def main():
                     if identifier not in known_ids:
                         retained.append(migration_entry)
                         known_ids.add(identifier)
+            for item in catalog["videos"]:
+                catalog_id = str(item.get("catalogId", ""))
+                match = re.fullmatch(r"youtube:([A-Za-z0-9_-]{11}):[A-Za-z0-9_-]{11}", catalog_id)
+                if not match:
+                    continue
+                identifier = match.group(1)
+                previous = state["videos"].get("youtube:" + identifier, {})
+                rebuild_entry = existing_entries.get(identifier) or {
+                    "id": identifier,
+                    "title": previous.get("title") or item.get("title", "Indexed match"),
+                    "published": previous.get("publishedAt")}
+                if timeline_rebuild_needed(channel, rebuild_entry, catalog) and identifier not in known_ids:
+                    retained.append(rebuild_entry)
+                    known_ids.add(identifier)
         entries.extend(retained)
         eligible = [item for item in entries
                     if stream_migration_needed(channel, item, catalog)
+                    or timeline_rebuild_needed(channel, item, catalog)
                     or should_process(source_key("youtube", item["id"]), published_ids, state["videos"],
                                       config.get("youtubeRetryHours", 0.5), now, arguments.retry_held)
                     or arguments.retry_held and should_attempt(source_key("youtube", item["id"]), published_ids,
                                                                state["videos"], config.get("youtubeRetryHours", 0.5), now)]
         migration_entries = [item for item in eligible if stream_migration_needed(channel, item, catalog)]
         migration_ids = {item["id"] for item in migration_entries}
-        regular_entries = [item for item in eligible if item["id"] not in migration_ids]
-        for entry_index, entry in enumerate(migration_entries + regular_entries[:per_channel]):
+        rebuild_entries = [item for item in eligible if item["id"] not in migration_ids
+                           and timeline_rebuild_needed(channel, item, catalog)]
+        priority_ids = migration_ids | {item["id"] for item in rebuild_entries}
+        regular_entries = [item for item in eligible if item["id"] not in priority_ids]
+        for entry_index, entry in enumerate(migration_entries + rebuild_entries[:per_channel] + regular_entries[:per_channel]):
             key = source_key("youtube", entry["id"])
             candidates.append((1 if key in state["videos"] else 0, channel.get("priority", 1),
                                channel_index, entry_index, channel, entry))

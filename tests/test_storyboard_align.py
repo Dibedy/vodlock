@@ -131,6 +131,15 @@ class StoryboardAlignmentTests(unittest.TestCase):
         self.assertEqual(result["anchors"], 180)
         self.assertEqual(result["coverage"], [60, 60, 60])
 
+    def test_round_alignment_rejects_residuals_above_its_limit(self):
+        reference = {"duration": 600, "interval": 10,
+                     "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}
+        target = {"duration": 600, "interval": 10,
+                  "frames": [{"time": index * 10 + (10 if index % 2 else 0), "hash": unique_hash(index)}
+                             for index in range(60)]}
+        with self.assertRaisesRegex(ValueError, "precise storyboard alignment"):
+            align_storyboards(reference, target, maximum_distance=0, maximum_residual=4)
+
     def test_alignment_accepts_small_verified_timebase_drift(self):
         target = {"duration": 600, "interval": 10,
                   "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}

@@ -8,8 +8,9 @@
   "retryHours": 6,
   "youtubeRetryHours": 0.5,
   "alignmentLookback": 8,
-  "watchPartyFingerprintInterval": 10,
+  "watchPartyFingerprintInterval": 2,
   "watchPartyMaximumDistance": 18,
+  "roundAlignmentMaximumResidual": 5,
   "minimumConfidence": 0.65,
   "minimumRounds": 13,
   "channels": [

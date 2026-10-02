@@ -335,6 +335,46 @@ class AutoPublishTests(unittest.TestCase):
             self.assertEqual(auto_publish.main(), 0)
         self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["abcdefghijk", "lmnopqrstuv"])
 
+    def test_legacy_match_migration_does_not_depend_on_youtube_discovery(self):
+        now = datetime.now(timezone.utc).isoformat()
+        channel = {"provider": "youtube", "name": "Full matches", "priority": 1, "matchSource": True}
+        config = {"channels": [channel], "lookback": 30, "maxPerRun": 4,
+                  "maxPerChannelPerRun": 1, "maxRetriesPerRun": 1, "youtubeRetryHours": 6}
+        state = {"videos": {
+            "youtube:abcdefghijk": {"status": "published", "channel": "Full matches",
+                                      "title": "A vs B - FULL MATCH", "publishedAt": now,
+                                      "checkedAt": now, "pipelineVersion": auto_publish.PIPELINE_VERSION}}}
+        catalog = {"videos": [{"provider": "youtube", "sourceId": "abcdefghijk",
+                                "title": "A vs B", "playedAt": now, "index": "/indexes/legacy.json"}]}
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, catalog]), \
+                patch.object(auto_publish, "discover_youtube", side_effect=RuntimeError("feed unavailable")), \
+                patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \
+                patch.object(auto_publish, "write_json"), patch.object(sys, "argv", ["auto_publish.py"]), \
+                patch("sys.stdout", new_callable=io.StringIO), patch("sys.stderr", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["abcdefghijk"])
+
+    def test_legacy_match_migrations_bypass_the_regular_channel_limit(self):
+        now = datetime.now(timezone.utc).isoformat()
+        channel = {"provider": "youtube", "name": "Full matches", "priority": 1, "matchSource": True}
+        config = {"channels": [channel], "lookback": 30, "maxPerRun": 4,
+                  "maxPerChannelPerRun": 1, "maxRetriesPerRun": 1, "youtubeRetryHours": 6}
+        identifiers = ["abcdefghijk", "lmnopqrstuv"]
+        state = {"videos": {"youtube:" + identifier: {"status": "published", "channel": "Full matches",
+                                                           "title": identifier, "publishedAt": now,
+                                                           "checkedAt": now, "pipelineVersion": auto_publish.PIPELINE_VERSION}
+                            for identifier in identifiers}}
+        catalog = {"videos": [{"provider": "youtube", "sourceId": identifier, "title": identifier,
+                                "playedAt": now, "index": "/indexes/legacy.json"}
+                               for identifier in identifiers]}
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, catalog]), \
+                patch.object(auto_publish, "discover_youtube", return_value=[]), \
+                patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \
+                patch.object(auto_publish, "write_json"), patch.object(sys, "argv", ["auto_publish.py"]), \
+                patch("sys.stdout", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], identifiers)
+
     def test_explicit_held_retry_keeps_new_candidates_eligible(self):
         channel = {"provider": "youtube", "name": "YouTube"}
         config = {"channels": [channel], "lookback": 30, "maxPerRun": 4, "maxPerChannelPerRun": 4}

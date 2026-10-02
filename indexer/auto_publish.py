@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v10"
+PUBLISHER_VERSION = "publisher-v11"
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 PUBLISH_LOCK = threading.Lock()
 
@@ -854,7 +854,7 @@ def main():
             entries = discover_youtube(channel, config["lookback"], yt_dlp)
         except Exception as error:
             print(f"YouTube discovery failed for {channel['name']}: {error}", file=sys.stderr, flush=True)
-            continue
+            entries = []
         known_ids = {item["id"] for item in entries}
         retained = [
             {"id": key.split(":", 1)[1], "title": item["title"], "published": item.get("publishedAt")}
@@ -862,6 +862,20 @@ def main():
             if key.startswith("youtube:") and item.get("status") == "held"
             and item.get("channel") == channel["name"] and key.split(":", 1)[1] not in known_ids
         ]
+        known_ids.update(item["id"] for item in retained)
+        if channel.get("matchSource"):
+            for item in catalog["videos"]:
+                identifier = str(item.get("sourceId", ""))
+                if (item.get("provider") != "youtube" or identifier in known_ids
+                        or not re.fullmatch(r"[A-Za-z0-9_-]{11}", identifier)):
+                    continue
+                previous = state["videos"].get("youtube:" + identifier, {})
+                migration_entry = {"id": identifier,
+                                   "title": previous.get("title") or item.get("title", "Indexed match"),
+                                   "published": previous.get("publishedAt") or item.get("playedAt")}
+                if stream_migration_needed(channel, migration_entry, catalog):
+                    retained.append(migration_entry)
+                    known_ids.add(identifier)
         entries.extend(retained)
         eligible = [item for item in entries
                     if stream_migration_needed(channel, item, catalog)
@@ -869,7 +883,10 @@ def main():
                                       config.get("youtubeRetryHours", 0.5), now, arguments.retry_held)
                     or arguments.retry_held and should_attempt(source_key("youtube", item["id"]), published_ids,
                                                                state["videos"], config.get("youtubeRetryHours", 0.5), now)]
-        for entry_index, entry in enumerate(eligible[:per_channel]):
+        migration_entries = [item for item in eligible if stream_migration_needed(channel, item, catalog)]
+        migration_ids = {item["id"] for item in migration_entries}
+        regular_entries = [item for item in eligible if item["id"] not in migration_ids]
+        for entry_index, entry in enumerate(migration_entries + regular_entries[:per_channel]):
             key = source_key("youtube", entry["id"])
             candidates.append((1 if key in state["videos"] else 0, channel.get("priority", 1),
                                channel_index, entry_index, channel, entry))
@@ -913,8 +930,9 @@ def main():
     for candidate in candidates:
         retrying = candidate[0]
         channel = candidate[-2]
-        dependent = has_alignment_archive and (channel.get("alignmentSource") or channel.get("reuseOfficialIndex")
-                                                or channel["provider"] == "youtube")
+        dependent = (channel.get("canonicalStream") or channel.get("matchSource") or channel.get("chatSource")
+                     or has_alignment_archive and (channel.get("alignmentSource") or channel.get("reuseOfficialIndex")
+                                                   or channel["provider"] == "youtube"))
         if retrying and not arguments.retry_held and retry_count >= config.get("maxRetriesPerRun", 1) and not dependent:
             continue
         selected.append(candidate)

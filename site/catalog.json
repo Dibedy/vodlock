@@ -162,6 +162,21 @@
       "chatSourceId": "2887052196"
     },
     {
+      "provider": "twitch",
+      "sourceId": "2887057207",
+      "catalogId": "twitch:2887057207:z_aPp2s4d_o",
+      "kind": "watch-party",
+      "creator": "FNS",
+      "title": "PRX vs G2",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Watch party",
+      "index": "/indexes/twitch-2887057207-z_aPp2s4d_o.json",
+      "playedAt": "2026-09-29T09:02:16Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai",
+      "chat": "/chats/twitch-2887057207.json"
+    },
+    {
       "provider": "youtube",
       "sourceId": "XsORTuEh7Z4",
       "title": "JDG vs FUT",

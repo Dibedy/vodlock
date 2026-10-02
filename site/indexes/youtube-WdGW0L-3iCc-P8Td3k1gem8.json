@@ -1,0 +1,261 @@
+{
+  "schemaVersion": 2,
+  "provider": "youtube",
+  "sourceId": "P8Td3k1gem8",
+  "label": "NS vs XLG",
+  "leadSeconds": 5,
+  "detector": "vct-clock-ocr-v9+storyboard-v4",
+  "rounds": [
+    {
+      "map": 1,
+      "round": 1,
+      "start": 13335.68
+    },
+    {
+      "map": 1,
+      "round": 2,
+      "start": 13444.77
+    },
+    {
+      "map": 1,
+      "round": 3,
+      "start": 13625.43
+    },
+    {
+      "map": 1,
+      "round": 4,
+      "start": 13699.0
+    },
+    {
+      "map": 1,
+      "round": 5,
+      "start": 13803.09
+    },
+    {
+      "map": 1,
+      "round": 6,
+      "start": 13901.18
+    },
+    {
+      "map": 1,
+      "round": 7,
+      "start": 14070.33
+    },
+    {
+      "map": 1,
+      "round": 8,
+      "start": 14202.44
+    },
+    {
+      "map": 1,
+      "round": 9,
+      "start": 14328.55
+    },
+    {
+      "map": 1,
+      "round": 10,
+      "start": 14445.66
+    },
+    {
+      "map": 1,
+      "round": 11,
+      "start": 14585.78
+    },
+    {
+      "map": 1,
+      "round": 12,
+      "start": 14708.89
+    },
+    {
+      "map": 1,
+      "round": 13,
+      "start": 14996.14
+    },
+    {
+      "map": 1,
+      "round": 14,
+      "start": 15130.26
+    },
+    {
+      "map": 1,
+      "round": 15,
+      "start": 15290.4
+    },
+    {
+      "map": 1,
+      "round": 16,
+      "start": 15393.49
+    },
+    {
+      "map": 1,
+      "round": 17,
+      "start": 15567.64
+    },
+    {
+      "map": 1,
+      "round": 18,
+      "start": 15682.75
+    },
+    {
+      "map": 1,
+      "round": 19,
+      "start": 15833.88
+    },
+    {
+      "map": 1,
+      "round": 20,
+      "start": 16009.03
+    },
+    {
+      "map": 1,
+      "round": 21,
+      "start": 16175.18
+    },
+    {
+      "map": 1,
+      "round": 22,
+      "start": 16403.38
+    },
+    {
+      "map": 1,
+      "round": 23,
+      "start": 16513.48
+    },
+    {
+      "map": 1,
+      "round": 24,
+      "start": 16874.8
+    },
+    {
+      "map": 2,
+      "round": 1,
+      "start": 17139.03
+    },
+    {
+      "map": 2,
+      "round": 2,
+      "start": 17258.13
+    },
+    {
+      "map": 2,
+      "round": 3,
+      "start": 18059.57
+    },
+    {
+      "map": 2,
+      "round": 4,
+      "start": 18155.66
+    },
+    {
+      "map": 2,
+      "round": 5,
+      "start": 18258.75
+    },
+    {
+      "map": 2,
+      "round": 6,
+      "start": 18419.89
+    },
+    {
+      "map": 2,
+      "round": 7,
+      "start": 18531.99
+    },
+    {
+      "map": 2,
+      "round": 8,
+      "start": 18642.08
+    },
+    {
+      "map": 2,
+      "round": 9,
+      "start": 18757.19
+    },
+    {
+      "map": 2,
+      "round": 10,
+      "start": 18843.26
+    },
+    {
+      "map": 2,
+      "round": 11,
+      "start": 18943.35
+    },
+    {
+      "map": 2,
+      "round": 12,
+      "start": 19032.43
+    },
+    {
+      "map": 2,
+      "round": 13,
+      "start": 19256.63
+    },
+    {
+      "map": 2,
+      "round": 14,
+      "start": 19377.73
+    },
+    {
+      "map": 2,
+      "round": 15,
+      "start": 19529.87
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 19657.98
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 19749.06
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 19849.15
+    },
+    {
+      "map": 2,
+      "round": 19,
+      "start": 19914.2
+    },
+    {
+      "map": 2,
+      "round": 20,
+      "start": 19981.26
+    },
+    {
+      "map": 2,
+      "round": 21,
+      "start": 20076.35
+    },
+    {
+      "map": 2,
+      "round": 22,
+      "start": 20235.49
+    },
+    {
+      "map": 2,
+      "round": 23,
+      "start": 20385.62
+    },
+    {
+      "map": 2,
+      "round": 24,
+      "start": 20453.68
+    }
+  ],
+  "alignment": {
+    "timelineScale": 0.995877376383758,
+    "segments": [
+      {
+        "offset": -12.4653971201955,
+        "targetStart": 12.517,
+        "targetEnd": 21640.682
+      }
+    ],
+    "source": "twitch:2888772554"
+  }
+}

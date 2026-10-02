@@ -1,96 +1,114 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-01",
+  "updatedAt": "2026-10-02",
   "videos": [
     {
       "provider": "youtube",
-      "sourceId": "WdGW0L-3iCc",
+      "sourceId": "P8Td3k1gem8",
       "title": "NS vs XLG",
       "event": "VALORANT Champions Shanghai | Group Stage",
       "label": "Full match",
-      "index": "/indexes/youtube-WdGW0L-3iCc.json",
+      "index": "/indexes/youtube-WdGW0L-3iCc-P8Td3k1gem8.json",
       "playedAt": "2026-10-01T14:38:33Z",
       "tournament": "VALORANT Champions Shanghai",
-      "tournamentKey": "valorant-champions-shanghai"
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:WdGW0L-3iCc:P8Td3k1gem8",
+      "chat": "/chats/twitch-2888772554.json",
+      "chatSourceId": "2888772554"
     },
     {
       "provider": "youtube",
-      "sourceId": "m29QjckzB7w",
+      "sourceId": "P8Td3k1gem8",
       "title": "TL vs TYL",
       "event": "VALORANT Champions Shanghai | Group Stage",
       "label": "Full match",
-      "index": "/indexes/youtube-m29QjckzB7w.json",
+      "index": "/indexes/youtube-m29QjckzB7w-P8Td3k1gem8.json",
       "playedAt": "2026-10-01T12:14:20Z",
       "tournament": "VALORANT Champions Shanghai",
-      "tournamentKey": "valorant-champions-shanghai"
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:m29QjckzB7w:P8Td3k1gem8",
+      "chat": "/chats/twitch-2888772554.json",
+      "chatSourceId": "2888772554"
     },
     {
       "provider": "youtube",
-      "sourceId": "2y9ne_hMZts",
+      "sourceId": "gYE4F6g9f9s",
       "title": "100T vs FUT",
       "event": "VALORANT Champions Shanghai | Group Stage",
       "label": "Full match",
-      "index": "/indexes/youtube-2y9ne_hMZts.json",
+      "index": "/indexes/youtube-2y9ne_hMZts-gYE4F6g9f9s.json",
       "playedAt": "2026-09-30T11:57:10Z",
       "tournament": "VALORANT Champions Shanghai",
-      "tournamentKey": "valorant-champions-shanghai"
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:2y9ne_hMZts:gYE4F6g9f9s",
+      "chat": "/chats/twitch-2887911255.json",
+      "chatSourceId": "2887911255"
     },
     {
       "provider": "youtube",
-      "sourceId": "XdGX65LMxig",
+      "sourceId": "gYE4F6g9f9s",
       "title": "VIT vs LOUD",
       "event": "VALORANT Champions Shanghai | Group Stage",
       "label": "Full match",
-      "index": "/indexes/youtube-XdGX65LMxig.json",
+      "index": "/indexes/youtube-XdGX65LMxig-gYE4F6g9f9s.json",
       "playedAt": "2026-09-30T09:08:51Z",
       "tournament": "VALORANT Champions Shanghai",
-      "tournamentKey": "valorant-champions-shanghai"
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:XdGX65LMxig:gYE4F6g9f9s",
+      "chat": "/chats/twitch-2887911255.json",
+      "chatSourceId": "2887911255"
     },
     {
       "provider": "youtube",
-      "sourceId": "y6wwIZysHns",
+      "sourceId": "w5O5vwuHwXY",
       "title": "NRG vs KC",
       "event": "VALORANT Champions Shanghai | Group Stage",
       "label": "Full match",
-      "index": "/indexes/youtube-y6wwIZysHns.json",
+      "index": "/indexes/youtube-y6wwIZysHns-w5O5vwuHwXY.json",
       "playedAt": "2026-09-29T16:02:28Z",
       "tournament": "VALORANT Champions Shanghai",
-      "tournamentKey": "valorant-champions-shanghai"
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:y6wwIZysHns:w5O5vwuHwXY",
+      "chat": "/chats/twitch-2887052196.json",
+      "chatSourceId": "2887052196"
     },
     {
       "provider": "youtube",
-      "sourceId": "z_aPp2s4d_o",
+      "sourceId": "w5O5vwuHwXY",
       "title": "PRX vs G2",
       "event": "VALORANT Champions Shanghai | Group Stage",
       "label": "Full match",
-      "index": "/indexes/youtube-z_aPp2s4d_o.json",
+      "index": "/indexes/youtube-z_aPp2s4d_o-w5O5vwuHwXY.json",
       "playedAt": "2026-09-29T09:02:16Z",
       "tournament": "VALORANT Champions Shanghai",
-      "tournamentKey": "valorant-champions-shanghai"
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:z_aPp2s4d_o:w5O5vwuHwXY",
+      "chat": "/chats/twitch-2887052196.json",
+      "chatSourceId": "2887052196"
     },
     {
       "provider": "youtube",
-      "sourceId": "fFfCJDNHEvc",
+      "sourceId": "XsORTuEh7Z4",
       "title": "JDG vs FUT",
       "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-fFfCJDNHEvc-XsORTuEh7Z4.json",
+      "playedAt": "2026-09-27T11:36:45Z",
       "tournament": "VALORANT Champions Shanghai",
       "tournamentKey": "valorant-champions-shanghai",
-      "label": "Full match",
-      "index": "/indexes/youtube-fFfCJDNHEvc.json",
-      "chat": "/chats/twitch-2885318675.json",
-      "chatSourceId": "2885318675",
-      "playedAt": "2026-09-27T11:36:45Z"
+      "catalogId": "youtube:fFfCJDNHEvc:XsORTuEh7Z4"
     },
     {
       "provider": "youtube",
-      "sourceId": "ZphbktbT26k",
+      "sourceId": "Lwi9Bd5ai5o",
       "title": "LOUD vs EDG",
-      "event": "VALORANT Champions Shanghai · Group Stage",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-ZphbktbT26k-Lwi9Bd5ai5o.json",
+      "playedAt": "2026-09-27T09:11:47Z",
       "tournament": "VALORANT Champions Shanghai",
       "tournamentKey": "valorant-champions-shanghai",
-      "label": "Full match",
-      "index": "/indexes/ZphbktbT26k.json",
-      "playedAt": "2026-09-27T09:11:47Z"
+      "catalogId": "youtube:ZphbktbT26k:Lwi9Bd5ai5o"
     },
     {
       "provider": "twitch",
@@ -106,16 +124,15 @@
     },
     {
       "provider": "youtube",
-      "sourceId": "ZWhEMQVk4x0",
+      "sourceId": "XsORTuEh7Z4",
       "title": "100T vs T1",
       "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-ZWhEMQVk4x0-XsORTuEh7Z4.json",
+      "playedAt": "2026-09-27T09:11:40Z",
       "tournament": "VALORANT Champions Shanghai",
       "tournamentKey": "valorant-champions-shanghai",
-      "label": "Full match",
-      "index": "/indexes/youtube-ZWhEMQVk4x0.json",
-      "chat": "/chats/twitch-2885318675.json",
-      "chatSourceId": "2885318675",
-      "playedAt": "2026-09-27T09:11:40Z"
+      "catalogId": "youtube:ZWhEMQVk4x0:XsORTuEh7Z4"
     },
     {
       "provider": "twitch",
@@ -131,16 +148,15 @@
     },
     {
       "provider": "youtube",
-      "sourceId": "TWjd0AoZdaY",
+      "sourceId": "Lwi9Bd5ai5o",
       "title": "GE vs VIT",
       "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-TWjd0AoZdaY-Lwi9Bd5ai5o.json",
+      "playedAt": "2026-09-26T09:09:12Z",
       "tournament": "VALORANT Champions Shanghai",
       "tournamentKey": "valorant-champions-shanghai",
-      "label": "Full match",
-      "index": "/indexes/youtube-TWjd0AoZdaY.json",
-      "chat": "/chats/twitch-2884367669.json",
-      "chatSourceId": "2884367669",
-      "playedAt": "2026-09-26T09:09:12Z"
+      "catalogId": "youtube:TWjd0AoZdaY:Lwi9Bd5ai5o"
     },
     {
       "provider": "twitch",

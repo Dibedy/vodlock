@@ -643,6 +643,35 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(result, (True, "Published"))
         self.assertEqual(catalog["videos"][0]["playedAt"], "2026-09-30T10:05:00Z")
 
+    def test_new_full_match_uses_a_local_analysis_download(self):
+        channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH", "published": "2026-09-30T10:00:00Z"}
+        rounds = [{"map": 1, "round": number, "start": number * 100, "confidence": .9}
+                  for number in range(1, 14)]
+        attempts = []
+
+        def index_job(identifier):
+            job = auto_publish.server.JOBS[identifier]
+            attempts.append(job.get("streamAnalysis", False))
+            job.update(status="ready", warnings=[], duration=2000, rounds=rounds)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "catalog.json").write_text('{"version":2,"videos":[]}', encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), \
+                    patch.object(auto_publish.server, "index_job", side_effect=index_job), \
+                    patch.object(auto_publish, "canonical_stream_alignment",
+                                 return_value=("lmnopqrstuv", {"offset": 0}, rounds)), \
+                    patch.dict(auto_publish.os.environ, {"VODLOCK_STREAM_ANALYSIS": "1"}):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13},
+                                              {"videos": {"youtube:lmnopqrstuv": {
+                                                  "publishedAt": "2026-09-30T08:00:00Z"}}}, object())
+        self.assertEqual(result, (True, "Published"))
+        self.assertEqual(attempts, [False])
+
     def test_official_twitch_chat_attaches_to_canonical_stream_matches_without_round_ocr(self):
         entry = {"id": "1234567890", "title": "A vs B - Champions"}
         config = {"channels": [{"name": "Streams", "canonicalStream": True}], "alignmentLookback": 8,

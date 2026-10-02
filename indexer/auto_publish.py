@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v14"
+PUBLISHER_VERSION = "publisher-v15"
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
 PUBLISH_LOCK = threading.Lock()
 
@@ -657,9 +657,6 @@ def process(channel, entry, config, state=None, yt_dlp=None):
         job["videoId"] = entry["id"]
     else:
         job["twitchVideoId"] = entry["id"]
-    server.DATA.mkdir(exist_ok=True)
-    server.JOBS[identifier] = job
-    server.save(job)
     aligned_source_id = None
     alignment = None
     playback_source_id = entry["id"]
@@ -667,6 +664,11 @@ def process(channel, entry, config, state=None, yt_dlp=None):
     reused_rounds = reusable_match_rounds(entry) if provider == "youtube" and channel.get("matchSource") else []
     if reused_rounds:
         job.update(status="ready", warnings=[], rounds=reused_rounds)
+    elif provider == "youtube" and channel.get("matchSource"):
+        job["streamAnalysis"] = False
+    server.DATA.mkdir(exist_ok=True)
+    server.JOBS[identifier] = job
+    server.save(job)
     try:
         print(f"Processing {provider}:{entry['id']} - {clean_text(entry['title'])}", flush=True)
         if provider == "youtube" and channel.get("canonicalStream"):

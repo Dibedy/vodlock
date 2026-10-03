@@ -237,16 +237,16 @@
       "checkedAt": "2026-10-02T15:43:20.435426+00:00"
     },
     "twitch:2887057207": {
-      "status": "published",
+      "status": "held",
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | PRX vs G2 - VCT Champions Group Stage #VCTWatchparty | !vote !inzone !voice",
-      "message": "Published 2 complete matches from the watch-party archive",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-29T08:45:31Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
-      "retryClass": "none",
-      "checkedAt": "2026-10-02T04:04:30.390946+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-03T00:12:59.423987+00:00"
     },
     "youtube:XdGX65LMxig": {
       "status": "waiting",
@@ -258,7 +258,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T20:35:20.369490+00:00"
+      "checkedAt": "2026-10-02T23:05:54.948342+00:00"
     },
     "twitch:2887911255": {
       "status": "held",
@@ -270,7 +270,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-02T15:24:29.172278+00:00"
+      "checkedAt": "2026-10-02T23:51:40.865025+00:00"
     },
     "youtube:2y9ne_hMZts": {
       "status": "waiting",
@@ -282,7 +282,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T20:19:35.632230+00:00"
+      "checkedAt": "2026-10-02T22:50:42.969587+00:00"
     },
     "twitch:2887917739": {
       "status": "held",
@@ -306,7 +306,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-02T15:09:57.093518+00:00"
+      "checkedAt": "2026-10-02T23:41:03.741142+00:00"
     },
     "youtube:m29QjckzB7w": {
       "status": "waiting",
@@ -318,7 +318,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T20:07:37.866026+00:00"
+      "checkedAt": "2026-10-02T22:39:08.469954+00:00"
     },
     "twitch:2888778875": {
       "status": "held",
@@ -342,7 +342,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T19:50:43.005466+00:00"
+      "checkedAt": "2026-10-02T22:23:45.476205+00:00"
     },
     "youtube:P8Td3k1gem8": {
       "status": "indexed",
@@ -474,7 +474,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T20:45:07.467269+00:00"
+      "checkedAt": "2026-10-02T23:30:39.646168+00:00"
     },
     "youtube:eKP_QB_H7F8": {
       "status": "indexed",
@@ -498,7 +498,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T19:36:38.141352+00:00"
+      "checkedAt": "2026-10-02T23:20:56.513609+00:00"
     },
     "twitch:2889639463": {
       "status": "indexed",

@@ -103,9 +103,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-09-24T07:32:31Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v15",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-02T04:00:39.818199+00:00"
+      "checkedAt": "2026-10-03T02:05:47.700952+00:00"
     },
     "twitch:2882594925": {
       "status": "indexed",
@@ -258,7 +258,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T23:05:54.948342+00:00"
+      "checkedAt": "2026-10-03T01:40:40.383701+00:00"
     },
     "twitch:2887911255": {
       "status": "held",
@@ -282,7 +282,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T22:50:42.969587+00:00"
+      "checkedAt": "2026-10-03T01:32:11.217488+00:00"
     },
     "twitch:2887917739": {
       "status": "held",
@@ -318,7 +318,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T22:39:08.469954+00:00"
+      "checkedAt": "2026-10-03T01:26:16.875992+00:00"
     },
     "twitch:2888778875": {
       "status": "held",
@@ -342,7 +342,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T22:23:45.476205+00:00"
+      "checkedAt": "2026-10-03T01:17:49.394968+00:00"
     },
     "youtube:P8Td3k1gem8": {
       "status": "indexed",
@@ -474,7 +474,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T23:30:39.646168+00:00"
+      "checkedAt": "2026-10-03T01:53:21.532155+00:00"
     },
     "youtube:eKP_QB_H7F8": {
       "status": "indexed",
@@ -498,7 +498,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-02T23:20:56.513609+00:00"
+      "checkedAt": "2026-10-03T01:48:13.108746+00:00"
     },
     "twitch:2889639463": {
       "status": "indexed",

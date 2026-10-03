@@ -612,6 +612,31 @@ class AutoPublishTests(unittest.TestCase):
                                               {"videos": {}}, object())
         self.assertEqual(result, ("waiting", "No matching stream archive"))
 
+    def test_full_match_alignment_uses_storyboard_sampling_tolerance(self):
+        config = {"channels": [{"name": "Streams", "canonicalStream": True}],
+                  "alignmentLookback": 8, "roundAlignmentMaximumResidual": 5}
+        state = {"videos": {"youtube:lmnopqrstuv": {"status": "indexed", "channel": "Streams"}}}
+        job = {"rounds": [{"map": 1, "round": 1, "start": 100}]}
+        alignment = {"anchors": 20, "offset": 10}
+        with patch.object(auto_publish, "storyboard", return_value={"duration": 5000}), \
+                patch.object(auto_publish, "align_storyboards", return_value=alignment) as align, \
+                patch.object(auto_publish, "translate_index", return_value=job["rounds"]):
+            result = auto_publish.canonical_stream_alignment({"id": "abcdefghijk"}, job, config, state, object())
+        self.assertEqual(result[0], "lmnopqrstuv")
+        self.assertNotIn("maximum_residual", align.call_args.kwargs)
+
+    def test_official_twitch_chat_waits_when_its_canonical_archive_cannot_align(self):
+        channel = {"provider": "twitch", "name": "Official", "chatSource": True}
+        entry = {"id": "1234567890", "title": "A vs B - Champions"}
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with patch.object(auto_publish, "SITE", root / "site"), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), \
+                    patch.object(auto_publish, "attach_stream_chat",
+                                 side_effect=auto_publish.OfficialArchiveUnmatched("No matching archive")):
+                result = auto_publish.process(channel, entry, {}, {"videos": {}}, object())
+        self.assertEqual(result, ("waiting", "No matching archive"))
+
     def test_full_match_migration_reuses_its_published_round_index(self):
         channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
         entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH", "published": "2026-09-30T10:00:00Z"}

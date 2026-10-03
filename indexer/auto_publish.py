@@ -520,8 +520,7 @@ def canonical_stream_alignment(entry, job, config, state, yt_dlp):
     for stream_id in reversed(streams):
         try:
             target = storyboard("youtube", stream_id, yt_dlp)
-            alignment = align_storyboards(reference, target, require_target_coverage=False,
-                                          maximum_residual=float(config.get("roundAlignmentMaximumResidual", 5)))
+            alignment = align_storyboards(reference, target, require_target_coverage=False)
             rounds = translate_index({"rounds": job["rounds"]}, target, alignment)
             matches.append((alignment["anchors"], stream_id, alignment, rounds))
         except (OSError, ValueError, KeyError):
@@ -558,13 +557,12 @@ def attach_stream_chat(entry, job, config, state, yt_dlp):
         try:
             reference = storyboard("youtube", stream_id, yt_dlp)
             alignment = align_storyboards(reference, target, maximum_distance=int(config.get("watchPartyMaximumDistance", 18)),
-                                          require_target_coverage=False,
-                                          maximum_residual=float(config.get("roundAlignmentMaximumResidual", 5)))
+                                          require_target_coverage=False)
             matches.append((alignment["anchors"], stream_id, inverted_alignment(alignment)))
         except (OSError, ValueError, KeyError):
             continue
     if not matches:
-        raise ValueError("No verified official YouTube stream archive aligns with this Twitch chat")
+        raise OfficialArchiveUnmatched("No verified official YouTube stream archive aligns with this Twitch chat")
     matches.sort(reverse=True, key=lambda item: item[0])
     if len(matches) > 1 and matches[1][0] >= matches[0][0] * .8:
         raise ValueError("More than one official YouTube stream archive aligns with this Twitch chat")
@@ -716,7 +714,10 @@ def process(channel, entry, config, state=None, yt_dlp=None):
                 raise ValueError("The official YouTube stream archive is shorter than the configured minimum")
             return "indexed", "Stored official YouTube stream archive"
         if provider == "twitch" and channel.get("chatSource"):
-            return attach_stream_chat(entry, job, config, state, yt_dlp)
+            try:
+                return attach_stream_chat(entry, job, config, state, yt_dlp)
+            except (OfficialMatchPending, OfficialArchiveUnmatched) as error:
+                return "waiting", str(error)
         if provider == "youtube" and not channel.get("matchSource") and state is not None and yt_dlp is not None:
             try:
                 aligned_source_id, alignment, rounds = youtube_alignment(channel, entry, config, state, yt_dlp)

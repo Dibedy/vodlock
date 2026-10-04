@@ -1,8 +1,8 @@
 {
   "schemaVersion": 2,
   "provider": "youtube",
-  "sourceId": "Lwi9Bd5ai5o",
-  "label": "LOUD vs EDG",
+  "sourceId": "UsFBKuZ_gX4",
+  "label": "KC vs XLG",
   "leadSeconds": 5,
   "detector": "vct-clock-ocr-v9+storyboard-v4",
   "roundTimingVersion": "round-timing-v2",
@@ -10,197 +10,198 @@
     {
       "map": 1,
       "round": 1,
-      "start": 14465.17
+      "start": 10758.97
     },
     {
       "map": 1,
       "round": 2,
-      "start": 14547.34
+      "start": 10879.2
     },
     {
       "map": 1,
       "round": 3,
-      "start": 14634.53
+      "start": 10994.43
     },
     {
       "map": 1,
       "round": 4,
-      "start": 14699.66
+      "start": 11144.72
     },
     {
       "map": 1,
       "round": 5,
-      "start": 14802.88
+      "start": 11366.14
     },
     {
       "map": 1,
       "round": 6,
-      "start": 14902.08
+      "start": 11525.45
     },
     {
       "map": 1,
       "round": 7,
-      "start": 15061.42
+      "start": 11634.66
     },
     {
       "map": 1,
       "round": 8,
-      "start": 15186.68
+      "start": 11775.93
     },
     {
       "map": 1,
       "round": 9,
-      "start": 15334.99
+      "start": 11871.12
     },
     {
       "map": 1,
       "round": 10,
-      "start": 15435.19
+      "start": 12023.41
     },
     {
       "map": 1,
       "round": 11,
-      "start": 15501.33
+      "start": 12195.74
     },
     {
       "map": 1,
       "round": 12,
-      "start": 15627.59
+      "start": 12330.0
     },
     {
       "map": 1,
       "round": 13,
-      "start": 15835.03
+      "start": 12559.44
     },
     {
       "map": 1,
       "round": 14,
-      "start": 15918.2
+      "start": 12746.8
     },
     {
       "map": 1,
       "round": 15,
-      "start": 15969.31
+      "start": 12833.97
     },
     {
       "map": 1,
       "round": 16,
-      "start": 16071.52
-    },
-    {
-      "map": 1,
-      "round": 17,
-      "start": 16208.8
-    },
-    {
-      "map": 1,
-      "round": 18,
-      "start": 16341.08
-    },
-    {
-      "map": 1,
-      "round": 19,
-      "start": 16440.29
-    },
-    {
-      "map": 1,
-      "round": 20,
-      "start": 16541.5
-    },
-    {
-      "map": 1,
-      "round": 21,
-      "start": 16737.91
+      "start": 12945.19
     },
     {
       "map": 2,
       "round": 1,
-      "start": 17583.96
+      "start": 13219.72
     },
     {
       "map": 2,
       "round": 2,
-      "start": 17654.11
+      "start": 13344.96
     },
     {
       "map": 2,
       "round": 3,
-      "start": 17720.24
+      "start": 14033.31
     },
     {
       "map": 2,
       "round": 4,
-      "start": 17808.43
+      "start": 14155.55
     },
     {
       "map": 2,
       "round": 5,
-      "start": 17879.58
+      "start": 14335.89
     },
     {
       "map": 2,
       "round": 6,
-      "start": 17958.74
+      "start": 14447.11
     },
     {
       "map": 2,
       "round": 7,
-      "start": 18104.04
+      "start": 14602.41
     },
     {
       "map": 2,
       "round": 8,
-      "start": 18280.41
+      "start": 14702.6
     },
     {
       "map": 2,
       "round": 9,
-      "start": 18465.8
+      "start": 14877.94
     },
     {
       "map": 2,
       "round": 10,
-      "start": 18594.06
+      "start": 14996.17
     },
     {
       "map": 2,
       "round": 11,
-      "start": 18663.21
+      "start": 15085.34
     },
     {
       "map": 2,
       "round": 12,
-      "start": 18747.38
+      "start": 15184.53
     },
     {
       "map": 2,
       "round": 13,
-      "start": 19005.92
+      "start": 15459.06
     },
     {
       "map": 2,
       "round": 14,
-      "start": 19094.1
+      "start": 15558.25
     },
     {
       "map": 2,
       "round": 15,
-      "start": 19183.29
+      "start": 15600.33
     },
     {
       "map": 2,
       "round": 16,
-      "start": 19375.69
+      "start": 15785.69
     },
     {
       "map": 2,
       "round": 17,
-      "start": 19525.0
+      "start": 15921.95
     },
     {
       "map": 2,
       "round": 18,
-      "start": 19609.18
+      "start": 15979.06
+    },
+    {
+      "map": 2,
+      "round": 19,
+      "start": 16035.17
     }
-  ]
+  ],
+  "alignment": {
+    "timelineScale": 1.0007317550739452,
+    "segments": [
+      {
+        "offset": -115.19723452182706,
+        "targetStart": 115.113,
+        "targetEnd": 9996.646
+      },
+      {
+        "offset": 128.57101369663525,
+        "targetStart": 9996.646,
+        "targetEnd": 14140.633
+      },
+      {
+        "offset": 997.5984639488087,
+        "targetStart": 14140.633,
+        "targetEnd": 17781.639
+      }
+    ],
+    "source": "twitch:2890572310"
+  }
 }

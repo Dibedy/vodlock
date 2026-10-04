@@ -186,7 +186,9 @@
       "playedAt": "2026-09-27T11:36:45Z",
       "tournament": "VALORANT Champions Shanghai",
       "tournamentKey": "valorant-champions-shanghai",
-      "catalogId": "youtube:fFfCJDNHEvc:XsORTuEh7Z4"
+      "catalogId": "youtube:fFfCJDNHEvc:XsORTuEh7Z4",
+      "chat": "/chats/twitch-2891543405.json",
+      "chatSourceId": "2891543405"
     },
     {
       "provider": "youtube",
@@ -222,7 +224,9 @@
       "playedAt": "2026-09-27T09:11:40Z",
       "tournament": "VALORANT Champions Shanghai",
       "tournamentKey": "valorant-champions-shanghai",
-      "catalogId": "youtube:ZWhEMQVk4x0:XsORTuEh7Z4"
+      "catalogId": "youtube:ZWhEMQVk4x0:XsORTuEh7Z4",
+      "chat": "/chats/twitch-2891543405.json",
+      "chatSourceId": "2891543405"
     },
     {
       "provider": "twitch",
@@ -249,6 +253,20 @@
       "catalogId": "youtube:TWjd0AoZdaY:Lwi9Bd5ai5o"
     },
     {
+      "provider": "youtube",
+      "sourceId": "UsFBKuZ_gX4",
+      "title": "KC vs XLG",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-6VPsYp9D7iM-UsFBKuZ_gX4.json",
+      "playedAt": "2026-09-25T11:29:35Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:6VPsYp9D7iM:UsFBKuZ_gX4",
+      "chat": "/chats/twitch-2890572310.json",
+      "chatSourceId": "2890572310"
+    },
+    {
       "provider": "twitch",
       "sourceId": "2883449763",
       "title": "EG FNS",
@@ -259,6 +277,20 @@
       "index": "/indexes/twitch-2883449763.json",
       "playedAt": "2026-09-25T09:10:02Z",
       "chat": "/chats/twitch-2883449763.json"
+    },
+    {
+      "provider": "youtube",
+      "sourceId": "UsFBKuZ_gX4",
+      "title": "NS vs NRG",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-fwPdFHPLY4k-UsFBKuZ_gX4.json",
+      "playedAt": "2026-09-25T09:09:55Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:fwPdFHPLY4k:UsFBKuZ_gX4",
+      "chat": "/chats/twitch-2890572310.json",
+      "chatSourceId": "2890572310"
     },
     {
       "provider": "twitch",

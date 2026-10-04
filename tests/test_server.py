@@ -113,7 +113,9 @@ class ServerTests(unittest.TestCase):
                 return info["path"]
 
         yt_dlp = SimpleNamespace(YoutubeDL=YoutubeDL, utils=SimpleNamespace(DownloadError=DownloadError))
-        with tempfile.TemporaryDirectory() as temporary, patch.object(server, "DATA", Path(temporary)), patch.dict(server.JOBS, {identifier: job}):
+        with tempfile.TemporaryDirectory() as temporary, patch.object(server, "DATA", Path(temporary)), \
+                patch.dict(server.JOBS, {identifier: job}), \
+                patch.dict(server.os.environ, {"VODLOCK_YOUTUBE_POT": "0"}):
             work = Path(temporary) / identifier
             work.mkdir()
             source = server.download_youtube(job, work, lambda _: None, yt_dlp)

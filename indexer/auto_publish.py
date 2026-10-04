@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v17"
+PUBLISHER_VERSION = "publisher-v18"
 ROUND_TIMING_VERSION = "round-timing-v2"
 TWITCH_STORYBOARD_VERSION = 3
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
@@ -824,6 +824,8 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             catalog_path = SITE / "catalog.json"
             catalog = read_json(catalog_path)
             catalog["version"] = 2
+            previous_catalog_entry = next((item for item in catalog["videos"]
+                                           if catalog_id and item.get("catalogId") == catalog_id), None)
             if catalog_id:
                 catalog["videos"] = [item for item in catalog["videos"]
                                      if item.get("catalogId") != catalog_id
@@ -839,7 +841,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             source = (state["videos"].get(source_key("youtube", playback_source_id))
                       if catalog_id and state is not None else state["videos"].get(source_key("twitch", aligned_source_id))
                       if provider == "youtube" and aligned_source_id and state is not None else None)
-            played_at = entry.get("catalogPlayedAt") or catalog_played_at(
+            played_at = entry.get("catalogPlayedAt") or (previous_catalog_entry or {}).get("playedAt") or catalog_played_at(
                 entry, exported["rounds"], source, alignment if source else None)
             catalog_entry = {"provider": provider, "sourceId": playback_source_id, "title": title,
                              "event": event, "label": "Full match" if provider == "youtube" else "Full broadcast",

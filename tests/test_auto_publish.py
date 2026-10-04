@@ -711,6 +711,34 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(result, (True, "Published"))
         self.assertEqual(catalog["videos"][0]["playedAt"], "2026-09-30T10:05:00Z")
 
+    def test_full_match_rebuild_preserves_its_existing_catalog_time(self):
+        channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH", "published": None}
+        rounds = [{"map": 1, "round": number, "start": number * 100} for number in range(1, 14)]
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "indexes" / "existing.json").write_text(json.dumps({"schemaVersion": 2, "provider": "youtube",
+                "sourceId": "lmnopqrstuv", "roundTimingVersion": auto_publish.ROUND_TIMING_VERSION,
+                "rounds": rounds}), encoding="utf-8")
+            (site / "catalog.json").write_text(json.dumps({"version": 2, "videos": [{"provider": "youtube",
+                "sourceId": "lmnopqrstuv", "catalogId": "youtube:abcdefghijk:lmnopqrstuv",
+                "playedAt": "2026-09-30T10:05:00Z", "index": "/indexes/existing.json"}]}), encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), \
+                    patch.object(auto_publish.server, "index_job", side_effect=lambda identifier:
+                                 auto_publish.server.JOBS[identifier].update(status="ready", warnings=[], duration=2000,
+                                                                             rounds=[{**item, "confidence": .9} for item in rounds])), \
+                    patch.object(auto_publish, "canonical_stream_alignment",
+                                 return_value=("lmnopqrstuv", {"offset": 0}, rounds)):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13},
+                                              {"videos": {"youtube:lmnopqrstuv": {"publishedAt": None}}}, object())
+            catalog = auto_publish.read_json(site / "catalog.json")
+        self.assertEqual(result, (True, "Published"))
+        self.assertEqual(catalog["videos"][0]["playedAt"], "2026-09-30T10:05:00Z")
+
     def test_new_full_match_uses_a_local_analysis_download(self):
         channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
         entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH", "published": "2026-09-30T10:00:00Z"}

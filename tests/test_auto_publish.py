@@ -90,6 +90,16 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(result["publishedAt"], "2026-10-03T08:00:00Z")
         self.assertEqual(stored["publishedAt"], "2026-10-03T08:00:00Z")
 
+    def test_fresh_canonical_stream_waits_while_youtube_prepares_its_formats(self):
+        channel = {"provider": "youtube", "name": "Streams", "canonicalStream": True, "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "Champions stream"}
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with patch.object(auto_publish.server, "DATA", root / "data"), patch.object(auto_publish.server, "save"), \
+                    patch.object(auto_publish, "storyboard", side_effect=ValueError("No video formats found!")):
+                result = auto_publish.process(channel, entry, {}, {"videos": {}}, object())
+        self.assertEqual(result, ("waiting", "YouTube is still preparing this stream archive; it will retry automatically"))
+
     def test_stream_migration_detects_legacy_full_match_catalog_entries(self):
         channel = {"matchSource": True}
         entry = {"id": "abcdefghijk"}

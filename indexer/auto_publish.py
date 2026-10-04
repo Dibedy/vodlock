@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v22"
+PUBLISHER_VERSION = "publisher-v23"
 ROUND_TIMING_VERSION = "round-timing-v2"
 TWITCH_STORYBOARD_VERSION = 3
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
@@ -99,6 +99,11 @@ def recovery_message(channel, error):
             return "YouTube rejected the configured cookies. Refresh the YOUTUBE_COOKIES secret and retry."
         return "YouTube blocked GitHub's shared runner. Add the YOUTUBE_COOKIES secret and retry."
     return message
+
+
+def youtube_archive_pending(error):
+    message = str(error).lower()
+    return "no video formats found" in message or "this live event has ended" in message
 
 
 def should_attempt(key, published, state, retry_hours, now):
@@ -726,7 +731,12 @@ def process(channel, entry, config, state=None, yt_dlp=None):
     try:
         print(f"Processing {provider}:{entry['id']} - {clean_text(entry['title'])}", flush=True)
         if provider == "youtube" and channel.get("canonicalStream"):
-            archive = storyboard("youtube", entry["id"], yt_dlp, require_published_at=True)
+            try:
+                archive = storyboard("youtube", entry["id"], yt_dlp, require_published_at=True)
+            except Exception as error:
+                if youtube_archive_pending(error):
+                    return "waiting", "YouTube is still preparing this stream archive; it will retry automatically"
+                raise
             if archive["duration"] < channel["minimumDuration"]:
                 raise ValueError("The official YouTube stream archive is shorter than the configured minimum")
             if not archive.get("publishedAt"):

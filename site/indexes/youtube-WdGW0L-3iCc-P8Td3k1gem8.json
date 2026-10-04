@@ -5,6 +5,7 @@
   "label": "NS vs XLG",
   "leadSeconds": 5,
   "detector": "vct-clock-ocr-v9+storyboard-v4",
+  "roundTimingVersion": "round-timing-v2",
   "rounds": [
     {
       "map": 1,
@@ -248,24 +249,19 @@
     }
   ],
   "alignment": {
-    "timelineScale": 1.0004965063962643,
+    "timelineScale": 1.0009281306276872,
     "segments": [
       {
-        "offset": -75.98370767477068,
-        "targetStart": 75.946,
-        "targetEnd": 4546.505
+        "offset": -99.9977248903591,
+        "targetStart": 99.905,
+        "targetEnd": 16828.837
       },
       {
-        "offset": -3348.515734418362,
-        "targetStart": 7817.413,
-        "targetEnd": 17710.587
-      },
-      {
-        "offset": -2336.6625921779946,
-        "targetStart": 16699.236,
-        "targetEnd": 21385.419
+        "offset": -17.893592191231164,
+        "targetStart": 16828.837,
+        "targetEnd": 21537.722
       }
     ],
-    "source": "twitch:2889639463"
+    "source": "twitch:2888772554"
   }
 }

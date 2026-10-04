@@ -5,6 +5,7 @@
   "label": "VIT vs LOUD",
   "leadSeconds": 5,
   "detector": "vct-clock-ocr-v9+storyboard-v4",
+  "roundTimingVersion": "round-timing-v2",
   "rounds": [
     {
       "map": 1,
@@ -288,12 +289,17 @@
     }
   ],
   "alignment": {
-    "timelineScale": 0.995647100571598,
+    "timelineScale": 1.00054975206127,
     "segments": [
       {
-        "offset": 13.7628298712012,
-        "targetStart": 0,
-        "targetEnd": 22030.132
+        "offset": -239.99986792743272,
+        "targetStart": 239.868,
+        "targetEnd": 13666.102
+      },
+      {
+        "offset": 13.999692130841291,
+        "targetStart": 13666.102,
+        "targetEnd": 21922.675
       }
     ],
     "source": "twitch:2887911255"

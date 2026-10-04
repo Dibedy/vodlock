@@ -249,40 +249,40 @@
       "checkedAt": "2026-10-03T00:12:59.423987+00:00"
     },
     "youtube:XdGX65LMxig": {
-      "status": "waiting",
+      "status": "published",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "VIT vs. LOUD - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive matches this full match",
+      "message": "Published",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
-      "retryClass": "dependency",
-      "checkedAt": "2026-10-03T19:44:15.596924+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
+      "retryClass": "none",
+      "checkedAt": "2026-10-04T02:19:36.640364+00:00"
     },
     "twitch:2887911255": {
-      "status": "held",
+      "status": "indexed",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "LOUD vs. VIT - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive aligns with this Twitch chat",
+      "message": "Attached Twitch chat to 2 official stream matches",
       "publishedAt": "2026-09-30T08:30:14Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-10-03T17:02:17.687730+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
+      "retryClass": "none",
+      "checkedAt": "2026-10-04T04:07:29.480247+00:00"
     },
     "youtube:2y9ne_hMZts": {
-      "status": "waiting",
+      "status": "published",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "100T vs. FUT - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive matches this full match",
+      "message": "Published",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
-      "retryClass": "dependency",
-      "checkedAt": "2026-10-03T19:28:22.734299+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
+      "retryClass": "none",
+      "checkedAt": "2026-10-04T02:03:28.623945+00:00"
     },
     "twitch:2887917739": {
       "status": "held",
@@ -297,28 +297,28 @@
       "checkedAt": "2026-10-02T21:35:29.580066+00:00"
     },
     "twitch:2888772554": {
-      "status": "held",
+      "status": "indexed",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "TL vs. TYL - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive aligns with this Twitch chat",
+      "message": "Attached Twitch chat to 2 official stream matches",
       "publishedAt": "2026-10-01T08:30:41Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-10-03T16:56:27.094419+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
+      "retryClass": "none",
+      "checkedAt": "2026-10-04T03:53:53.589080+00:00"
     },
     "youtube:m29QjckzB7w": {
-      "status": "waiting",
+      "status": "published",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "TL vs. TYL - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive matches this full match",
+      "message": "Published",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
-      "retryClass": "dependency",
-      "checkedAt": "2026-10-03T19:16:43.208932+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
+      "retryClass": "none",
+      "checkedAt": "2026-10-04T01:51:31.705180+00:00"
     },
     "twitch:2888778875": {
       "status": "held",
@@ -333,16 +333,16 @@
       "checkedAt": "2026-10-02T16:12:48.744043+00:00"
     },
     "youtube:WdGW0L-3iCc": {
-      "status": "waiting",
+      "status": "published",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "NS vs. XLG - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive matches this full match",
+      "message": "Published",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
-      "retryClass": "dependency",
-      "checkedAt": "2026-10-03T19:00:34.623517+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
+      "retryClass": "none",
+      "checkedAt": "2026-10-04T01:34:52.598146+00:00"
     },
     "youtube:P8Td3k1gem8": {
       "status": "indexed",
@@ -352,9 +352,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
       "retryClass": "none",
-      "checkedAt": "2026-10-02T13:38:06.944294+00:00"
+      "checkedAt": "2026-10-04T01:20:57.462112+00:00"
     },
     "youtube:gYE4F6g9f9s": {
       "status": "indexed",
@@ -364,9 +364,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
       "retryClass": "none",
-      "checkedAt": "2026-10-02T13:38:06.946554+00:00"
+      "checkedAt": "2026-10-04T01:20:57.464729+00:00"
     },
     "youtube:w5O5vwuHwXY": {
       "status": "indexed",
@@ -465,16 +465,16 @@
       "checkedAt": "2026-10-02T14:56:13.533224+00:00"
     },
     "youtube:hDHTJkgLsLg": {
-      "status": "waiting",
+      "status": "held",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "GE vs. EDG - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive matches this full match",
+      "message": "The match does not have enough timing information for the catalog",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
-      "retryClass": "dependency",
-      "checkedAt": "2026-10-03T20:39:42.623579+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-04T03:16:07.296835+00:00"
     },
     "youtube:eKP_QB_H7F8": {
       "status": "indexed",
@@ -484,33 +484,33 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
       "retryClass": "none",
-      "checkedAt": "2026-10-02T19:20:52.700945+00:00"
+      "checkedAt": "2026-10-04T01:20:57.459525+00:00"
     },
     "youtube:QL2P-AwdZjw": {
-      "status": "waiting",
+      "status": "held",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "T1 vs. JDG - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive matches this full match",
+      "message": "The match does not have enough timing information for the catalog",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
-      "retryClass": "dependency",
-      "checkedAt": "2026-10-03T20:29:47.708687+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-04T03:05:59.329711+00:00"
     },
     "twitch:2889639463": {
       "status": "indexed",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "EDG vs. GE - VALORANT Champions Shanghai - Group Stage",
-      "message": "Attached Twitch chat to 2 official stream matches",
+      "message": "Attached Twitch chat to 0 official stream matches",
       "publishedAt": "2026-10-02T08:30:31Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
       "retryClass": "none",
-      "checkedAt": "2026-10-02T21:05:08.300698+00:00"
+      "checkedAt": "2026-10-04T03:40:53.718985+00:00"
     },
     "twitch:2889647074": {
       "status": "held",
@@ -525,16 +525,16 @@
       "checkedAt": "2026-10-03T17:08:24.608511+00:00"
     },
     "youtube:Ma4ipFeW7Mc": {
-      "status": "waiting",
+      "status": "held",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "G2 vs. TL - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive matches this full match",
+      "message": "The match does not have enough timing information for the catalog",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
-      "retryClass": "dependency",
-      "checkedAt": "2026-10-03T20:14:07.344241+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-04T02:50:23.829294+00:00"
     },
     "youtube:gwap8BHITn0": {
       "status": "indexed",
@@ -544,9 +544,9 @@
       "message": "Stored official YouTube stream archive",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
       "retryClass": "none",
-      "checkedAt": "2026-10-03T18:46:11.162845+00:00"
+      "checkedAt": "2026-10-04T01:20:57.457081+00:00"
     },
     "youtube:HVOUB9c8pDY": {
       "status": "waiting",
@@ -556,21 +556,21 @@
       "message": "No verified official YouTube stream archive matches this full match",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-03T20:01:59.730574+00:00"
+      "checkedAt": "2026-10-04T02:37:14.656297+00:00"
     },
     "twitch:2890572310": {
-      "status": "held",
+      "status": "indexed",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "G2 vs. TL - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive aligns with this Twitch chat",
+      "message": "Attached Twitch chat to 0 official stream matches",
       "publishedAt": "2026-10-03T08:30:16Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-10-03T16:50:29.418563+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
+      "retryClass": "none",
+      "checkedAt": "2026-10-04T03:29:17.435404+00:00"
     },
     "twitch:2890592017": {
       "status": "held",
@@ -580,9 +580,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-10-03T09:19:59Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v16",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-03T17:15:55.806171+00:00"
+      "checkedAt": "2026-10-04T04:16:57.993345+00:00"
     }
   }
 }

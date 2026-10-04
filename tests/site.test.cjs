@@ -271,6 +271,17 @@ test('website keeps settings visible in the sticky header', () => {
   assert.match(styles, /\.header-settings/);
 });
 
+test('website communicates temporary VOD processing delays without spoilers', () => {
+  const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
+  const header = index.match(/<header[\s\S]*?<\/header>/)?.[0] || '';
+  assert.match(header, /class="processing-status"/);
+  assert.match(header, /Livestream matching \+ watch-party sync/);
+  assert.match(header, /Newly finished matches may take longer than usual to appear/);
+  assert.match(styles, /\.processing-status-card/);
+  assert.match(styles, /\.processing-status-dot/);
+});
+
 test('website exposes Twitch quality without exposing playback length', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');

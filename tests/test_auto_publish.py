@@ -625,6 +625,25 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(result[0], "lmnopqrstuv")
         self.assertNotIn("maximum_residual", align.call_args.kwargs)
 
+    def test_canonical_alignment_considers_every_indexed_day_archive(self):
+        config = {"channels": [{"name": "Streams", "canonicalStream": True}], "alignmentLookback": 8}
+        state = {"videos": {f"youtube:stream{number:05}": {"status": "indexed", "channel": "Streams"}
+                            for number in range(9)}}
+        entry = {"id": "abcdefghijk"}
+        job = {"rounds": [{"map": 1, "round": 1, "start": 100}]}
+
+        def align(reference, target, **_):
+            if target["sourceId"] == "stream00000":
+                return {"anchors": 20, "offset": 10}
+            raise ValueError("Different broadcast")
+
+        with patch.object(auto_publish, "storyboard", side_effect=lambda _, identifier, __:
+                          {"sourceId": identifier, "duration": 5000}), \
+                patch.object(auto_publish, "align_storyboards", side_effect=align), \
+                patch.object(auto_publish, "translate_index", return_value=job["rounds"]):
+            result = auto_publish.canonical_stream_alignment(entry, job, config, state, object())
+        self.assertEqual(result[0], "stream00000")
+
     def test_official_twitch_chat_waits_when_its_canonical_archive_cannot_align(self):
         channel = {"provider": "twitch", "name": "Official", "chatSource": True}
         entry = {"id": "1234567890", "title": "A vs B - Champions"}
@@ -751,6 +770,14 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(catalog["videos"][0]["chatSourceId"], "1234567890")
         self.assertEqual(index["alignment"]["source"], "twitch:1234567890")
         self.assertEqual(index["alignment"]["segments"][0]["offset"], -120)
+
+    def test_inverted_alignment_does_not_create_overlapping_source_ranges(self):
+        alignment = {"timelineScale": 1, "segments": [
+            {"offset": 0, "targetStart": 0, "targetEnd": 100},
+            {"offset": -25, "targetStart": 100, "targetEnd": 200}
+        ]}
+        result = auto_publish.inverted_alignment(alignment)
+        self.assertEqual(result["segments"][0]["targetEnd"], result["segments"][1]["targetStart"])
 
     def test_watch_party_alignment_uses_precise_twitch_storyboard(self):
         entry = {"id": "1234567890", "title": "FNS | A vs B - Champions"}

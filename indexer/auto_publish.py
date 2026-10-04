@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v16"
+PUBLISHER_VERSION = "publisher-v17"
 ROUND_TIMING_VERSION = "round-timing-v2"
 TWITCH_STORYBOARD_VERSION = 3
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
@@ -512,7 +512,7 @@ def canonical_streams(config, state):
 
 
 def canonical_stream_alignment(entry, job, config, state, yt_dlp):
-    streams = canonical_streams(config, state)[-int(config.get("alignmentLookback", 8)):]
+    streams = canonical_streams(config, state)
     if not streams:
         raise OfficialMatchPending("Waiting for an indexed official YouTube stream archive")
     reference = storyboard("youtube", entry["id"], yt_dlp)
@@ -541,6 +541,8 @@ def inverted_alignment(value):
     for segment in segments:
         start = scale * float(segment["targetStart"]) + float(segment["offset"])
         end = scale * float(segment["targetEnd"]) + float(segment["offset"])
+        if inverted:
+            start = max(start, inverted[-1]["targetEnd"])
         if end > start:
             inverted.append({"offset": -float(segment["offset"]) / scale,
                              "targetStart": round(max(0, start), 3), "targetEnd": round(end, 3)})
@@ -548,7 +550,7 @@ def inverted_alignment(value):
 
 
 def attach_stream_chat(entry, job, config, state, yt_dlp):
-    streams = canonical_streams(config, state)[-int(config.get("alignmentLookback", 8)):]
+    streams = canonical_streams(config, state)
     if not streams:
         raise OfficialMatchPending("Waiting for an indexed official YouTube stream archive")
     target = precise_twitch_storyboard(entry, job, config)

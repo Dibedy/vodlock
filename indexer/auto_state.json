@@ -304,9 +304,9 @@
       "message": "Attached Twitch chat to 2 official stream matches",
       "publishedAt": "2026-10-01T08:30:41Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v22",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "none",
-      "checkedAt": "2026-10-04T17:35:01.713957+00:00"
+      "checkedAt": "2026-10-04T23:29:11.845736+00:00"
     },
     "youtube:m29QjckzB7w": {
       "status": "published",
@@ -501,16 +501,16 @@
       "checkedAt": "2026-10-04T21:04:43.436363+00:00"
     },
     "twitch:2889639463": {
-      "status": "waiting",
+      "status": "indexed",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "EDG vs. GE - VALORANT Champions Shanghai - Group Stage",
-      "message": "Waiting for matches from the aligned official YouTube stream archive",
+      "message": "Attached Twitch chat to 2 official stream matches",
       "publishedAt": "2026-10-02T08:30:31Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v22",
-      "retryClass": "dependency",
-      "checkedAt": "2026-10-04T17:24:48.881697+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "none",
+      "checkedAt": "2026-10-04T23:15:26.402971+00:00"
     },
     "twitch:2889647074": {
       "status": "held",
@@ -558,7 +558,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-04T20:42:12.684431+00:00"
+      "checkedAt": "2026-10-04T23:02:27.023066+00:00"
     },
     "twitch:2890572310": {
       "status": "indexed",
@@ -580,9 +580,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-10-03T09:19:59Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-04T04:16:57.993345+00:00"
+      "checkedAt": "2026-10-04T23:37:54.822344+00:00"
     },
     "youtube:j12hJ1miDfE": {
       "status": "indexed",
@@ -597,28 +597,28 @@
       "checkedAt": "2026-10-04T20:27:46.407918+00:00"
     },
     "youtube:G4qJLMntBCo": {
-      "status": "waiting",
+      "status": "published",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "FUT vs. T1 - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive matches this full match",
+      "message": "Published",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v22",
-      "retryClass": "dependency",
-      "checkedAt": "2026-10-04T15:46:23.237198+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "none",
+      "checkedAt": "2026-10-04T22:33:36.525776+00:00"
     },
     "youtube:0Yr0XKJJmZE": {
-      "status": "waiting",
+      "status": "published",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "LOUD vs. GE - FULL MATCH - VALORANT Champions Shanghai - Group Stage",
-      "message": "No verified official YouTube stream archive matches this full match",
+      "message": "Published",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v22",
-      "retryClass": "dependency",
-      "checkedAt": "2026-10-04T15:57:29.094594+00:00"
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "none",
+      "checkedAt": "2026-10-04T22:45:01.917892+00:00"
     },
     "twitch:2891543405": {
       "status": "indexed",

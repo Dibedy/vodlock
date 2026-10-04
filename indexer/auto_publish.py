@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v21"
+PUBLISHER_VERSION = "publisher-v22"
 ROUND_TIMING_VERSION = "round-timing-v2"
 TWITCH_STORYBOARD_VERSION = 3
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
@@ -859,6 +859,10 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             source = (state["videos"].get(source_key("youtube", playback_source_id))
                       if catalog_id and state is not None else state["videos"].get(source_key("twitch", aligned_source_id))
                       if provider == "youtube" and aligned_source_id and state is not None else None)
+            if catalog_id and source and not source.get("publishedAt") and not entry.get("catalogPlayedAt") \
+                    and not (previous_catalog_entry or {}).get("playedAt"):
+                archive = storyboard("youtube", playback_source_id, yt_dlp, require_published_at=True)
+                source["publishedAt"] = archive.get("publishedAt")
             played_at = entry.get("catalogPlayedAt") or (previous_catalog_entry or {}).get("playedAt") or catalog_played_at(
                 entry, exported["rounds"], source, alignment if source else None)
             catalog_entry = {"provider": provider, "sourceId": playback_source_id, "title": title,

@@ -677,6 +677,35 @@ class AutoPublishTests(unittest.TestCase):
                                               {"videos": {}}, object())
         self.assertEqual(result, ("waiting", "No matching stream archive"))
 
+    def test_full_match_repairs_its_canonical_stream_timestamp_before_publication(self):
+        channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH", "published": "2026-09-30T10:00:00Z"}
+        rounds = [{"map": 1, "round": number, "start": number * 100, "confidence": .9} for number in range(1, 14)]
+        state = {"videos": {"youtube:lmnopqrstuv": {"status": "indexed", "publishedAt": None}}}
+
+        def index_job(identifier):
+            auto_publish.server.JOBS[identifier].update(status="ready", warnings=[], duration=2000, rounds=rounds)
+
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            (site / "catalog.json").write_text('{"version":2,"videos":[]}', encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), \
+                    patch.object(auto_publish.server, "index_job", side_effect=index_job), \
+                    patch.object(auto_publish, "canonical_stream_alignment",
+                                 return_value=("lmnopqrstuv", {"offset": 0}, rounds)), \
+                    patch.object(auto_publish, "storyboard",
+                                 return_value={"publishedAt": "2026-09-30T08:00:00Z"}) as storyboard:
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13},
+                                              state, object())
+            catalog = auto_publish.read_json(site / "catalog.json")
+        self.assertEqual(result, (True, "Published"))
+        self.assertEqual(state["videos"]["youtube:lmnopqrstuv"]["publishedAt"], "2026-09-30T08:00:00Z")
+        self.assertEqual(catalog["videos"][0]["playedAt"], "2026-09-30T08:01:40Z")
+        storyboard.assert_called_once_with("youtube", "lmnopqrstuv", ANY, require_published_at=True)
+
     def test_full_match_alignment_uses_storyboard_sampling_tolerance(self):
         config = {"channels": [{"name": "Streams", "canonicalStream": True}],
                   "alignmentLookback": 8, "roundAlignmentMaximumResidual": 5}

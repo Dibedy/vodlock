@@ -128,7 +128,9 @@
       "playedAt": "2026-09-29T16:02:28Z",
       "tournament": "VALORANT Champions Shanghai",
       "tournamentKey": "valorant-champions-shanghai",
-      "catalogId": "youtube:y6wwIZysHns:w5O5vwuHwXY"
+      "catalogId": "youtube:y6wwIZysHns:w5O5vwuHwXY",
+      "chat": "/chats/twitch-2887052196.json",
+      "chatSourceId": "2887052196"
     },
     {
       "provider": "twitch",
@@ -155,7 +157,9 @@
       "playedAt": "2026-09-29T09:02:16Z",
       "tournament": "VALORANT Champions Shanghai",
       "tournamentKey": "valorant-champions-shanghai",
-      "catalogId": "youtube:z_aPp2s4d_o:w5O5vwuHwXY"
+      "catalogId": "youtube:z_aPp2s4d_o:w5O5vwuHwXY",
+      "chat": "/chats/twitch-2887052196.json",
+      "chatSourceId": "2887052196"
     },
     {
       "provider": "twitch",
@@ -182,9 +186,7 @@
       "playedAt": "2026-09-27T11:36:45Z",
       "tournament": "VALORANT Champions Shanghai",
       "tournamentKey": "valorant-champions-shanghai",
-      "catalogId": "youtube:fFfCJDNHEvc:XsORTuEh7Z4",
-      "chat": "/chats/twitch-2882594925.json",
-      "chatSourceId": "2882594925"
+      "catalogId": "youtube:fFfCJDNHEvc:XsORTuEh7Z4"
     },
     {
       "provider": "youtube",
@@ -220,9 +222,7 @@
       "playedAt": "2026-09-27T09:11:40Z",
       "tournament": "VALORANT Champions Shanghai",
       "tournamentKey": "valorant-champions-shanghai",
-      "catalogId": "youtube:ZWhEMQVk4x0:XsORTuEh7Z4",
-      "chat": "/chats/twitch-2882594925.json",
-      "chatSourceId": "2882594925"
+      "catalogId": "youtube:ZWhEMQVk4x0:XsORTuEh7Z4"
     },
     {
       "provider": "twitch",

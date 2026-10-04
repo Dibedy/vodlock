@@ -5,6 +5,7 @@
   "label": "NRG vs KC",
   "leadSeconds": 5,
   "detector": "vct-clock-ocr-v9+storyboard-v4",
+  "roundTimingVersion": "round-timing-v2",
   "rounds": [
     {
       "map": 1,
@@ -336,5 +337,26 @@
       "round": 22,
       "start": 25194.93
     }
-  ]
+  ],
+  "alignment": {
+    "timelineScale": 1.0000284808111335,
+    "segments": [
+      {
+        "offset": -69.69898502709357,
+        "targetStart": 69.697,
+        "targetEnd": 21836.457
+      },
+      {
+        "offset": 10.512299390286636,
+        "targetStart": 21836.457,
+        "targetEnd": 25905.012
+      },
+      {
+        "offset": 105.22799689335152,
+        "targetStart": 25905.012,
+        "targetEnd": 26191.097
+      }
+    ],
+    "source": "twitch:2887052196"
+  }
 }

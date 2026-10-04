@@ -4,6 +4,42 @@
   "videos": [
     {
       "provider": "youtube",
+      "sourceId": "gwap8BHITn0",
+      "title": "G2 vs TL",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-Ma4ipFeW7Mc-gwap8BHITn0.json",
+      "playedAt": "2026-10-03T09:07:14Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:Ma4ipFeW7Mc:gwap8BHITn0"
+    },
+    {
+      "provider": "youtube",
+      "sourceId": "eKP_QB_H7F8",
+      "title": "T1 vs JDG",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-QL2P-AwdZjw-eKP_QB_H7F8.json",
+      "playedAt": "2026-10-02T11:08:25Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:QL2P-AwdZjw:eKP_QB_H7F8"
+    },
+    {
+      "provider": "youtube",
+      "sourceId": "eKP_QB_H7F8",
+      "title": "GE vs EDG",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-hDHTJkgLsLg-eKP_QB_H7F8.json",
+      "playedAt": "2026-10-02T09:06:38Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:hDHTJkgLsLg:eKP_QB_H7F8"
+    },
+    {
+      "provider": "youtube",
       "sourceId": "P8Td3k1gem8",
       "title": "NS vs XLG",
       "event": "VALORANT Champions Shanghai | Group Stage",

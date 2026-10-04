@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "indexer"))
-from storyboard_align import align_storyboards, extract_storyboard, frame_distance, hamming, translate_index
+from storyboard_align import align_storyboards, extract_published_at, extract_storyboard, frame_distance, hamming, translate_index
 
 
 def unique_hash(value):
@@ -68,6 +68,31 @@ class StoryboardAlignmentTests(unittest.TestCase):
             with self.assertRaises(Expected):
                 extract_storyboard("https://youtube.com/watch?v=example", "youtube", YtDlp)
         self.assertEqual(captured["cookiefile"], "/tmp/youtube-cookies.txt")
+
+    def test_metadata_extraction_does_not_require_a_playable_format(self):
+        captured = {}
+
+        class Downloader:
+            def __init__(self, options):
+                captured.update(options)
+
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_):
+                return False
+
+            def extract_info(self, *_, **__):
+                return {"timestamp": 1791014400}
+
+        class YtDlp:
+            YoutubeDL = Downloader
+
+        result = extract_published_at("https://youtube.com/watch?v=example", "youtube", YtDlp)
+        self.assertEqual(result, "2026-10-03T08:00:00Z")
+        self.assertTrue(captured["skip_download"])
+        self.assertTrue(captured["ignore_no_formats_error"])
+        self.assertNotIn("format", captured)
 
     def test_hamming_distance_counts_changed_bits(self):
         self.assertEqual(hamming("00ff", "01fe"), 2)

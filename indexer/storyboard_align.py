@@ -64,6 +64,9 @@ def extractor_options(provider, format_selector=None):
 
 def extract_video_info(url, provider, yt_dlp, format_selector=None):
     options = extractor_options(provider, format_selector)
+    if not format_selector:
+        options["skip_download"] = True
+        options["ignore_no_formats_error"] = True
     with yt_dlp.YoutubeDL(options) as downloader:
         return downloader.extract_info(url, download=False)
 

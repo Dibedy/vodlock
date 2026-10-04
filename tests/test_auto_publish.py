@@ -77,6 +77,19 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(result, ("indexed", "Stored official YouTube stream archive"))
         self.assertEqual(entry["published"], "2026-10-03T08:00:00Z")
 
+    def test_canonical_stream_repairs_missing_broadcast_time_in_cached_storyboard(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            path = root / "youtube-abcdefghijk.json"
+            path.write_text(json.dumps({"version": 2, "duration": 5000, "frames": []}), encoding="utf-8")
+            with patch.object(auto_publish, "STORYBOARDS", root), \
+                    patch.object(auto_publish, "extract_published_at", return_value="2026-10-03T08:00:00Z") as extract:
+                result = auto_publish.storyboard("youtube", "abcdefghijk", object(), require_published_at=True)
+            stored = json.loads(path.read_text(encoding="utf-8"))
+        extract.assert_called_once()
+        self.assertEqual(result["publishedAt"], "2026-10-03T08:00:00Z")
+        self.assertEqual(stored["publishedAt"], "2026-10-03T08:00:00Z")
+
     def test_stream_migration_detects_legacy_full_match_catalog_entries(self):
         channel = {"matchSource": True}
         entry = {"id": "abcdefghijk"}
@@ -328,6 +341,22 @@ class AutoPublishTests(unittest.TestCase):
             self.assertEqual(auto_publish.main(), 0)
         self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["abcdefghijk", "lmnopqrstuv"])
 
+    def test_waiting_youtube_match_remains_eligible_after_it_leaves_the_feed(self):
+        now = datetime.now(timezone.utc).isoformat()
+        channel = {"provider": "youtube", "name": "YouTube", "priority": 1}
+        config = {"channels": [channel], "lookback": 30, "maxPerRun": 2,
+                  "maxPerChannelPerRun": 2, "youtubeRetryHours": 0}
+        state = {"videos": {
+            "youtube:lmnopqrstuv": {"status": "waiting", "channel": "YouTube", "title": "Waiting - FULL MATCH",
+                                      "publishedAt": now, "checkedAt": now, "retryClass": "dependency"}}}
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, {"videos": []}]), \
+                patch.object(auto_publish, "discover_youtube", return_value=[]), \
+                patch.object(auto_publish, "process", return_value=(True, "Published")) as process, \
+                patch.object(auto_publish, "write_json"), patch.object(sys, "argv", ["auto_publish.py"]), \
+                patch("sys.stdout", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["lmnopqrstuv"])
+
     def test_explicit_held_retry_bypasses_the_automatic_retry_cap(self):
         now = datetime.now(timezone.utc)
         channel = {"provider": "youtube", "name": "YouTube"}
@@ -439,6 +468,30 @@ class AutoPublishTests(unittest.TestCase):
                 patch.object(sys, "argv", ["auto_publish.py", "--retry-held"]), patch("sys.stdout", new_callable=io.StringIO):
             self.assertEqual(auto_publish.main(), 0)
         self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["1234567890"])
+
+    def test_waiting_twitch_sources_rotate_by_oldest_attempt(self):
+        now = datetime.now(timezone.utc)
+        channel = {"provider": "twitch", "name": "Official", "login": "official", "priority": 0}
+        config = {"channels": [channel], "lookback": 30, "maxPerRun": 2, "maxPerChannelPerRun": 2,
+                  "maxRetriesPerRun": 2, "retryHours": 0}
+        entries = [{"id": "3333333333", "title": "Newest", "type": "archive"},
+                   {"id": "2222222222", "title": "Middle", "type": "archive"},
+                   {"id": "1111111111", "title": "Oldest", "type": "archive"}]
+        state = {"videos": {
+            "twitch:3333333333": {"status": "waiting", "channel": "Official",
+                                    "checkedAt": now.isoformat()},
+            "twitch:2222222222": {"status": "waiting", "channel": "Official",
+                                    "checkedAt": (now - timedelta(hours=1)).isoformat()},
+            "twitch:1111111111": {"status": "waiting", "channel": "Official",
+                                    "checkedAt": (now - timedelta(hours=2)).isoformat()}}}
+        with patch.object(auto_publish, "read_json", side_effect=[config, state, {"videos": []}]), \
+                patch.object(auto_publish, "discover_twitch", return_value={"official": entries}), \
+                patch.object(auto_publish, "process", return_value=("waiting", "dependency")) as process, \
+                patch.object(auto_publish, "write_json"), \
+                patch.dict(auto_publish.os.environ, {"TWITCH_CLIENT_ID": "client", "TWITCH_CLIENT_SECRET": "secret"}), \
+                patch.object(sys, "argv", ["auto_publish.py"]), patch("sys.stdout", new_callable=io.StringIO):
+            self.assertEqual(auto_publish.main(), 0)
+        self.assertEqual([call.args[1]["id"] for call in process.call_args_list], ["1111111111", "2222222222"])
 
     def test_match_dependency_chain_can_retry_in_one_run(self):
         channels = [{"provider": "twitch", "name": "Official", "login": "official", "priority": 0,
@@ -811,6 +864,25 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(index["alignment"]["source"], "twitch:1234567890")
         self.assertEqual(index["alignment"]["segments"][0]["offset"], -120)
 
+    def test_official_twitch_chat_waits_when_aligned_stream_matches_are_not_published_yet(self):
+        entry = {"id": "1234567890", "title": "A vs B - Champions"}
+        config = {"channels": [{"name": "Streams", "canonicalStream": True}],
+                  "watchPartyMaximumDistance": 18}
+        state = {"videos": {"youtube:abcdefghijk": {"status": "indexed", "channel": "Streams"}}}
+        alignment = {"timelineScale": 1, "segments": [{"offset": 120, "targetStart": 0,
+                                                          "targetEnd": 1000}], "anchors": 20}
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            (site / "catalog.json").write_text('{"version":2,"videos":[]}', encoding="utf-8")
+            with patch.object(auto_publish, "SITE", site), \
+                    patch.object(auto_publish, "precise_twitch_storyboard", return_value={"duration": 1200, "frames": []}), \
+                    patch.object(auto_publish, "storyboard", return_value={"duration": 1200, "frames": []}), \
+                    patch.object(auto_publish, "align_storyboards", return_value=alignment), \
+                    patch.object(auto_publish.chat_archive, "archive_chat", return_value=site / "chat.json"):
+                with self.assertRaisesRegex(auto_publish.OfficialMatchPending,
+                                            "Waiting for matches from the aligned official YouTube stream archive"):
+                    auto_publish.attach_stream_chat(entry, {"id": "job"}, config, state, object())
+
     def test_inverted_alignment_does_not_create_overlapping_source_ranges(self):
         alignment = {"timelineScale": 1, "segments": [
             {"offset": 0, "targetStart": 0, "targetEnd": 100},
@@ -841,6 +913,39 @@ class AutoPublishTests(unittest.TestCase):
         index_job.assert_not_called()
         precise_storyboard.assert_called_once_with(entry, job, config)
         self.assertEqual(result[0][2], rounds)
+
+    def test_watch_party_candidates_are_selected_by_broadcast_time(self):
+        entry = {"id": "1234567890", "title": "FNS | A vs B - Champions",
+                 "created_at": "2026-09-29T08:00:00Z"}
+        config = {"alignmentLookback": 1, "watchPartyMaximumDistance": 18,
+                  "roundAlignmentMaximumResidual": 5}
+        rounds = [{"map": 1, "round": number, "start": number * 100} for number in range(1, 14)]
+        alignment = {"anchors": 20, "offset": 100}
+        with tempfile.TemporaryDirectory() as temporary:
+            site = Path(temporary)
+            (site / "indexes").mkdir()
+            (site / "indexes" / "near.json").write_text(json.dumps({"rounds": rounds}), encoding="utf-8")
+            catalog = {"version": 2, "videos": [
+                {"provider": "youtube", "sourceId": "farstream00", "title": "C vs D",
+                 "playedAt": "2026-10-03T10:00:00Z", "index": "/indexes/far.json"},
+                {"provider": "youtube", "sourceId": "nearstream0", "title": "A vs B",
+                 "playedAt": "2026-09-29T10:00:00Z", "index": "/indexes/near.json"}]}
+            (site / "indexes" / "far.json").write_text(json.dumps({"rounds": rounds}), encoding="utf-8")
+            (site / "catalog.json").write_text(json.dumps(catalog), encoding="utf-8")
+
+            def align(reference, *_args, **_kwargs):
+                if reference["sourceId"] != "nearstream0":
+                    raise ValueError("wrong stream")
+                return alignment
+
+            with patch.object(auto_publish, "SITE", site), \
+                    patch.object(auto_publish, "precise_twitch_storyboard", return_value={"duration": 1200, "frames": []}), \
+                    patch.object(auto_publish, "storyboard", side_effect=lambda _, source_id, __: {"sourceId": source_id}), \
+                    patch.object(auto_publish, "align_storyboards", side_effect=align), \
+                    patch.object(auto_publish, "translate_index", return_value=rounds):
+                result = auto_publish.watchparty_alignments({"id": "job"}, entry, config, {"videos": {}},
+                                                            object(), multi_series=True)
+        self.assertEqual(result[0][0]["sourceId"], "nearstream0")
 
     def test_precise_twitch_storyboard_replaces_a_coarse_cache(self):
         entry = {"id": "1234567890"}

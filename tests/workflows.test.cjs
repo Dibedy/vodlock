@@ -39,3 +39,11 @@ test('publisher synchronizes before committing generated indexes', () => {
   assert.match(publisher, /git pull --rebase --autostash origin main/);
   assert.ok(publisher.indexOf('git pull --rebase --autostash origin main') < publisher.indexOf('git add site/catalog.json'));
 });
+
+test('publisher validates generated indexes before committing them', () => {
+  const publisher = workflow('auto-publish.yml');
+  assert.match(publisher, /Validate generated catalog/);
+  assert.match(publisher, /python -m unittest discover -s tests -p 'test_\*\.py'/);
+  assert.match(publisher, /node --test tests\/site\.test\.cjs/);
+  assert.ok(publisher.indexOf('Validate generated catalog') < publisher.indexOf('git add site/catalog.json'));
+});

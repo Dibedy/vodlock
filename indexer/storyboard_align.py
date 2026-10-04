@@ -44,8 +44,10 @@ def split_sheet(image, rows, columns, start, duration, interval):
     return frames
 
 
-def extract_storyboard(url, provider, yt_dlp, requester=None):
-    options = {"quiet": True, "no_warnings": True, "format": "sb0"}
+def extractor_options(provider, format_selector=None):
+    options = {"quiet": True, "no_warnings": True}
+    if format_selector:
+        options["format"] = format_selector
     node = shutil.which("node")
     if node:
         options["js_runtimes"] = {"node": {"path": node}}
@@ -57,8 +59,26 @@ def extract_storyboard(url, provider, yt_dlp, requester=None):
         options["extractor_args"] = {"youtube": {"player_client": [client]}}
         if os.environ.get("VODLOCK_YOUTUBE_POT") == "1":
             options["extractor_args"]["youtubepot-bgutilhttp"] = {"base_url": ["http://127.0.0.1:4416"]}
+    return options
+
+
+def extract_video_info(url, provider, yt_dlp, format_selector=None):
+    options = extractor_options(provider, format_selector)
     with yt_dlp.YoutubeDL(options) as downloader:
-        info = downloader.extract_info(url, download=False)
+        return downloader.extract_info(url, download=False)
+
+
+def published_at(info):
+    timestamp = info.get("release_timestamp") or info.get("timestamp")
+    return datetime.fromtimestamp(timestamp, timezone.utc).isoformat().replace("+00:00", "Z") if timestamp else None
+
+
+def extract_published_at(url, provider, yt_dlp):
+    return published_at(extract_video_info(url, provider, yt_dlp))
+
+
+def extract_storyboard(url, provider, yt_dlp, requester=None):
+    info = extract_video_info(url, provider, yt_dlp, "sb0")
     formats = [item for item in info.get("formats", [])
                if str(item.get("format_id", "")).startswith("sb") and item.get("fragments")]
     if not formats:
@@ -83,12 +103,10 @@ def extract_storyboard(url, provider, yt_dlp, requester=None):
         duration = float(fragment.get("duration") or rows * columns * interval)
         frames.extend(split_sheet(image, rows, columns, position, duration, interval))
         position += duration
-    published_at = info.get("release_timestamp") or info.get("timestamp")
     return {"version": 2, "provider": provider, "sourceId": str(info["id"]).removeprefix("v"),
             "duration": round(float(info.get("duration") or position), 3),
             "interval": round(interval, 6), "frames": frames,
-            "publishedAt": datetime.fromtimestamp(published_at, timezone.utc).isoformat().replace("+00:00", "Z")
-            if published_at else None}
+            "publishedAt": published_at(info)}
 
 
 def fingerprint_video(path, source_id, interval=10):

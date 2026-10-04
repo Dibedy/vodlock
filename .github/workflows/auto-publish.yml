@@ -96,6 +96,11 @@ jobs:
         env:
           VODLOCK_CHAT_VOD_ID: ${{ inputs.chat_vod_id }}
         run: python indexer/chat_archive.py "$VODLOCK_CHAT_VOD_ID"
+      - name: Validate generated catalog
+        if: github.event_name != 'workflow_dispatch' || inputs.process_vods == true || inputs.chat_vod_id != ''
+        run: |
+          python -m unittest discover -s tests -p 'test_*.py'
+          node --test tests/site.test.cjs
       - name: Save published indexes
         if: github.event_name != 'workflow_dispatch' || inputs.process_vods == true || inputs.chat_vod_id != ''
         run: |

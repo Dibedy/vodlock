@@ -16,7 +16,7 @@ from xml.etree import ElementTree
 import server
 import chat_archive
 from detector import DETECTOR_VERSION
-from storyboard_align import ALIGNER_VERSION, align_storyboards, extract_storyboard, load_storyboard, save_storyboard, translate_index
+from storyboard_align import ALIGNER_VERSION, align_storyboards, extract_published_at, extract_storyboard, load_storyboard, save_storyboard, translate_index
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v19"
+PUBLISHER_VERSION = "publisher-v20"
 ROUND_TIMING_VERSION = "round-timing-v2"
 TWITCH_STORYBOARD_VERSION = 3
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
@@ -66,6 +66,11 @@ def clean_text(value):
 
 def source_key(provider, identifier):
     return f"{provider}:{identifier}"
+
+
+def candidate_order(provider, entry, state):
+    previous = state.get(source_key(provider, entry["id"]))
+    return (1 if previous else 0, previous.get("checkedAt", "") if previous else "")
 
 
 def retry_class(message):
@@ -407,11 +412,15 @@ def storyboard_path(provider, identifier):
     return STORYBOARDS / f"{provider}-{identifier}.json"
 
 
-def storyboard(provider, identifier, yt_dlp):
+def storyboard(provider, identifier, yt_dlp, require_published_at=False):
     path = storyboard_path(provider, identifier)
     if path.is_file():
         value = load_storyboard(path)
         if value.get("version") >= 2:
+            if require_published_at and provider == "youtube" and not value.get("publishedAt"):
+                value["publishedAt"] = extract_published_at("https://www.youtube.com/watch?v=" + identifier,
+                                                            provider, yt_dlp)
+                save_storyboard(path, value)
             return value
     url = ("https://www.youtube.com/watch?v=" + identifier if provider == "youtube"
            else "https://www.twitch.tv/videos/" + identifier)
@@ -587,6 +596,8 @@ def attach_stream_chat(entry, job, config, state, yt_dlp):
         if matched:
             catalog["updatedAt"] = datetime.now(timezone.utc).date().isoformat()
             write_json(catalog_path, catalog)
+    if not matched:
+        raise OfficialMatchPending("Waiting for matches from the aligned official YouTube stream archive")
     return "indexed", f"Attached Twitch chat to {matched} official stream matches"
 
 
@@ -604,6 +615,10 @@ def watchparty_alignments(job, entry, config, state, yt_dlp, multi_series=False)
                   and (multi_series or matchup_key(item.get("title", "")) == target_match)]
     if not candidates:
         raise OfficialMatchPending("Waiting for the indexed official YouTube stream match")
+    if entry.get("created_at"):
+        created_at = datetime.fromisoformat(str(entry["created_at"]).replace("Z", "+00:00"))
+        candidates.sort(key=lambda item: abs((datetime.fromisoformat(str(item.get("playedAt", "9999-12-31T23:59:59Z"))
+                                                         .replace("Z", "+00:00")) - created_at).total_seconds()))
     target = precise_twitch_storyboard(entry, job, config)
     matches = []
     failures = []
@@ -711,11 +726,12 @@ def process(channel, entry, config, state=None, yt_dlp=None):
     try:
         print(f"Processing {provider}:{entry['id']} - {clean_text(entry['title'])}", flush=True)
         if provider == "youtube" and channel.get("canonicalStream"):
-            archive = storyboard("youtube", entry["id"], yt_dlp)
+            archive = storyboard("youtube", entry["id"], yt_dlp, require_published_at=True)
             if archive["duration"] < channel["minimumDuration"]:
                 raise ValueError("The official YouTube stream archive is shorter than the configured minimum")
-            if archive.get("publishedAt"):
-                entry["published"] = archive["publishedAt"]
+            if not archive.get("publishedAt"):
+                raise ValueError("The official YouTube stream archive does not expose its broadcast time")
+            entry["published"] = archive["publishedAt"]
             return "indexed", "Stored official YouTube stream archive"
         if provider == "twitch" and channel.get("chatSource"):
             try:
@@ -909,7 +925,7 @@ def main():
         retained = [
             {"id": key.split(":", 1)[1], "title": item["title"], "published": item.get("publishedAt")}
             for key, item in state["videos"].items()
-            if key.startswith("youtube:") and item.get("status") == "held"
+            if key.startswith("youtube:") and item.get("status") in {"held", "waiting"}
             and item.get("channel") == channel["name"] and key.split(":", 1)[1] not in known_ids
         ]
         known_ids.update(item["id"] for item in retained)
@@ -951,6 +967,7 @@ def main():
                                       config.get("youtubeRetryHours", 0.5), now, arguments.retry_held)
                     or arguments.retry_held and should_attempt(source_key("youtube", item["id"]), published_ids,
                                                                state["videos"], config.get("youtubeRetryHours", 0.5), now)]
+        eligible.sort(key=lambda item: candidate_order("youtube", item, state["videos"]))
         migration_entries = [item for item in eligible if stream_migration_needed(channel, item, catalog)]
         migration_ids = {item["id"] for item in migration_entries}
         rebuild_entries = [item for item in eligible if item["id"] not in migration_ids
@@ -987,6 +1004,7 @@ def main():
                                       config.get("retryHours", 6), now, arguments.retry_held)
                     or arguments.retry_held and should_attempt(source_key("twitch", item["id"]), published_ids,
                                                                state["videos"], config.get("retryHours", 6), now)]
+        eligible.sort(key=lambda item: candidate_order("twitch", item, state["videos"]))
         for entry_index, entry in enumerate(eligible[:per_channel]):
             key = source_key("twitch", entry["id"])
             candidates.append((1 if key in state["videos"] else 0, channel.get("priority", 0),

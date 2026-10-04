@@ -2,6 +2,7 @@ import json
 import os
 import shutil
 import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
 from urllib.request import Request, urlopen
 
@@ -82,9 +83,12 @@ def extract_storyboard(url, provider, yt_dlp, requester=None):
         duration = float(fragment.get("duration") or rows * columns * interval)
         frames.extend(split_sheet(image, rows, columns, position, duration, interval))
         position += duration
+    published_at = info.get("release_timestamp") or info.get("timestamp")
     return {"version": 2, "provider": provider, "sourceId": str(info["id"]).removeprefix("v"),
             "duration": round(float(info.get("duration") or position), 3),
-            "interval": round(interval, 6), "frames": frames}
+            "interval": round(interval, 6), "frames": frames,
+            "publishedAt": datetime.fromtimestamp(published_at, timezone.utc).isoformat().replace("+00:00", "Z")
+            if published_at else None}
 
 
 def fingerprint_video(path, source_id, interval=10):

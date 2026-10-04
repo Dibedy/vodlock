@@ -65,6 +65,18 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(auto_publish.discover_youtube(channel, 30, YtDlp),
                          [{"id": "abcdefghijk", "title": "Champions Shanghai - Day 1"}])
 
+    def test_canonical_stream_persists_its_broadcast_start_time(self):
+        channel = {"provider": "youtube", "name": "Streams", "canonicalStream": True, "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "Champions stream"}
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            with patch.object(auto_publish.server, "DATA", root / "data"), patch.object(auto_publish.server, "save"), \
+                    patch.object(auto_publish, "storyboard", return_value={"duration": 5000,
+                                                                             "publishedAt": "2026-10-03T08:00:00Z"}):
+                result = auto_publish.process(channel, entry, {}, {"videos": {}}, object())
+        self.assertEqual(result, ("indexed", "Stored official YouTube stream archive"))
+        self.assertEqual(entry["published"], "2026-10-03T08:00:00Z")
+
     def test_stream_migration_detects_legacy_full_match_catalog_entries(self):
         channel = {"matchSource": True}
         entry = {"id": "abcdefghijk"}

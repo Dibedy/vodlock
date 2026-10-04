@@ -25,7 +25,7 @@ CONFIG_PATH = Path(__file__).with_name("auto_channels.json")
 STATE_PATH = Path(__file__).with_name("auto_state.json")
 STORYBOARDS = Path(__file__).with_name("storyboards")
 DIAGNOSTICS = Path(__file__).with_name("diagnostics")
-PUBLISHER_VERSION = "publisher-v18"
+PUBLISHER_VERSION = "publisher-v19"
 ROUND_TIMING_VERSION = "round-timing-v2"
 TWITCH_STORYBOARD_VERSION = 3
 PIPELINE_VERSION = DETECTOR_VERSION + "+" + ALIGNER_VERSION + "+" + PUBLISHER_VERSION
@@ -714,6 +714,8 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             archive = storyboard("youtube", entry["id"], yt_dlp)
             if archive["duration"] < channel["minimumDuration"]:
                 raise ValueError("The official YouTube stream archive is shorter than the configured minimum")
+            if archive.get("publishedAt"):
+                entry["published"] = archive["publishedAt"]
             return "indexed", "Stored official YouTube stream archive"
         if provider == "twitch" and channel.get("chatSource"):
             try:

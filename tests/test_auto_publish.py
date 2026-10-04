@@ -201,6 +201,7 @@ class AutoPublishTests(unittest.TestCase):
         self.assertFalse(auto_publish.should_attempt(key, set(), current, 6, now))
         self.assertTrue(auto_publish.should_attempt(key, set(), current, 6, now + timedelta(hours=6)))
         self.assertFalse(auto_publish.should_attempt(key, {key}, old, 6, now))
+        self.assertFalse(auto_publish.should_attempt(key, {key}, {key: {**old[key], "pipelineVersion": "older"}}, 6, now))
         self.assertTrue(auto_publish.should_attempt(key, set(), {key: {"status": "published"}}, 6, now))
         self.assertFalse(auto_publish.should_attempt(key, set(), {key: {"status": "superseded"}}, 6, now))
 

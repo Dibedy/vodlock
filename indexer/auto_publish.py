@@ -103,10 +103,10 @@ def recovery_message(channel, error):
 
 def should_attempt(key, published, state, retry_hours, now):
     previous = state.get(key)
-    if previous and previous.get("pipelineVersion") and previous["pipelineVersion"] != PIPELINE_VERSION:
-        return True
     if key in published:
         return False
+    if previous and previous.get("pipelineVersion") and previous["pipelineVersion"] != PIPELINE_VERSION:
+        return True
     if not previous:
         return True
     if previous.get("status") in {"superseded", "indexed"}:

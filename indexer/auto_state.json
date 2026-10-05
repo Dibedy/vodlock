@@ -558,7 +558,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-05T07:16:05.097008+00:00"
+      "checkedAt": "2026-10-05T15:45:51.709602+00:00"
     },
     "twitch:2890572310": {
       "status": "indexed",
@@ -640,9 +640,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-10-04T08:51:36Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v22",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-04T17:50:38.524804+00:00"
+      "checkedAt": "2026-10-05T15:50:18.474743+00:00"
     }
   }
 }

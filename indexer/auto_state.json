@@ -520,9 +520,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-10-02T08:54:38Z",
       "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v18",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-04T08:29:38.807100+00:00"
+      "checkedAt": "2026-10-05T01:30:35.931930+00:00"
     },
     "youtube:Ma4ipFeW7Mc": {
       "status": "published",
@@ -558,7 +558,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-04T23:02:27.023066+00:00"
+      "checkedAt": "2026-10-05T01:22:25.275347+00:00"
     },
     "twitch:2890572310": {
       "status": "indexed",

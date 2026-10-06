@@ -558,7 +558,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-05T22:28:42.137289+00:00"
+      "checkedAt": "2026-10-06T02:34:00.142700+00:00"
     },
     "twitch:2890572310": {
       "status": "indexed",
@@ -582,7 +582,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-04T23:37:54.822344+00:00"
+      "checkedAt": "2026-10-06T02:42:40.301842+00:00"
     },
     "youtube:j12hJ1miDfE": {
       "status": "indexed",

@@ -271,6 +271,16 @@ test('website keeps settings visible in the sticky header', () => {
   assert.match(styles, /\.header-settings/);
 });
 
+test('canonical chat alignment does not guess inside an unverified discontinuity', () => {
+  const index = validateIndex({schemaVersion: 2, provider: 'youtube', sourceId: 'ZphbktbT26k', rounds: sample().rounds,
+    alignment: {source: 'twitch:1234567890', timelineScale: 1, strictCoverage: true, segments: [
+      {offset: 100, targetStart: 0, targetEnd: 400}, {offset: 200, targetStart: 600, targetEnd: 1000}
+    ]}});
+  assert.equal(sourceTime(index, 300), 400);
+  assert.ok(Number.isNaN(sourceTime(index, 500)));
+  assert.ok(Number.isNaN(playbackTime(index, 700, 500)));
+});
+
 test('website communicates temporary VOD processing delays without spoilers', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
   const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');

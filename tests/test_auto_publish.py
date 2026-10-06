@@ -791,6 +791,28 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(catalog["videos"][0]["sourceId"], "lmnopqrstuv")
         self.assertEqual(catalog["videos"][0]["catalogId"], "youtube:abcdefghijk:lmnopqrstuv")
 
+    def test_full_match_fallback_does_not_replace_canonical_pipeline_catalog(self):
+        channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH"}
+        rounds = [{"map": 1, "round": number, "start": number * 100, "confidence": 1} for number in range(1, 14)]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            canonical_path = site / "indexes" / "canonical.json"
+            canonical_path.write_text(json.dumps({"rounds": rounds}))
+            original_index = canonical_path.read_text()
+            catalog_path = site / "catalog.json"
+            original = json.dumps({"version": 2, "videos": [{"provider": "youtube", "sourceId": "lmnopqrstuv", "canonicalPipeline": True, "title": "A vs B", "index": "/indexes/canonical.json"}]})
+            catalog_path.write_text(original)
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), patch.object(auto_publish, "reusable_match_rounds", return_value=rounds), \
+                    patch.object(auto_publish, "canonical_stream_alignment", return_value=("lmnopqrstuv", {"offset": 0}, rounds)):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13}, {"videos": {}}, object())
+            self.assertEqual(result[0], "indexed")
+            self.assertEqual(catalog_path.read_text(), original)
+            self.assertEqual(canonical_path.read_text(), original_index)
+
     def test_full_match_migration_preserves_the_legacy_catalog_time(self):
         channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
         entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH",

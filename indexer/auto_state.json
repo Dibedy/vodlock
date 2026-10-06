@@ -150,7 +150,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-05T07:20:24.538181+00:00"
+      "checkedAt": "2026-10-06T16:17:33.383256+00:00"
     },
     "twitch:2877469732": {
       "status": "held",
@@ -558,7 +558,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-06T09:26:56.887072+00:00"
+      "checkedAt": "2026-10-06T16:13:04.158830+00:00"
     },
     "twitch:2890572310": {
       "status": "indexed",

@@ -591,6 +591,8 @@ def attach_stream_chat(entry, job, config, state, yt_dlp):
             for record in catalog["videos"]:
                 if record.get("provider") != "youtube" or record.get("sourceId") != stream_id:
                     continue
+                if record.get("canonicalPipeline"):
+                    continue
                 index_path = SITE / record["index"].lstrip("/")
                 index = read_json(index_path)
                 index["alignment"] = {**alignment, "source": "twitch:" + entry["id"]}
@@ -851,6 +853,9 @@ def process(channel, entry, config, state=None, yt_dlp=None):
         with PUBLISH_LOCK:
             catalog_path = SITE / "catalog.json"
             catalog = read_json(catalog_path)
+            if provider == "youtube" and any(item.get("canonicalPipeline") and item.get("sourceId") == playback_source_id
+                                              for item in catalog["videos"]):
+                return "indexed", "Official broadcast is owned by the canonical pipeline; retained legacy fallback evidence"
             catalog["version"] = 2
             previous_catalog_entry = next((item for item in catalog["videos"]
                                            if catalog_id and item.get("catalogId") == catalog_id), None)

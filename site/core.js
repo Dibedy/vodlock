@@ -58,7 +58,7 @@
       previousEnd = segment.targetEnd;
       return {offset: segment.offset, targetStart: segment.targetStart, targetEnd: segment.targetEnd};
     });
-    return {source: sourceKey(source.provider, source.sourceId), timelineScale: scale, segments};
+    return {source: sourceKey(source.provider, source.sourceId), timelineScale: scale, segments, ...(value.strictCoverage === true ? {strictCoverage: true} : {})};
   }
 
   function validateIndex(value) {
@@ -92,7 +92,9 @@
   function sourceTime(index, time) {
     if (!index?.alignment || !Number.isFinite(time)) return time;
     const segments = index.alignment.segments;
-    const segment = segments.find(item => time >= item.targetStart && time < item.targetEnd) ||
+    const verified = segments.find(item => time >= item.targetStart && time < item.targetEnd);
+    if (!verified && index.alignment.strictCoverage) return NaN;
+    const segment = verified ||
       (time < segments[0].targetStart ? segments[0] : segments[segments.length - 1]);
     return index.alignment.timelineScale * time + segment.offset;
   }
@@ -100,7 +102,9 @@
   function playbackTime(index, time, position) {
     if (!index?.alignment || !Number.isFinite(time)) return time;
     const segments = index.alignment.segments;
-    const segment = segments.find(item => position >= item.targetStart && position < item.targetEnd) ||
+    const verified = segments.find(item => position >= item.targetStart && position < item.targetEnd);
+    if (!verified && index.alignment.strictCoverage) return NaN;
+    const segment = verified ||
       (position < segments[0].targetStart ? segments[0] : segments[segments.length - 1]);
     return (time - segment.offset) / index.alignment.timelineScale;
   }

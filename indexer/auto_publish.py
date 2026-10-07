@@ -854,7 +854,7 @@ def process(channel, entry, config, state=None, yt_dlp=None):
             catalog_path = SITE / "catalog.json"
             catalog = read_json(catalog_path)
             if provider == "youtube" and any(item.get("canonicalPipeline") and item.get("sourceId") == playback_source_id
-                                              for item in catalog["videos"]):
+                                              for item in catalog["videos"] + catalog.get("withheld", [])):
                 return "indexed", "Official broadcast is owned by the canonical pipeline; retained legacy fallback evidence"
             catalog["version"] = 2
             previous_catalog_entry = next((item for item in catalog["videos"]

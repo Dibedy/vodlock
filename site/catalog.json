@@ -4,6 +4,21 @@
   "videos": [
     {
       "provider": "youtube",
+      "sourceId": "jbQHpGuy-lU",
+      "catalogId": "youtube:7abbc1aecde95540:jbQHpGuy-lU",
+      "title": "NRG vs T1",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Full match",
+      "index": "/indexes/youtube-jbQHpGuy-lU-7abbc1aecde95540-v15-cf18291cf086.json",
+      "playedAt": "2026-10-07T11:06:30.175000+02:00",
+      "pipelineState": "provisional",
+      "expectedMatchId": "b7f8586a-dea2-5157-ac9b-277234f4b459",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 15,
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
       "sourceId": "j12hJ1miDfE",
       "title": "FUT vs T1",
       "event": "VALORANT Champions Shanghai | Group Stage",

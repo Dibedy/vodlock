@@ -15,7 +15,9 @@
       "expectedMatchId": "b7f8586a-dea2-5157-ac9b-277234f4b459",
       "pipelineGeneration": 1,
       "pipelineVersion": 15,
-      "canonicalPipeline": true
+      "canonicalPipeline": true,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai"
     },
     {
       "provider": "youtube",

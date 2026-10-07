@@ -150,7 +150,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-06T16:17:33.383256+00:00"
+      "checkedAt": "2026-10-07T19:42:26.488127+00:00"
     },
     "twitch:2877469732": {
       "status": "held",
@@ -558,7 +558,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-07T12:43:26.578972+00:00"
+      "checkedAt": "2026-10-07T19:26:06.347421+00:00"
     },
     "twitch:2890572310": {
       "status": "indexed",
@@ -645,16 +645,64 @@
       "checkedAt": "2026-10-06T21:06:02.950881+00:00"
     },
     "youtube:ANktybjyQ4k": {
-      "status": "waiting",
+      "status": "indexed",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "NRG vs. T1 - FULL MATCH - VALORANT Champions Shanghai - Playoffs Stage",
-      "message": "No verified official YouTube stream archive matches this full match",
+      "message": "Official broadcast is owned by the canonical pipeline; retained legacy fallback evidence",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
-      "retryClass": "dependency",
-      "checkedAt": "2026-10-07T12:30:40.343025+00:00"
+      "retryClass": "none",
+      "checkedAt": "2026-10-07T19:17:05.998172+00:00"
+    },
+    "youtube:jbQHpGuy-lU": {
+      "status": "indexed",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour streams",
+      "title": "PRX vs. LOUD - VALORANT Champions Shanghai - Playoffs Stage - Day 11",
+      "message": "Stored official YouTube stream archive",
+      "publishedAt": "2026-10-07T08:30:32Z",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "none",
+      "checkedAt": "2026-10-07T19:01:30.777868+00:00"
+    },
+    "youtube:wX7SJF9xoCM": {
+      "status": "indexed",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour full matches",
+      "title": "PRX vs. LOUD - FULL MATCH - VALORANT Champions Shanghai - Playoffs Stage",
+      "message": "Official broadcast is owned by the canonical pipeline; retained legacy fallback evidence",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "none",
+      "checkedAt": "2026-10-07T19:09:20.295567+00:00"
+    },
+    "twitch:2894136432": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "VALORANT on Twitch",
+      "title": "NRG vs. T1 - VALORANT Champions Shanghai - Playoffs Stage - Day 11",
+      "message": "More than one official YouTube stream archive aligns with this Twitch chat",
+      "publishedAt": "2026-10-07T08:30:43Z",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-07T19:39:25.249412+00:00"
+    },
+    "twitch:2894139574": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | NRG vs T1 - VCT Champions Playoffs #VCTWatchparty | !vote !inzone",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
+      "publishedAt": "2026-10-07T08:40:51Z",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-07T19:50:59.109431+00:00"
     }
   }
 }

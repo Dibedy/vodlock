@@ -522,7 +522,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-06T09:35:18.298599+00:00"
+      "checkedAt": "2026-10-07T12:49:48.383466+00:00"
     },
     "youtube:Ma4ipFeW7Mc": {
       "status": "published",
@@ -558,7 +558,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-07T06:09:52.016020+00:00"
+      "checkedAt": "2026-10-07T12:43:26.578972+00:00"
     },
     "twitch:2890572310": {
       "status": "indexed",
@@ -643,6 +643,18 @@
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
       "checkedAt": "2026-10-06T21:06:02.950881+00:00"
+    },
+    "youtube:ANktybjyQ4k": {
+      "status": "waiting",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour full matches",
+      "title": "NRG vs. T1 - FULL MATCH - VALORANT Champions Shanghai - Playoffs Stage",
+      "message": "No verified official YouTube stream archive matches this full match",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "dependency",
+      "checkedAt": "2026-10-07T12:30:40.343025+00:00"
     }
   }
 }

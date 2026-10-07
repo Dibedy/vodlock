@@ -9,15 +9,15 @@
       "title": "NRG vs T1",
       "event": "Champions Shanghai | Playoffs",
       "label": "Full match",
-      "index": "/indexes/youtube-jbQHpGuy-lU-7abbc1aecde95540-v15-cf18291cf086.json",
-      "playedAt": "2026-10-07T11:06:30.175000+02:00",
+      "index": "/indexes/youtube-jbQHpGuy-lU-7abbc1aecde95540-v17-1dfb9b629a82.json",
+      "playedAt": "2026-10-07T11:06:30.175357+02:00",
       "pipelineState": "provisional",
       "expectedMatchId": "b7f8586a-dea2-5157-ac9b-277234f4b459",
       "pipelineGeneration": 1,
-      "pipelineVersion": 15,
-      "canonicalPipeline": true,
+      "pipelineVersion": 17,
       "tournament": "Champions Shanghai",
-      "tournamentKey": "champions-shanghai"
+      "tournamentKey": "champions-shanghai",
+      "canonicalPipeline": true
     },
     {
       "provider": "youtube",

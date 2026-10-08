@@ -4,6 +4,44 @@
   "videos": [
     {
       "provider": "youtube",
+      "sourceId": "jbQHpGuy-lU",
+      "catalogId": "youtube:552f86bd6e0d5126:jbQHpGuy-lU",
+      "title": "LOUD vs PRX",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Full match",
+      "index": "/indexes/youtube-jbQHpGuy-lU-552f86bd6e0d5126-v12-5107f8b091d0.json",
+      "playedAt": "2026-10-07T13:32:06.022000+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "4e31e2af-9fa3-5c00-ae08-13d21f641dfc",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 12,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "chat": "/chats/twitch-2894136432.json",
+      "chatSourceId": "2894136432",
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
+      "sourceId": "jbQHpGuy-lU",
+      "catalogId": "youtube:7abbc1aecde95540:jbQHpGuy-lU",
+      "title": "NRG vs T1",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Full match",
+      "index": "/indexes/youtube-jbQHpGuy-lU-7abbc1aecde95540-v24-eb23cc1e5d20.json",
+      "playedAt": "2026-10-07T11:06:37.974000+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "b7f8586a-dea2-5157-ac9b-277234f4b459",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 24,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "chat": "/chats/twitch-2894136432.json",
+      "chatSourceId": "2894136432",
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
       "sourceId": "j12hJ1miDfE",
       "title": "FUT vs T1",
       "event": "VALORANT Champions Shanghai | Group Stage",
@@ -393,23 +431,5 @@
       "chat": "/chats/twitch-2882594925.json"
     }
   ],
-  "withheld": [
-    {
-      "provider": "youtube",
-      "sourceId": "jbQHpGuy-lU",
-      "catalogId": "youtube:7abbc1aecde95540:jbQHpGuy-lU",
-      "title": "NRG vs T1",
-      "event": "Champions Shanghai | Playoffs",
-      "label": "Full match",
-      "index": "/indexes/youtube-jbQHpGuy-lU-7abbc1aecde95540-v17-1dfb9b629a82.json",
-      "playedAt": "2026-10-07T11:06:30.175357+02:00",
-      "pipelineState": "provisional",
-      "expectedMatchId": "b7f8586a-dea2-5157-ac9b-277234f4b459",
-      "pipelineGeneration": 1,
-      "pipelineVersion": 20,
-      "tournament": "Champions Shanghai",
-      "tournamentKey": "champions-shanghai",
-      "canonicalPipeline": true
-    }
-  ]
+  "withheld": []
 }

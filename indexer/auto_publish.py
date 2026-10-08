@@ -674,6 +674,8 @@ def publish_watchparty_archive(channel, entry, state, matches):
         title = clean_text(official.get("title") or state["videos"]["youtube:" + source_id]["title"])
         event = clean_text(official.get("event") or channel["name"])
         catalog_id = f"twitch:{entry['id']}:{match_id}"
+        if any(item.get("catalogId") == catalog_id and item.get("canonicalPipeline") for item in catalog["videos"] + catalog.get("withheld", [])):
+            continue
         exported = {"schemaVersion": 2, "provider": "twitch", "sourceId": entry["id"], "label": title,
                     "leadSeconds": 5, "detector": DETECTOR_VERSION + "+" + ALIGNER_VERSION,
                     "rounds": rounds, "alignment": {**alignment, "source": "youtube:" + source_id}}

@@ -13,6 +13,22 @@ import auto_publish
 
 
 class AutoPublishTests(unittest.TestCase):
+    def test_legacy_watchparty_publisher_preserves_canonical_entries_and_withholding(self):
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            canonical_id = "twitch:123456789:abcdef1234567890"
+            record = {"catalogId": canonical_id, "provider": "twitch", "canonicalPipeline": True}
+            official = {"catalogId": "youtube:abcdef1234567890:abcdefghijk", "sourceId": "abcdefghijk", "title": "A vs B", "event": "Champions"}
+            for bucket in ("videos", "withheld"):
+                catalog = {"videos": [], "withheld": []}
+                catalog[bucket].append(record)
+                (site / "catalog.json").write_text(json.dumps(catalog))
+                with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.chat_archive, "archive_chat", return_value=site / "chat.json"):
+                    auto_publish.publish_watchparty_archive({"name": "FNS on Twitch"}, {"id": "123456789"}, {}, [(official, {}, [])])
+                updated = json.loads((site / "catalog.json").read_text())
+                self.assertEqual(updated[bucket], [record])
+                self.assertFalse((site / "indexes").exists())
+
     global_channel = {"name": "Global", "includeTitle": r"\bFULL MATCH\b",
                       "excludeTitle": r"\b(HIGHLIGHTS|SHOWMATCH)\b", "minimumDuration": 3600}
     americas_channel = {"name": "Americas", "includeTitle": r"^[A-Z0-9][A-Z0-9 ._-]{1,20}\s+vs\.?\s+[A-Z0-9][A-Z0-9 ._-]{1,20}\s+[-|]",

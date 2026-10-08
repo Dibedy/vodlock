@@ -522,7 +522,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-07T12:49:48.383466+00:00"
+      "checkedAt": "2026-10-08T18:37:50.637435+00:00"
     },
     "youtube:Ma4ipFeW7Mc": {
       "status": "published",
@@ -558,7 +558,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-08T10:00:29.431016+00:00"
+      "checkedAt": "2026-10-08T17:47:29.188619+00:00"
     },
     "twitch:2890572310": {
       "status": "indexed",
@@ -690,7 +690,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-08T10:12:55.939933+00:00"
+      "checkedAt": "2026-10-08T18:24:00.589852+00:00"
     },
     "twitch:2894139574": {
       "status": "held",
@@ -703,6 +703,66 @@
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
       "checkedAt": "2026-10-07T19:50:59.109431+00:00"
+    },
+    "youtube:jT9C2wBHn6c": {
+      "status": "waiting",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour streams",
+      "title": "VALORANT Champions Shanghai - Playoffs Stage - Day 12",
+      "message": "YouTube is still preparing this stream archive; it will retry automatically",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "dependency",
+      "checkedAt": "2026-10-08T16:58:40.815268+00:00"
+    },
+    "youtube:7NPrRv2vq94": {
+      "status": "waiting",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour full matches",
+      "title": "VIT vs. NS - FULL MATCH - VALORANT Champions Shanghai - Playoffs Stage",
+      "message": "No verified official YouTube stream archive matches this full match",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "dependency",
+      "checkedAt": "2026-10-08T17:17:27.796206+00:00"
+    },
+    "youtube:7zKE36y96zo": {
+      "status": "waiting",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour full matches",
+      "title": "100T vs. G2 - FULL MATCH - VALORANT Champions Shanghai - Playoffs Stage",
+      "message": "No verified official YouTube stream archive matches this full match",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "dependency",
+      "checkedAt": "2026-10-08T17:29:55.442831+00:00"
+    },
+    "twitch:2895001673": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "VALORANT on Twitch",
+      "title": "100T vs. G2 - VALORANT Champions Shanghai - Playoffs Stage - Day 12",
+      "message": "More than one official YouTube stream archive aligns with this Twitch chat",
+      "publishedAt": "2026-10-08T08:30:14Z",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-08T18:11:25.729706+00:00"
+    },
+    "twitch:2895010541": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | 100T vs G2 - VCT Champions Playoffs #VCTWatchparty | !vote !inzone !noYT",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
+      "publishedAt": "2026-10-08T08:58:40Z",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-08T18:45:24.411856+00:00"
     }
   }
 }

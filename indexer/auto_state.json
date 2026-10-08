@@ -558,7 +558,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-08T03:08:43.174352+00:00"
+      "checkedAt": "2026-10-08T10:00:29.431016+00:00"
     },
     "twitch:2890572310": {
       "status": "indexed",
@@ -582,7 +582,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-07T06:18:47.039624+00:00"
+      "checkedAt": "2026-10-08T10:21:36.784712+00:00"
     },
     "youtube:j12hJ1miDfE": {
       "status": "indexed",
@@ -690,7 +690,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-08T03:18:14.330998+00:00"
+      "checkedAt": "2026-10-08T10:12:55.939933+00:00"
     },
     "twitch:2894139574": {
       "status": "held",

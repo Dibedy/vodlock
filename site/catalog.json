@@ -1,7 +1,21 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-04",
+  "updatedAt": "2026-10-09",
   "videos": [
+    {
+      "provider": "youtube",
+      "sourceId": "okKCRRKj1Gg",
+      "title": "T1 vs PRX",
+      "event": "VALORANT Champions Shanghai | Playoffs Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-mbsqsNT6ClQ-okKCRRKj1Gg.json",
+      "playedAt": "2026-10-09T09:06:51Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:mbsqsNT6ClQ:okKCRRKj1Gg",
+      "chat": "/chats/twitch-2895868132.json",
+      "chatSourceId": "2895868132"
+    },
     {
       "provider": "youtube",
       "sourceId": "jT9C2wBHn6c",

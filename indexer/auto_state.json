@@ -582,7 +582,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-08T10:21:36.784712+00:00"
+      "checkedAt": "2026-10-09T21:56:51.434572+00:00"
     },
     "youtube:j12hJ1miDfE": {
       "status": "indexed",
@@ -726,7 +726,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-09T15:40:48.244190+00:00"
+      "checkedAt": "2026-10-09T21:02:35.339883+00:00"
     },
     "youtube:7zKE36y96zo": {
       "status": "waiting",
@@ -738,7 +738,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-09T15:52:17.970584+00:00"
+      "checkedAt": "2026-10-09T21:14:25.200946+00:00"
     },
     "twitch:2895001673": {
       "status": "held",
@@ -765,16 +765,64 @@
       "checkedAt": "2026-10-08T18:45:24.411856+00:00"
     },
     "youtube:mbsqsNT6ClQ": {
-      "status": "waiting",
+      "status": "published",
       "provider": "youtube",
       "channel": "VALORANT Champions Tour full matches",
       "title": "T1 vs. PRX - FULL MATCH - VALORANT Champions Shanghai - Playoffs Stage",
+      "message": "Published",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "none",
+      "checkedAt": "2026-10-09T20:43:05.863844+00:00"
+    },
+    "youtube:okKCRRKj1Gg": {
+      "status": "indexed",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour streams",
+      "title": "VALORANT Champions Shanghai - Playoffs Stage - Day 13",
+      "message": "Stored official YouTube stream archive",
+      "publishedAt": "2026-10-09T08:30:42Z",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "none",
+      "checkedAt": "2026-10-09T20:06:43.338748+00:00"
+    },
+    "youtube:gc23eK0xEr0": {
+      "status": "waiting",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour full matches",
+      "title": "100T vs. NS - FULL MATCH - VALORANT Champions Shanghai - Playoffs Stage",
       "message": "No verified official YouTube stream archive matches this full match",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-09T15:22:28.909186+00:00"
+      "checkedAt": "2026-10-09T20:24:09.888428+00:00"
+    },
+    "twitch:2895868132": {
+      "status": "indexed",
+      "provider": "twitch",
+      "channel": "VALORANT on Twitch",
+      "title": "PRX vs. T1 - VALORANT Champions Shanghai - Playoffs Stage - Day 13",
+      "message": "Attached Twitch chat to 1 official stream matches",
+      "publishedAt": "2026-10-09T08:30:51Z",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "none",
+      "checkedAt": "2026-10-09T21:44:45.436682+00:00"
+    },
+    "twitch:2895872598": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | T1 vs PRX - VCT Champions Playoffs #VCTWatchparty | !vote !inzone !noYT !pickems",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
+      "publishedAt": "2026-10-09T08:44:44Z",
+      "detectorVersion": "vct-clock-ocr-v9",
+      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-09T22:10:10.426007+00:00"
     }
   }
 }

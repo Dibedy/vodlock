@@ -478,7 +478,7 @@
       "pipelineGeneration": 1,
       "pipelineVersion": 6,
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 50,
+      "pipelineAlignmentVersion": 51,
       "reason": "waiting_alignment",
       "canonicalPipeline": true
     },
@@ -514,7 +514,7 @@
       "pipelineGeneration": 1,
       "pipelineVersion": 4,
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 50,
+      "pipelineAlignmentVersion": 51,
       "reason": "waiting_alignment",
       "canonicalPipeline": true
     }

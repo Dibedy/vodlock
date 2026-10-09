@@ -558,7 +558,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-08T22:37:07.336908+00:00"
+      "checkedAt": "2026-10-09T02:23:03.225934+00:00"
     },
     "twitch:2890572310": {
       "status": "indexed",
@@ -690,7 +690,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-08T18:24:00.589852+00:00"
+      "checkedAt": "2026-10-09T02:48:30.135049+00:00"
     },
     "twitch:2894139574": {
       "status": "held",
@@ -702,7 +702,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-07T19:50:59.109431+00:00"
+      "checkedAt": "2026-10-09T02:57:06.649897+00:00"
     },
     "youtube:jT9C2wBHn6c": {
       "status": "waiting",
@@ -726,7 +726,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-08T22:07:55.557760+00:00"
+      "checkedAt": "2026-10-09T01:53:01.500741+00:00"
     },
     "youtube:7zKE36y96zo": {
       "status": "waiting",
@@ -738,7 +738,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-08T22:19:29.820552+00:00"
+      "checkedAt": "2026-10-09T02:05:30.805087+00:00"
     },
     "twitch:2895001673": {
       "status": "held",
@@ -750,7 +750,7 @@
       "detectorVersion": "vct-clock-ocr-v9",
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-08T18:11:25.729706+00:00"
+      "checkedAt": "2026-10-09T02:36:38.034641+00:00"
     },
     "twitch:2895010541": {
       "status": "held",

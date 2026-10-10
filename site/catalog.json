@@ -1,7 +1,19 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-09",
+  "updatedAt": "2026-10-10",
   "videos": [
+    {
+      "provider": "youtube",
+      "sourceId": "RMBxo7P3cbk",
+      "title": "NRG vs LOUD",
+      "event": "VALORANT Champions Shanghai | Playoffs Stage",
+      "label": "Full match",
+      "index": "/indexes/youtube-91OQEM7i78w-RMBxo7P3cbk.json",
+      "playedAt": "2026-10-10T09:07:05Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai",
+      "catalogId": "youtube:91OQEM7i78w:RMBxo7P3cbk"
+    },
     {
       "provider": "youtube",
       "sourceId": "okKCRRKj1Gg",

@@ -5,14 +5,19 @@
     {
       "provider": "youtube",
       "sourceId": "RMBxo7P3cbk",
-      "title": "NRG vs LOUD",
-      "event": "VALORANT Champions Shanghai | Playoffs Stage",
+      "catalogId": "youtube:4a055981134b5a82:RMBxo7P3cbk",
+      "title": "LOUD vs NRG",
+      "event": "Champions Shanghai | Playoffs",
       "label": "Full match",
-      "index": "/indexes/youtube-91OQEM7i78w-RMBxo7P3cbk.json",
-      "playedAt": "2026-10-10T09:07:05Z",
-      "tournament": "VALORANT Champions Shanghai",
-      "tournamentKey": "valorant-champions-shanghai",
-      "catalogId": "youtube:91OQEM7i78w:RMBxo7P3cbk"
+      "index": "/indexes/youtube-RMBxo7P3cbk-4a055981134b5a82-v68-e8734af994ee.json",
+      "playedAt": "2026-10-10T11:07:05.994000+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "9db93b9e-4af0-5bbe-b146-ae9cdc812d61",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 68,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "canonicalPipeline": true
     },
     {
       "provider": "youtube",
@@ -562,6 +567,18 @@
       "pipelineSourceRevision": 1,
       "pipelineAlignmentVersion": 53,
       "reason": "needs_review",
+      "canonicalPipeline": true
+    },
+    {
+      "expectedMatchId": "9db93b9e-4af0-5bbe-b146-ae9cdc812d61",
+      "catalogId": "twitch:2896809061:4a055981134b5a82",
+      "provider": "twitch",
+      "sourceId": "2896809061",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 68,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 1,
+      "reason": "waiting_alignment",
       "canonicalPipeline": true
     }
   ]

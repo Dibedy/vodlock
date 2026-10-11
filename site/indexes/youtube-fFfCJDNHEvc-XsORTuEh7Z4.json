@@ -192,5 +192,26 @@
       "round": 23,
       "start": 16979.57
     }
-  ]
+  ],
+  "alignment": {
+    "timelineScale": 1.0002509229465304,
+    "segments": [
+      {
+        "offset": -140.91434977378424,
+        "targetStart": 140.879,
+        "targetEnd": 13256.296
+      },
+      {
+        "offset": 441.6297872484291,
+        "targetStart": 13256.296,
+        "targetEnd": 14901.78
+      },
+      {
+        "offset": 787.3425127427466,
+        "targetStart": 14901.78,
+        "targetEnd": 18214.041
+      }
+    ],
+    "source": "twitch:2891543405"
+  }
 }

@@ -1,0 +1,344 @@
+{
+  "schemaVersion": 2,
+  "provider": "youtube",
+  "sourceId": "jT9C2wBHn6c",
+  "label": "G2 vs 100T",
+  "leadSeconds": 5,
+  "detector": "canonical-clock-v4",
+  "pipelineState": "final",
+  "pipelineVersion": 6,
+  "rounds": [
+    {
+      "map": 1,
+      "round": 1,
+      "start": 2208.982
+    },
+    {
+      "map": 1,
+      "round": 2,
+      "start": 2328.968
+    },
+    {
+      "map": 1,
+      "round": 3,
+      "start": 2433.007
+    },
+    {
+      "map": 1,
+      "round": 4,
+      "start": 2525.968
+    },
+    {
+      "map": 1,
+      "round": 5,
+      "start": 2645.017
+    },
+    {
+      "map": 1,
+      "round": 6,
+      "start": 2846.016
+    },
+    {
+      "map": 1,
+      "round": 7,
+      "start": 2937.978
+    },
+    {
+      "map": 1,
+      "round": 8,
+      "start": 3039.011
+    },
+    {
+      "map": 1,
+      "round": 9,
+      "start": 3195.971
+    },
+    {
+      "map": 1,
+      "round": 10,
+      "start": 3346.983
+    },
+    {
+      "map": 1,
+      "round": 11,
+      "start": 3491.999
+    },
+    {
+      "map": 1,
+      "round": 12,
+      "start": 3575.012
+    },
+    {
+      "map": 1,
+      "round": 13,
+      "start": 3835.005
+    },
+    {
+      "map": 1,
+      "round": 14,
+      "start": 3926.029
+    },
+    {
+      "map": 1,
+      "round": 15,
+      "start": 4025.995
+    },
+    {
+      "map": 1,
+      "round": 16,
+      "start": 4195.97
+    },
+    {
+      "map": 1,
+      "round": 17,
+      "start": 4322.028
+    },
+    {
+      "map": 1,
+      "round": 18,
+      "start": 4439.01
+    },
+    {
+      "map": 2,
+      "round": 1,
+      "start": 5237.009
+    },
+    {
+      "map": 2,
+      "round": 2,
+      "start": 5314.017
+    },
+    {
+      "map": 2,
+      "round": 3,
+      "start": 5445.019
+    },
+    {
+      "map": 2,
+      "round": 4,
+      "start": 5582.02
+    },
+    {
+      "map": 2,
+      "round": 5,
+      "start": 5690.992
+    },
+    {
+      "map": 2,
+      "round": 6,
+      "start": 5857.028
+    },
+    {
+      "map": 2,
+      "round": 7,
+      "start": 5994.03
+    },
+    {
+      "map": 2,
+      "round": 8,
+      "start": 6137.975
+    },
+    {
+      "map": 2,
+      "round": 9,
+      "start": 6355.995
+    },
+    {
+      "map": 2,
+      "round": 10,
+      "start": 6488.996
+    },
+    {
+      "map": 2,
+      "round": 11,
+      "start": 6616.988
+    },
+    {
+      "map": 2,
+      "round": 12,
+      "start": 6765.999
+    },
+    {
+      "map": 2,
+      "round": 13,
+      "start": 7054.022
+    },
+    {
+      "map": 2,
+      "round": 14,
+      "start": 7145.979
+    },
+    {
+      "map": 2,
+      "round": 15,
+      "start": 7251.017
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 7360.999
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 7471.975
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 7578.013
+    },
+    {
+      "map": 2,
+      "round": 19,
+      "start": 7676.98
+    },
+    {
+      "map": 2,
+      "round": 20,
+      "start": 7886.985
+    },
+    {
+      "map": 2,
+      "round": 21,
+      "start": 8041.011
+    },
+    {
+      "map": 2,
+      "round": 22,
+      "start": 8249.016
+    },
+    {
+      "map": 2,
+      "round": 23,
+      "start": 8351.988
+    },
+    {
+      "map": 2,
+      "round": 24,
+      "start": 8493.994
+    }
+  ],
+  "alignment": {
+    "source": "twitch:2895001673",
+    "timelineScale": 1.0,
+    "strictCoverage": true,
+    "segments": [
+      {
+        "offset": -2.0,
+        "targetStart": 322.0,
+        "targetEnd": 914.0
+      },
+      {
+        "offset": -0.0,
+        "targetStart": 992.0,
+        "targetEnd": 1666.0
+      },
+      {
+        "offset": -0.0,
+        "targetStart": 1668.0,
+        "targetEnd": 1750.0
+      },
+      {
+        "offset": -2.0,
+        "targetStart": 1858.0,
+        "targetEnd": 1948.0
+      },
+      {
+        "offset": -4.0,
+        "targetStart": 2018.0,
+        "targetEnd": 2110.0
+      },
+      {
+        "offset": -4.0,
+        "targetStart": 2112.0,
+        "targetEnd": 2838.0
+      },
+      {
+        "offset": -2.0,
+        "targetStart": 2898.0,
+        "targetEnd": 3190.0
+      },
+      {
+        "offset": -2.0,
+        "targetStart": 3192.0,
+        "targetEnd": 3632.0
+      },
+      {
+        "offset": -2.0,
+        "targetStart": 3788.0,
+        "targetEnd": 3848.0
+      },
+      {
+        "offset": -2.0,
+        "targetStart": 3860.0,
+        "targetEnd": 3980.0
+      },
+      {
+        "offset": -2.0,
+        "targetStart": 4036.0,
+        "targetEnd": 4192.0
+      },
+      {
+        "offset": -2.0,
+        "targetStart": 4198.0,
+        "targetEnd": 4286.0
+      },
+      {
+        "offset": -2.0,
+        "targetStart": 4288.0,
+        "targetEnd": 4936.0
+      },
+      {
+        "offset": -4.0,
+        "targetStart": 4940.0,
+        "targetEnd": 5338.0
+      },
+      {
+        "offset": -6.0,
+        "targetStart": 5364.0,
+        "targetEnd": 5432.0
+      },
+      {
+        "offset": -4.0,
+        "targetStart": 5504.0,
+        "targetEnd": 5802.0
+      },
+      {
+        "offset": -4.0,
+        "targetStart": 5866.0,
+        "targetEnd": 5966.0
+      },
+      {
+        "offset": -4.0,
+        "targetStart": 5968.0,
+        "targetEnd": 8104.0
+      },
+      {
+        "offset": -6.0,
+        "targetStart": 8296.0,
+        "targetEnd": 8360.0
+      },
+      {
+        "offset": -6.0,
+        "targetStart": 8362.0,
+        "targetEnd": 9430.0
+      },
+      {
+        "offset": -10.0,
+        "targetStart": 9488.0,
+        "targetEnd": 9686.0
+      },
+      {
+        "offset": -10.0,
+        "targetStart": 9688.0,
+        "targetEnd": 9852.0
+      },
+      {
+        "offset": -0.0,
+        "targetStart": 9960.0,
+        "targetEnd": 10552.0
+      }
+    ]
+  }
+}

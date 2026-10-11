@@ -5,6 +5,7 @@
   "label": "LOUD vs EDG",
   "leadSeconds": 5,
   "detector": "vct-clock-ocr-v9+storyboard-v4",
+  "roundTimingVersion": "round-timing-v2",
   "rounds": [
     {
       "map": 1,
@@ -184,7 +185,7 @@
     {
       "map": 2,
       "round": 15,
-      "start": 19183.79
+      "start": 19183.29
     },
     {
       "map": 2,

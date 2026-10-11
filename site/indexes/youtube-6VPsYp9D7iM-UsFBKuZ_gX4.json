@@ -1,0 +1,207 @@
+{
+  "schemaVersion": 2,
+  "provider": "youtube",
+  "sourceId": "UsFBKuZ_gX4",
+  "label": "KC vs XLG",
+  "leadSeconds": 5,
+  "detector": "vct-clock-ocr-v9+storyboard-v4",
+  "roundTimingVersion": "round-timing-v2",
+  "rounds": [
+    {
+      "map": 1,
+      "round": 1,
+      "start": 10758.97
+    },
+    {
+      "map": 1,
+      "round": 2,
+      "start": 10879.2
+    },
+    {
+      "map": 1,
+      "round": 3,
+      "start": 10994.43
+    },
+    {
+      "map": 1,
+      "round": 4,
+      "start": 11144.72
+    },
+    {
+      "map": 1,
+      "round": 5,
+      "start": 11366.14
+    },
+    {
+      "map": 1,
+      "round": 6,
+      "start": 11525.45
+    },
+    {
+      "map": 1,
+      "round": 7,
+      "start": 11634.66
+    },
+    {
+      "map": 1,
+      "round": 8,
+      "start": 11775.93
+    },
+    {
+      "map": 1,
+      "round": 9,
+      "start": 11871.12
+    },
+    {
+      "map": 1,
+      "round": 10,
+      "start": 12023.41
+    },
+    {
+      "map": 1,
+      "round": 11,
+      "start": 12195.74
+    },
+    {
+      "map": 1,
+      "round": 12,
+      "start": 12330.0
+    },
+    {
+      "map": 1,
+      "round": 13,
+      "start": 12559.44
+    },
+    {
+      "map": 1,
+      "round": 14,
+      "start": 12746.8
+    },
+    {
+      "map": 1,
+      "round": 15,
+      "start": 12833.97
+    },
+    {
+      "map": 1,
+      "round": 16,
+      "start": 12945.19
+    },
+    {
+      "map": 2,
+      "round": 1,
+      "start": 13219.72
+    },
+    {
+      "map": 2,
+      "round": 2,
+      "start": 13344.96
+    },
+    {
+      "map": 2,
+      "round": 3,
+      "start": 14033.31
+    },
+    {
+      "map": 2,
+      "round": 4,
+      "start": 14155.55
+    },
+    {
+      "map": 2,
+      "round": 5,
+      "start": 14335.89
+    },
+    {
+      "map": 2,
+      "round": 6,
+      "start": 14447.11
+    },
+    {
+      "map": 2,
+      "round": 7,
+      "start": 14602.41
+    },
+    {
+      "map": 2,
+      "round": 8,
+      "start": 14702.6
+    },
+    {
+      "map": 2,
+      "round": 9,
+      "start": 14877.94
+    },
+    {
+      "map": 2,
+      "round": 10,
+      "start": 14996.17
+    },
+    {
+      "map": 2,
+      "round": 11,
+      "start": 15085.34
+    },
+    {
+      "map": 2,
+      "round": 12,
+      "start": 15184.53
+    },
+    {
+      "map": 2,
+      "round": 13,
+      "start": 15459.06
+    },
+    {
+      "map": 2,
+      "round": 14,
+      "start": 15558.25
+    },
+    {
+      "map": 2,
+      "round": 15,
+      "start": 15600.33
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 15785.69
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 15921.95
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 15979.06
+    },
+    {
+      "map": 2,
+      "round": 19,
+      "start": 16035.17
+    }
+  ],
+  "alignment": {
+    "timelineScale": 1.0007317550739452,
+    "segments": [
+      {
+        "offset": -115.19723452182706,
+        "targetStart": 115.113,
+        "targetEnd": 9996.646
+      },
+      {
+        "offset": 128.57101369663525,
+        "targetStart": 9996.646,
+        "targetEnd": 14140.633
+      },
+      {
+        "offset": 997.5984639488087,
+        "targetStart": 14140.633,
+        "targetEnd": 17781.639
+      }
+    ],
+    "source": "twitch:2890572310"
+  }
+}

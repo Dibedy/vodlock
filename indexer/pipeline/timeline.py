@@ -19,7 +19,7 @@ def scoreboard_section(samples, expected, canonical_start, scale):
         start = seed.time - (100 - seed.timer)
         candidates = sorted((sample for sample in clocks if abs(sample.time - (100 - sample.timer) - start) <= 1),
                             key=lambda sample: sample.time)
-        anchors = []
+        anchors: list[Any] = []
         for sample in candidates:
             if not anchors or (sample.time > anchors[-1].time and sample.timer < anchors[-1].timer):
                 anchors.append(sample)
@@ -28,7 +28,7 @@ def scoreboard_section(samples, expected, canonical_start, scale):
         start = statistics.median(sample.time - (100 - sample.timer) for sample in anchors)
         if start < 7 or not math.isfinite(start) or any(abs(sample.time - (100 - sample.timer) - start) > 1 for sample in anchors):
             continue
-        preroll = []
+        preroll: list[Any] = []
         if len(anchors) < 5 and anchors[0].timer >= 97:
             for sample in sorted(visible, key=lambda sample: sample.time):
                 if (sample.buy_phase and sample.timer is not None and 0 <= sample.timer <= 10

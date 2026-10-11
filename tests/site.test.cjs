@@ -208,6 +208,7 @@ test('start and resume gates keep their play icon through loading and retry labe
   assert.doesNotMatch(gate, /class="gate-icon"/);
   assert.match(gate, /id="start-watching-label"/);
   assert.match(gate, /<button id="start-watching"[^>]*><svg/);
+  assert.doesNotMatch(html, /class="chat-warning"|Viewer messages can still contain spoilers/);
   assert.doesNotMatch(app, /\$\('start-watching'\)\.textContent/);
   const start = app.indexOf("    $('start-gate-title').textContent = state.resumeTime");
   for (const resumeTime of [null, 321.25]) {

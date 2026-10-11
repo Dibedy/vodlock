@@ -234,7 +234,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-11T03:05:20.594634+00:00"
+      "checkedAt": "2026-10-11T20:13:54.066460+00:00"
     },
     "twitch:2887057207": {
       "status": "held",
@@ -513,16 +513,16 @@
       "checkedAt": "2026-10-11T09:30:49.223635+00:00"
     },
     "twitch:2889647074": {
-      "status": "held",
+      "status": "published",
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | GE vs EDG - VCT Champions Group Stage Elimination #VCTWatchparty | !vote !inzone !noYT",
-      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
+      "message": "Published 2 complete matches from the watch-party archive",
       "publishedAt": "2026-10-02T08:54:38Z",
-      "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-10-10T01:02:19.911514+00:00"
+      "detectorVersion": "vct-clock-ocr-v10",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "retryClass": "none",
+      "checkedAt": "2026-10-11T20:19:18.436351+00:00"
     },
     "youtube:Ma4ipFeW7Mc": {
       "status": "published",
@@ -681,16 +681,16 @@
       "checkedAt": "2026-10-11T02:23:25.903015+00:00"
     },
     "twitch:2894136432": {
-      "status": "held",
+      "status": "indexed",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "NRG vs. T1 - VALORANT Champions Shanghai - Playoffs Stage - Day 11",
-      "message": "More than one official YouTube stream archive aligns with this Twitch chat",
+      "message": "Attached Twitch chat to 2 official stream matches",
       "publishedAt": "2026-10-07T08:30:43Z",
-      "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-10-10T21:41:47.477190+00:00"
+      "detectorVersion": "vct-clock-ocr-v10",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "retryClass": "none",
+      "checkedAt": "2026-10-11T20:13:27.499696+00:00"
     },
     "twitch:2894139574": {
       "status": "held",
@@ -723,10 +723,10 @@
       "title": "VIT vs. NS - FULL MATCH - VALORANT Champions Shanghai - Playoffs Stage",
       "message": "No verified official YouTube stream archive matches this full match",
       "publishedAt": null,
-      "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
+      "detectorVersion": "vct-clock-ocr-v10",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-11T00:44:12.297602+00:00"
+      "checkedAt": "2026-10-11T19:57:58.559558+00:00"
     },
     "youtube:7zKE36y96zo": {
       "status": "waiting",
@@ -738,19 +738,19 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-11T03:02:22.849589+00:00"
+      "checkedAt": "2026-10-11T20:04:05.801486+00:00"
     },
     "twitch:2895001673": {
-      "status": "held",
+      "status": "indexed",
       "provider": "twitch",
       "channel": "VALORANT on Twitch",
       "title": "100T vs. G2 - VALORANT Champions Shanghai - Playoffs Stage - Day 12",
-      "message": "More than one official YouTube stream archive aligns with this Twitch chat",
+      "message": "Attached Twitch chat to 2 official stream matches",
       "publishedAt": "2026-10-08T08:30:14Z",
-      "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-10-10T21:26:58.489383+00:00"
+      "detectorVersion": "vct-clock-ocr-v10",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "retryClass": "none",
+      "checkedAt": "2026-10-11T20:12:16.536583+00:00"
     },
     "twitch:2895010541": {
       "status": "held",
@@ -883,6 +883,42 @@
       "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
       "retryClass": "cooldown",
       "checkedAt": "2026-10-10T18:12:18.125398+00:00"
+    },
+    "youtube:2EzWX2VemjM": {
+      "status": "waiting",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour full matches",
+      "title": "G2 vs. T1 - FULL MATCH - VALORANT Champions Shanghai - Playoffs Stage",
+      "message": "No verified official YouTube stream archive matches this full match",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v10",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "retryClass": "dependency",
+      "checkedAt": "2026-10-11T19:42:31.367424+00:00"
+    },
+    "youtube:UMIkxgmsOTA": {
+      "status": "waiting",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour full matches",
+      "title": "NRG vs. 100T - FULL MATCH - VALORANT Champions Shanghai - Playoffs Stage",
+      "message": "No verified official YouTube stream archive matches this full match",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v10",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "retryClass": "dependency",
+      "checkedAt": "2026-10-11T19:49:24.740614+00:00"
+    },
+    "twitch:2897752834": {
+      "status": "waiting",
+      "provider": "twitch",
+      "channel": "VALORANT on Twitch",
+      "title": "NRG vs. 100T - VALORANT Champions Shanghai - Playoffs Stage - Day 15",
+      "message": "Waiting for matches from the aligned official YouTube stream archive",
+      "publishedAt": "2026-10-11T08:30:30Z",
+      "detectorVersion": "vct-clock-ocr-v10",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "retryClass": "dependency",
+      "checkedAt": "2026-10-11T20:10:59.429254+00:00"
     }
   }
 }

@@ -214,24 +214,19 @@
     }
   ],
   "alignment": {
-    "timelineScale": 1.0007317550739452,
+    "timelineScale": 1.0001933773875842,
     "segments": [
       {
-        "offset": -115.19723452182706,
-        "targetStart": 115.113,
-        "targetEnd": 9996.646
+        "offset": -73.89328652801734,
+        "targetStart": 73.879,
+        "targetEnd": 14732.209
       },
       {
-        "offset": 128.57101369663525,
-        "targetStart": 9996.646,
-        "targetEnd": 14140.633
-      },
-      {
-        "offset": 997.5984639488087,
-        "targetStart": 14140.633,
-        "targetEnd": 17781.639
+        "offset": 1680.44789779656,
+        "targetStart": 14732.209,
+        "targetEnd": 17080.795
       }
     ],
-    "source": "twitch:2890572310"
+    "source": "twitch:2894136432"
   }
 }

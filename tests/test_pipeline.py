@@ -1305,6 +1305,12 @@ if has_bgutil:
             media = MediaAnalysis(requester=lambda url, headers: path.read_bytes())
             self.assertAlmostEqual(media.live_presentation_time({"headers": {}}, {"url": "fixture"}), 2150.123, places=3)
 
+    def test_live_presentation_clock_uses_exact_pts_instead_of_rounded_display(self):
+        media = MediaAnalysis(requester=lambda url, headers: b"fixture")
+        result = Mock(returncode=0, stderr=b"config in time_base: 1/90000\nn: 0 pts: 193511070 pts_time:2150.12")
+        with patch("pipeline.media.subprocess.run", return_value=result):
+            self.assertAlmostEqual(media.live_presentation_time({"headers": {}}, {"url": "fixture"}), 2150.123, places=6)
+
     def test_live_presentation_clock_requires_decodable_timestamped_video(self):
         media = MediaAnalysis(requester=lambda url, headers: b"invalid media")
         with self.assertRaises(WaitingSource):

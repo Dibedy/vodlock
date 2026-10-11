@@ -32,7 +32,7 @@ from pipeline.schedule import ingest_schedule
 from pipeline.storage import LocalStorage
 from pipeline.media import MediaAnalysis
 from pipeline.store import Store, identifier, json_bytes
-from pipeline.twitch import TwitchCapture, ingest_event
+from pipeline.twitch import TwitchCapture, eventsub_loop, ingest_event
 from pipeline.worker import Worker
 from pipeline.youtube import timestamp
 from test_pipeline import fingerprints, series
@@ -472,6 +472,18 @@ class DatabasePipelineTests(unittest.TestCase):
         stored = self.store.one("SELECT * FROM pipeline.jobs WHERE id=%s", (job["id"],))
         self.assertEqual(stored["state"], "succeeded")
         self.assertEqual(stored["payload"]["checkpoint"], 360)
+
+    def test_eventsub_startup_records_the_chat_archive_last_seen_time(self):
+        twitch = identifier()
+        self.store.execute("INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role,state) VALUES (%s,%s,'twitch','123456789','official_twitch','live')", (twitch, self.broadcast))
+        self.store.execute("INSERT INTO pipeline.chat_archives(source_id,state,updated_at) VALUES (%s,'capturing','2026-10-04T10:15:00Z')", (twitch,))
+        stop = Mock()
+        stop.is_set.side_effect = [False, True]
+        config = Config(DATABASE, settings={"twitch_channels": [{"login": "fixture"}]})
+        with patch.dict(os.environ, {"TWITCH_USER_TOKEN": "test", "TWITCH_CLIENT_ID": "test", "TWITCH_CHAT_USER_ID": "7"}), patch("pipeline.twitch.resolve_channels", side_effect=WaitingSource("Disconnected test session")):
+            eventsub_loop(self.store, config, stop)
+        archive = self.store.one("SELECT disconnected_at,updated_at FROM pipeline.chat_archives WHERE source_id=%s", (twitch,))
+        self.assertEqual(archive["disconnected_at"], archive["updated_at"])
 
     def test_chat_download_does_not_block_canonical_indexing_or_overlap_its_source(self):
         twitch = identifier()

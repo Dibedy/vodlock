@@ -758,7 +758,7 @@ def eventsub_loop(store, config, stop):
     while not stop.is_set():
         try:
             if not initialized:
-                store.execute("UPDATE pipeline.chat_archives a SET disconnected_at=COALESCE(disconnected_at,updated_at) FROM pipeline.sources s WHERE a.source_id=s.id AND s.state='live' AND s.provider='twitch'")
+                store.execute("UPDATE pipeline.chat_archives a SET disconnected_at=COALESCE(a.disconnected_at,a.updated_at) FROM pipeline.sources s WHERE a.source_id=s.id AND s.state='live' AND s.provider='twitch'")
                 initialized = True
             channels = resolve_channels(channels)
             url = reconnect_url or "wss://eventsub.wss.twitch.tv/ws"

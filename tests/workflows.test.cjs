@@ -24,6 +24,15 @@ test('production deployment rejects obsolete commits before using the provider b
   assert.ok(deployment.indexOf('Deployment superseded by current branch head') < deployment.indexOf('npx --yes vercel@'));
 });
 
+test('Linux pipeline CI and worker use system FFmpeg for transport streams', () => {
+  const pipeline = workflow('pipeline-ci.yml');
+  const dockerfile = readFileSync(resolve(__dirname, '../indexer/Dockerfile.worker'), 'utf8');
+  assert.match(pipeline, /IMAGEIO_FFMPEG_EXE: \/usr\/bin\/ffmpeg/);
+  assert.match(pipeline, /apt-get install -y ffmpeg/);
+  assert.match(dockerfile, /IMAGEIO_FFMPEG_EXE=\/usr\/bin\/ffmpeg/);
+  assert.match(dockerfile, /apt-get install -y --no-install-recommends ffmpeg /);
+});
+
 test('publisher exposes health and held-source recovery controls', () => {
   const publisher = workflow('auto-publish.yml');
   assert.match(publisher, /retry_held:/);

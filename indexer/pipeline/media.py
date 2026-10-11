@@ -449,10 +449,11 @@ class MediaAnalysis:
             except subprocess.TimeoutExpired as error:
                 raise WaitingSource("YouTube DVR presentation-clock probe timed out") from error
             output = result.stderr.decode(errors="replace")
-            found = re.search(r"n:\s*0\s+pts:\s*-?\d+\s+pts_time:([-+\d.eE]+)", output)
-            if result.returncode or not found:
+            base = re.search(r"config in time_base:\s*(\d+)/(\d+)", output)
+            found = re.search(r"n:\s*0\s+pts:\s*(-?\d+)\s+pts_time:", output)
+            if result.returncode or not found or not base or not int(base[2]):
                 raise WaitingSource("YouTube DVR returned no decodable presentation-clock anchor")
-            value = float(found[1])
+            value = float(Fraction(int(found[1]) * int(base[1]), int(base[2])))
             if not math.isfinite(value) or value < 0:
                 raise WaitingSource("YouTube DVR presentation-clock anchor is invalid")
             return value

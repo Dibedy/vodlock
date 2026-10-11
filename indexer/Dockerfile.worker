@@ -1,8 +1,8 @@
 FROM node:24-bookworm-slim AS javascript
 FROM python:3.12-slim-bookworm
-ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/app/indexer SPOILLESS_STATUS_HOST=0.0.0.0
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/app/indexer SPOILLESS_STATUS_HOST=0.0.0.0 IMAGEIO_FFMPEG_EXE=/usr/bin/ffmpeg
 WORKDIR /app
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git libxcb1 libgl1 libglib2.0-0 libgomp1 libstdc++6 ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ffmpeg git libxcb1 libgl1 libglib2.0-0 libgomp1 libstdc++6 ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
 COPY --from=javascript /usr/local/bin/node /usr/local/bin/node
 COPY indexer/requirements*.txt /app/indexer/
 RUN pip install --no-cache-dir -r indexer/requirements-worker.txt

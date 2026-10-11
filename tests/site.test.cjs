@@ -228,6 +228,38 @@ test('second-round skip is off by default and preserves saved boolean settings',
   assert.match(html, /id="setting-auto-skip-second-rounds" type="checkbox"/);
 });
 
+test('grouped settings preserve fullscreen chat preferences with native radio controls', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const html = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  for (const title of ['Playback', 'Spoiler protection', 'Chat', 'Keyboard']) assert.ok(html.includes('>' + title + '</h3>'));
+  assert.equal((html.match(/role="switch"/g) || []).length, 9);
+  const options = ['left', 'right', 'hidden'].map(value => ({value, checked: false}));
+  const controls = new Map();
+  const $ = id => {
+    if (!controls.has(id)) controls.set(id, {type: 'checkbox', tagName: 'INPUT', classList: {toggle() {}},
+      addEventListener(type, handler) {this.handler = handler;}});
+    return controls.get(id);
+  };
+  Object.assign($('setting-fullscreen-chat-position'), {tagName: 'FIELDSET', querySelectorAll: () => options});
+  let saved = JSON.stringify({fullscreenChatPosition: 'right', autoSkipSecondRounds: true});
+  const sandbox = vm.createContext({$, state: {}, renderChat() {}, updateStatus() {},
+    localStorage: {getItem: () => saved, setItem(key, value) {saved = value;}}});
+  const declarations = app.slice(app.indexOf('  const defaultSettings ='), app.indexOf('  const teamLogos ='));
+  vm.runInContext(declarations + app.slice(app.indexOf('  function readSettings('), app.indexOf('  function readKeybinds(')) +
+    '\nlet settings = readSettings();\n' + app.slice(app.indexOf('  function applySettings('), app.indexOf('  function readFavouriteTeams(')) +
+    app.slice(app.indexOf('  for (const [key, identifier] of Object.entries(settingIds)) {', app.indexOf("$('teams-close')")),
+      app.indexOf("  for (const button of document.querySelectorAll('[data-keybind]')) {", app.indexOf("$('teams-close')"))), sandbox);
+  sandbox.applySettings();
+  assert.deepEqual(options.filter(option => option.checked).map(option => option.value), ['right']);
+  assert.equal($('setting-auto-skip-second-rounds').checked, true);
+  $('setting-fullscreen-chat-position').handler({target: {type: 'radio', value: 'hidden'}});
+  assert.equal(JSON.parse(saved).fullscreenChatPosition, 'hidden');
+  assert.deepEqual(options.filter(option => option.checked).map(option => option.value), ['hidden']);
+  $('setting-show-chat').handler({target: {type: 'checkbox', checked: false}});
+  assert.equal(JSON.parse(saved).showChat, false);
+  assert.equal(sandbox.readSettings().fullscreenChatPosition, 'hidden');
+});
+
 test('auto-skip only runs during playback, avoids repeat seeks and respects manual review', () => {
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   const index = {leadSeconds: 5, rounds: [

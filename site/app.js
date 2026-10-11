@@ -164,7 +164,9 @@
   function applySettings() {
     for (const [key, identifier] of Object.entries(settingIds)) {
       const control = $(identifier);
-      if (control.type === 'checkbox') control.checked = settings[key];
+      if (control.tagName === 'FIELDSET') {
+        for (const option of control.querySelectorAll('input[type="radio"]')) option.checked = option.value === settings[key];
+      } else if (control.type === 'checkbox') control.checked = settings[key];
       else control.value = settings[key];
     }
     const twitchTimelineHidden = state.entry?.provider === 'twitch' && settings.hideTwitchTimeline;

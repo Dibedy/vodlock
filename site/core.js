@@ -162,10 +162,28 @@
     return Object.freeze(messages);
   }
 
+  function seventvEmotes(value) {
+    const emotes = new Map();
+    if (!Array.isArray(value?.emotes)) return emotes;
+    for (const emote of value.emotes.slice(0, 2000)) {
+      if (typeof emote?.name === 'string' && emote.name.length > 0 && emote.name.length <= 100 && !/\s/.test(emote.name) &&
+          typeof emote.id === 'string' && /^[A-Za-z0-9]{20,32}$/.test(emote.id)) {
+        emotes.set(emote.name, '7tv:' + emote.id);
+      }
+    }
+    return emotes;
+  }
+
+  function chatFragments(fragments, emotes) {
+    if (!emotes.size) return fragments;
+    return fragments.flatMap(fragment => fragment.length === 2 ? [fragment] :
+      fragment[0].split(/(\s+)/).filter(Boolean).map(text => emotes.has(text) ? [text, emotes.get(text)] : [text]));
+  }
+
   function playedTime(value) {
     const time = typeof value === 'string' ? Date.parse(value) : NaN;
     return Number.isFinite(time) ? time : 0;
   }
 
-  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, playedTime, position, roundDestination, mapDestination, sourceTime, playbackTime});
+  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, seventvEmotes, chatFragments, playedTime, position, roundDestination, mapDestination, sourceTime, playbackTime});
 })();

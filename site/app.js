@@ -2,6 +2,8 @@
   'use strict';
 
   const $ = id => document.getElementById(id);
+  const chatEmoteSets = new Map();
+  let chatEmotes = new Map();
   const defaultSettings = {hideTwitchTimeline: true, hideMetadata: false, hideRoundStatus: false, showChat: true, fullscreenChatPosition: 'left', showChatTimestamps: false, endScreenProtection: true};
   const defaultKeybinds = {previousRound: 'ArrowUp', nextRound: 'ArrowDown', skipBackward: 'ArrowLeft', skipForward: 'ArrowRight'};
   const settingIds = {
@@ -268,14 +270,16 @@
       user.textContent = message.user + ':';
       if (message.color) user.style.color = message.color;
       row.append(user);
-      for (const [text, emote] of message.fragments) {
+      for (const [text, emote] of VodlockSite.chatFragments(message.fragments, chatEmotes)) {
         if (emote) {
           const image = document.createElement('img');
           image.src = emote.startsWith('7tv:')
             ? 'https://cdn.7tv.app/emote/' + emote.slice(4) + '/1x.webp'
             : 'https://static-cdn.jtvnw.net/emoticons/v2/' + emote + '/default/dark/1.0';
           image.alt = text;
+          image.title = text;
           image.loading = 'lazy';
+          image.addEventListener('error', () => image.replaceWith(document.createTextNode(text)), {once: true});
           row.append(image);
         } else {
           row.append(document.createTextNode(text));
@@ -287,6 +291,7 @@
   }
 
   async function loadChat(entry, index) {
+    chatEmotes = new Map();
     state.chat = [];
     state.chatIndex = null;
     state.chatPosition = null;
@@ -303,6 +308,30 @@
     const response = await fetch(entry.chat, {cache: 'no-store'});
     if (!response.ok) return;
     state.chat = VodlockSite.validateChat(await response.json(), sourceId);
+    const messages = state.chat;
+    const channelId = entry.chatChannelId;
+    if (typeof channelId !== 'string' || !/^[0-9]{1,20}$/.test(channelId)) return;
+    const urls = ['https://7tv.io/v3/emote-sets/global', 'https://7tv.io/v3/users/twitch/' + channelId];
+    const sets = urls.map(url => {
+      if (!chatEmoteSets.has(url)) {
+        chatEmoteSets.set(url, fetch(url, {credentials: 'omit', signal: AbortSignal.timeout(5000)})
+          .then(async response => {
+            if (response.status === 404) return new Map();
+            if (!response.ok) throw new Error('7TV returned HTTP ' + response.status);
+            const value = await response.json();
+            return VodlockSite.seventvEmotes(value.emote_set || value);
+          }).catch(error => {
+            console.warn('7TV emotes are unavailable; keeping chat text.', error);
+            return new Map();
+          }));
+      }
+      return chatEmoteSets.get(url);
+    });
+    void Promise.all(sets).then(sets => {
+      if (state.chat !== messages) return;
+      chatEmotes = new Map(sets.flatMap(set => [...set]));
+      state.chatPosition = null;
+    });
   }
 
   function resetPlayerHost() {

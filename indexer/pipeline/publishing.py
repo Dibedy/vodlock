@@ -250,7 +250,8 @@ def export_snapshot(store, storage, shadow=True, approved_broadcasts=None, conne
                             for section in mapping["segments"]
                         ]}
                     contract["alignment"] = chat_alignment(mapping, chat_source_id)
-                    chat_fields = {"chat": "/chats/" + chat_file, "chatSourceId": chat_source_id}
+                    chat_fields = {"chat": "/chats/" + chat_file, "chatSourceId": chat_source_id,
+                                   "chatChannelId": chat_source["metadata"].get("broadcaster_user_id")}
             digest = hashlib.sha256(json_bytes(contract)).hexdigest()[:12]
             filename = f"youtube-{source['external_id']}-{key}-v{index['version']}-{digest}.json"
             storage.put(f"{prefix}/indexes/{filename}", json_bytes(contract))
@@ -323,8 +324,9 @@ def export_snapshot(store, storage, shadow=True, approved_broadcasts=None, conne
                 chat_fields = {}
                 if chat["messages"]:
                     storage.put(f"{prefix}/chats/twitch-{vod_id}.json", json_bytes(chat))
-                    chat_fields = {"chat": f"/chats/twitch-{vod_id}.json", "chatSourceId": vod_id}
-                catalog["videos"].append({**{name: value for name, value in parent.items() if name not in {"chat", "chatSourceId"}},
+                    chat_fields = {"chat": f"/chats/twitch-{vod_id}.json", "chatSourceId": vod_id,
+                                   "chatChannelId": secondary["metadata"].get("broadcaster_user_id")}
+                catalog["videos"].append({**{name: value for name, value in parent.items() if name not in {"chat", "chatSourceId", "chatChannelId"}},
                                           **version, "kind": "watch-party", "creator": "FNS" if secondary["metadata"].get("login") == "gofns" else secondary["metadata"].get("login", "Watch party"),
                                           "label": "Watch party", "index": "/indexes/" + filename, **chat_fields})
         if not shadow:

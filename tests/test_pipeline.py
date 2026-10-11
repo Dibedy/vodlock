@@ -691,6 +691,9 @@ class PipelineTests(unittest.TestCase):
         updated = {**index, "alignment": {"segments": [{"targetStart": 0, "targetEnd": 300}]}}
         after = {current_entry["index"]: updated}
         self.assertEqual(deploy.publication_kind(previous, current, before, after, set()), "incremental")
+        current_entry["chatChannelId"] = "490592527"
+        self.assertEqual(deploy.publication_kind(previous, current, before, after, set()), "incremental")
+        del current_entry["chatChannelId"]
         legacy = {"title": "B vs A", "index": "/indexes/legacy.json"}
         self.assertEqual(deploy.publication_kind({"videos": [entry, legacy]}, current, before, after, set()), "ready")
         self.assertEqual(deploy.publication_kind({"videos": [entry, legacy]}, {"videos": [current_entry, legacy]}, before, after, set()), "incremental")

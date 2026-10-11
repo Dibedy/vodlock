@@ -201,6 +201,90 @@ test('map navigation lands on the first round without exposing map totals', () =
   assert.equal(mapDestination(index, 800, 1), null);
 });
 
+test('7TV emotes match whole case-sensitive tokens and preserve native emotes and whitespace', () => {
+  const id = '01F6M2T8P00000000000000000';
+  const emotes = context.VodlockSite.seventvEmotes({emotes: [
+    {name: 'KEKW', id}, {name: 'bad name', id}, {name: 'invalid', id: '../unsafe'},
+    {name: '__proto__', id}
+  ]});
+  assert.equal(emotes.size, 2);
+  const fragments = [['KEKW  KEKWish kekw\tKEKW'], ['KEKW', '25'], ['__proto__']];
+  assert.deepEqual(JSON.parse(JSON.stringify(context.VodlockSite.chatFragments(fragments, emotes))), [
+    ['KEKW', '7tv:' + id], ['  '], ['KEKWish'], [' '], ['kekw'], ['\t'], ['KEKW', '7tv:' + id],
+    ['KEKW', '25'], ['__proto__', '7tv:' + id]
+  ]);
+  assert.equal(context.VodlockSite.chatFragments(fragments, new Map()), fragments);
+  assert.equal(context.VodlockSite.seventvEmotes(null).size, 0);
+  const vercel = readFileSync(resolve(__dirname, '../site/vercel.json'), 'utf8');
+  assert.match(vercel, /connect-src 'self' https:\/\/7tv\.io;/);
+});
+
+function chatLoader(fetch) {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const sandbox = vm.createContext({fetch, AbortSignal, VodlockSite: context.VodlockSite, console: {warn() {}}});
+  vm.runInContext('const state = {chat: []}; const chatEmoteSets = new Map(); let chatEmotes = new Map();\n' +
+    app.slice(app.indexOf('  async function loadChat('), app.indexOf('  function resetPlayerHost(')), sandbox);
+  return {
+    load: entry => sandbox.loadChat(entry, {}),
+    state: () => vm.runInContext('state', sandbox),
+    emotes: () => vm.runInContext('chatEmotes', sandbox)
+  };
+}
+
+test('7TV lookup is nonblocking, cached, and channel aliases override global emotes', async () => {
+  const calls = [];
+  const resolveEmotes = [];
+  const loader = chatLoader(url => {
+    calls.push(url);
+    if (url.startsWith('/chats/')) return Promise.resolve({ok: true, json: async () => ({v: 1, source: '1234567890', messages: [{t: 1, u: 'Viewer', c: '', f: [['KEKW']]}]})});
+    return new Promise(resolve => resolveEmotes.push(resolve));
+  });
+  const entry = {provider: 'twitch', sourceId: '1234567890', chat: '/chats/twitch-1234567890.json', chatChannelId: '66418614'};
+  await loader.load(entry);
+  assert.equal(loader.state().chat.length, 1);
+  assert.equal(loader.emotes().size, 0);
+  const globalId = '01F6M2T8P00000000000000000';
+  const channelId = '01F6M2T8P00000000000000001';
+  resolveEmotes[0]({ok: true, json: async () => ({emotes: [{name: 'KEKW', id: globalId}]})});
+  resolveEmotes[1]({ok: true, json: async () => ({emote_set: {emotes: [{name: 'KEKW', id: channelId}]}})});
+  await new Promise(setImmediate);
+  assert.equal(loader.emotes().get('KEKW'), '7tv:' + channelId);
+  assert.equal(loader.state().chatPosition, null);
+  await loader.load(entry);
+  await new Promise(setImmediate);
+  assert.equal(calls.filter(url => url.startsWith('https:')).length, 2);
+  assert.equal(loader.emotes().get('KEKW'), '7tv:' + channelId);
+});
+
+test('late 7TV responses cannot alter another VOD chat', async () => {
+  const resolveEmotes = [];
+  const loader = chatLoader(url => url.startsWith('/chats/')
+    ? Promise.resolve({ok: true, json: async () => ({v: 1, source: '1234567890', messages: []})})
+    : new Promise(resolve => resolveEmotes.push(resolve)));
+  await loader.load({provider: 'twitch', sourceId: '1234567890', chat: '/chats/twitch-1234567890.json', chatChannelId: '66418614'});
+  await loader.load({provider: 'youtube', sourceId: 'ZphbktbT26k'});
+  for (const resolve of resolveEmotes) resolve({ok: true, json: async () => ({emotes: [{name: 'KEKW', id: '01F6M2T8P00000000000000000'}]})});
+  await new Promise(setImmediate);
+  assert.equal(loader.emotes().size, 0);
+  assert.equal(loader.state().chat.length, 0);
+});
+
+test('7TV errors preserve readable chat and malformed channel IDs are never requested', async () => {
+  let requests = 0;
+  const loader = chatLoader(url => {
+    if (url.startsWith('https:')) { requests++; return Promise.reject(new Error('offline')); }
+    return Promise.resolve({ok: true, json: async () => ({v: 1, source: '1234567890', messages: [{t: 1, u: 'Viewer', c: '', f: [['KEKW']]}]})});
+  });
+  const entry = {provider: 'twitch', sourceId: '1234567890', chat: '/chats/twitch-1234567890.json', chatChannelId: '../unsafe'};
+  await loader.load(entry);
+  assert.equal(requests, 0);
+  await loader.load({...entry, chatChannelId: '66418614'});
+  await new Promise(setImmediate);
+  assert.equal(requests, 2);
+  assert.equal(loader.emotes().size, 0);
+  assert.equal(loader.state().chat[0].fragments[0][0], 'KEKW');
+});
+
 test('website rejects malformed hosted indexes', () => {
   for (const mutate of [
     value => { value.videoId = 'invalid'; },

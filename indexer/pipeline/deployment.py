@@ -151,7 +151,7 @@ class Deployment:
             return "ready"
         for key, entry in new.items():
             prior = old[key]
-            ignored = {"index", "chat", "chatSourceId", "pipelineAlignmentVersion"}
+            ignored = {"index", "chat", "chatSourceId", "chatChannelId", "pipelineAlignmentVersion"}
             if {name: value for name, value in entry.items() if name not in ignored} != {name: value for name, value in prior.items() if name not in ignored}:
                 return "ready"
             index, prior_index = after[entry["index"]], before[prior["index"]]

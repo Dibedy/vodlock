@@ -2247,7 +2247,7 @@ class DatabasePipelineTests(unittest.TestCase):
         secondary = identifier()
         self.store.execute("""INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role,state,checkpoint_time,metadata)
                             VALUES (%s,%s,'twitch','123456789','watch_party','ended',1700,%s)""",
-                           (secondary, self.broadcast, Jsonb({"vod_id": "123456789", "login": "gofns"})))
+                           (secondary, self.broadcast, Jsonb({"vod_id": "123456789", "login": "gofns", "broadcaster_user_id": "66418614"})))
         site = Path(self.temporary.name) / "site"
         site.mkdir()
         held = export_snapshot(self.store, self.storage, False, ["abcdefghijk"])
@@ -2277,6 +2277,7 @@ class DatabasePipelineTests(unittest.TestCase):
         self.assertEqual(watchparty["provider"], "twitch")
         self.assertEqual(watchparty["creator"], "FNS")
         self.assertEqual(watchparty["chatSourceId"], "123456789")
+        self.assertEqual(watchparty["chatChannelId"], "66418614")
         contract = json.loads(self.storage.get("release/" + watchparty["index"].lstrip("/")))
         self.assertEqual(contract["rounds"][0]["start"], 200)
         self.assertEqual(contract["canonical"]["rounds"][0]["start"], 100)
@@ -2375,9 +2376,10 @@ class DatabasePipelineTests(unittest.TestCase):
         self.assertAlmostEqual(index["rounds"][0]["start"] - index["leadSeconds"], 102.793)
         self.assertEqual(index["alignment"]["segments"][0], {"offset": -17.793, "targetStart": 107.793, "targetEnd": 1407.793})
         self.assertEqual(self.store.one("SELECT mapping FROM pipeline.alignments")["mapping"], mapping)
-        self.store.execute("UPDATE pipeline.sources SET metadata=%s WHERE id=%s", (Jsonb({"vod_id": "987654321"}), twitch))
+        self.store.execute("UPDATE pipeline.sources SET metadata=%s WHERE id=%s", (Jsonb({"vod_id": "987654321", "broadcaster_user_id": "490592527"}), twitch))
         entry = export_snapshot(self.store, self.storage)["videos"][0]
         self.assertEqual(entry["chatSourceId"], "987654321")
+        self.assertEqual(entry["chatChannelId"], "490592527")
         self.assertEqual(json.loads(self.storage.get("shadow/chats/twitch-987654321.json"))["source"], "987654321")
         self.store.execute("UPDATE pipeline.sources SET role='watch_party' WHERE id=%s", (twitch,))
         entry = export_snapshot(self.store, self.storage)["videos"][0]

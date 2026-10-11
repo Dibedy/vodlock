@@ -201,6 +201,75 @@ test('map navigation lands on the first round without exposing map totals', () =
   assert.equal(mapDestination(index, 800, 1), null);
 });
 
+test('second-round auto-skip stays within a map and requires the exact next round', () => {
+  const index = {leadSeconds: 5, rounds: [
+    {map: 1, round: 1, start: 100}, {map: 1, round: 2, start: 200}, {map: 1, round: 3, start: 300},
+    {map: 1, round: 13, start: 1300}, {map: 1, round: 14, start: 1400}, {map: 1, round: 15, start: 1500},
+    {map: 2, round: 1, start: 2000}, {map: 2, round: 2, start: 2100}, {map: 2, round: 3, start: 2200}]};
+  const skip = context.VodlockSite.autoSkipDestination;
+  for (const time of [0, 100, 194, 300, 1300, 1500, 2000]) assert.equal(skip(index, time), null);
+  assert.equal(skip(index, 195), 295);
+  assert.equal(skip(index, 1395), 1495);
+  assert.equal(skip(index, 2100), 2195);
+  assert.equal(skip({...index, rounds: index.rounds.slice(0, 2)}, 200), null);
+  assert.equal(skip({...index, rounds: index.rounds.filter(round => round.round !== 3)}, 200), null);
+  assert.equal(skip({...index, rounds: [index.rounds[1], index.rounds[6]]}, 200), null);
+});
+
+test('second-round skip is off by default and preserves saved boolean settings', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const declaration = app.match(/  const defaultSettings = .*;/)[0];
+  for (const saved of [{}, {autoSkipSecondRounds: true}, {autoSkipSecondRounds: false}, {autoSkipSecondRounds: 'true'}]) {
+    const sandbox = vm.createContext({localStorage: {getItem: () => JSON.stringify(saved)}});
+    vm.runInContext(declaration + app.slice(app.indexOf('  function readSettings('), app.indexOf('  function saveSettings(')), sandbox);
+    assert.equal(sandbox.readSettings().autoSkipSecondRounds, saved.autoSkipSecondRounds === true);
+  }
+  const html = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  assert.match(html, /id="setting-auto-skip-second-rounds" type="checkbox"/);
+});
+
+test('auto-skip only runs during playback, avoids repeat seeks and respects manual review', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const index = {leadSeconds: 5, rounds: [
+    {map: 1, round: 1, start: 100}, {map: 1, round: 2, start: 200}, {map: 1, round: 3, start: 300},
+    {map: 1, round: 13, start: 1300}, {map: 1, round: 14, start: 1400}, {map: 1, round: 15, start: 1500}]};
+  const clock = {time: 195};
+  const state = {index, ready: true, playing: true, autoSkippedRound: null};
+  const settings = {autoSkipSecondRounds: false, hideRoundStatus: false};
+  const destinations = [], notices = [];
+  const elements = new Map();
+  const $ = id => {if (!elements.has(id)) elements.set(id, {}); return elements.get(id);};
+  const sandbox = vm.createContext({$, state, settings, VodlockSite: context.VodlockSite,
+    currentTime: () => clock.time, seekPlayer: value => destinations.push(value), setTimeout() {},
+    saveResume() {}, renderChat() {}, toast: message => notices.push(message)});
+  vm.runInContext(app.slice(app.indexOf('  function seek('), app.indexOf('  function navigateRound(')), sandbox);
+  sandbox.updateStatus();
+  assert.equal(destinations.length, 0);
+  settings.autoSkipSecondRounds = true;
+  state.playing = false;
+  sandbox.updateStatus();
+  assert.equal(destinations.length, 0);
+  state.playing = true;
+  sandbox.updateStatus();
+  sandbox.updateStatus();
+  assert.deepEqual(destinations, [295]);
+  assert.deepEqual(notices, ['Skipped round 2']);
+  clock.time = 295;
+  sandbox.seek(195, 'Previous round');
+  clock.time = 195;
+  sandbox.updateStatus();
+  assert.deepEqual(destinations, [295, 195]);
+  clock.time = 1395;
+  settings.hideRoundStatus = true;
+  sandbox.updateStatus();
+  assert.equal(destinations.at(-1), 1495);
+  assert.equal(notices.at(-1), 'Skipped round');
+  state.ready = false;
+  state.autoSkippedRound = null;
+  sandbox.updateStatus();
+  assert.equal(destinations.length, 3);
+});
+
 test('7TV emotes match whole case-sensitive tokens and preserve native emotes and whitespace', () => {
   const id = '01F6M2T8P00000000000000000';
   const emotes = context.VodlockSite.seventvEmotes({emotes: [

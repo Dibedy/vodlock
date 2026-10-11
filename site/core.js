@@ -124,6 +124,15 @@
     return target ? Math.max(0, target.start - index.leadSeconds) : null;
   }
 
+  function autoSkipDestination(index, time) {
+    const current = position(index, time);
+    const round = index.rounds[current];
+    const next = index.rounds[current + 1];
+    if (!round || ![2, 14].includes(round.round) || time < round.start - index.leadSeconds ||
+        !next || next.map !== round.map || next.round !== round.round + 1) return null;
+    return Math.max(0, next.start - index.leadSeconds);
+  }
+
   function mapDestination(index, time, direction) {
     const currentPosition = position(index, time);
     const currentMap = index.rounds[Math.max(0, currentPosition)]?.map;
@@ -199,5 +208,5 @@
       /\b(?:score|result)\b.{0,30}\b\d{1,2}\s*:\s*\d{1,2}\b/i.test(text);
   }
 
-  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, seventvEmotes, chatFragments, isChatBot, isChatSpoiler, playedTime, position, roundDestination, mapDestination, sourceTime, playbackTime});
+  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, seventvEmotes, chatFragments, isChatBot, isChatSpoiler, playedTime, position, roundDestination, autoSkipDestination, mapDestination, sourceTime, playbackTime});
 })();

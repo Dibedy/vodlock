@@ -4,12 +4,13 @@
   const $ = id => document.getElementById(id);
   const chatEmoteSets = new Map();
   let chatEmotes = new Map();
-  const defaultSettings = {hideTwitchTimeline: true, hideMetadata: false, hideRoundStatus: false, showChat: true, hideChatBots: true, filterChatSpoilers: true, fullscreenChatPosition: 'left', showChatTimestamps: false, endScreenProtection: true};
+  const defaultSettings = {hideTwitchTimeline: true, hideMetadata: false, hideRoundStatus: false, autoSkipSecondRounds: false, showChat: true, hideChatBots: true, filterChatSpoilers: true, fullscreenChatPosition: 'left', showChatTimestamps: false, endScreenProtection: true};
   const defaultKeybinds = {previousRound: 'ArrowUp', nextRound: 'ArrowDown', skipBackward: 'ArrowLeft', skipForward: 'ArrowRight'};
   const settingIds = {
     hideTwitchTimeline: 'setting-hide-twitch-timeline',
     hideMetadata: 'setting-hide-metadata',
     hideRoundStatus: 'setting-hide-round-status',
+    autoSkipSecondRounds: 'setting-auto-skip-second-rounds',
     showChat: 'setting-show-chat',
     hideChatBots: 'setting-hide-chat-bots',
     filterChatSpoilers: 'setting-filter-chat-spoilers',
@@ -118,7 +119,7 @@
     try {
       const saved = JSON.parse(localStorage.getItem('vodlock-settings') || '{}');
       return {...defaultSettings,
-        ...Object.fromEntries(['hideTwitchTimeline', 'hideMetadata', 'hideRoundStatus', 'showChat', 'hideChatBots', 'filterChatSpoilers', 'showChatTimestamps', 'endScreenProtection']
+        ...Object.fromEntries(['hideTwitchTimeline', 'hideMetadata', 'hideRoundStatus', 'autoSkipSecondRounds', 'showChat', 'hideChatBots', 'filterChatSpoilers', 'showChatTimestamps', 'endScreenProtection']
           .map(key => [key, typeof saved[key] === 'boolean' ? saved[key] : defaultSettings[key]])),
         fullscreenChatPosition: ['left', 'right', 'hidden'].includes(saved.fullscreenChatPosition) ? saved.fullscreenChatPosition : defaultSettings.fullscreenChatPosition};
     } catch {
@@ -811,6 +812,7 @@
     setPlaybackControlsDisabled(true);
     state.entry = entry;
     state.index = index;
+    state.autoSkippedRound = null;
     state.resumeTime = Number.isFinite(resumeTime) && resumeTime >= 0 ? resumeTime : null;
     destroyPlayer();
     state.started = false;
@@ -1100,12 +1102,16 @@
       'previous-round', 'next-round', 'previous-map', 'next-map', 'restart-round']) $(identifier).disabled = disabled;
   }
 
-  function seek(destination, message) {
+  function seek(destination, message, automatic = false) {
     if (!state.ready || destination === null) {
       if (destination === null) toast('No indexed item in that direction.');
       return;
     }
     $('end-shield').hidden = true;
+    if (!automatic) {
+      const round = state.index.rounds[VodlockSite.position(state.index, destination)];
+      state.autoSkippedRound = round ? round.map + ':' + round.round : null;
+    }
     const resume = state.playing;
     seekPlayer(destination);
     if (resume) setTimeout(() => state.player && playPlayer(), 200);
@@ -1115,8 +1121,18 @@
 
   function updateStatus() {
     if (!state.index) return;
-    const position = VodlockSite.position(state.index, currentTime());
+    const time = currentTime();
+    const position = VodlockSite.position(state.index, time);
     const round = state.index.rounds[Math.max(position, 0)];
+    if (settings.autoSkipSecondRounds && state.ready && state.playing) {
+      const destination = VodlockSite.autoSkipDestination(state.index, time);
+      const identity = round.map + ':' + round.round;
+      if (destination !== null && state.autoSkippedRound !== identity) {
+        state.autoSkippedRound = identity;
+        seek(destination, settings.hideRoundStatus ? 'Skipped round' : 'Skipped round ' + round.round, true);
+        return;
+      }
+    }
     if (settings.hideRoundStatus) {
       $('current-round').textContent = 'Position hidden · Navigation active';
     } else if (position < 0) {

@@ -559,7 +559,7 @@
       "pipelineVersion": 12,
       "pipelineSourceRevision": 1,
       "pipelineAlignmentVersion": 2,
-      "reason": "waiting_alignment",
+      "reason": "needs_review",
       "canonicalPipeline": true
     },
     {
@@ -571,7 +571,7 @@
       "pipelineVersion": 24,
       "pipelineSourceRevision": 1,
       "pipelineAlignmentVersion": 2,
-      "reason": "waiting_alignment",
+      "reason": "needs_review",
       "canonicalPipeline": true
     },
     {

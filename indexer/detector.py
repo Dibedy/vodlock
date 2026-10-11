@@ -3,7 +3,7 @@ import statistics
 from dataclasses import dataclass
 
 
-DETECTOR_VERSION = "vct-clock-ocr-v9"
+DETECTOR_VERSION = "vct-clock-ocr-v10"
 HUD_PROFILES = (
     {"label": (0, .026, .46, .54), "clock": (.026, .065, .465, .535),
      "top": (0, .034, .445, .555), "wide": (0, .09, .43, .57), "score_top": .053},
@@ -21,6 +21,9 @@ class Observation:
     timer: int | None
     confidence: float = 0.0
     replay: bool = False
+    scores: tuple[int, int] | None = None
+    raw_lines: tuple = ()
+    buy_phase: bool = False
 
 
 def parse_hud(time, lines, replay_lines=()):
@@ -42,7 +45,9 @@ def parse_hud(time, lines, replay_lines=()):
             confidences.append(confidence)
     replay = any("REPLAY" in text.upper().replace(" ", "") and score >= 0.55
                  for text, score in replay_lines)
-    return Observation(time, round_number, timer, min(confidences, default=0), replay)
+    buy_phase = any("BUY PHASE" in text.upper() and score >= 0.65 for text, score in lines)
+    return Observation(time, round_number, timer, min(confidences, default=0), replay,
+                       raw_lines=tuple(lines), buy_phase=buy_phase)
 
 
 class RoundDetector:
@@ -137,21 +142,39 @@ class HudReader:
         top, bottom, left, right = bounds
         return frame[int(height * top):int(height * bottom), int(width * left):int(width * right)]
 
+    def read_clock_lines(self, frame, time, profile, compact=False):
+        lines = self.read_lines(self.crop(frame, profile["clock"], compact), single=True)
+        sample = parse_hud(time, lines)
+        if sample.timer is None or not 85 <= sample.timer <= 100 or sample.confidence >= .85:
+            return lines
+        top, bottom, left, right = profile["clock"]
+        alternatives = []
+        for padding in (2, 6):
+            bounds = (max(0, top - padding / 720), min(1, bottom + padding / 720),
+                      max(0, left - padding / 1280), min(1, right + padding / 1280))
+            candidate_lines = self.read_lines(self.crop(frame, bounds, compact), single=True)
+            candidate = parse_hud(time, candidate_lines)
+            if candidate.timer != sample.timer or candidate.confidence < .85:
+                return lines
+            alternatives.extend(candidate_lines)
+        return alternatives
+
     def read_clock(self, frame, time, compact=False):
         best = Observation(time, None, None)
-        for profile in HUD_PROFILES:
-            clock = self.crop(frame, profile["clock"], compact)
-            sample = parse_hud(time, self.read_lines(clock, single=True))
+        preferred = getattr(self, "profile", None)
+        profiles = ([preferred] if preferred else []) + [profile for profile in HUD_PROFILES if profile != preferred]
+        for profile in profiles:
+            sample = parse_hud(time, self.read_clock_lines(frame, time, profile, compact))
             if sample.confidence > best.confidence:
                 best = sample
             if sample.timer is not None and 82 <= sample.timer <= 100:
+                self.profile = profile
                 return sample
         return best
 
     def read_profile(self, frame, time, profile, compact=False):
         height, width = (720, 1280) if compact else frame.shape[:2]
-        clock = self.crop(frame, profile["clock"], compact)
-        clock_lines = self.read_lines(clock, single=True)
+        clock_lines = self.read_clock_lines(frame, time, profile, compact)
         clock_sample = parse_hud(time, clock_lines)
         if clock_sample.timer is None or not 85 <= clock_sample.timer <= 100:
             return clock_sample
@@ -175,6 +198,7 @@ class HudReader:
                     break
                 scores.append((int(result[0][0]), result[0][1]))
             if len(scores) == 2 and 1 <= sum(value for value, _ in scores) + 1 <= 60:
+                sample.scores = tuple(value for value, _ in scores)
                 sample.round = sum(value for value, _ in scores) + 1
                 sample.confidence = min(parse_hud(time, clock_lines).confidence, *(confidence for _, confidence in scores))
         if sample.round is None or sample.timer is None or not 85 <= sample.timer <= 100:
@@ -186,10 +210,40 @@ class HudReader:
 
     def read(self, frame, time, compact=False):
         best = None
-        for profile in HUD_PROFILES:
+        preferred = getattr(self, "profile", None)
+        profiles = ([preferred] if preferred else []) + [profile for profile in HUD_PROFILES if profile != preferred]
+        for profile in profiles:
             sample = self.read_profile(frame, time, profile, compact)
             if best is None or sample.confidence > best.confidence:
                 best = sample
             if sample.round is not None and sample.timer is not None:
+                self.profile = profile
                 return sample
         return best
+
+    def read_scoreboard(self, frame, time, compact=False):
+        height, width = (720, 1280) if compact else frame.shape[:2]
+        preferred = getattr(self, "profile", None)
+        profiles = ([preferred] if preferred else []) + [profile for profile in HUD_PROFILES if profile != preferred]
+        for profile in profiles:
+            clock = self.read_clock_lines(frame, time, profile, compact)
+            sample = parse_hud(time, self.read_lines(self.crop(frame, profile["label"], compact), single=True, scale=4) + clock)
+            if sample.round is None or sample.timer is None or sample.confidence < .85:
+                continue
+            scores = []
+            for left, right in [(0.417, 0.44), (0.56, 0.583)]:
+                crop = frame[int(height * .007):int(height * min(profile["score_top"], .046)),
+                             int(width * left):int(width * right)]
+                lines = self.read_lines(crop, single=True, scale=4)
+                if len(lines) != 1 or lines[0][1] < .65 or not re.fullmatch(r"[0-9]{1,2}", lines[0][0].strip()):
+                    break
+                scores.append(int(lines[0][0]))
+            if len(scores) != 2 or sum(scores) + 1 != sample.round:
+                continue
+            sample.scores = tuple(scores)
+            replay = frame[208:324, 934:1280] if compact else frame[int(height * .84):, int(width * .73):]
+            sample.replay = parse_hud(time, (), self.read_lines(replay)).replay
+            sample.buy_phase = sample.timer <= 45
+            self.profile = profile
+            return sample
+        return Observation(time, None, None)

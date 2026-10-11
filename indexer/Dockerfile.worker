@@ -1,0 +1,14 @@
+FROM node:24-bookworm-slim AS javascript
+FROM python:3.12-slim-bookworm
+ENV PYTHONUNBUFFERED=1 PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=/app/indexer SPOILLESS_STATUS_HOST=0.0.0.0
+WORKDIR /app
+RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends git libxcb1 libgl1 libglib2.0-0 libgomp1 libstdc++6 ca-certificates tzdata && rm -rf /var/lib/apt/lists/*
+COPY --from=javascript /usr/local/bin/node /usr/local/bin/node
+COPY indexer/requirements*.txt /app/indexer/
+RUN pip install --no-cache-dir -r indexer/requirements-worker.txt
+COPY indexer /app/indexer
+RUN useradd --create-home --uid 10001 worker && mkdir -p /app/indexer/data/pipeline && chown -R worker:worker /app/indexer/data
+USER worker
+EXPOSE 8767
+HEALTHCHECK --interval=30s --timeout=5s CMD python -c "from urllib.request import urlopen; urlopen('http://127.0.0.1:8767/health', timeout=4)"
+CMD ["python", "-m", "pipeline.worker"]

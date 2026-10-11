@@ -1,0 +1,9 @@
+.git
+.venv-indexer
+indexer/.venv
+indexer/data
+indexer/diagnostics
+**/__pycache__
+**/node_modules
+*.zip
+vodlock-extension-*

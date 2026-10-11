@@ -13,6 +13,22 @@ import auto_publish
 
 
 class AutoPublishTests(unittest.TestCase):
+    def test_legacy_watchparty_publisher_preserves_canonical_entries_and_withholding(self):
+        with tempfile.TemporaryDirectory() as directory:
+            site = Path(directory)
+            canonical_id = "twitch:123456789:abcdef1234567890"
+            record = {"catalogId": canonical_id, "provider": "twitch", "canonicalPipeline": True}
+            official = {"catalogId": "youtube:abcdef1234567890:abcdefghijk", "sourceId": "abcdefghijk", "title": "A vs B", "event": "Champions"}
+            for bucket in ("videos", "withheld"):
+                catalog = {"videos": [], "withheld": []}
+                catalog[bucket].append(record)
+                (site / "catalog.json").write_text(json.dumps(catalog))
+                with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.chat_archive, "archive_chat", return_value=site / "chat.json"):
+                    auto_publish.publish_watchparty_archive({"name": "FNS on Twitch"}, {"id": "123456789"}, {}, [(official, {}, [])])
+                updated = json.loads((site / "catalog.json").read_text())
+                self.assertEqual(updated[bucket], [record])
+                self.assertFalse((site / "indexes").exists())
+
     global_channel = {"name": "Global", "includeTitle": r"\bFULL MATCH\b",
                       "excludeTitle": r"\b(HIGHLIGHTS|SHOWMATCH)\b", "minimumDuration": 3600}
     americas_channel = {"name": "Americas", "includeTitle": r"^[A-Z0-9][A-Z0-9 ._-]{1,20}\s+vs\.?\s+[A-Z0-9][A-Z0-9 ._-]{1,20}\s+[-|]",
@@ -60,7 +76,8 @@ class AutoPublishTests(unittest.TestCase):
                 return {"entries": [{"id": "abcdefghijk", "title": "Champions Shanghai - Day 1"}]}
 
         class YtDlp:
-            YoutubeDL = lambda *_: Downloader()
+            def YoutubeDL(*_):
+                return Downloader()
 
         self.assertEqual(auto_publish.discover_youtube(channel, 30, YtDlp),
                          [{"id": "abcdefghijk", "title": "Champions Shanghai - Day 1"}])
@@ -790,6 +807,50 @@ class AutoPublishTests(unittest.TestCase):
         self.assertEqual(len(catalog["videos"]), 1)
         self.assertEqual(catalog["videos"][0]["sourceId"], "lmnopqrstuv")
         self.assertEqual(catalog["videos"][0]["catalogId"], "youtube:abcdefghijk:lmnopqrstuv")
+
+    def test_full_match_fallback_does_not_replace_canonical_pipeline_catalog(self):
+        channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH"}
+        rounds = [{"map": 1, "round": number, "start": number * 100, "confidence": 1} for number in range(1, 14)]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            canonical_path = site / "indexes" / "canonical.json"
+            canonical_path.write_text(json.dumps({"rounds": rounds}))
+            original_index = canonical_path.read_text()
+            catalog_path = site / "catalog.json"
+            original = json.dumps({"version": 2, "videos": [{"provider": "youtube", "sourceId": "lmnopqrstuv", "canonicalPipeline": True, "title": "A vs B", "index": "/indexes/canonical.json"}]})
+            catalog_path.write_text(original)
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), patch.object(auto_publish, "reusable_match_rounds", return_value=rounds), \
+                    patch.object(auto_publish, "canonical_stream_alignment", return_value=("lmnopqrstuv", {"offset": 0}, rounds)):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13}, {"videos": {}}, object())
+            self.assertEqual(result[0], "indexed")
+            self.assertEqual(catalog_path.read_text(), original)
+            self.assertEqual(canonical_path.read_text(), original_index)
+
+    def test_full_match_fallback_does_not_replace_withheld_canonical_index(self):
+        channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}
+        entry = {"id": "abcdefghijk", "title": "A vs B - FULL MATCH"}
+        rounds = [{"map": 1, "round": number, "start": number * 100, "confidence": 1} for number in range(1, 14)]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            site = root / "site"
+            (site / "indexes").mkdir(parents=True)
+            canonical_path = site / "indexes" / "canonical.json"
+            canonical_path.write_text(json.dumps({"rounds": rounds}))
+            original_index = canonical_path.read_text()
+            catalog_path = site / "catalog.json"
+            original = json.dumps({"version": 2, "videos": [], "withheld": [{"provider": "youtube", "sourceId": "lmnopqrstuv", "canonicalPipeline": True, "title": "A vs B", "index": "/indexes/canonical.json"}]})
+            catalog_path.write_text(original)
+            with patch.object(auto_publish, "SITE", site), patch.object(auto_publish.server, "DATA", root / "data"), \
+                    patch.object(auto_publish.server, "save"), patch.object(auto_publish, "reusable_match_rounds", return_value=rounds), \
+                    patch.object(auto_publish, "canonical_stream_alignment", return_value=("lmnopqrstuv", {"offset": 0}, rounds)):
+                result = auto_publish.process(channel, entry, {"minimumConfidence": .65, "minimumRounds": 13}, {"videos": {}}, object())
+            self.assertEqual(result[0], "indexed")
+            self.assertEqual(catalog_path.read_text(), original)
+            self.assertEqual(canonical_path.read_text(), original_index)
 
     def test_full_match_migration_preserves_the_legacy_catalog_time(self):
         channel = {"provider": "youtube", "name": "Full matches", "matchSource": True, "minimumDuration": 3600}

@@ -6,7 +6,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "indexer"))
-from storyboard_align import align_storyboards, extract_published_at, extract_storyboard, frame_distance, hamming, translate_index
+from storyboard_align import align_storyboards, extract_published_at, extract_storyboard, frame_distance, hamming, matching_frames, translate_index
 
 
 def unique_hash(value):
@@ -14,6 +14,26 @@ def unique_hash(value):
 
 
 class StoryboardAlignmentTests(unittest.TestCase):
+    def test_packed_visual_matching_is_identical_to_scalar_matching(self):
+        reference = [{"time": index * 2, "hash": unique_hash(index),
+                      **({"gameplayHash": unique_hash(index + 1000)} if index % 3 else {})} for index in range(120)]
+        targets = [{**value, "time": value["time"] + 7} for value in reference[::4]]
+        targets += [{"time": 999, "hash": unique_hash("unmatched"), "gameplayHash": unique_hash("unmatched-crop")}]
+        for maximum_distance in (0, 12, 64):
+            expected = []
+            for target in targets:
+                values = sorted((frame_distance(target, value), index) for index, value in enumerate(reference))
+                if values[0][0] <= maximum_distance and values[1][0] - values[0][0] >= 2:
+                    expected.append((target, reference[values[0][1]], values[0][0]))
+            self.assertEqual(list(matching_frames(reference, targets, maximum_distance)), expected)
+
+    def test_packed_matching_rejects_ambiguous_anchors_and_preserves_legacy_hashes(self):
+        duplicate = {"time": 0, "hash": unique_hash(1)}
+        self.assertEqual(list(matching_frames([duplicate, {**duplicate, "time": 2}], [duplicate], 12)), [])
+        self.assertEqual(list(matching_frames([], [duplicate], 12)), [])
+        short = {"time": 0, "hash": "ff"}
+        self.assertEqual(list(matching_frames([short, {"time": 2, "hash": "00"}], [short], 12)), [(short, short, 0)])
+
     def test_youtube_storyboard_uses_web_client_with_po_token_provider(self):
         captured = {}
 
@@ -164,6 +184,17 @@ class StoryboardAlignmentTests(unittest.TestCase):
                              for index in range(60)]}
         with self.assertRaisesRegex(ValueError, "precise storyboard alignment"):
             align_storyboards(reference, target, maximum_distance=0, maximum_residual=4)
+
+    def test_round_alignment_discards_imprecise_outliers_before_precision_check(self):
+        reference = {"duration": 600, "interval": 2,
+                     "frames": [{"time": index * 10 + (6 if index in {0, 1, 59} else 0), "hash": unique_hash(index)} for index in range(60)]}
+        target = {"duration": 600, "interval": 10,
+                  "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}
+        result = align_storyboards(reference, target, maximum_distance=0, maximum_residual=2)
+        self.assertEqual(result["anchors"], 57)
+        self.assertEqual(result["offset"], 0)
+        self.assertEqual(result["maximumResidual"], 0)
+        self.assertEqual(result["coverage"], [18, 20, 19])
 
     def test_alignment_accepts_small_verified_timebase_drift(self):
         target = {"duration": 600, "interval": 10,

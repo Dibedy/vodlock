@@ -34,4 +34,12 @@ jobs:
       - name: Verify deployment credentials
         run: test -n "$VERCEL_TOKEN"
       - name: Deploy production site
-        run: npx --yes vercel@latest deploy --prod --yes --token "$VERCEL_TOKEN"
+        shell: bash
+        run: |
+          current_head="$(git ls-remote origin "refs/heads/$GITHUB_REF_NAME" | cut -f1)"
+          test -n "$current_head"
+          if [ "$current_head" != "$GITHUB_SHA" ]; then
+            echo "Deployment superseded by current branch head"
+            exit 1
+          fi
+          npx --yes vercel@63.1.0 deploy --prod --yes --token "$VERCEL_TOKEN"

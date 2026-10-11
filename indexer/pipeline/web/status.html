@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>SPOILLESS Worker Status</title>
+  <link rel="stylesheet" href="/status.css">
+  <script src="/status.js" defer></script>
+</head>
+<body>
+  <header><a class="brand" href="/">[SPOILLESS]</a><span id="connection" role="status">Connecting</span></header>
+  <main>
+    <div class="heading"><div><h1>Worker status</h1><p id="updated">Waiting for status</p></div><div class="actions"><button id="refresh" type="button">Refresh</button><button id="stop" class="danger" type="button" disabled>Stop worker</button></div></div>
+    <p id="notice" role="alert" hidden></p>
+    <form id="access" hidden><label for="token">Status token</label><div class="access-row"><input id="token" type="password" autocomplete="off" required><button type="submit">Connect</button></div><p id="access-error" role="alert"></p></form>
+    <div id="dashboard" hidden>
+      <section class="current-status" aria-labelledby="summary-title"><h2 id="summary-title">Checking the worker</h2><p id="summary-detail"></p></section>
+      <section class="overview" aria-label="Worker overview"><div><span>Worker</span><strong id="worker">Checking</strong></div><div><span>Live recording</span><strong id="capture">Checking</strong></div><div><span>Website updates</span><strong id="publication">Checking</strong></div><div><span>Automatic updates in 24 hours</span><strong id="budget">Checking</strong></div></section>
+      <section class="working" aria-labelledby="working-title"><div class="section-heading"><h2 id="working-title">Working now <span id="working-count"></span></h2><span id="working-state" class="secondary">Checking</span></div><ul id="activity" class="activity-list"></ul><p id="activity-empty" class="empty" hidden>No task is running right now. The worker is waiting for its next eligible task.</p></section>
+      <section class="matches"><div class="section-heading"><h2>Recent matches <span id="match-count"></span></h2><label>Day <select id="day"><option value="all">Recent days</option></select></label></div><div class="table-wrap"><table><thead><tr><th scope="col">Match</th><th scope="col">Day</th><th scope="col">Match preparation</th><th scope="col">Watch party</th></tr></thead><tbody id="matches"></tbody></table></div><p id="matches-empty" class="empty" hidden>No matches discovered for this day.</p></section>
+      <div class="details">
+        <section><h2>Website publication</h2><dl><div><dt>Latest update</dt><dd id="release">No release recorded</dd></div><div><dt>Deployment check</dt><dd id="verification">Waiting</dd></div><div><dt>Next automatic update slot</dt><dd id="next-slot">Available</dd></div><div><dt>Extra chat updates in 24 hours</dt><dd id="incremental">Checking</dd></div></dl><p class="section-note">The automatic limit leaves room for manual deployments. Vercel's own quota is separate.</p><details><summary>Recent update history</summary><ul id="deployments" class="release-list"></ul></details></section>
+        <section><h2>Live sources</h2><ul id="sources" class="source-list"></ul><details><summary>Processing details</summary><dl id="jobs"></dl></details></section>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

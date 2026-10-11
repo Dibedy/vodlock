@@ -11,7 +11,7 @@ import imageio_ffmpeg
 import numpy as np
 
 
-ALIGNER_VERSION = "storyboard-v4"
+ALIGNER_VERSION = "storyboard-v5"
 
 
 def frame_hash(image):
@@ -62,12 +62,27 @@ def extractor_options(provider, format_selector=None):
     return options
 
 
-def extract_video_info(url, provider, yt_dlp, format_selector=None):
+def extract_video_info(url, provider, yt_dlp, format_selector=None, storyboard_intervals=False):
     options = extractor_options(provider, format_selector)
     if not format_selector:
         options["skip_download"] = True
         options["ignore_no_formats_error"] = True
     with yt_dlp.YoutubeDL(options) as downloader:
+        if storyboard_intervals and provider == "youtube":
+            extractor = downloader.get_info_extractor("Youtube")
+            original = extractor._extract_storyboard
+
+            def declared_storyboards(responses, duration):
+                spec = next((response.get("storyboards", {}).get("playerStoryboardSpecRenderer", {}).get("spec") for response in responses if response.get("storyboards", {}).get("playerStoryboardSpecRenderer", {}).get("spec")), "")
+                levels = spec.split("|")[1:][::-1]
+                for value in original(responses, duration):
+                    index = int(value["format_id"].removeprefix("sb"))
+                    fields = levels[index].split("#") if index < len(levels) else []
+                    if len(fields) == 8 and fields[5].isdigit() and int(fields[5]) > 0:
+                        value["storyboard_interval"] = int(fields[5]) / 1000
+                    yield value
+
+            extractor._extract_storyboard = declared_storyboards
         return downloader.extract_info(url, download=False)
 
 
@@ -80,8 +95,8 @@ def extract_published_at(url, provider, yt_dlp):
     return published_at(extract_video_info(url, provider, yt_dlp))
 
 
-def extract_storyboard(url, provider, yt_dlp, requester=None):
-    info = extract_video_info(url, provider, yt_dlp, "sb0")
+def extract_storyboard(url, provider, yt_dlp, requester=None, precise_timestamps=False):
+    info = extract_video_info(url, provider, yt_dlp, "sb0", storyboard_intervals=precise_timestamps)
     formats = [item for item in info.get("formats", [])
                if str(item.get("format_id", "")).startswith("sb") and item.get("fragments")]
     if not formats:
@@ -94,6 +109,10 @@ def extract_storyboard(url, provider, yt_dlp, requester=None):
     if not full_durations:
         full_durations = [float(fragments[0]["duration"])]
     interval = float(np.median(full_durations)) / (rows * columns)
+    if precise_timestamps:
+        interval = storyboard.get("storyboard_interval")
+        if not interval or not np.isfinite(interval) or interval <= 0:
+            raise ValueError("YouTube storyboard does not expose a verified sampling interval")
     headers = storyboard.get("http_headers") or info.get("http_headers") or {}
     fetch = requester or (lambda target: urlopen(Request(target, headers=headers), timeout=30).read())
     frames = []
@@ -103,11 +122,12 @@ def extract_storyboard(url, provider, yt_dlp, requester=None):
         image = cv2.imdecode(np.frombuffer(data, dtype=np.uint8), cv2.IMREAD_COLOR)
         if image is None:
             raise ValueError("A storyboard image could not be decoded")
-        duration = float(fragment.get("duration") or rows * columns * interval)
-        frames.extend(split_sheet(image, rows, columns, position, duration, interval))
+        duration = min(rows * columns * interval, float(info["duration"]) - position) if precise_timestamps else float(fragment.get("duration") or rows * columns * interval)
+        frames.extend(split_sheet(image, rows, columns, position, duration + interval / 3 if precise_timestamps else duration, interval))
         position += duration
     return {"version": 2, "provider": provider, "sourceId": str(info["id"]).removeprefix("v"),
             "duration": round(float(info.get("duration") or position), 3),
+            "timestampBasis": "declared_interval" if precise_timestamps else "estimated_interval",
             "interval": round(interval, 6), "frames": frames,
             "publishedAt": published_at(info)}
 
@@ -158,19 +178,45 @@ def frame_distance(left, right):
     return min(distances)
 
 
+def matching_frames(reference_frames, target_frames, maximum_distance):
+    hash_bytes = [bytes.fromhex(frame["hash"]) for frame in reference_frames]
+    gameplay = [bytes.fromhex(frame.get("gameplayHash") or "") for frame in reference_frames]
+    packed = all(len(value) == 8 for value in hash_bytes) and all(len(value) in {0, 8} for value in gameplay)
+    if not reference_frames:
+        return
+    if packed:
+        reference_hashes = np.frombuffer(b"".join(hash_bytes), dtype=np.uint8).reshape(-1, 8)
+        gameplay_hashes = np.frombuffer(b"".join(value or bytes(8) for value in gameplay), dtype=np.uint8).reshape(-1, 8)
+        gameplay_present = np.array([bool(value) for value in gameplay])
+        bits = np.array([value.bit_count() for value in range(256)], dtype=np.uint8)
+    for target in target_frames:
+        target_hash = bytes.fromhex(target["hash"])
+        target_gameplay = bytes.fromhex(target.get("gameplayHash") or "")
+        if packed and len(target_hash) == 8 and len(target_gameplay) in {0, 8}:
+            distances = bits[np.bitwise_xor(reference_hashes, np.frombuffer(target_hash, dtype=np.uint8))].sum(axis=1)
+            if target_gameplay:
+                cropped = bits[np.bitwise_xor(gameplay_hashes, np.frombuffer(target_gameplay, dtype=np.uint8))].sum(axis=1)
+                distances = np.where(gameplay_present, np.minimum(distances, cropped), distances)
+            best = int(np.argmin(distances))
+            distance = int(distances[best])
+            second = int(np.partition(distances, 1)[1]) if len(distances) > 1 else None
+        else:
+            ordered = sorted((frame_distance(target, frame), index) for index, frame in enumerate(reference_frames))
+            distance, best = ordered[0]
+            second = ordered[1][0] if len(ordered) > 1 else None
+        if distance <= maximum_distance and (second is None or second - distance >= 2):
+            yield target, reference_frames[best], distance
+
+
 def align_storyboards(reference, target, maximum_distance=12, require_target_coverage=True, maximum_residual=None):
     if len(reference.get("frames", [])) < 30 or len(target.get("frames", [])) < 30:
         raise ValueError("Not enough storyboard frames for a verified alignment")
     reference_frames = reference["frames"]
     target_frames = target["frames"]
     matches = []
-    for target_frame in target_frames:
-        distances = [(frame_distance(target_frame, item), item["time"])
-                     for item in reference_frames]
-        distances.sort(key=lambda item: item[0])
-        if distances[0][0] <= maximum_distance and (len(distances) == 1 or distances[1][0] - distances[0][0] >= 2):
-            matches.append({"target": target_frame["time"], "reference": distances[0][1],
-                            "distance": distances[0][0], "offset": distances[0][1] - target_frame["time"]})
+    for target_frame, reference_frame, distance in matching_frames(reference_frames, target_frames, maximum_distance):
+        matches.append({"target": target_frame["time"], "reference": reference_frame["time"],
+                        "distance": distance, "offset": reference_frame["time"] - target_frame["time"]})
     if len(matches) < 12:
         raise ValueError("The videos do not contain enough matching visual anchors")
     tolerance = (reference.get("interval", 10) + target.get("interval", 10)) / 2 + 1
@@ -221,9 +267,12 @@ def align_storyboards(reference, target, maximum_distance=12, require_target_cov
         segment["offset"] = float(np.median([match["reference"] - scale * match["target"]
                                               for match in segment["matches"]]))
         segment["matches"] = [match for match in segment["matches"]
-                              if abs(match["reference"] - (scale * match["target"] + segment["offset"])) <= tolerance]
-        if len(segment["matches"]) < 5:
-            raise ValueError("The videos do not have enough precise visual anchors")
+                              if abs(match["reference"] - (scale * match["target"] + segment["offset"])) <= (tolerance if maximum_residual is None else min(tolerance, maximum_residual))]
+        if len(segment["matches"]) < 5 or max(match["target"] for match in segment["matches"]) - min(match["target"] for match in segment["matches"]) < 60:
+            raise ValueError("The videos do not have a precise storyboard alignment: insufficient precise visual anchors")
+        segment["anchorStart"] = min(match["target"] for match in segment["matches"])
+        segment["anchorEnd"] = max(match["target"] for match in segment["matches"])
+        segment["referenceEnd"] = max(match["reference"] for match in segment["matches"])
         segment["anchors"] = len(segment["matches"])
         residuals = [abs(match["reference"] - (scale * match["target"] + segment["offset"]))
                      for match in segment["matches"]]

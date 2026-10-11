@@ -1,0 +1,64 @@
+{
+  "youtube_channels": [
+    {
+      "channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "region": "international",
+      "timezone": "Asia/Shanghai",
+      "event": "VALORANT Champions Shanghai",
+      "includeTitle": "(?=.*\\b(CHAMPIONS|SHANGHAI)\\b)(?!.*\\bFULL MATCH\\b)",
+      "excludeTitle": "\\b(HIGHLIGHTS|SHOWMATCH|REBROADCAST|VERTICAL)\\b|#shorts\\b"
+    }
+  ],
+  "schedule_routes": [
+    {
+      "league": "champions",
+      "channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "region": "international",
+      "timezone": "Asia/Shanghai"
+    }
+  ],
+  "full_match_channels": [
+    {
+      "channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "official_channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "includeTitle": "(?=.*\\bFULL MATCH\\b)(?=.*\\b(CHAMPIONS|SHANGHAI)\\b)",
+      "excludeTitle": "\\b(HIGHLIGHTS|SHOWMATCH)\\b"
+    }
+  ],
+  "youtube_archive_client": "android",
+  "twitch_downloader": "indexer/data/twitch-downloader/TwitchDownloaderCLI.exe",
+  "twitch_channels": [
+    {
+      "login": "valorant",
+      "role": "official_twitch",
+      "official_youtube_channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw"
+    },
+    {
+      "login": "gofns",
+      "role": "watch_party",
+      "official_youtube_channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw"
+    }
+  ],
+  "approved_broadcasts": [
+    "jbQHpGuy-lU",
+    "jT9C2wBHn6c",
+    "okKCRRKj1Gg",
+    "RMBxo7P3cbk"
+  ],
+  "auto_publish": [
+    {
+      "channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "event": "VALORANT Champions Shanghai",
+      "from_day": "2026-10-08"
+    }
+  ],
+  "deployment": {
+    "repository": "https://github.com/Dibedy/vodlock.git",
+    "branch": "main"
+  },
+  "processing_slots": 2,
+  "archive_start_seconds": {
+    "j12hJ1miDfE": 1800
+  },
+  "lookback_days": 14
+}

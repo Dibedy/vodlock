@@ -14,7 +14,14 @@ test('VOD processing and site deployment use independent workflows', () => {
   assert.match(deployment, /^  push:/m);
   assert.match(deployment, /- site\/\*\*/);
   assert.match(deployment, /node --test tests\/site\.test\.cjs/);
-  assert.match(deployment, /vercel@latest deploy --prod/);
+  assert.match(deployment, /vercel@63\.1\.0 deploy --prod/);
+});
+
+test('production deployment rejects obsolete commits before using the provider budget', () => {
+  const deployment = workflow('deploy-site.yml');
+  assert.match(deployment, /git ls-remote origin "refs\/heads\/\$GITHUB_REF_NAME"/);
+  assert.match(deployment, /"\$current_head" != "\$GITHUB_SHA"/);
+  assert.ok(deployment.indexOf('Deployment superseded by current branch head') < deployment.indexOf('npx --yes vercel@'));
 });
 
 test('publisher exposes health and held-source recovery controls', () => {

@@ -52,6 +52,22 @@ class DetectorTests(unittest.TestCase):
             sample = reader.read(np.zeros((720, 1280, 3), dtype=np.uint8), 4676)
         self.assertEqual((sample.round, sample.timer), (16, 96))
 
+    def test_low_confidence_clock_requires_agreement_from_both_padded_crops(self):
+        reader = HudReader.__new__(HudReader)
+        with patch.object(reader, "read_lines", side_effect=[[("1:37", .80)], [("1:37", .92)], [("1:37", .94)]]):
+            lines = reader.read_clock_lines(np.zeros((720, 1280, 3), dtype=np.uint8), 100, HUD_PROFILES[0])
+        sample = parse_hud(100, lines)
+        self.assertEqual(sample.timer, 97)
+        self.assertEqual(sample.confidence, .92)
+
+    def test_disagreeing_padded_clock_does_not_increase_confidence(self):
+        reader = HudReader.__new__(HudReader)
+        with patch.object(reader, "read_lines", side_effect=[[("1:37", .80)], [("1:37", .92)], [("1:31", .99)]]):
+            lines = reader.read_clock_lines(np.zeros((324, 1280, 3), dtype=np.uint8), 100, HUD_PROFILES[0], compact=True)
+        sample = parse_hud(100, lines)
+        self.assertEqual(sample.timer, 97)
+        self.assertEqual(sample.confidence, .80)
+
     def test_reader_uses_an_alternate_hud_profile_when_primary_is_unreadable(self):
         reader = HudReader.__new__(HudReader)
         unreadable = Observation(10, None, None)

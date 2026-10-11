@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:17-bookworm
+    environment:
+      POSTGRES_DB: spoilless
+      POSTGRES_USER: spoilless
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD}
+    volumes:
+      - pipeline-db:/var/lib/postgresql/data
+    healthcheck:
+      test: [CMD-SHELL, pg_isready -U spoilless -d spoilless]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    restart: unless-stopped
+  worker:
+    build:
+      context: .
+      dockerfile: indexer/Dockerfile.worker
+    init: true
+    environment:
+      DATABASE_URL: postgresql://spoilless:${POSTGRES_PASSWORD}@postgres:5432/spoilless
+      SPOILLESS_PIPELINE_MODE: ${SPOILLESS_PIPELINE_MODE:-shadow}
+      SPOILLESS_PIPELINE_CONFIG: /app/pipeline.json
+      SPOILLESS_STATUS_TOKEN: ${SPOILLESS_STATUS_TOKEN:-}
+      YOUTUBE_API_KEY: ${YOUTUBE_API_KEY:-}
+      TWITCH_CLIENT_ID: ${TWITCH_CLIENT_ID:-}
+      TWITCH_USER_TOKEN: ${TWITCH_USER_TOKEN:-}
+      TWITCH_CHAT_USER_ID: ${TWITCH_CHAT_USER_ID:-}
+      SPOILLESS_GITHUB_TOKEN: ${SPOILLESS_GITHUB_TOKEN:-}
+      TWITCH_DOWNLOADER: ${TWITCH_DOWNLOADER:-}
+      SPOILLESS_STORAGE_BUCKET: ${SPOILLESS_STORAGE_BUCKET:-}
+      SPOILLESS_STORAGE_ENDPOINT: ${SPOILLESS_STORAGE_ENDPOINT:-}
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID:-}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-}
+      AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION:-auto}
+    volumes:
+      - ./indexer/pipeline.example.json:/app/pipeline.json:ro
+      - pipeline-data:/app/indexer/data
+    ports:
+      - 127.0.0.1:8767:8767
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+    stop_grace_period: 30s
+volumes:
+  pipeline-db:
+  pipeline-data:

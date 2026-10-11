@@ -1,0 +1,186 @@
+[
+  {
+    "__typename": "EventMatch",
+    "blockName": "Playoffs",
+    "id": "115576361461142749",
+    "league": {
+      "__typename": "League",
+      "displayPriority": {
+        "__typename": "Priority",
+        "position": 0,
+        "status": "force_selected"
+      },
+      "id": "107254585505459304",
+      "image": "http://static.lolesports.com/leagues/1636575094815_VCT_Spark_Gold.png",
+      "name": "Champions",
+      "slug": "champions"
+    },
+    "match": {
+      "__typename": "Match",
+      "flags": [],
+      "games": [
+        {
+          "__typename": "Game",
+          "id": "115576361461142750",
+          "number": 1,
+          "state": "unstarted",
+          "vods": [],
+          "recaps": []
+        },
+        {
+          "__typename": "Game",
+          "id": "115576361461142751",
+          "number": 2,
+          "state": "unstarted",
+          "vods": [],
+          "recaps": []
+        },
+        {
+          "__typename": "Game",
+          "id": "115576361461142752",
+          "number": 3,
+          "state": "unstarted",
+          "vods": [],
+          "recaps": []
+        }
+      ],
+      "id": "115576361461142749",
+      "state": "unstarted",
+      "strategy": {
+        "__typename": "MatchStrategy",
+        "count": 3,
+        "type": "bestOf"
+      },
+      "type": "normal"
+    },
+    "matchTeams": [
+      {
+        "__typename": "MatchTeam",
+        "code": "NRG",
+        "id": "115576361461142749:105665339248060878",
+        "image": "http://static.lolesports.com/teams/1731490666442_NRGWHT.png",
+        "lightImage": null,
+        "name": "NRG",
+        "result": {
+          "__typename": "TeamResult",
+          "gameWins": 0,
+          "outcome": null
+        }
+      },
+      {
+        "__typename": "MatchTeam",
+        "code": "T1",
+        "id": "115576361461142749:105827039633208481",
+        "image": "http://static.lolesports.com/teams/1677137430839_T1_infoboximage1.png",
+        "lightImage": null,
+        "name": "T1",
+        "result": {
+          "__typename": "TeamResult",
+          "gameWins": 0,
+          "outcome": null
+        }
+      }
+    ],
+    "startTime": "2026-10-07T09:00:00Z",
+    "state": "unstarted",
+    "streams": [],
+    "tournament": {
+      "__typename": "Tournament",
+      "id": "115576361459045501",
+      "name": "Champions Shanghai"
+    },
+    "type": "match"
+  },
+  {
+    "__typename": "EventMatch",
+    "blockName": "Playoffs",
+    "id": "115576361461142753",
+    "league": {
+      "__typename": "League",
+      "displayPriority": {
+        "__typename": "Priority",
+        "position": 0,
+        "status": "force_selected"
+      },
+      "id": "107254585505459304",
+      "image": "http://static.lolesports.com/leagues/1636575094815_VCT_Spark_Gold.png",
+      "name": "Champions",
+      "slug": "champions"
+    },
+    "match": {
+      "__typename": "Match",
+      "flags": [],
+      "games": [
+        {
+          "__typename": "Game",
+          "id": "115576361461142754",
+          "number": 1,
+          "state": "unstarted",
+          "vods": [],
+          "recaps": []
+        },
+        {
+          "__typename": "Game",
+          "id": "115576361461142755",
+          "number": 2,
+          "state": "unstarted",
+          "vods": [],
+          "recaps": []
+        },
+        {
+          "__typename": "Game",
+          "id": "115576361461142756",
+          "number": 3,
+          "state": "unstarted",
+          "vods": [],
+          "recaps": []
+        }
+      ],
+      "id": "115576361461142753",
+      "state": "unstarted",
+      "strategy": {
+        "__typename": "MatchStrategy",
+        "count": 3,
+        "type": "bestOf"
+      },
+      "type": "normal"
+    },
+    "matchTeams": [
+      {
+        "__typename": "MatchTeam",
+        "code": "PRX",
+        "id": "115576361461142753:105795137629057449",
+        "image": "http://static.lolesports.com/teams/1630018120582_paper-rex-2021.png",
+        "lightImage": null,
+        "name": "Paper Rex",
+        "result": {
+          "__typename": "TeamResult",
+          "gameWins": 0,
+          "outcome": null
+        }
+      },
+      {
+        "__typename": "MatchTeam",
+        "code": "LOUD",
+        "id": "115576361461142753:107745125595754895",
+        "image": "http://static.lolesports.com/teams/1644060140569_LOUDGreen.png",
+        "lightImage": null,
+        "name": "LOUD",
+        "result": {
+          "__typename": "TeamResult",
+          "gameWins": 0,
+          "outcome": null
+        }
+      }
+    ],
+    "startTime": "2026-10-07T12:00:00Z",
+    "state": "unstarted",
+    "streams": [],
+    "tournament": {
+      "__typename": "Tournament",
+      "id": "115576361459045501",
+      "name": "Champions Shanghai"
+    },
+    "type": "match"
+  }
+]

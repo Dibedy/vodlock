@@ -1,0 +1,33 @@
+{
+  "youtube_channels": [
+    {
+      "channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "region": "international",
+      "timezone": "Asia/Shanghai",
+      "event": "VALORANT Champions Shanghai",
+      "includeTitle": "(?=.*\\b(CHAMPIONS|SHANGHAI)\\b)(?!.*\\bFULL MATCH\\b)",
+      "excludeTitle": "\\b(HIGHLIGHTS|SHOWMATCH|REBROADCAST)\\b"
+    }
+  ],
+  "schedule_routes": [
+    {
+      "league": "champions",
+      "channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "region": "international",
+      "timezone": "Asia/Shanghai"
+    }
+  ],
+  "full_match_channels": [
+    {
+      "channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "official_channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "includeTitle": "(?=.*\\bFULL MATCH\\b)(?=.*\\b(CHAMPIONS|SHANGHAI)\\b)",
+      "excludeTitle": "\\b(HIGHLIGHTS|SHOWMATCH)\\b"
+    }
+  ],
+  "twitch_channels": [],
+  "approved_broadcasts": [],
+  "processing_slots": 2,
+  "archive_start_seconds": {},
+  "lookback_days": 14
+}

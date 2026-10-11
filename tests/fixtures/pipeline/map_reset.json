@@ -1,0 +1,288 @@
+{
+  "source": "j12hJ1miDfE",
+  "previous": {
+    "round": 21,
+    "start": 4644,
+    "scores": [
+      12,
+      8
+    ]
+  },
+  "observations": [
+    {
+      "time": 5706.0,
+      "round": 1,
+      "timer": 99,
+      "confidence": 0.8768778562545776,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5707.0,
+      "round": 1,
+      "timer": 98,
+      "confidence": 0.9250337140900748,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5708.0,
+      "round": 1,
+      "timer": 97,
+      "confidence": 0.798379248380661,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5709.0,
+      "round": 1,
+      "timer": 96,
+      "confidence": 0.9355827740260533,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5710.0,
+      "round": 1,
+      "timer": 95,
+      "confidence": 0.900642991065979,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5711.0,
+      "round": 1,
+      "timer": 94,
+      "confidence": 0.9841462969779968,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5712.0,
+      "round": 1,
+      "timer": 93,
+      "confidence": 0.9314686826297215,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5713.0,
+      "round": 1,
+      "timer": 92,
+      "confidence": 0.9469453266688755,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5714.0,
+      "round": 1,
+      "timer": 91,
+      "confidence": 0.9423180307660785,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5715.0,
+      "round": 1,
+      "timer": 90,
+      "confidence": 0.9136905244418553,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5716.0,
+      "round": 1,
+      "timer": 89,
+      "confidence": 0.9459354451724461,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5717.0,
+      "round": 1,
+      "timer": 88,
+      "confidence": 0.9443867036274501,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5718.0,
+      "round": 1,
+      "timer": 87,
+      "confidence": 0.8950831443071365,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5719.0,
+      "round": 1,
+      "timer": 86,
+      "confidence": 0.951658947127206,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5720.0,
+      "round": 1,
+      "timer": 85,
+      "confidence": 0.8800474490438189,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5768.0,
+      "round": 2,
+      "timer": 99,
+      "confidence": 0.9740731120109558,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5769.0,
+      "round": 2,
+      "timer": 98,
+      "confidence": 0.9753396809101105,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5770.0,
+      "round": 2,
+      "timer": 97,
+      "confidence": 0.9075166583061218,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5771.0,
+      "round": 2,
+      "timer": 96,
+      "confidence": 0.8917563915252685,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5772.0,
+      "round": 2,
+      "timer": 95,
+      "confidence": 0.888163959980011,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    },
+    {
+      "time": 5773.0,
+      "round": 2,
+      "timer": 94,
+      "confidence": 0.8946522951126099,
+      "scores": null,
+      "teams": [
+        "GE",
+        "LOUD"
+      ],
+      "replay": false,
+      "buy_phase": false
+    }
+  ],
+  "expected_start": 5705,
+  "expected_map": 2
+}

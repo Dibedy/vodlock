@@ -1,0 +1,11 @@
+#EXTM3U
+#EXT-X-VERSION:3
+#EXT-X-TARGETDURATION:6
+#EXT-X-MEDIA-SEQUENCE:101
+#EXT-X-PROGRAM-DATE-TIME:2026-10-04T10:00:06Z
+#EXTINF:6,
+segment-101.ts?token=new
+#EXTINF:6,
+segment-102.ts?token=new
+#EXTINF:6,
+segment-103.ts?token=new

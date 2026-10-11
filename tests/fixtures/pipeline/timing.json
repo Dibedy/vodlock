@@ -1,0 +1,31 @@
+{
+  "early_frozen_clock": {
+    "expected_start": 100,
+    "observations": [
+      {"time": 80, "round": 1, "timer": 100, "confidence": 0.99, "scores": [0, 0]},
+      {"time": 81, "round": 1, "timer": 100, "confidence": 0.99, "scores": [0, 0]},
+      {"time": 82, "round": 1, "timer": 100, "confidence": 0.99, "scores": [0, 0]},
+      {"time": 100, "round": 1, "timer": 100, "confidence": 0.99, "scores": [0, 0]},
+      {"time": 101, "round": 1, "timer": 99, "confidence": 0.99, "scores": [0, 0]},
+      {"time": 102, "round": 1, "timer": 98, "confidence": 0.99, "scores": [0, 0]}
+    ]
+  },
+  "early_buy_phase": {
+    "expected_start": 100,
+    "observations": [
+      {"time": 85, "round": 1, "timer": 100, "confidence": 0.99, "scores": [0, 0], "buy_phase": true},
+      {"time": 86, "round": 1, "timer": 99, "confidence": 0.99, "scores": [0, 0], "buy_phase": true},
+      {"time": 87, "round": 1, "timer": 98, "confidence": 0.99, "scores": [0, 0], "buy_phase": true},
+      {"time": 100, "round": 1, "timer": 100, "confidence": 0.99, "scores": [0, 0]},
+      {"time": 101, "round": 1, "timer": 99, "confidence": 0.99, "scores": [0, 0]},
+      {"time": 102, "round": 1, "timer": 98, "confidence": 0.99, "scores": [0, 0]}
+    ]
+  },
+  "clock_speed_error": {
+    "observations": [
+      {"time": 80, "round": 1, "timer": 100, "confidence": 0.99},
+      {"time": 81, "round": 1, "timer": 95, "confidence": 0.99},
+      {"time": 82, "round": 1, "timer": 90, "confidence": 0.99}
+    ]
+  }
+}

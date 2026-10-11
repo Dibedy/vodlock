@@ -231,6 +231,27 @@ function chatLoader(fetch) {
   };
 }
 
+test('chat toggle displays its current visibility rather than the opposite action', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const body = app.slice(app.indexOf('  function renderChat('), app.indexOf('    const layout =', app.indexOf('  function renderChat(')));
+  const elements = new Map();
+  const $ = id => {
+    if (!elements.has(id)) elements.set(id, {setAttribute(name, value) {this[name] = value;}});
+    return elements.get(id);
+  };
+  const sandbox = vm.createContext({$, state: {chat: [{}]}, settings: {showChat: true}, document: {fullscreenElement: null}});
+  vm.runInContext(body + '\n}', sandbox);
+  sandbox.renderChat();
+  assert.equal($('chat-toggle').textContent, 'Chat on');
+  assert.equal($('chat-toggle')['aria-pressed'], 'true');
+  assert.equal($('chat-panel').hidden, false);
+  sandbox.settings.showChat = false;
+  sandbox.renderChat();
+  assert.equal($('chat-toggle').textContent, 'Chat off');
+  assert.equal($('chat-toggle')['aria-pressed'], 'false');
+  assert.equal($('chat-panel').hidden, true);
+});
+
 test('7TV lookup is nonblocking, cached, and channel aliases override global emotes', async () => {
   const calls = [];
   const resolveEmotes = [];

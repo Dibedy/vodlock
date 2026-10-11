@@ -235,8 +235,9 @@
     const visible = available && settings.showChat && !(fullscreen && settings.fullscreenChatPosition === 'hidden');
     $('chat-panel').hidden = !visible;
     $('chat-toggle').hidden = !available;
-    $('chat-toggle').textContent = visible ? 'Chat off' : 'Chat on';
-    $('chat-toggle').setAttribute('aria-label', visible ? 'Turn chat off' : 'Turn chat on');
+    $('chat-toggle').textContent = visible ? 'Chat on' : 'Chat off';
+    $('chat-toggle').setAttribute('aria-pressed', String(visible));
+    $('chat-toggle').title = visible ? 'Turn chat off' : 'Turn chat on';
     const layout = $('watch-layout');
     layout.classList.toggle('chat-visible', visible);
     layout.classList.toggle('fullscreen-chat-right', settings.fullscreenChatPosition === 'right');

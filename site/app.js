@@ -88,7 +88,7 @@
   const teamKey = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   const teamAliases = new Map(vctTeams.flatMap(team => [team.code, team.name, ...(team.aliases || [])].map(value => [teamKey(value), team.code])));
   const teamsByCode = new Map(vctTeams.map(team => [team.code, team]));
-  const state = {catalog: [], entry: null, index: null, chat: [], chatIndex: null, chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null, teamPickerMode: 'favourites'};
+  const state = {catalog: [], entry: null, index: null, chat: [], chatIndex: null, chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, startTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null, teamPickerMode: 'favourites'};
   let settings = readSettings();
   let keybinds = readKeybinds();
 
@@ -216,6 +216,8 @@
   }
 
   function destroyPlayer() {
+    clearInterval(state.startTimer);
+    state.startTimer = null;
     if (state.player?.destroy) state.player.destroy();
     state.player = null;
     state.ready = false;
@@ -824,14 +826,63 @@
     });
   }
 
-  function playerReady() {
-    state.ready = true;
+  function playerReady(event) {
+    if (event?.target && event.target !== state.player) return;
     preventTwitchNativeFullscreen();
     setVolume(Number($('volume').value));
     const destination = state.resumeTime ?? Math.max(0, state.index.rounds[0].start - state.index.leadSeconds);
     state.resumeTime = null;
+    if (state.entry.provider === 'youtube') {
+      const player = state.player;
+      const muted = player.isMuted();
+      const startedAt = Date.now();
+      let corrected = false;
+      let verifiedAt = null;
+      player.mute();
+      player.loadVideoById({videoId: state.entry.sourceId, startSeconds: destination});
+      state.startTimer = setInterval(() => {
+        if (state.player !== player) return;
+        const now = Date.now();
+        const playing = player.getPlayerState() === YT.PlayerState.PLAYING;
+        const position = player.getCurrentTime();
+        if (playing && Number.isFinite(position) && Math.abs(position - destination) <= 3) {
+          verifiedAt ??= now;
+          if (now - verifiedAt >= 500) {
+            clearInterval(state.startTimer);
+            state.startTimer = null;
+            if (!muted) player.unMute();
+            finishPlayerReady();
+            return;
+          }
+        } else {
+          verifiedAt = null;
+          if (playing && !corrected) {
+            corrected = true;
+            player.seekTo(destination, true);
+          }
+        }
+        if (now - startedAt >= 15000) {
+          player.pauseVideo();
+          state.resumeTime = destination;
+          destroyPlayer();
+          state.started = false;
+          $('start-gate').hidden = false;
+          $('start-watching').disabled = false;
+          $('start-watching').textContent = 'Try again';
+          toast('The indexed start is not available in this player yet. Please try again shortly.');
+        }
+      }, 100);
+      return;
+    }
+    state.ready = true;
     seekPlayer(destination);
     playPlayer();
+    finishPlayerReady();
+  }
+
+  function finishPlayerReady() {
+    state.ready = true;
+    setPlaying(state.entry.provider === 'youtube' ? state.player.getPlayerState() === YT.PlayerState.PLAYING : state.playing);
     setPlaybackControlsDisabled(false);
     updateQualityOptions();
     const player = state.player;
@@ -840,7 +891,7 @@
     }, 1000);
     const revealDelay = state.entry.provider === 'twitch' && settings.hideTwitchTimeline ? 1400 : 0;
     setTimeout(() => {
-      if (!state.ready) return;
+      if (!state.ready || state.player !== player) return;
       $('start-gate').hidden = true;
       $('start-watching').textContent = 'Start watching';
     }, revealDelay);
@@ -850,13 +901,15 @@
   }
 
   function createYouTubePlayer() {
+    const destination = state.resumeTime ?? Math.max(0, state.index.rounds[0].start - state.index.leadSeconds);
     state.player = new YT.Player('media-player', {
       host: 'https://www.youtube-nocookie.com',
       videoId: state.entry.sourceId,
-      playerVars: {autoplay: 0, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, playsinline: 1, rel: 0},
+      playerVars: {autoplay: 0, start: Math.floor(destination), controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, playsinline: 1, rel: 0},
       events: {
         onReady: playerReady,
         onStateChange: event => {
+          if (!state.ready || event.target !== state.player) return;
           setPlaying(event.data === YT.PlayerState.PLAYING);
           if (event.data === YT.PlayerState.ENDED) setTimeout(finishWatching, 0);
         },

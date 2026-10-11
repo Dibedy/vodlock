@@ -12,6 +12,118 @@ const sample = () => ({schemaVersion: 1, videoId: 'ZphbktbT26k', rounds: [
   {map: 2, round: 1, start: 700}, {map: 2, round: 2, start: 850}
 ]});
 
+function playerStartup() {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const elements = new Map();
+  const intervals = new Map();
+  const calls = [];
+  let now = 0;
+  let sequence = 0;
+  const player = {
+    time: 9000, status: 1, muted: false,
+    getCurrentTime() { return this.time; },
+    getPlayerState() { return this.status; },
+    isMuted() { return this.muted; },
+    mute() { this.muted = true; calls.push('mute'); },
+    unMute() { this.muted = false; calls.push('unmute'); },
+    loadVideoById(value) { calls.push(['load', value]); },
+    seekTo(value) { calls.push(['seek', value]); },
+    pauseVideo() { this.status = 2; calls.push('pause'); },
+    destroy() { calls.push('destroy'); }
+  };
+  const state = {entry: {provider: 'youtube', sourceId: 'ZphbktbT26k'}, index: {rounds: [{start: 100}], leadSeconds: 5}, player, resumeTime: null, ready: false, started: true};
+  const sandbox = vm.createContext({state, Date: {now: () => now}, settings: {},
+    YT: {PlayerState: {PLAYING: 1, ENDED: 0}, Player: function(host, options) { calls.push(['create', options]); return player; }},
+    $: id => { if (!elements.has(id)) elements.set(id, {hidden: false, disabled: true, value: '50', replaceChildren() {}}); return elements.get(id); },
+    setInterval: callback => { const id = ++sequence; intervals.set(id, callback); return id; },
+    clearInterval: id => intervals.delete(id), setTimeout: callback => callback(),
+    preventTwitchNativeFullscreen() {}, setVolume() {}, setPlaybackControlsDisabled(value) { calls.push(['disabled', value]); },
+    seekPlayer(value) { calls.push(['seek', value]); }, playPlayer() { state.playing = true; },
+    updateQualityOptions() {}, updateStatus() {}, setPlaying(value) { state.playing = value; }, toast(message) { calls.push(['toast', message]); }
+  });
+  vm.runInContext(app.slice(app.indexOf('  function destroyPlayer('), app.indexOf('  function renderChat(')), sandbox);
+  vm.runInContext(app.slice(app.indexOf('  function playerReady('), app.indexOf('  function createTwitchPlayer(')), sandbox);
+  return {sandbox, state, player, calls, elements, intervals, tick(milliseconds = 100) { now += milliseconds; for (const callback of [...intervals.values()]) callback(); }};
+}
+
+test('YouTube startup corrects an ignored live seek before revealing or unmuting playback', () => {
+  const startup = playerStartup();
+  startup.sandbox.createYouTubePlayer();
+  const options = startup.calls.find(call => call[0] === 'create')[1];
+  assert.equal(options.playerVars.start, 95);
+  options.events.onReady({target: startup.player});
+  assert.equal(startup.calls.find(call => call[0] === 'load')[1].startSeconds, 95);
+  startup.tick();
+  assert.equal(startup.calls.find(call => call[0] === 'seek')[1], 95);
+  assert.equal(startup.state.ready, false);
+  assert.equal(startup.player.muted, true);
+  assert.equal(startup.elements.get('start-gate'), undefined);
+  options.events.onStateChange({target: startup.player, data: 0});
+  startup.player.time = 95;
+  startup.tick();
+  startup.tick(500);
+  assert.equal(startup.state.ready, true);
+  assert.equal(startup.player.muted, false);
+  assert.equal(startup.elements.get('start-gate').hidden, true);
+});
+
+test('YouTube startup fails closed when the indexed position cannot be reached', () => {
+  const startup = playerStartup();
+  startup.sandbox.playerReady({target: startup.player});
+  startup.tick(15000);
+  assert.equal(startup.state.ready, false);
+  assert.equal(startup.state.started, false);
+  assert.equal(startup.state.resumeTime, 95);
+  assert.equal(startup.elements.get('start-gate').hidden, false);
+  assert.equal(startup.elements.get('start-watching').disabled, false);
+  assert.ok(startup.calls.includes('pause'));
+  assert.ok(startup.calls.includes('destroy'));
+  assert.equal(startup.calls.includes('unmute'), false);
+});
+
+test('YouTube startup preserves fractional resume positions and existing mute settings', () => {
+  const startup = playerStartup();
+  startup.state.resumeTime = 321.25;
+  startup.player.muted = true;
+  startup.sandbox.playerReady({target: startup.player});
+  assert.equal(startup.calls.find(call => call[0] === 'load')[1].startSeconds, 321.25);
+  startup.player.time = 321.25;
+  startup.tick();
+  startup.tick(500);
+  assert.equal(startup.state.ready, true);
+  assert.equal(startup.player.muted, true);
+});
+
+test('YouTube startup timers and stale ready events are cancelled when leaving the player', () => {
+  const startup = playerStartup();
+  startup.sandbox.playerReady({target: startup.player});
+  startup.sandbox.destroyPlayer();
+  startup.sandbox.playerReady({target: startup.player});
+  assert.equal(startup.intervals.size, 0);
+  assert.equal(startup.calls.filter(call => call[0] === 'load').length, 1);
+  assert.equal(startup.calls.includes('unmute'), false);
+});
+
+test('YouTube startup clamps early indexed starts to zero', () => {
+  const startup = playerStartup();
+  startup.state.index.rounds[0].start = 3;
+  startup.sandbox.createYouTubePlayer();
+  assert.equal(startup.calls.find(call => call[0] === 'create')[1].playerVars.start, 0);
+  startup.sandbox.playerReady({target: startup.player});
+  assert.equal(startup.calls.find(call => call[0] === 'load')[1].startSeconds, 0);
+});
+
+test('Twitch startup keeps its existing indexed seek and playback behavior', () => {
+  const startup = playerStartup();
+  startup.state.entry.provider = 'twitch';
+  startup.sandbox.playerReady();
+  assert.equal(startup.calls.find(call => call[0] === 'seek')[1], 95);
+  assert.equal(startup.state.ready, true);
+  assert.equal(startup.state.playing, true);
+  assert.equal(startup.calls.includes('mute'), false);
+  assert.equal(startup.state.startTimer, undefined);
+});
+
 test('website accepts supported YouTube URL forms without accepting lookalike hosts', () => {
   for (const value of ['ZphbktbT26k', 'https://www.youtube.com/watch?v=ZphbktbT26k&t=90s',
     'https://youtu.be/ZphbktbT26k', 'https://youtube.com/embed/ZphbktbT26k',

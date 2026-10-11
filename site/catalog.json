@@ -622,7 +622,7 @@
       "pipelineState": "provisional",
       "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
       "pipelineGeneration": 1,
-      "pipelineVersion": 3,
+      "pipelineVersion": 4,
       "tournament": "Champions Shanghai",
       "tournamentKey": "champions-shanghai",
       "chat": "/chats/twitch-316085678673.json",

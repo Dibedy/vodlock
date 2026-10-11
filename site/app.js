@@ -1106,7 +1106,8 @@
   function setPlaybackControlsDisabled(disabled) {
     for (const identifier of ['play-button', 'back-ten', 'skip-replay', 'mute-button', 'volume',
       'previous-round', 'next-round', 'previous-map', 'next-map', 'restart-round']) $(identifier).disabled = disabled;
-    $('fullscreen-reveal').hidden = !(document.fullscreenElement === $('watch-layout') || state.windowFullscreen);
+    $('fullscreen-reveal').hidden = !(document.fullscreenElement === $('watch-layout') || state.windowFullscreen) ||
+      (!matchMedia('(pointer: coarse)').matches && !state.windowFullscreen);
     if (disabled) hideFullscreenControls();
     showFullscreenControls();
   }
@@ -1192,6 +1193,7 @@
 
   function showFullscreenControls() {
     if (document.fullscreenElement !== $('watch-layout') && !state.windowFullscreen) return;
+    if (!matchMedia('(pointer: coarse)').matches && !state.windowFullscreen) return;
     hideFullscreenControls();
     $('watch-layout').classList.add('fullscreen-controls-visible');
     if (!state.ready) return;
@@ -1255,7 +1257,7 @@
     const fullscreen = document.fullscreenElement === $('watch-layout') || state.windowFullscreen;
     $('fullscreen-button').textContent = fullscreen ? 'Exit' : 'Full screen';
     $('fullscreen-button').setAttribute('aria-label', fullscreen ? 'Exit fullscreen' : chatVisible ? 'Enter fullscreen with chat' : 'Enter fullscreen');
-    $('fullscreen-reveal').hidden = !fullscreen;
+    $('fullscreen-reveal').hidden = !fullscreen || (!matchMedia('(pointer: coarse)').matches && !state.windowFullscreen);
     if (!fullscreen) hideFullscreenControls();
   }
 
@@ -1378,9 +1380,6 @@
   });
   $('fullscreen-button').addEventListener('click', toggleFullscreen);
   $('fullscreen-reveal').addEventListener('click', showFullscreenControls);
-  $('watch-layout').addEventListener('pointermove', event => {
-    if (event.pointerType === 'mouse') showFullscreenControls();
-  });
   $('watch-layout').addEventListener('pointerdown', event => {
     if (event.target.closest('.round-dock, .player-controls')) showFullscreenControls();
   });

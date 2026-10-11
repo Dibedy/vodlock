@@ -22,13 +22,27 @@ function setup() {
   const state = {ready: true, openRequest: 1};
   const notices = [];
   const document = {fullscreenElement: null, fullscreenEnabled: true, body: $('body')};
-  const sandbox = vm.createContext({$, state, document, renderChat() {}, toast: value => notices.push(value),
+  const device = {touch: true};
+  const sandbox = vm.createContext({$, state, document, matchMedia: () => ({matches: device.touch}), renderChat() {}, toast: value => notices.push(value),
     clearTimeout: id => timers.delete(id), setTimeout: callback => {timers.set(++timerId, callback); return timerId;}});
   vm.runInContext(app.slice(app.indexOf('  function hideFullscreenControls('), app.indexOf('  function toggleTheater(')) +
     app.slice(app.indexOf('  function syncFullscreenButton('), app.indexOf("  $('settings-button').addEventListener")), sandbox);
   $('player-view').hidden = false;
-  return {sandbox, $, state, document, timers, notices};
+  return {sandbox, $, state, document, device, timers, notices};
 }
+
+test('native desktop fullscreen keeps the touch layer and controls hidden', () => {
+  const {sandbox, $, document, device, timers} = setup();
+  device.touch = false;
+  document.fullscreenElement = $('watch-layout');
+  sandbox.syncFullscreenButton();
+  sandbox.showFullscreenControls();
+  assert.equal($('fullscreen-reveal').hidden, true);
+  assert.equal($('watch-layout').classList.contains('fullscreen-controls-visible'), false);
+  assert.equal(timers.size, 0);
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  assert.doesNotMatch(app, /addEventListener\('pointermove'/);
+});
 
 test('fullscreen controls reveal on demand, hide after inactivity and protect keyboard focus', () => {
   const {sandbox, $, state, document, timers} = setup();

@@ -23,6 +23,9 @@ function renderActivity(value) {
   byId('working-state').textContent = value.worker.state === 'stopping' ? 'Finishing current work' : tasks.length ? 'In progress' : 'Waiting';
   byId('activity-empty').hidden = tasks.length !== 0;
   const names = {live: 'Recording the official stream', twitch_live: 'Recording Twitch', twitch_vod: 'Processing the Twitch archive', twitch_align: 'Synchronizing the watch party', chat_gaps: 'Recovering Twitch chat', fingerprint_archive: 'Processing the official archive', reconcile: 'Synchronizing the official archive', recover: 'Recovering missing match footage', validate: 'Checking match data', validate_upload: 'Checking the separate match upload', finalize: 'Running final archive checks', segment: 'Identifying matches', refresh: 'Checking broadcast availability', export: 'Preparing a website update', deploy: 'Publishing a website update', verify_deployment: 'Checking the published website', discover_youtube: 'Looking for official recordings', discover_twitch_vods: 'Looking for Twitch recordings'};
+  names.watchparty_vod = 'Processing the YouTube watch party';
+  names.watchparty_align = 'Synchronizing the YouTube watch party';
+  names.associate_watchparty = 'Finding the matching broadcast';
   byId('activity').replaceChildren(...tasks.map(task => {
     const row = element('li', '', 'activity-row');
     const content = element('div', '', 'activity-content');
@@ -64,7 +67,7 @@ function renderMatches() {
     const index = document.createElement('td'); index.append(badge(row.state));
     const descriptions = {pending: 'No match data captured yet.', indexing: 'Collecting data from the stream.', validating: 'Checking the recording before it is ready.', provisional: 'Usable now; archive checks still pending.', final: 'Final checks complete.', needs_review: 'Match data needs a manual check.'};
     index.append(element('span', descriptions[row.state] || 'Status not yet available.', 'secondary'));
-    const taskNames = {validate: 'Broadcast validation', finalize: 'Final archive check', validate_upload: 'Separate full-match upload check', recover: 'Missing recording recovery', reconcile_segment: 'Match archive synchronization', probe_archive: 'Official archive availability', fingerprint_archive: 'Official archive processing', reconcile: 'Broadcast archive synchronization', twitch_vod: 'Twitch archive processing', twitch_align: 'Twitch stream synchronization', chat_gaps: 'Missing Twitch chat recovery'};
+    const taskNames = {validate: 'Broadcast validation', finalize: 'Final archive check', validate_upload: 'Separate full-match upload check', recover: 'Missing recording recovery', reconcile_segment: 'Match archive synchronization', probe_archive: 'Official archive availability', fingerprint_archive: 'Official archive processing', reconcile: 'Broadcast archive synchronization', twitch_vod: 'Twitch archive processing', twitch_align: 'Twitch stream synchronization', watchparty_vod: 'YouTube watch-party processing', watchparty_align: 'YouTube watch-party synchronization', chat_gaps: 'Missing Twitch chat recovery'};
     if (row.tasks?.length || row.checks?.length) {
       const details = document.createElement('details'); details.className = 'match-tasks';
       details.open = expandedMatches.has(row.id);

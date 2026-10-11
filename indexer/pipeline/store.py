@@ -140,8 +140,8 @@ class Store:
                             AND ((j.broadcast_id IS NOT NULL AND active.broadcast_id=j.broadcast_id
                                   AND j.kind<>'chat_gaps' AND active.kind<>'chat_gaps'
                                   AND NOT ((j.source_id IS NULL OR active.source_id IS NULL OR j.source_id<>active.source_id) AND (
-                                          (j.kind IN ('twitch_vod','twitch_live','twitch_align','validate_upload') AND active.kind IN ('live','recover','probe_archive','fingerprint_archive','reconcile','segment','validate','reconcile_segment','finalize'))
-                                          OR (active.kind IN ('twitch_vod','twitch_live','twitch_align','validate_upload') AND j.kind IN ('live','recover','probe_archive','fingerprint_archive','reconcile','segment','validate','reconcile_segment','finalize')))))
+                                          (j.kind IN ('twitch_vod','twitch_live','twitch_align','watchparty_vod','watchparty_align','validate_upload') AND active.kind IN ('live','recover','probe_archive','fingerprint_archive','reconcile','segment','validate','reconcile_segment','finalize'))
+                                          OR (active.kind IN ('twitch_vod','twitch_live','twitch_align','watchparty_vod','watchparty_align','validate_upload') AND j.kind IN ('live','recover','probe_archive','fingerprint_archive','reconcile','segment','validate','reconcile_segment','finalize')))))
                                  OR (j.source_id IS NOT NULL AND active.source_id=j.source_id)))
                         AND (j.kind<>'validate_upload' OR EXISTS (
                             SELECT 1 FROM pipeline.segments s WHERE s.expected_match_id=j.expected_match_id
@@ -409,7 +409,7 @@ class Store:
                    EXISTS (SELECT 1 FROM pipeline.jobs j WHERE j.expected_match_id=m.id
                    AND j.generation=b.generation AND j.state='needs_review') AS needs_review,
                    (SELECT p.state FROM pipeline.watchparty_publications p
-                    WHERE p.expected_match_id=m.id ORDER BY p.updated_at DESC LIMIT 1) AS watchparty
+                    WHERE p.expected_match_id=m.id ORDER BY (p.state='ready') DESC,p.updated_at DESC LIMIT 1) AS watchparty
                    FROM pipeline.expected_matches m LEFT JOIN pipeline.broadcasts b ON b.id=m.broadcast_id
                    LEFT JOIN LATERAL (SELECT state,findings,evidence FROM pipeline.segments WHERE expected_match_id=m.id
                    AND generation=b.generation ORDER BY updated_at DESC LIMIT 1) s ON true
@@ -475,7 +475,7 @@ class Store:
                 for task in tasks:
                     if task["expected_match_id"] != match["id"] and not (
                         task["expected_match_id"] is None and task["broadcast_id"] == broadcast
-                        and task["kind"] in {"probe_archive", "fingerprint_archive", "reconcile", "twitch_vod", "twitch_align", "chat_gaps"}):
+                        and task["kind"] in {"probe_archive", "fingerprint_archive", "reconcile", "twitch_vod", "twitch_align", "watchparty_vod", "watchparty_align", "chat_gaps"}):
                         continue
                     error = (task["last_error"] or "") if task["state"] in {"needs_review", "retryable", "waiting_source"} else ""
                     reason = next((message for prefix, message in reason_labels.items() if error.startswith(prefix)), None)

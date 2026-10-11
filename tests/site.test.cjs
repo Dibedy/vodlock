@@ -171,7 +171,7 @@ test('website maps official Twitch chat onto aligned YouTube playback', () => {
   assert.ok(aligned.length > 0);
   for (const entry of aligned) {
     const hosted = validateIndex(JSON.parse(readFileSync(resolve(__dirname, '../site' + entry.index), 'utf8')));
-    assert.equal(hosted.alignment.source, 'twitch:' + entry.chatSourceId);
+    assert.equal((hosted.chatAlignment || hosted.alignment).source, 'twitch:' + entry.chatSourceId);
     assert.equal(entry.chat, '/chats/twitch-' + entry.chatSourceId + '.json');
   }
 });
@@ -225,7 +225,7 @@ function chatLoader(fetch) {
   vm.runInContext('const state = {chat: []}; const chatEmoteSets = new Map(); let chatEmotes = new Map();\n' +
     app.slice(app.indexOf('  async function loadChat('), app.indexOf('  function resetPlayerHost(')), sandbox);
   return {
-    load: entry => sandbox.loadChat(entry, {}),
+    load: (entry, index = {}) => sandbox.loadChat(entry, index),
     state: () => vm.runInContext('state', sandbox),
     emotes: () => vm.runInContext('chatEmotes', sandbox)
   };
@@ -246,6 +246,43 @@ test('chat protection flags likely results without changing messages or hiding o
   assert.equal(isChatSpoiler(fragments), true);
   assert.equal(JSON.stringify(fragments), before);
   assert.equal(isChatSpoiler([['WON', '25']]), false);
+});
+
+test('YouTube watch parties keep separate canonical and Twitch chat alignment', async () => {
+  const index = validateIndex({...sample(), schemaVersion: 2, provider: 'youtube', sourceId: 'ZphbktbT26k',
+    alignment: {source: 'youtube:abcdefghijk', timelineScale: 1, strictCoverage: true,
+      segments: [{targetStart: 0, targetEnd: 1000, offset: -50}]},
+    chatAlignment: {source: 'twitch:1234567890', timelineScale: 1, strictCoverage: true,
+      segments: [{targetStart: 100, targetEnd: 300, offset: 50}]}});
+  const loader = chatLoader(async () => ({ok: true, json: async () => ({v: 1, source: '1234567890',
+    messages: [{t: 200, u: 'Viewer', c: '', f: [['hello']]}]})}));
+  await loader.load({provider: 'youtube', sourceId: 'ZphbktbT26k', chat: '/chats/twitch-1234567890.json',
+    chatSourceId: '1234567890'}, index);
+  assert.equal(loader.state().chat.length, 1);
+  assert.equal(sourceTime(loader.state().chatIndex, 150), 200);
+  assert.equal(sourceTime(index, 150), 100);
+  assert.ok(Number.isNaN(sourceTime(loader.state().chatIndex, 350)));
+});
+
+test('match source selection prefers verified YouTube watch parties per creator with Twitch fallback', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const official = {id: 'official', kind: 'match', provider: 'youtube', match: 'first', playedAt: '2026-10-11T10:00:00Z'};
+  const twitch = {id: 'twitch', kind: 'watch-party', provider: 'twitch', creator: 'FNS', match: 'first', playedAt: '2026-10-11T10:00:00Z'};
+  const youtube = {...twitch, id: 'youtube', provider: 'youtube'};
+  const other = {...twitch, id: 'other', creator: 'Other'};
+  const state = {catalog: [official, twitch, youtube, other, {...twitch, id: 'second', match: 'second'}]};
+  const sandbox = vm.createContext({state, VodlockSite: context.VodlockSite, matchKey: entry => entry.match,
+    matchup: () => [], entryKind: entry => entry.kind, creatorName: entry => entry.creator});
+  vm.runInContext(app.slice(app.indexOf('  function groupedMatches('), app.indexOf('  function tournamentName(')), sandbox);
+  let groups = sandbox.groupedMatches();
+  assert.deepEqual(Array.from(groups[0].entries, entry => entry.id), ['official', 'youtube', 'other']);
+  assert.deepEqual(Array.from(groups[1].entries, entry => entry.id), ['second']);
+  assert.equal(state.catalog.length, 5);
+  state.catalog = [official, twitch, {...youtube, playedAt: '2026-10-10T10:00:00Z'}];
+  assert.ok(sandbox.groupedMatches()[0].entries.some(entry => entry.id === 'twitch'));
+  state.catalog = [official, twitch, other];
+  groups = sandbox.groupedMatches();
+  assert.deepEqual(Array.from(groups[0].entries, entry => entry.id), ['official', 'twitch', 'other']);
 });
 
 test('chat protection defaults on for existing users and preserves explicit opt-outs', () => {

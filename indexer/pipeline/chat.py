@@ -57,3 +57,20 @@ def chat_alignment(mapping, source_id):
             if section["canonicalEnd"] > max(0, section["canonicalStart"])
         ],
     }
+
+
+def watchparty_chat_alignment(video_mapping, chat_mapping, source_id):
+    video_scale, chat_scale = video_mapping["timelineScale"], chat_mapping["timelineScale"]
+    segments = []
+    for video in video_mapping["segments"]:
+        for chat in chat_mapping["segments"]:
+            start = max(video["canonicalStart"], chat["canonicalStart"])
+            end = min(video["canonicalEnd"], chat["canonicalEnd"])
+            if end > start:
+                segments.append({"targetStart": max(0, (start - video["offset"]) / video_scale),
+                                 "targetEnd": (end - video["offset"]) / video_scale,
+                                 "offset": (video["offset"] - chat["offset"]) / chat_scale})
+    segments = sorted((section for section in segments if section["targetEnd"] > section["targetStart"]),
+                      key=lambda section: section["targetStart"])
+    return {"source": "twitch:" + source_id, "timelineScale": video_scale / chat_scale,
+            "strictCoverage": True, "segments": segments} if segments else None

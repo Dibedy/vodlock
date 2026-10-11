@@ -43,7 +43,8 @@ class Coordinator:
         if not self.config.shadow and settings.get("deployment"):
             self.store.enqueue("deploy", "deploy:site", priority=50)
         routes: dict[str, list[dict]] = {}
-        for setting, kind in [("youtube_channels", "associate"), ("full_match_channels", "associate_upload")]:
+        for setting, kind in [("youtube_channels", "associate"), ("full_match_channels", "associate_upload"),
+                              ("watchparty_youtube_channels", "associate_watchparty")]:
             for channel in settings.get(setting, []):
                 routes.setdefault(channel["channel_id"], []).append({"kind": kind, "channel": channel})
         for channel_id, channel_routes in routes.items():
@@ -64,30 +65,31 @@ class Coordinator:
                 self.store.enqueue("refresh", f"refresh:{broadcast['id']}", broadcast=broadcast["id"])
             self.store.enqueue("segment", f"segment:{broadcast['id']}", broadcast=broadcast["id"], delay=1)
         for source in self.store.rows(
-            "SELECT s.*,b.reconciled_revision FROM pipeline.sources s JOIN pipeline.broadcasts b ON b.id=s.broadcast_id WHERE s.provider='twitch' AND s.checkpoint_time>=60"
+            "SELECT s.*,b.reconciled_revision FROM pipeline.sources s JOIN pipeline.broadcasts b ON b.id=s.broadcast_id WHERE (s.provider='twitch' OR s.role='watch_party') AND s.checkpoint_time>=60"
         ):
             bucket = int(source["checkpoint_time"] // 300)
             key = f"twitch-local-alignment:{source['id']}:r{source['reconciled_revision']}:{bucket}"
-            if source["role"] == "watch_party" and source["metadata"].get("vod_id"):
+            if source["role"] == "watch_party" and (source["provider"] == "youtube" or source["metadata"].get("vod_id")):
                 indexes = self.store.rows("""SELECT i.expected_match_id,max(i.version) AS version FROM pipeline.match_indexes i
                     JOIN pipeline.broadcasts b ON b.id=i.broadcast_id WHERE i.broadcast_id=%s AND i.generation=b.generation
                     AND i.archive_revision=%s AND i.state IN ('provisional','final') GROUP BY i.expected_match_id ORDER BY i.expected_match_id""",
                     (source["broadcast_id"], source["reconciled_revision"]))
                 key += ":scoreboard-v4:" + str(stable_id(indexes))
+            kind = "watchparty_align" if source["provider"] == "youtube" else "twitch_align"
             with self.store.transaction() as connection:
                 if not connection.execute("SELECT id FROM pipeline.jobs WHERE dedupe_key=%s", (key,)).fetchone():
-                    prior = connection.execute("""SELECT payload FROM pipeline.jobs WHERE source_id=%s AND kind='twitch_align'
+                    prior = connection.execute("""SELECT payload FROM pipeline.jobs WHERE source_id=%s AND kind=%s
                         AND generation=(SELECT generation FROM pipeline.broadcasts WHERE id=%s)
                         AND (payload ? 'scoreboard_checks' OR last_error='Twitch scoreboard window exceeded the memory limit')
                         ORDER BY updated_at DESC LIMIT 1""",
-                        (source["id"], source["broadcast_id"])).fetchone()
+                        (source["id"], kind, source["broadcast_id"])).fetchone()
                     self.store.enqueue(
-                        "twitch_align",
+                        kind,
                         key,
                         broadcast=source["broadcast_id"],
                         source=source["id"],
                         payload=prior["payload"] if prior else None,
-                        priority=5 if source["role"] == "watch_party" and source["metadata"].get("vod_id") else -40,
+                        priority=5 if source["role"] == "watch_party" else -40,
                         connection=connection,
                     )
 
@@ -107,16 +109,58 @@ class Coordinator:
                     known = self.store.one("SELECT id FROM pipeline.broadcasts WHERE youtube_id=%s", (entry["id"],))
                 else:
                     known = self.store.one(
-                        "SELECT id FROM pipeline.sources WHERE provider='youtube' AND external_id=%s AND role='full_match' LIMIT 1",
-                        (entry["id"],),
+                        "SELECT id FROM pipeline.sources WHERE provider='youtube' AND external_id=%s AND role=%s LIMIT 1",
+                        (entry["id"], "watch_party" if kind == "associate_watchparty" else "full_match"),
                     )
                 if not known:
                     self.store.enqueue(
-                        kind, ("associate:" if kind == "associate" else "associate-upload:") + entry["id"],
+                        kind, kind.replace("_", "-") + ":" + entry["id"],
                         payload={"entry": entry, "channel": channel},
                     )
         if failures:
             raise WaitingSource("; ".join(failures))
+
+    def associate_watchparty(self, job):
+        from .errors import NeedsReview, Unsupported, WaitingSource
+        from .youtube import timestamp
+
+        entry, channel = job["payload"]["entry"], job["payload"]["channel"]
+        info = self.youtube.metadata(entry["id"])
+        metadata = info["metadata"]
+        owner = metadata.get("channel_id") or metadata.get("snippet", {}).get("channelId")
+        if owner != channel["channel_id"]:
+            raise NeedsReview("Watch-party YouTube channel identity does not match configuration")
+        if info["state"] == "scheduled":
+            raise WaitingWork("Watch-party YouTube broadcast has not started")
+        if info["state"] in {"discovered", "unavailable"}:
+            raise Unsupported("Watch-party source must be a YouTube livestream or its archive")
+        start = info["actual_start"]
+        if not start:
+            raise WaitingSource("Watch-party YouTube stream start time is unavailable")
+        end = info["actual_end"] or timestamp(start.timestamp() + float(metadata.get("duration") or 0))
+        if end <= start:
+            end = datetime.now(timezone.utc)
+        broadcasts = self.store.rows(
+            """SELECT * FROM pipeline.broadcasts WHERE channel_id=%s AND actual_start IS NOT NULL
+               AND actual_start<%s AND COALESCE(actual_end,actual_start+interval '12 hours')>%s
+               AND abs(extract(epoch FROM (actual_start-%s::timestamptz)))<=21600""",
+            (channel["official_youtube_channel_id"], end, start, start))
+        if not broadcasts:
+            raise WaitingWork("Watch-party is waiting for an overlapping official broadcast")
+        if len(broadcasts) != 1:
+            raise NeedsReview("Watch-party overlaps multiple official broadcasts; association requires review")
+        broadcast = broadcasts[0]
+        source_id = stable_id("source", broadcast["id"], "youtube", entry["id"])
+        with self.store.transaction() as connection:
+            self.store.guard(connection, job)
+            connection.execute(
+                """INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role,state,actual_start,metadata)
+                   VALUES (%s,%s,'youtube',%s,'watch_party',%s,%s,%s) ON CONFLICT DO NOTHING""",
+                (source_id, broadcast["id"], entry["id"], info["state"], start,
+                 Jsonb({"channel_id": owner, "login": channel["login"], "creator": channel["creator"],
+                        "title": metadata.get("title") or entry.get("title", "Watch party")})))
+            self.store.enqueue("watchparty_vod", f"watchparty-vod:{source_id}", broadcast=broadcast["id"],
+                               source=source_id, priority=-20, connection=connection)
 
     def associate(self, job):
         entry, channel = job["payload"]["entry"], job["payload"]["channel"]

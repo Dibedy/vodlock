@@ -1330,6 +1330,80 @@ class DatabasePipelineTests(unittest.TestCase):
             coordinator.discover_youtube({"payload": {"routes": routes}})
         self.assertIsNotNone(self.store.one("SELECT * FROM pipeline.jobs WHERE dedupe_key='associate-upload:lmnopqrstuv'"))
 
+    def test_youtube_watchparty_association_uses_stream_window_not_matchup_title(self):
+        channel = {"channel_id": "creator-channel", "official_youtube_channel_id": "official", "login": "gofns", "creator": "FNS"}
+        youtube = Mock()
+        youtube.metadata.return_value = {"state": "ended_waiting_archive", "actual_start": timestamp("2026-10-04T09:45:00Z"),
+            "actual_end": timestamp("2026-10-04T15:00:00Z"), "metadata": {"channel_id": "creator-channel", "title": "Only the first matchup"}}
+        coordinator = Coordinator(self.store, self.config, youtube)
+        job = self.job("associate_watchparty", payload={"entry": {"id": "lmnopqrstuv", "title": "No second match in title"}, "channel": channel})
+        coordinator.associate_watchparty(job)
+        coordinator.associate_watchparty(job)
+        sources = self.store.rows("SELECT * FROM pipeline.sources WHERE role='watch_party'")
+        self.assertEqual(len(sources), 1)
+        self.assertEqual(sources[0]["broadcast_id"], self.broadcast)
+        self.assertEqual(sources[0]["provider"], "youtube")
+        self.assertEqual(len(self.store.rows("SELECT id FROM pipeline.jobs WHERE kind='watchparty_vod'")), 1)
+        self.assertEqual(self.store.rows("SELECT source_id FROM pipeline.chat_archives"), [])
+        youtube.metadata.return_value["metadata"]["channel_id"] = "wrong-channel"
+        with self.assertRaisesRegex(NeedsReview, "channel identity"):
+            coordinator.associate_watchparty(job)
+        youtube.metadata.return_value["metadata"]["channel_id"] = "creator-channel"
+        self.store.execute("""INSERT INTO pipeline.broadcasts(id,event,day,region,channel_id,youtube_id,state,actual_start)
+            VALUES (%s,'Champions','2026-10-04','international','official','otherstream','live','2026-10-04T11:00:00Z')""", (identifier(),))
+        with self.assertRaisesRegex(NeedsReview, "multiple official broadcasts"):
+            coordinator.associate_watchparty(job)
+
+    def test_youtube_watchparty_export_release_preserves_official_and_twitch_chat(self):
+        job = self.job()
+        persist_index(self.store, job, *self.entities(), series(), "provisional", False)
+        self.store.finish(job)
+        processing = Processing(self.store, self.config, self.storage)
+        align_job = self.job("watchparty_align")
+        for provider, external, offset in [("youtube", "lmnopqrstuv", -50), ("twitch", "123456789", -100)]:
+            source_id = identifier()
+            metadata = {"login": "gofns", "creator": "FNS"}
+            if provider == "twitch":
+                metadata.update({"vod_id": external, "broadcaster_user_id": "66418614"})
+            self.store.execute("""INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role,state,metadata)
+                VALUES (%s,%s,%s,%s,'watch_party','ended',%s)""", (source_id, self.broadcast, provider, external, Jsonb(metadata)))
+            source = self.store.one("SELECT * FROM pipeline.sources WHERE id=%s", (source_id,))
+            mapping = {"timelineScale": 1, "anchors": 12, "maximumResidual": .1, "segments": [{"sourceStart": -offset, "sourceEnd": 1600-offset,
+                "canonicalStart": 0, "canonicalEnd": 1600, "offset": offset, "anchors": 12, "maximumResidual": .1}]}
+            processing.save_alignment(align_job, source, self.entities()[1], mapping, "secondary", 0)
+            if provider == "twitch":
+                self.store.execute("""INSERT INTO pipeline.chat_messages(source_id,message_id,media_time,wall_time,origin,message)
+                    VALUES (%s,'message',200,'2026-10-04T10:03:20Z','vod',%s)""", (source_id, Jsonb({
+                    "content_offset_seconds": 200, "commenter": {"display_name": "Viewer"},
+                    "message": {"body": "Hello", "fragments": [{"text": "Hello"}], "user_color": ""}})))
+        catalog = export_snapshot(self.store, self.storage, False, ["abcdefghijk"])
+        self.assertEqual(len(catalog["videos"]), 3)
+        youtube = next(entry for entry in catalog["videos"] if entry["sourceId"] == "lmnopqrstuv")
+        self.assertEqual(youtube["kind"], "watch-party")
+        self.assertEqual(youtube["chatSourceId"], "123456789")
+        path = "release/" + youtube["index"].lstrip("/")
+        contract = json.loads(self.storage.get(path))
+        self.assertEqual(contract["rounds"][0]["start"], 150)
+        self.assertEqual(contract["chatAlignment"]["segments"][0]["offset"], 50)
+        site = Path(self.temporary.name) / "site"
+        site.mkdir()
+        (site / "catalog.json").write_text(json.dumps({"videos": []}))
+        release_to_site(Path(self.temporary.name) / "release", site)
+        self.assertEqual(len(json.loads((site / "catalog.json").read_text())["videos"]), 3)
+        contract["rounds"][0]["start"] += 10
+        self.storage.put(path, json_bytes(contract))
+        with self.assertRaisesRegex(ValueError, "canonical timestamps"):
+            release_to_site(Path(self.temporary.name) / "release", site)
+        youtube_source = self.store.one("SELECT * FROM pipeline.sources WHERE external_id='lmnopqrstuv'")
+        partial = {"timelineScale": 1, "anchors": 12, "maximumResidual": .1, "segments": [{
+            "sourceStart": 50, "sourceEnd": 151, "canonicalStart": 0, "canonicalEnd": 101,
+            "offset": -50, "anchors": 12, "maximumResidual": .1}]}
+        processing.save_alignment(align_job, youtube_source, self.entities()[1], partial, "secondary", 0)
+        catalog = export_snapshot(self.store, self.storage, False, ["abcdefghijk"])
+        self.assertEqual([entry["sourceId"] for entry in catalog["videos"]], ["abcdefghijk", "123456789"])
+        release_to_site(Path(self.temporary.name) / "release", site)
+        self.assertEqual(len(json.loads((site / "catalog.json").read_text())["videos"]), 2)
+
     def test_upload_without_segment_cannot_starve_archive_readiness(self):
         self.store.execute("DELETE FROM pipeline.segments")
         self.store.enqueue(

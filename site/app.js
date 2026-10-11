@@ -305,8 +305,9 @@
     const sourceId = entry.chatSourceId || entry.sourceId;
     if (sourceId !== chatMatch[1] || !VodlockSite.twitchId(sourceId)) return;
     if (entry.provider === 'youtube') {
-      if (index.alignment?.source !== 'twitch:' + sourceId) return;
-      state.chatIndex = index;
+      const alignment = index.chatAlignment || index.alignment;
+      if (alignment?.source !== 'twitch:' + sourceId) return;
+      state.chatIndex = {...index, alignment};
     } else if (entry.provider !== 'twitch' || sourceId !== entry.sourceId) {
       return;
     }
@@ -403,7 +404,12 @@
     }
     return [...matches.values()].map(entries => {
       const primary = entries.find(entry => entryKind(entry) === 'match') || entries[0];
-      return {primary, teams: matchup(primary), entries: entries.slice().sort((first, second) => {
+      const preferred = entries.filter(entry => entry.provider !== 'twitch' || entryKind(entry) !== 'watch-party' ||
+        !entries.some(candidate => candidate.provider === 'youtube' && entryKind(candidate) === 'watch-party' &&
+          (candidate.expectedMatchId && entry.expectedMatchId ? candidate.expectedMatchId === entry.expectedMatchId :
+            candidate.playedAt.slice(0, 10) === entry.playedAt.slice(0, 10)) &&
+          creatorName(candidate).toLowerCase() === creatorName(entry).toLowerCase()));
+      return {primary, teams: matchup(primary), entries: preferred.sort((first, second) => {
         const kindOrder = Number(entryKind(first) === 'watch-party') - Number(entryKind(second) === 'watch-party');
         if (kindOrder) return kindOrder;
         return Number(first.provider === 'twitch') - Number(second.provider === 'twitch');

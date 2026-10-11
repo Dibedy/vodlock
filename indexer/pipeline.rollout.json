@@ -25,6 +25,15 @@
       "excludeTitle": "\\b(HIGHLIGHTS|SHOWMATCH)\\b"
     }
   ],
+  "watchparty_youtube_channels": [
+    {
+      "channel_id": "UC0l4egqFkC7XQvZFW1qajPg",
+      "official_youtube_channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "login": "gofns",
+      "creator": "FNS",
+      "excludeTitle": "\\b(HIGHLIGHTS|SHORTS|REBROADCAST)\\b|#shorts\\b"
+    }
+  ],
   "youtube_archive_client": "android",
   "twitch_downloader": "indexer/data/twitch-downloader/TwitchDownloaderCLI.exe",
   "twitch_channels": [

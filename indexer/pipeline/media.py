@@ -619,6 +619,9 @@ class MediaAnalysis:
     def watchparty_window(self, remote, start, end):
         from pathlib import Path
 
+        if remote.get("provider") == "youtube":
+            yield from self.window(remote, start, end)
+            return
         if "vod_segments" not in remote:
             remote["vod_segments"] = self.manifest(remote)
         position = 0.0

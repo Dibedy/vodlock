@@ -23,7 +23,7 @@ from pipeline.cli import release_to_site
 from pipeline.config import Config
 from pipeline.deployment import Deployment
 from pipeline.detection import CandidateDetector, observation_from_dict, redetect_candidates
-from pipeline.chat import chat_alignment, compact_chat
+from pipeline.chat import chat_alignment, compact_chat, watchparty_chat_alignment
 from pipeline.errors import NeedsReview, Unsupported, WaitingSource, WaitingWork, failure_kind, retry_after
 from pipeline.media import MediaAnalysis, decode_frames, parse_playlist, recognized_teams
 from pipeline.publishing import canonical_contract, watchparty_contract
@@ -693,6 +693,49 @@ class PipelineTests(unittest.TestCase):
                         {"day": "2026-11-01"}, {"metadata": {}}, {"metadata": {"channel_id": "other"}}):
             self.assertTrue(config.shadow_for({**broadcast, **changes}))
         self.assertTrue(Config("test", settings=config.settings).shadow_for(broadcast))
+
+    def test_youtube_watchparty_keeps_verified_canonical_rounds(self):
+        canonical = {"provider": "youtube", "role": "canonical", "broadcast_id": "broadcast", "external_id": "abcdefghijk"}
+        secondary = {"provider": "youtube", "role": "watch_party", "external_id": "lmnopqrstuv", "revision": 1, "metadata": {}}
+        index = {"id": "index", "broadcast_id": "broadcast", "version": 1, "state": "final", "archive_revision": 1, "rounds": series()}
+        mapping = {"timelineScale": 1, "segments": [{"sourceStart": 50, "sourceEnd": 1650,
+                   "canonicalStart": 0, "canonicalEnd": 1600, "offset": -50, "anchors": 12, "maximumResidual": .1}]}
+        contract = watchparty_contract(canonical, secondary, expected(), index, mapping, 1)
+        self.assertEqual(contract["provider"], "youtube")
+        self.assertEqual(contract["sourceId"], "lmnopqrstuv")
+        self.assertEqual(contract["rounds"][0]["start"], 150)
+        self.assertEqual(contract["canonical"]["rounds"][0]["start"], 100)
+        mapping["segments"][0]["canonicalEnd"] = 101
+        with self.assertRaises(NeedsReview):
+            watchparty_contract(canonical, secondary, expected(), index, mapping, 1)
+
+    def test_youtube_watchparty_chat_composes_only_verified_overlaps(self):
+        video = {"timelineScale": 1, "segments": [{"canonicalStart": 100, "canonicalEnd": 400, "offset": -50}]}
+        chat = {"timelineScale": 1, "segments": [{"canonicalStart": 120, "canonicalEnd": 200, "offset": -100},
+                                                {"canonicalStart": 250, "canonicalEnd": 350, "offset": -110}]}
+        alignment = watchparty_chat_alignment(video, chat, "123456789")
+        self.assertEqual(alignment["timelineScale"], 1)
+        self.assertEqual(alignment["segments"], [{"targetStart": 170, "targetEnd": 250, "offset": 50},
+                                               {"targetStart": 300, "targetEnd": 400, "offset": 60}])
+        self.assertTrue(alignment["strictCoverage"])
+        video["segments"][0]["canonicalStart"] = 500
+        video["segments"][0]["canonicalEnd"] = 600
+        self.assertIsNone(watchparty_chat_alignment(video, chat, "123456789"))
+
+    def test_youtube_watchparty_waits_for_archive_without_using_twitch_resolver(self):
+        from pipeline.twitch import TwitchCapture
+
+        processing = Mock()
+        processing.youtube.metadata.return_value = {"state": "live"}
+        capture = TwitchCapture(Mock(), Config("test"), processing)
+        source = {"provider": "youtube", "external_id": "lmnopqrstuv"}
+        with self.assertRaises(WaitingWork):
+            capture.resolve_archive(source)
+        processing.youtube.resolve.assert_not_called()
+        processing.youtube.metadata.return_value = {"state": "ended_waiting_archive"}
+        processing.youtube.resolve.return_value = {"url": "archive", "duration": 3600}
+        self.assertEqual(capture.resolve_archive(source)["provider"], "youtube")
+        processing.youtube.resolve.assert_called_once_with("lmnopqrstuv", cached=True)
 
     def test_auto_approval_configuration_rejects_unconfigured_channels(self):
         with tempfile.TemporaryDirectory() as directory:

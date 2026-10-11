@@ -113,7 +113,7 @@ class Deployment:
                        VALUES (%s,%s,%s,'pushed',%s,%s) ON CONFLICT(commit_sha) DO NOTHING""",
                     (commit, settings["repository"], branch, publication_kind,
                      Jsonb([{key: entry[key] for key in ('expectedMatchId','pipelineGeneration','pipelineVersion','pipelineState')}
-                            for entry in catalog["videos"] if entry.get('provider') == 'youtube'])))
+                            for entry in catalog["videos"] if entry.get('provider') == 'youtube' and entry.get('kind') != 'watch-party'])))
                 record = connection.execute("SELECT state FROM pipeline.deployments WHERE commit_sha=%s", (commit,)).fetchone()
                 if record["state"] == "pushed":
                     self.store.enqueue("verify_deployment", "verify-deployment:" + commit,

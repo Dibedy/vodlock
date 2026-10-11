@@ -206,6 +206,14 @@ class TwitchCapture:
         self.processing = processing
         self.media = media or MediaAnalysis()
 
+    def resolve_archive(self, source):
+        if source["provider"] == "youtube":
+            info = self.processing.youtube.metadata(source["external_id"])
+            if info["state"] in {"scheduled", "live", "unavailable", "discovered"}:
+                raise WaitingWork("YouTube watch-party is waiting for a seekable archive; Twitch remains available")
+            return {**self.processing.youtube.resolve(source["external_id"], cached=True), "provider": "youtube"}
+        return resolve_twitch(source["metadata"]["vod_id"], live=False)
+
     def discover_vods(self, job):
         import yt_dlp
 
@@ -295,10 +303,10 @@ class TwitchCapture:
 
     def vod(self, job):
         broadcast, source, _, _ = self.processing.context(job)
-        vod_id = source["metadata"].get("vod_id")
+        vod_id = source["external_id"] if source["provider"] == "youtube" else source["metadata"].get("vod_id")
         if not vod_id:
             raise WaitingWork("Twitch archive processing requires a verified VOD ID")
-        remote = resolve_twitch(vod_id, live=False)
+        remote = self.resolve_archive(source)
         duration = float(remote.get("duration") or 0)
         start = source["actual_start"] or remote.get("actual_start")
         if not start or not math.isfinite(duration) or duration <= 0:
@@ -307,16 +315,18 @@ class TwitchCapture:
             self.store.guard(connection, job)
             connection.execute("UPDATE pipeline.sources SET actual_start=COALESCE(actual_start,%s),state='ended',updated_at=now() WHERE id=%s",
                                (start, source["id"]))
-            connection.execute("INSERT INTO pipeline.chat_archives(source_id,state,gaps) VALUES (%s,'waiting_vod',%s) ON CONFLICT DO NOTHING",
-                               (source["id"], Jsonb([[0, duration]])))
-            archive = connection.execute("SELECT state FROM pipeline.chat_archives WHERE source_id=%s", (source["id"],)).fetchone()
-            if archive["state"] != "complete":
-                self.store.enqueue("chat_gaps", f"chat_gaps:{source['id']}", broadcast=broadcast["id"], source=source["id"], connection=connection)
+            if source["provider"] == "twitch":
+                connection.execute("INSERT INTO pipeline.chat_archives(source_id,state,gaps) VALUES (%s,'waiting_vod',%s) ON CONFLICT DO NOTHING",
+                                   (source["id"], Jsonb([[0, duration]])))
+                archive = connection.execute("SELECT state FROM pipeline.chat_archives WHERE source_id=%s", (source["id"],)).fetchone()
+                if archive["state"] != "complete":
+                    self.store.enqueue("chat_gaps", f"chat_gaps:{source['id']}", broadcast=broadcast["id"], source=source["id"], connection=connection)
         if source["role"] == "watch_party" and self.seed_rounds(job, broadcast, source, remote, start):
             return
         position = float(job["payload"].get("checkpoint", 0))
+        align_kind = "watchparty_align" if source["provider"] == "youtube" else "twitch_align"
         if position >= duration:
-            self.store.enqueue("twitch_align", f"twitch_align:{source['id']}", broadcast=broadcast["id"], source=source["id"])
+            self.store.enqueue(align_kind, f"{align_kind}:{source['id']}", broadcast=broadcast["id"], source=source["id"])
             return
         end = min(position + 120, duration)
         frames = list(self.media.archive_fingerprints(remote, position, end, interval=2))
@@ -330,7 +340,7 @@ class TwitchCapture:
                                (end, source["id"]))
         if end < duration:
             raise ContinueJob("Twitch archive fingerprints checkpointed")
-        self.store.enqueue("twitch_align", f"twitch_align:{source['id']}", broadcast=broadcast["id"], source=source["id"])
+        self.store.enqueue(align_kind, f"{align_kind}:{source['id']}", broadcast=broadcast["id"], source=source["id"])
 
     def seed_rounds(self, job, broadcast, source, remote, source_start):
         progress = job["payload"].get("round_seed", {})
@@ -390,7 +400,8 @@ class TwitchCapture:
             connection.execute("UPDATE pipeline.jobs SET payload=payload||%s WHERE id=%s", (Jsonb({"round_seed": seed}), job["id"]))
             connection.execute("UPDATE pipeline.sources SET checkpoint_time=GREATEST(checkpoint_time,%s),updated_at=now() WHERE id=%s",
                                (max(frame["time"] for frame in target["frames"]), source["id"]))
-            self.store.enqueue("twitch_align", f"twitch-round-seed:{source['id']}:r{source['revision']}:{revision}:v1", broadcast=broadcast["id"],
+            kind = "watchparty_align" if source["provider"] == "youtube" else "twitch_align"
+            self.store.enqueue(kind, f"{'youtube' if source['provider'] == 'youtube' else 'twitch'}-round-seed:{source['id']}:r{source['revision']}:{revision}:v1", broadcast=broadcast["id"],
                                source=source["id"], payload={"visual_alignment": {"signature": signature, "mapping": alignment}},
                                priority=-10, connection=connection)
         LOG.info("watchparty_seed_verified source_id=%s frames=%s", source["id"], len(target["frames"]))
@@ -467,12 +478,12 @@ class TwitchCapture:
                 reference, target, maximum_distance=18, maximum_residual=self.config.maximum_residual, local=True
             )
         except NeedsReview as error:
-            pending = self.store.one("SELECT id FROM pipeline.jobs WHERE source_id=%s AND kind IN ('twitch_vod','twitch_live') AND state IN ('queued','running','waiting_source','retryable') LIMIT 1", (source["id"],))
+            pending = self.store.one("SELECT id FROM pipeline.jobs WHERE source_id=%s AND kind IN ('twitch_vod','twitch_live','watchparty_vod') AND state IN ('queued','running','waiting_source','retryable') LIMIT 1", (source["id"],))
             if pending or broadcast["reconciled_revision"] < broadcast["archive_revision"] or broadcast["state"] == "live":
                 raise WaitingWork("Twitch alignment is waiting for additional verified fingerprint coverage") from error
             raise
         canonical_revision = broadcast["archive_revision"] if timeline == "archive" else 0
-        if source["role"] == "watch_party" and source["metadata"].get("vod_id"):
+        if source["role"] == "watch_party" and (source["provider"] == "youtube" or source["metadata"].get("vod_id")):
             with self.store.transaction() as connection:
                 self.store.guard(connection, job)
                 connection.execute("UPDATE pipeline.jobs SET payload=payload||%s WHERE id=%s",
@@ -483,7 +494,7 @@ class TwitchCapture:
             self.store.guard(connection, job)
             connection.execute("""UPDATE pipeline.jobs SET state='unsupported',failure_kind='superseded',
                 last_error='Superseded by a newer verified alignment',updated_at=now()
-                WHERE source_id=%s AND kind='twitch_align' AND generation=%s AND created_at<%s
+                WHERE source_id=%s AND kind IN ('twitch_align','watchparty_align') AND generation=%s AND created_at<%s
                 AND state IN ('needs_review','unsupported','queued','retryable','waiting_source')""",
                 (source["id"], job["generation"], job["created_at"]))
         self.store.enqueue(
@@ -536,7 +547,7 @@ class TwitchCapture:
         cached["version"] = 4
         pending = [(key, value, start) for key, value, start in rounds if key not in checks]
         batch = {item[0] for item in pending[:4]}
-        remote = resolve_twitch(source["metadata"]["vod_id"], live=False) if pending else {}
+        remote = self.resolve_archive(source) if pending else {}
         previous = None
         for key, value, start in rounds:
             if key in checks:

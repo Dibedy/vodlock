@@ -683,10 +683,10 @@ class Processing:
                 payload={"segment_id": str(segment["id"]), "revision": revision},
             )
         for secondary in self.store.rows(
-            "SELECT id FROM pipeline.sources WHERE broadcast_id=%s AND provider='twitch'", (broadcast["id"],)
+            "SELECT id,provider FROM pipeline.sources WHERE broadcast_id=%s AND (provider='twitch' OR role='watch_party')", (broadcast["id"],)
         ):
             self.store.enqueue(
-                "twitch_align",
+                "watchparty_align" if secondary["provider"] == "youtube" else "twitch_align",
                 f"archive-twitch-alignment:{secondary['id']}:{revision}",
                 broadcast=broadcast["id"],
                 source=secondary["id"],

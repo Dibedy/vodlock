@@ -19,9 +19,11 @@ LOG = logging.getLogger(__name__)
 
 
 def watchparty_contract(canonical, secondary, match, index, mapping, alignment_version, playback_shift=0):
-    vod_id = secondary["metadata"].get("vod_id", "")
-    if secondary["role"] != "watch_party" or secondary["provider"] != "twitch" or not re.fullmatch(r"[0-9]{6,20}", vod_id):
-        raise NeedsReview("Watch-party publication requires a verified Twitch VOD")
+    provider = secondary["provider"]
+    vod_id = secondary["external_id"] if provider == "youtube" else secondary["metadata"].get("vod_id", "")
+    pattern = r"[A-Za-z0-9_-]{11}" if provider == "youtube" else r"[0-9]{6,20}"
+    if secondary["role"] != "watch_party" or provider not in {"youtube", "twitch"} or not re.fullmatch(pattern, vod_id):
+        raise NeedsReview("Watch-party publication requires a verified YouTube or Twitch archive")
     scale = mapping["timelineScale"]
     if not math.isfinite(scale) or not .95 <= scale <= 1.05:
         raise NeedsReview("Watch-party alignment has an unsupported timeline scale")
@@ -40,7 +42,7 @@ def watchparty_contract(canonical, secondary, match, index, mapping, alignment_v
             raise NeedsReview("Watch-party round sequence has invalid source timing")
         rounds.append({"map": value["map"], "round": value["round"], "start": target})
     return {
-        "schemaVersion": 2, "provider": "twitch", "sourceId": vod_id,
+        "schemaVersion": 2, "provider": provider, "sourceId": vod_id,
         "label": match["team_a"] + " vs " + match["team_b"], "leadSeconds": 5,
         "detector": DETECTOR_VERSION + "+canonical-secondary", "pipelineState": index["state"],
         "pipelineVersion": index["version"], "sourceRevision": secondary["revision"],
@@ -286,12 +288,15 @@ def export_snapshot(store, storage, shadow=True, approved_broadcasts=None, conne
                 """SELECT s.*,a.mapping,a.revision AS alignment_version FROM pipeline.sources s
                    LEFT JOIN pipeline.alignments a ON a.source_id=s.id AND a.canonical_source_id=%s
                    AND a.source_revision=s.revision AND a.canonical_revision=%s AND a.kind='secondary'
-                   WHERE s.broadcast_id=%s AND s.provider='twitch' AND s.role='watch_party' AND s.metadata ? 'vod_id'""",
+                   WHERE s.broadcast_id=%s AND s.role='watch_party' AND (s.provider='youtube' OR s.metadata ? 'vod_id')
+                   ORDER BY s.provider,s.external_id""",
                 (canonical["id"], index["archive_revision"], index["broadcast_id"])).fetchall():
-                vod_id = secondary["metadata"]["vod_id"]
+                provider = secondary["provider"]
+                vod_id = secondary["external_id"] if provider == "youtube" else secondary["metadata"]["vod_id"]
                 key = stable_id("catalog", match["id"]).hex[:16]
-                identity = f"twitch:{vod_id}:{key}"
-                version = {"expectedMatchId": str(match["id"]), "catalogId": identity, "provider": "twitch", "sourceId": vod_id,
+                identity = f"{provider}:{vod_id}:{key}"
+                version = {"expectedMatchId": str(match["id"]), "catalogId": identity, "provider": provider, "sourceId": vod_id,
+                           "kind": "watch-party",
                            "pipelineGeneration": index["generation"], "pipelineVersion": index["version"],
                            "pipelineSourceRevision": secondary["revision"], "pipelineAlignmentVersion": secondary["alignment_version"] or 0}
                 state, finding = "ready", None
@@ -301,7 +306,7 @@ def export_snapshot(store, storage, shadow=True, approved_broadcasts=None, conne
                     shift = index["provenance"]["clock"]["playback_shift"] if index["provenance"].get("method") == "live_presentation_clock" else 0
                     contract = watchparty_contract(canonical, secondary, match, index, secondary["mapping"], secondary["alignment_version"], shift)
                 except (NeedsReview, WaitingWork) as error:
-                    pending = connection.execute("SELECT id FROM pipeline.jobs WHERE source_id=%s AND kind IN ('twitch_vod','twitch_live','twitch_align') AND state IN ('queued','running','waiting_source','retryable') LIMIT 1", (secondary["id"],)).fetchone()
+                    pending = connection.execute("SELECT id FROM pipeline.jobs WHERE source_id=%s AND kind IN ('twitch_vod','twitch_live','twitch_align','watchparty_vod','watchparty_align') AND state IN ('queued','running','waiting_source','retryable') LIMIT 1", (secondary["id"],)).fetchone()
                     state = "waiting_alignment" if pending or isinstance(error, WaitingWork) else "needs_review"
                     finding = str(error)
                     catalog["withheld"].append({**version, "reason": state})
@@ -313,24 +318,43 @@ def export_snapshot(store, storage, shadow=True, approved_broadcasts=None, conne
                         (secondary["id"], match["id"], index["id"], state, Jsonb([finding] if finding else [])))
                 if finding:
                     continue
+                chat_source = secondary
+                if provider == "youtube":
+                    from .chat import watchparty_chat_alignment
+
+                    alternatives = connection.execute(
+                        """SELECT s.*,a.mapping FROM pipeline.sources s JOIN pipeline.alignments a ON a.source_id=s.id
+                           AND a.canonical_source_id=%s AND a.source_revision=s.revision AND a.canonical_revision=%s
+                           AND a.kind='secondary' WHERE s.broadcast_id=%s AND s.provider='twitch'
+                           AND s.role='watch_party' AND s.metadata->>'login'=%s AND s.metadata ? 'vod_id'
+                           ORDER BY s.external_id""",
+                        (canonical["id"], index["archive_revision"], index["broadcast_id"], secondary["metadata"].get("login"))).fetchall()
+                    chat_source = None
+                    for alternative in alternatives:
+                        alignment = watchparty_chat_alignment(secondary["mapping"], alternative["mapping"], alternative["metadata"]["vod_id"])
+                        if alignment and .95 <= alignment["timelineScale"] <= 1.05:
+                            chat_source = alternative
+                            contract["chatAlignment"] = alignment
+                            break
                 prefix = "shadow" if shadow else "release"
-                filename = f"twitch-{vod_id}-{key}-v{index['version']}-{hashlib.sha256(json_bytes(contract)).hexdigest()[:12]}.json"
+                filename = f"{provider}-{vod_id}-{key}-v{index['version']}-{hashlib.sha256(json_bytes(contract)).hexdigest()[:12]}.json"
                 storage.put(f"{prefix}/indexes/{filename}", json_bytes(contract))
                 from .chat import compact_chat
 
                 with connection.cursor(name="watchparty_chat_export") as cursor:
-                    cursor.execute("SELECT * FROM pipeline.chat_messages WHERE source_id=%s ORDER BY media_time,message_id", (secondary["id"],))
-                    chat = compact_chat(secondary, cursor)
+                    cursor.execute("SELECT * FROM pipeline.chat_messages WHERE source_id=%s ORDER BY media_time,message_id", (chat_source["id"] if chat_source else None,))
+                    chat = compact_chat(chat_source or secondary, cursor)
                 chat_fields = {}
                 if chat["messages"]:
-                    storage.put(f"{prefix}/chats/twitch-{vod_id}.json", json_bytes(chat))
-                    chat_fields = {"chat": f"/chats/twitch-{vod_id}.json", "chatSourceId": vod_id,
-                                   "chatChannelId": secondary["metadata"].get("broadcaster_user_id")}
+                    chat_id = chat_source["metadata"]["vod_id"]
+                    storage.put(f"{prefix}/chats/twitch-{chat_id}.json", json_bytes(chat))
+                    chat_fields = {"chat": f"/chats/twitch-{chat_id}.json", "chatSourceId": chat_id,
+                                   "chatChannelId": chat_source["metadata"].get("broadcaster_user_id")}
                 catalog["videos"].append({**{name: value for name, value in parent.items() if name not in {"chat", "chatSourceId", "chatChannelId"}},
-                                          **version, "kind": "watch-party", "creator": "FNS" if secondary["metadata"].get("login") == "gofns" else secondary["metadata"].get("login", "Watch party"),
+                                          **version, "creator": secondary["metadata"].get("creator") or ("FNS" if secondary["metadata"].get("login") == "gofns" else secondary["metadata"].get("login", "Watch party")),
                                           "label": "Watch party", "index": "/indexes/" + filename, **chat_fields})
         if not shadow:
-            blocked = [entry["expectedMatchId"] for entry in catalog["withheld"] if entry.get("provider") != "twitch"]
+            blocked = [entry["expectedMatchId"] for entry in catalog["withheld"] if entry.get("provider") != "twitch" and entry.get("kind") != "watch-party"]
             connection.execute("UPDATE pipeline.watchparty_publications SET state='needs_review',findings=%s,updated_at=now() WHERE expected_match_id=ANY(%s::uuid[])", (Jsonb(["Canonical match is not currently publishable"]), blocked))
         catalog["videos"].sort(key=lambda item: item["playedAt"], reverse=True)
         storage.put(("shadow" if shadow else "release") + "/catalog.json", json_bytes(catalog))

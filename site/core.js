@@ -86,7 +86,8 @@
       return {map: round.map, round: round.round, start: round.start};
     });
     const alignment = value.schemaVersion === 2 ? validateAlignment(value.alignment) : null;
-    return {schemaVersion: 2, provider, sourceId, label: String(value.label || 'Indexed VOD').slice(0, 100), leadSeconds: 5, rounds, ...(alignment ? {alignment} : {})};
+    const chatAlignment = value.schemaVersion === 2 ? validateAlignment(value.chatAlignment) : null;
+    return {schemaVersion: 2, provider, sourceId, label: String(value.label || 'Indexed VOD').slice(0, 100), leadSeconds: 5, rounds, ...(alignment ? {alignment} : {}), ...(chatAlignment ? {chatAlignment} : {})};
   }
 
   function sourceTime(index, time) {

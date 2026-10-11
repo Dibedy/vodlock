@@ -51,7 +51,7 @@ def compare_catalogs(legacy_path, shadow_path):
 
 def release_to_site(release, site):
     def identity(entry):
-        return entry.get("catalogId") if str(entry.get("catalogId", "")).startswith("twitch:") else entry.get("expectedMatchId")
+        return entry.get("catalogId") if entry.get("kind") == "watch-party" or str(entry.get("catalogId", "")).startswith("twitch:") else entry.get("expectedMatchId")
 
     def version(entry):
         return tuple(entry.get(name, 0) for name in ("pipelineGeneration", "pipelineVersion", "pipelineSourceRevision", "pipelineAlignmentVersion"))
@@ -65,17 +65,18 @@ def release_to_site(release, site):
     withheld_records = {identity(value): value for value in catalog.get("withheld", [])}
     withheld = list(incoming.get("withheld", []))
     for parent in incoming.get("withheld", []):
-        if str(parent.get("catalogId", "")).startswith("twitch:"):
+        if parent.get("kind") == "watch-party" or str(parent.get("catalogId", "")).startswith("twitch:"):
             continue
         for previous in catalog["videos"] + catalog.get("withheld", []):
-            if previous.get("provider") == "twitch" and previous.get("canonicalPipeline") and previous.get("expectedMatchId") == parent["expectedMatchId"]:
-                withheld.append({**previous, **parent, "catalogId": previous["catalogId"]})
+            if (previous.get("kind") == "watch-party" or previous.get("provider") == "twitch") and previous.get("canonicalPipeline") and previous.get("expectedMatchId") == parent["expectedMatchId"]:
+                withheld.append({**previous, **parent, "catalogId": previous["catalogId"], "kind": "watch-party",
+                                 "provider": previous["provider"], "sourceId": previous["sourceId"]})
     for entry in withheld:
         match_id = identity(entry)
         if match_id in incoming_ids:
             raise ValueError("A release cannot both publish and withhold the same match")
         previous = next((value for value in catalog["videos"] + catalog.get("withheld", []) if identity(value) == match_id), None)
-        owned_variant = entry.get("provider") == "twitch" and any(value.get("provider") == "youtube" and value["expectedMatchId"] == entry["expectedMatchId"] for value in incoming["videos"])
+        owned_variant = (entry.get("kind") == "watch-party" or entry.get("provider") == "twitch") and any(value.get("kind") != "watch-party" and value.get("provider") == "youtube" and value["expectedMatchId"] == entry["expectedMatchId"] for value in incoming["videos"])
         if (previous and previous.get("canonicalPipeline") and version(previous) <= version(entry)) or (owned_variant and (not previous or not previous.get("canonicalPipeline"))):
             withheld_ids.add(match_id)
             withheld_records[match_id] = {**(previous or {}), **entry, "canonicalPipeline": True}
@@ -103,8 +104,8 @@ def release_to_site(release, site):
             or not index.get("rounds")
         ):
             raise ValueError("Release index does not match its canonical catalog entry")
-        if entry["provider"] == "twitch":
-            parent = next((value for value in incoming["videos"] if value.get("provider") == "youtube" and value["expectedMatchId"] == entry["expectedMatchId"]), None)
+        if entry.get("kind") == "watch-party" or entry["provider"] == "twitch":
+            parent = next((value for value in incoming["videos"] if value.get("provider") == "youtube" and value.get("kind") != "watch-party" and value["expectedMatchId"] == entry["expectedMatchId"]), None)
             parent_index = json.loads(release_storage.get(parent["index"].lstrip("/"))) if parent else {}
             if not parent or not index.get("derivedFromCanonical") or index.get("canonical", {}).get("sourceId") != parent["sourceId"] or index["canonical"].get("rounds") != parent_index.get("rounds") or version(entry)[:2] != version(parent)[:2] or index.get("sourceRevision") != entry.get("pipelineSourceRevision") or index.get("alignmentVersion") != entry.get("pipelineAlignmentVersion"):
                 raise ValueError("Watch-party release is not derived from its current canonical index")

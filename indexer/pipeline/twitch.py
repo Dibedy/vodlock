@@ -12,7 +12,7 @@ from urllib.parse import urlencode
 
 from psycopg.types.json import Jsonb
 
-from .errors import ContinueJob, NeedsReview, WaitingSource, WaitingWork
+from .errors import ContinueJob, NeedsReview, Unsupported, WaitingSource, WaitingWork
 from .detection import observation_from_dict
 from .media import MediaAnalysis
 from .schedule import fetch_bytes
@@ -139,11 +139,18 @@ def apply_event(store, connection, envelope, channel, broadcast):
             connection=connection,
         )
     else:
+        wall = timestamp(envelope["metadata"]["message_timestamp"]) if kind == "channel.chat.message" else None
         sources = connection.execute(
-            "SELECT * FROM pipeline.sources WHERE broadcast_id=%s AND provider='twitch' AND metadata->>'broadcaster_user_id'=%s ORDER BY actual_start DESC LIMIT 1",
-            (broadcast["id"], broadcaster),
+            "SELECT * FROM pipeline.sources WHERE broadcast_id=%s AND provider='twitch' AND metadata->>'broadcaster_user_id'=%s AND (%s::timestamptz IS NULL OR actual_start<=%s) ORDER BY actual_start DESC LIMIT 1",
+            (broadcast["id"], broadcaster, wall, wall),
         ).fetchall()
         if not sources:
+            if wall and connection.execute(
+                "SELECT id FROM pipeline.sources WHERE broadcast_id=%s AND provider='twitch' AND metadata->>'broadcaster_user_id'=%s AND actual_start>%s LIMIT 1",
+                (broadcast["id"], broadcaster, wall),
+            ).fetchone():
+                LOG.debug("twitch_chat_before_recording event_id=%s", envelope["metadata"]["message_id"])
+                return
             raise WaitingSource("Twitch chat/lifecycle event is waiting for stream identity")
         source = sources[0]
         source_id = source["id"]
@@ -168,10 +175,7 @@ def apply_event(store, connection, envelope, channel, broadcast):
                 connection=connection,
             )
         elif kind == "channel.chat.message":
-            wall = timestamp(envelope["metadata"]["message_timestamp"])
             offset = (wall - source["actual_start"]).total_seconds()
-            if offset < 0:
-                raise NeedsReview("Twitch chat timestamp precedes the stream")
             connection.execute(
                 """INSERT INTO pipeline.chat_messages(source_id,message_id,media_time,wall_time,origin,message)
                                VALUES (%s,%s,%s,%s,'live',%s) ON CONFLICT DO NOTHING""",
@@ -303,6 +307,8 @@ class TwitchCapture:
 
     def vod(self, job):
         broadcast, source, _, _ = self.processing.context(job)
+        if source["provider"] == "youtube" and (datetime.now(timezone.utc).date() - broadcast["day"]).days > (self.config.settings or {}).get("lookback_days", 14):
+            raise Unsupported("Watch-party YouTube stream is outside the configured discovery lookback")
         vod_id = source["external_id"] if source["provider"] == "youtube" else source["metadata"].get("vod_id")
         if not vod_id:
             raise WaitingWork("Twitch archive processing requires a verified VOD ID")
@@ -694,7 +700,7 @@ class TwitchCapture:
             path = Path(directory) / "chat.json"
             with tempfile.TemporaryFile(mode="w+b") as output:
                 result = subprocess.run(
-                    [executable, "chatdownload", "--id", vod_id, "--beginning", f"{lower}s", "--ending", f"{upper}s",
+                    [executable, "chatdownload", "--id", vod_id, "--beginning", f"{math.floor(lower)}s", "--ending", f"{math.ceil(upper)}s",
                      "--threads", "2", "--collision", "Overwrite", "--temp-path", directory, "-o", str(path)],
                     stdout=output, stderr=output, timeout=300,
                     creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))

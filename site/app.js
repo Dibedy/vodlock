@@ -92,7 +92,7 @@
   const teamKey = value => value.normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^A-Za-z0-9]/g, '').toUpperCase();
   const teamAliases = new Map(vctTeams.flatMap(team => [team.code, team.name, ...(team.aliases || [])].map(value => [teamKey(value), team.code])));
   const teamsByCode = new Map(vctTeams.map(team => [team.code, team]));
-  const state = {catalog: [], entry: null, index: null, chat: [], chatIndex: null, chatPosition: null, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, startTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null, teamPickerMode: 'favourites'};
+  const state = {catalog: [], entry: null, index: null, chat: [], chatIndex: null, chatPosition: null, openRequest: 0, player: null, ready: false, started: false, playing: false, theater: false, resume: readResume(), resumeTime: null, lastResumeWrite: 0, toastTimer: null, statusTimer: null, startTimer: null, kindFilter: 'all', regionFilter: 'all', teamFilter: 'all', favouriteTeams: readFavouriteTeams(), watchedMatches: readWatchedMatches(), tournament: null, teamPickerMode: 'favourites'};
   let settings = readSettings();
   let keybinds = readKeybinds();
 
@@ -259,7 +259,8 @@
     if (!messages.length) {
       const empty = document.createElement('p');
       empty.className = 'chat-empty';
-      empty.textContent = 'No archived messages at this point in the VOD.';
+      empty.textContent = Number.isFinite(now) ? 'No archived messages at this point in the VOD.' :
+        'Chat is not synced for this part of the video. It will return at the next verified section.';
       host.append(empty);
       return;
     }
@@ -295,11 +296,13 @@
     host.scrollTop = host.scrollHeight;
   }
 
-  async function loadChat(entry, index) {
+  async function loadChat(entry, index, request = state.openRequest) {
     chatEmotes = new Map();
     state.chat = [];
     state.chatIndex = null;
     state.chatPosition = null;
+    const pending = state.chat;
+    let chatIndex = null;
     const chatMatch = typeof entry.chat === 'string' && entry.chat.match(/^\/chats\/twitch-([0-9]{6,20})\.json$/);
     if (!chatMatch) return;
     const sourceId = entry.chatSourceId || entry.sourceId;
@@ -307,14 +310,16 @@
     if (entry.provider === 'youtube') {
       const alignment = index.chatAlignment || index.alignment;
       if (alignment?.source !== 'twitch:' + sourceId) return;
-      state.chatIndex = {...index, alignment};
+      chatIndex = {...index, alignment};
     } else if (entry.provider !== 'twitch' || sourceId !== entry.sourceId) {
       return;
     }
     const response = await fetch(entry.chat, {cache: 'no-store'});
-    if (!response.ok) return;
-    state.chat = VodlockSite.validateChat(await response.json(), sourceId);
-    const messages = state.chat;
+    if (!response.ok || state.chat !== pending || request !== state.openRequest) return;
+    const messages = VodlockSite.validateChat(await response.json(), sourceId);
+    if (state.chat !== pending || request !== state.openRequest) return;
+    state.chat = messages;
+    state.chatIndex = chatIndex;
     const channelId = entry.chatChannelId;
     if (typeof channelId !== 'string' || !/^[0-9]{1,20}$/.test(channelId)) return;
     const urls = ['https://7tv.io/v3/emote-sets/global', 'https://7tv.io/v3/users/twitch/' + channelId];
@@ -755,6 +760,7 @@
   }
 
   function showLibrary(updateHistory = true) {
+    state.openRequest++;
     saveResume(true);
     clearInterval(state.statusTimer);
     state.statusTimer = null;
@@ -792,11 +798,16 @@
       toast('This VOD has not been processed yet.');
       return;
     }
+    const request = ++state.openRequest;
     const response = await fetch(entry.index, {cache: 'no-store'});
+    if (request !== state.openRequest) return;
     if (!response.ok) throw new Error('This round index is temporarily unavailable.');
-    const index = VodlockSite.validateIndex(await response.json());
+    const value = await response.json();
+    if (request !== state.openRequest) return;
+    const index = VodlockSite.validateIndex(value);
     if (index.provider !== entry.provider || index.sourceId !== entry.sourceId) throw new Error('The catalog and round index do not match.');
-    await loadChat(entry, index);
+    await loadChat(entry, index, request);
+    if (request !== state.openRequest) return;
     setPlaybackControlsDisabled(true);
     state.entry = entry;
     state.index = index;

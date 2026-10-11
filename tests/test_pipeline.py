@@ -848,6 +848,21 @@ class PipelineTests(unittest.TestCase):
                             Config.load(path)
                     settings["deployment"].pop(key)
 
+    def test_watchparty_chat_alignment_updates_use_incremental_budget_unless_newly_usable(self):
+        deploy = Deployment(Mock(), Config("test"))
+        entry = {"canonicalPipeline": True, "catalogId": "youtube:abcdefghijk:match", "expectedMatchId": "match",
+                 "provider": "youtube", "kind": "watch-party", "index": "/indexes/watch.json",
+                 "chat": "/chats/twitch-123456789.json", "chatSourceId": "123456789"}
+        catalog = {"videos": [entry]}
+        index = {"rounds": [{"start": 100}], "alignment": {"segments": [{"targetStart": 0, "targetEnd": 300}]},
+                 "chatAlignment": {"segments": [{"targetStart": 0, "targetEnd": 200}]}}
+        before = {entry["index"]: index, entry["chat"]: {"messages": [{"t": 100}]}}
+        after = {**before, entry["index"]: {**index, "chatAlignment": {"segments": [{"targetStart": 0, "targetEnd": 300}]}}}
+        self.assertEqual(deploy.publication_kind(catalog, catalog, before, after, set()), "incremental")
+        self.assertEqual(deploy.publication_kind(catalog, catalog, before, after, {"123456789"}), "ready")
+        before[entry["index"]] = {**index, "chatAlignment": {"segments": [{"targetStart": 200, "targetEnd": 300}]}}
+        self.assertEqual(deploy.publication_kind(catalog, catalog, before, after, set()), "ready")
+
     def test_deployment_verification_waits_and_records_success(self):
         store = Mock()
         from datetime import datetime, timezone
@@ -950,6 +965,24 @@ class PipelineTests(unittest.TestCase):
             youtube.discover(channel, uploads=True)
             requester.assert_called_once()
             downloader.assert_not_called()
+
+    def test_youtube_discovery_without_title_filters_accepts_arbitrary_matchups(self):
+        feed = b'<feed xmlns="http://www.w3.org/2005/Atom" xmlns:yt="http://www.youtube.com/xml/schemas/2015"><entry><yt:videoId>abcdefghijk</yt:videoId><title>Just watching today</title></entry></feed>'
+        youtube = YouTube(Mock(return_value=feed))
+        self.assertEqual([entry["id"] for entry in youtube.discover({"channel_id": "creator"})], ["abcdefghijk"])
+
+    def test_watchparty_discovery_uses_stream_listing_even_when_rss_succeeds(self):
+        requester = Mock(return_value=b'<feed/>')
+        youtube = YouTube(requester)
+        channel = {"channel_id": "creator", "excludeTitle": "HIGHLIGHTS"}
+        with patch("yt_dlp.YoutubeDL") as factory:
+            downloader = factory.return_value.__enter__.return_value
+            downloader.extract_info.return_value = {"channel_id": "creator", "entries": [
+                {"id": "abcdefghijk", "title": "Only one matchup", "live_status": "is_live"},
+                {"id": "lmnopqrstuv", "title": "Other match HIGHLIGHTS"}]}
+            self.assertEqual([entry["id"] for entry in youtube.discover(channel, streams_only=True)], ["abcdefghijk"])
+            requester.assert_not_called()
+            downloader.extract_info.assert_called_once_with("https://www.youtube.com/channel/creator/streams", download=False)
 
     def test_discovery_failure_is_classified_and_rss_is_retried_after_cooldown(self):
         import yt_dlp

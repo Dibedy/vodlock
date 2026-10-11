@@ -248,6 +248,46 @@ test('chat protection flags likely results without changing messages or hiding o
   assert.equal(isChatSpoiler([['WON', '25']]), false);
 });
 
+test('late chat downloads cannot replace a newer source or a cancelled navigation', async () => {
+  const resolvers = [];
+  const loader = chatLoader(() => new Promise(resolve => resolvers.push(resolve)));
+  const first = {provider: 'youtube', sourceId: 'abcdefghijk', chat: '/chats/twitch-1234567890.json', chatSourceId: '1234567890'};
+  const second = {...first, sourceId: 'lmnopqrstuv', chat: '/chats/twitch-1234567891.json', chatSourceId: '1234567891'};
+  const index = entry => ({alignment: {source: 'twitch:' + entry.chatSourceId}});
+  const response = entry => ({ok: true, json: async () => ({v: 1, source: entry.chatSourceId,
+    messages: [{t: 100, u: entry.sourceId, c: '', f: [['hello']]}]})});
+  const older = loader.load(first, index(first));
+  const newer = loader.load(second, index(second));
+  resolvers[1](response(second));
+  await newer;
+  resolvers[0](response(first));
+  await older;
+  assert.equal(loader.state().chat[0].user, second.sourceId);
+  assert.equal(loader.state().chatIndex.alignment.source, 'twitch:' + second.chatSourceId);
+  loader.state().openRequest = 0;
+  const cancelled = loader.load(first, index(first));
+  loader.state().openRequest++;
+  resolvers[2](response(first));
+  await cancelled;
+  assert.equal(loader.state().chat.length, 0);
+  assert.equal(loader.state().chatIndex, null);
+});
+
+test('late index responses cannot reopen a cancelled VOD', async () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const entry = {key: 'first', provider: 'youtube', sourceId: 'abcdefghijk', index: '/indexes/first.json'};
+  let resolveIndex;
+  const sandbox = vm.createContext({state: {catalog: [entry], openRequest: 0}, entryKey: entry => entry.key,
+    fetch: () => new Promise(resolve => {resolveIndex = resolve;}),
+    VodlockSite: context.VodlockSite, loadChat: () => {throw new Error('Cancelled VOD loaded chat');}});
+  vm.runInContext(app.slice(app.indexOf('  async function openVideo('), app.indexOf('  function loadYouTubeApi(')), sandbox);
+  const pending = sandbox.openVideo('first');
+  sandbox.state.openRequest++;
+  resolveIndex({ok: true, json: () => {throw new Error('Cancelled VOD parsed its index');}});
+  await pending;
+  assert.equal(sandbox.state.entry, undefined);
+});
+
 test('YouTube watch parties keep separate canonical and Twitch chat alignment', async () => {
   const index = validateIndex({...sample(), schemaVersion: 2, provider: 'youtube', sourceId: 'ZphbktbT26k',
     alignment: {source: 'youtube:abcdefghijk', timelineScale: 1, strictCoverage: true,
@@ -339,6 +379,10 @@ test('chat rendering removes bots and spoilers before the cap without placeholde
   sandbox.renderChat(true);
   assert.equal(host.children.length, 1);
   assert.equal(host.children[0].className, 'chat-empty');
+  state.chatIndex = {alignment: {timelineScale: 1, strictCoverage: true,
+    segments: [{targetStart: 200, targetEnd: 300, offset: 0}]}};
+  sandbox.renderChat(true);
+  assert.match(host.children[0].textContent, /Chat is not synced/);
 });
 
 test('chat toggle displays its current visibility rather than the opposite action', () => {

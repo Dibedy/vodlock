@@ -25,7 +25,7 @@ from pipeline.deployment import Deployment
 from pipeline.cli import main as cli_main, release_to_site
 from pipeline.coordinator import Coordinator
 from pipeline.detection import DETECTOR_VERSION, CandidateDetector
-from pipeline.errors import ContinueJob, NeedsReview, StaleAttempt, WaitingSource, WaitingWork
+from pipeline.errors import ContinueJob, NeedsReview, StaleAttempt, Unsupported, WaitingSource, WaitingWork
 from pipeline.processing import Processing
 from pipeline.publishing import export_snapshot, persist_index
 from pipeline.schedule import ingest_schedule
@@ -743,6 +743,26 @@ class DatabasePipelineTests(unittest.TestCase):
             capture.chat_gaps(job)
         self.assertEqual(calls[-1], [2500, 2600])
 
+    def test_chat_recovery_uses_locale_independent_bounds_without_changing_exact_coverage(self):
+        twitch = identifier()
+        self.store.execute("INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role,actual_start,metadata) VALUES (%s,%s,'twitch','123456789','watch_party','2026-10-04T10:00:00Z',%s)",
+                           (twitch, self.broadcast, Jsonb({"vod_id": "123456789"})))
+        self.store.execute("INSERT INTO pipeline.chat_archives(source_id,state,gaps) VALUES (%s,'waiting_vod',%s)", (twitch, Jsonb([[.125, 20.557498]])))
+        self.store.enqueue("chat_gaps", "fractional-chat", broadcast=self.broadcast, source=twitch)
+        job = self.store.claim()
+        capture = TwitchCapture(self.store, self.config, Processing(self.store, self.config, self.storage))
+        def download(arguments, **kwargs):
+            self.assertEqual(arguments[arguments.index("--beginning") + 1], "0s")
+            self.assertEqual(arguments[arguments.index("--ending") + 1], "21s")
+            Path(arguments[-1]).write_text(json.dumps({"comments": [
+                {"_id": str(time), "content_offset_seconds": time} for time in [0, 10, 20.6]]}))
+            return Mock(returncode=0)
+        with patch.dict(os.environ, {"TWITCH_DOWNLOADER": "downloader"}), patch("subprocess.run", side_effect=download):
+            capture.chat_gaps(job)
+        self.assertEqual(self.store.one("SELECT payload FROM pipeline.jobs WHERE id=%s", (job["id"],))["payload"]["chat_coverage"], [[.125, 20.557498]])
+        self.assertEqual(self.store.rows("SELECT media_time FROM pipeline.chat_messages WHERE source_id=%s", (twitch,)), [{"media_time": 10}])
+        self.assertEqual(self.store.one("SELECT state FROM pipeline.chat_archives WHERE source_id=%s", (twitch,))["state"], "complete")
+
     def test_canonical_checkpoint_yield_does_not_start_optional_alignment_in_delay_gap(self):
         self.store.enqueue("reconcile", "canonical", broadcast=self.broadcast, source=self.source, priority=30)
         self.store.enqueue("twitch_align", "optional", broadcast=self.broadcast, priority=-40)
@@ -1330,7 +1350,9 @@ class DatabasePipelineTests(unittest.TestCase):
             coordinator.discover_youtube({"payload": {"routes": routes}})
         self.assertIsNotNone(self.store.one("SELECT * FROM pipeline.jobs WHERE dedupe_key='associate-upload:lmnopqrstuv'"))
 
-    def test_youtube_watchparty_association_uses_stream_window_not_matchup_title(self):
+    @patch("pipeline.coordinator.datetime")
+    def test_youtube_watchparty_association_uses_stream_window_not_matchup_title(self, clock):
+        clock.now.return_value = timestamp("2026-10-11T20:00:00Z")
         channel = {"channel_id": "creator-channel", "official_youtube_channel_id": "official", "login": "gofns", "creator": "FNS"}
         youtube = Mock()
         youtube.metadata.return_value = {"state": "ended_waiting_archive", "actual_start": timestamp("2026-10-04T09:45:00Z"),
@@ -1353,6 +1375,29 @@ class DatabasePipelineTests(unittest.TestCase):
             VALUES (%s,'Champions','2026-10-04','international','official','otherstream','live','2026-10-04T11:00:00Z')""", (identifier(),))
         with self.assertRaisesRegex(NeedsReview, "multiple official broadcasts"):
             coordinator.associate_watchparty(job)
+        clock.now.return_value = timestamp("2026-10-20T20:00:00Z")
+        with self.assertRaisesRegex(Unsupported, "outside the configured discovery lookback"):
+            coordinator.associate_watchparty(job)
+        capture = TwitchCapture(self.store, self.config, Mock())
+        capture.processing.context.return_value = (self.store.one("SELECT * FROM pipeline.broadcasts WHERE id=%s", (self.broadcast,)), sources[0], None, None)
+        with patch("pipeline.twitch.datetime") as vod_clock:
+            vod_clock.now.return_value = clock.now.return_value
+            with self.assertRaisesRegex(Unsupported, "outside the configured discovery lookback"):
+                capture.vod(job)
+        capture.processing.youtube.resolve.assert_not_called()
+
+    def test_watchparty_discovery_routes_to_streams_and_retries_missing_metadata(self):
+        youtube = Mock()
+        youtube.discover.return_value = [{"id": "lmnopqrstuv", "title": "Only one matchup"}]
+        channel = {"channel_id": "creator-channel", "official_youtube_channel_id": "official", "login": "gofns", "creator": "FNS"}
+        coordinator = Coordinator(self.store, self.config, youtube)
+        coordinator.discover_youtube({"payload": {"routes": [{"kind": "associate_watchparty", "channel": channel}]}})
+        youtube.discover.assert_called_once_with(channel, streams_only=True)
+        job = self.store.claim()
+        youtube.metadata.return_value = {"state": "unavailable", "metadata": {}}
+        with self.assertRaisesRegex(WaitingSource, "metadata is currently unavailable"):
+            coordinator.associate_watchparty(job)
+        self.assertEqual(self.store.rows("SELECT id FROM pipeline.sources WHERE role='watch_party'"), [])
 
     def test_youtube_watchparty_export_release_preserves_official_and_twitch_chat(self):
         job = self.job()
@@ -2998,6 +3043,18 @@ class DatabasePipelineTests(unittest.TestCase):
         )
         self.assertEqual(self.store.one("SELECT count(*) AS count FROM pipeline.chat_messages")["count"], 1)
         self.assertEqual(self.store.one("SELECT * FROM pipeline.chat_messages")["media_time"], 120)
+        before = {**chat, "metadata": {"message_id": "pre-stream", "message_timestamp": "2026-10-04T09:59:59Z"}}
+        ingest_event(self.store, before, [channel])
+        self.assertEqual(self.store.one("SELECT count(*) AS count FROM pipeline.chat_messages")["count"], 1)
+        self.assertIsNotNone(self.store.one("SELECT event_id FROM pipeline.source_events WHERE event_id='pre-stream'"))
+        self.assertEqual(self.store.rows("SELECT id FROM pipeline.jobs WHERE kind='twitch_event'"), [])
+        later = envelope("stream.online", {"id": "987654321", "started_at": "2026-10-04T11:00:00Z"}, "later")
+        ingest_event(self.store, later, [channel])
+        delayed = {**chat, "metadata": {"message_id": "delayed", "message_timestamp": "2026-10-04T10:05:00Z"},
+                   "payload": {**chat["payload"], "event": {**chat["payload"]["event"], "message_id": "delayed-message"}}}
+        ingest_event(self.store, delayed, [channel])
+        self.assertEqual(self.store.one("SELECT s.external_id,m.media_time FROM pipeline.chat_messages m JOIN pipeline.sources s ON s.id=m.source_id WHERE m.message_id='delayed-message'"),
+                         {"external_id": "123456789", "media_time": 300})
 
     def test_bounded_retry_is_per_job(self):
         first = self.job("probe_archive")

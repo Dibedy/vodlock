@@ -100,7 +100,10 @@ class Coordinator:
         for route in job["payload"]["routes"]:
             channel, kind = route["channel"], route["kind"]
             try:
-                entries = self.youtube.discover(channel, uploads=kind == "associate_upload")
+                if kind == "associate_watchparty":
+                    entries = self.youtube.discover(channel, streams_only=True)
+                else:
+                    entries = self.youtube.discover(channel, uploads=kind == "associate_upload")
             except WaitingSource as error:
                 failures.append(str(error))
                 continue
@@ -126,17 +129,21 @@ class Coordinator:
 
         entry, channel = job["payload"]["entry"], job["payload"]["channel"]
         info = self.youtube.metadata(entry["id"])
+        if info["state"] == "unavailable":
+            raise WaitingSource("Watch-party YouTube metadata is currently unavailable")
         metadata = info["metadata"]
         owner = metadata.get("channel_id") or metadata.get("snippet", {}).get("channelId")
         if owner != channel["channel_id"]:
             raise NeedsReview("Watch-party YouTube channel identity does not match configuration")
         if info["state"] == "scheduled":
             raise WaitingWork("Watch-party YouTube broadcast has not started")
-        if info["state"] in {"discovered", "unavailable"}:
+        if info["state"] == "discovered":
             raise Unsupported("Watch-party source must be a YouTube livestream or its archive")
         start = info["actual_start"]
         if not start:
             raise WaitingSource("Watch-party YouTube stream start time is unavailable")
+        if (datetime.now(timezone.utc).date() - start.date()).days > (self.config.settings or {}).get("lookback_days", 14):
+            raise Unsupported("Watch-party YouTube stream is outside the configured discovery lookback")
         end = info["actual_end"] or timestamp(start.timestamp() + float(metadata.get("duration") or 0))
         if end <= start:
             end = datetime.now(timezone.utc)

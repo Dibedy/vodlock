@@ -136,7 +136,7 @@ class Deployment:
                 return False
             index = artifacts[entry["index"]]
             return any(section["targetStart"] <= value["start"] <= section["targetEnd"]
-                       for section in index.get("alignment", {}).get("segments", []) for value in index["rounds"])
+                       for section in index.get("chatAlignment", index.get("alignment", {})).get("segments", []) for value in index["rounds"])
 
         old, new = entries(previous), entries(current)
         if [entry for entry in previous["videos"] if not entry.get("canonicalPipeline")] != [entry for entry in current["videos"] if not entry.get("canonicalPipeline")]:
@@ -155,7 +155,7 @@ class Deployment:
             if {name: value for name, value in entry.items() if name not in ignored} != {name: value for name, value in prior.items() if name not in ignored}:
                 return "ready"
             index, prior_index = after[entry["index"]], before[prior["index"]]
-            if {name: value for name, value in index.items() if name not in {"alignment", "alignmentVersion"}} != {name: value for name, value in prior_index.items() if name not in {"alignment", "alignmentVersion"}}:
+            if {name: value for name, value in index.items() if name not in {"alignment", "alignmentVersion", "chatAlignment"}} != {name: value for name, value in prior_index.items() if name not in {"alignment", "alignmentVersion", "chatAlignment"}}:
                 return "ready"
             usable = chat_ready(entry, after)
             if usable and (not chat_ready(prior, before) or entry.get("chatSourceId") != prior.get("chatSourceId")):

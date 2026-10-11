@@ -66,14 +66,15 @@ class YouTube:
         self.invalidate(video_id)
         self.rejected_media[video_id] = time.monotonic() + 1800
 
-    def discover(self, channel, uploads=False):
+    def discover(self, channel, uploads=False, streams_only=False):
         from auto_publish import discover_youtube, is_candidate
         import yt_dlp
 
         channel_id = channel["channel_id"]
-        legacy = {**channel, "channelId": channel_id, "canonicalStream": True, "minimumDuration": 0}
+        legacy = {"includeTitle": ".*", "excludeTitle": "(?!)", **channel,
+                  "channelId": channel_id, "canonicalStream": True, "minimumDuration": 0}
         now = time.monotonic()
-        if now >= self.rss_retry_at.get(channel_id, 0):
+        if not streams_only and now >= self.rss_retry_at.get(channel_id, 0):
             try:
                 cached = self.rss_feeds.get(channel_id)
                 feed = cached[1] if cached and now - cached[0] < 30 else self.requester(

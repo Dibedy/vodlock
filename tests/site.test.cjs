@@ -598,7 +598,7 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   assert.doesNotMatch(app, /\+ 31|31 seconds/);
   assert.match(app, /twitch-timeline-hidden/);
-  assert.match(app, /requestFullscreen\) \$\('watch-layout'\)\.requestFullscreen/);
+  assert.match(app, /await \$\('watch-layout'\)\.requestFullscreen\(\)/);
   assert.match(index, /setting-hide-twitch-timeline/);
   assert.match(index, /setting-show-chat/);
   assert.match(index, /setting-fullscreen-chat-position/);
@@ -618,11 +618,11 @@ test('website keeps concise archive copy and uses ten-second arrow navigation', 
   assert.doesNotMatch(styles, /\.library-title::before/);
   assert.match(styles, /\.library-summary \{[^}]+transform: translateY\(clamp\(12px, 2vw, 28px\)\)/);
   assert.match(styles, /twitch-timeline-hidden #media-player iframe[^}]+top: -90px[^}]+height: calc\(100% \+ 180px\)/);
-  assert.match(styles, /watch-layout:fullscreen \.chat-panel/);
-  assert.match(styles, /watch-layout:fullscreen \.chat-panel \{[^}]+width: clamp\(340px, 22vw, 430px\)[^}]+height: 16vh[^}]+top: 34vh[^}]+left: clamp/);
+  assert.match(styles, /watch-layout:is\(:fullscreen, \.window-fullscreen\) \.chat-panel/);
+  assert.match(styles, /\.chat-panel \{[^}]+width: min\([^}]+clamp\(340px, 22vw, 430px\)[^}]+height: 16vh[^}]+top: 34vh[^}]+left: clamp/);
   assert.match(styles, /fullscreen-chat-right \.chat-panel/);
-  assert.match(styles, /watch-layout:fullscreen \.chat-message \{[^}]+font-size: clamp\(12px, \.85vw, 16px\)/);
-  assert.match(styles, /watch-layout:fullscreen \.player-controls \{ display: none; \}/);
+  assert.match(styles, /watch-layout:is\(:fullscreen, \.window-fullscreen\) \.chat-message \{[^}]+font-size: clamp\(12px, \.85vw, 16px\)/);
+  assert.match(styles, /fullscreen-controls-visible \.player-controls \{ visibility: visible; pointer-events: auto; \}/);
 });
 
 test('website library supports source, region, and all VCT team filters', () => {

@@ -41,7 +41,7 @@ jobs:
       - run: python -m mypy --check-untyped-defs --follow-imports=silent --ignore-missing-imports indexer/pipeline
       - run: python -m compileall -q indexer/pipeline
       - run: python -m unittest discover -s tests -p 'test_*.py'
-      - run: node --test tests/site.test.cjs tests/index.test.cjs tests/bridge.test.cjs tests/workflows.test.cjs
+      - run: node --test tests/site.test.cjs tests/index.test.cjs tests/bridge.test.cjs tests/workflows.test.cjs tests/fullscreen.test.cjs
       - run: python -m pipeline.worker --migrate-only
       - run: docker build -f indexer/Dockerfile.worker -t spoilless-worker:test .
       - run: docker run --rm spoilless-worker:test node --version

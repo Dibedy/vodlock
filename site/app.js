@@ -236,7 +236,7 @@
 
   function renderChat(force = false) {
     const available = state.chat.length > 0;
-    const fullscreen = document.fullscreenElement === $('watch-layout');
+    const fullscreen = document.fullscreenElement === $('watch-layout') || state.windowFullscreen;
     const visible = available && settings.showChat && !(fullscreen && settings.fullscreenChatPosition === 'hidden');
     $('chat-panel').hidden = !visible;
     $('chat-toggle').hidden = !available;
@@ -763,6 +763,9 @@
   }
 
   function showLibrary(updateHistory = true) {
+    if (state.windowFullscreen) setWindowFullscreen(false);
+    if (document.fullscreenElement === $('watch-layout')) toggleFullscreen();
+    hideFullscreenControls();
     state.openRequest++;
     saveResume(true);
     clearInterval(state.statusTimer);
@@ -1102,6 +1105,9 @@
   function setPlaybackControlsDisabled(disabled) {
     for (const identifier of ['play-button', 'back-ten', 'skip-replay', 'mute-button', 'volume',
       'previous-round', 'next-round', 'previous-map', 'next-map', 'restart-round']) $(identifier).disabled = disabled;
+    $('fullscreen-reveal').hidden = !(document.fullscreenElement === $('watch-layout') || state.windowFullscreen);
+    if (disabled) hideFullscreenControls();
+    showFullscreenControls();
   }
 
   function seek(destination, message, automatic = false) {
@@ -1177,10 +1183,55 @@
     $('mute-button').setAttribute('aria-label', muted ? 'Unmute' : 'Mute');
   }
 
-  function toggleFullscreen() {
-    if (document.fullscreenElement) document.exitFullscreen();
-    else if ($('watch-layout').requestFullscreen) $('watch-layout').requestFullscreen();
-    else toast('Full screen is not available in this browser.');
+  function hideFullscreenControls() {
+    clearTimeout(state.fullscreenControlsTimer);
+    state.fullscreenControlsTimer = null;
+    $('watch-layout').classList.remove('fullscreen-controls-visible');
+  }
+
+  function showFullscreenControls() {
+    if (document.fullscreenElement !== $('watch-layout') && !state.windowFullscreen) return;
+    hideFullscreenControls();
+    $('watch-layout').classList.add('fullscreen-controls-visible');
+    if (!state.ready) return;
+    state.fullscreenControlsTimer = setTimeout(() => {
+      if ($('watch-layout').querySelector('.round-dock :focus-visible, .player-controls :focus-visible')) return;
+      if (document.activeElement?.closest('.round-dock, .player-controls')) $('fullscreen-reveal').focus({preventScroll: true});
+      hideFullscreenControls();
+    }, 4000);
+  }
+
+  function setWindowFullscreen(enabled) {
+    state.windowFullscreen = enabled;
+    $('watch-layout').classList.toggle('window-fullscreen', enabled);
+    document.body.classList.toggle('window-fullscreen-active', enabled);
+    syncFullscreenButton();
+    renderChat(true);
+    if (enabled) showFullscreenControls();
+    else hideFullscreenControls();
+  }
+
+  async function toggleFullscreen() {
+    if (state.windowFullscreen) {
+      setWindowFullscreen(false);
+      return;
+    }
+    if (document.fullscreenElement) {
+      try { await document.exitFullscreen(); } catch (error) { toast('Could not exit full screen: ' + error.message); }
+      return;
+    }
+    const request = state.openRequest;
+    if ($('watch-layout').requestFullscreen && document.fullscreenEnabled !== false) {
+      try {
+        await $('watch-layout').requestFullscreen();
+        if (request !== state.openRequest && document.fullscreenElement === $('watch-layout')) await document.exitFullscreen();
+        return;
+      } catch (error) {
+        if (request !== state.openRequest || $('player-view').hidden) return;
+        toast('Full screen fills the browser window here.');
+      }
+    }
+    setWindowFullscreen(true);
   }
 
   function toggleTheater() {
@@ -1200,9 +1251,11 @@
 
   function syncFullscreenButton() {
     const chatVisible = !$('chat-panel').hidden;
-    const fullscreen = document.fullscreenElement === $('watch-layout');
-    $('fullscreen-button').textContent = fullscreen ? 'Exit full screen' : 'Full screen';
+    const fullscreen = document.fullscreenElement === $('watch-layout') || state.windowFullscreen;
+    $('fullscreen-button').textContent = fullscreen ? 'Exit' : 'Full screen';
     $('fullscreen-button').setAttribute('aria-label', fullscreen ? 'Exit fullscreen' : chatVisible ? 'Enter fullscreen with chat' : 'Enter fullscreen');
+    $('fullscreen-reveal').hidden = !fullscreen;
+    if (!fullscreen) hideFullscreenControls();
   }
 
   $('settings-button').addEventListener('click', () => $('settings-dialog').showModal());
@@ -1315,10 +1368,20 @@
     toast('Video quality set to ' + event.target.options[event.target.selectedIndex].textContent + '.');
   });
   $('fullscreen-button').addEventListener('click', toggleFullscreen);
+  $('fullscreen-reveal').addEventListener('click', showFullscreenControls);
+  $('watch-layout').addEventListener('pointermove', event => {
+    if (event.pointerType === 'mouse') showFullscreenControls();
+  });
+  $('watch-layout').addEventListener('pointerdown', event => {
+    if (event.target.closest('.round-dock, .player-controls')) showFullscreenControls();
+  });
+  $('watch-layout').addEventListener('focusin', showFullscreenControls);
+  $('watch-layout').addEventListener('focusout', showFullscreenControls);
   $('theater-button').addEventListener('click', toggleTheater);
   document.addEventListener('fullscreenchange', () => {
     syncFullscreenButton();
     renderChat(true);
+    if (document.fullscreenElement === $('watch-layout')) showFullscreenControls();
   });
   new MutationObserver(preventTwitchNativeFullscreen).observe($('player-shell'), {subtree: true, childList: true, attributes: true, attributeFilter: ['allow', 'allowfullscreen']});
   addEventListener('blur', reclaimPlayerFocus);
@@ -1335,6 +1398,11 @@
 
   document.addEventListener('keydown', event => {
     if ($('player-view').hidden || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
+    if (event.key === 'Escape' && state.windowFullscreen) {
+      event.preventDefault();
+      setWindowFullscreen(false);
+      return;
+    }
     if ($('settings-dialog').open || $('site-info').open || event.defaultPrevented) return;
     const key = event.code === 'Space' ? ' ' : event.key;
     if (!state.started) {

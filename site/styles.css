@@ -245,17 +245,31 @@ body.theater-mode main { width: 100%; }
 .player-view.theater-active .watch-layout.chat-visible { grid-template-columns: minmax(0, 1fr) clamp(320px, 24vw, 420px); }
 .player-view.theater-active .player-topline, .player-view.theater-active .watch-heading { max-width: none; }
 
-.watch-layout:fullscreen { width: 100vw; height: 100vh; padding: 0; display: block; position: relative; background: #000; }
-.watch-layout:fullscreen .video-column { width: 100%; height: 100%; min-height: 0; display: flex; flex-direction: column; background: #000; }
-.watch-layout:fullscreen .player-shell { width: 100%; min-height: 0; height: 100%; flex: 1 1 auto; aspect-ratio: auto; border: 0; }
-.watch-layout:fullscreen .round-dock { display: none; }
-.watch-layout:fullscreen .player-controls { display: none; }
-.watch-layout:fullscreen .chat-panel { width: clamp(340px, 22vw, 430px); height: 16vh; min-height: 0; position: absolute; z-index: 4; top: 34vh; left: clamp(14px, 1.6vw, 30px); border: 0; background: transparent; overflow: hidden; pointer-events: none; }
-.watch-layout:fullscreen.fullscreen-chat-right .chat-panel { left: auto; right: clamp(14px, 1.6vw, 30px); }
-.watch-layout:fullscreen .chat-heading, .watch-layout:fullscreen .chat-warning { display: none; }
-.watch-layout:fullscreen .chat-messages { height: 100%; max-height: none; padding: 0 2px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
-.watch-layout:fullscreen .chat-message { margin-bottom: 4px; color: #fff; font-size: clamp(12px, .85vw, 16px); font-weight: 700; line-height: 1.3; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 1px 2px #000; }
-.watch-layout:fullscreen .chat-message strong { color: #fff; }
+.watch-layout:is(:fullscreen, .window-fullscreen) { width: 100%; height: 100dvh; padding: 0; display: block; position: relative; background: #000; }
+.watch-layout.window-fullscreen { position: fixed; z-index: 40; inset: 0; }
+body.window-fullscreen-active { overflow: hidden; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .video-column { width: 100%; height: 100%; min-height: 0; display: flex; flex-direction: column; background: #000; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .player-shell { width: 100%; min-height: 0; height: 100%; flex: 1 1 auto; aspect-ratio: auto; border: 0; }
+.fullscreen-reveal { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; }
+.fullscreen-reveal:focus-visible { outline: 2px solid var(--lime); outline-offset: -4px; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .round-dock,
+.watch-layout:is(:fullscreen, .window-fullscreen) .player-controls { position: absolute; z-index: 6; left: 50%; transform: translateX(-50%); width: min(600px, calc(100% - 24px)); visibility: hidden; pointer-events: none; }
+.watch-layout:is(:fullscreen, .window-fullscreen).fullscreen-controls-visible .round-dock,
+.watch-layout:is(:fullscreen, .window-fullscreen).fullscreen-controls-visible .player-controls { visibility: visible; pointer-events: auto; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .round-dock { bottom: calc(64px + env(safe-area-inset-bottom)); min-height: 56px; display: block; border-top-width: 1px; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .round-position { display: none; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .round-actions button { min-height: 56px; padding: 6px; gap: 6px; font-size: 11px; letter-spacing: 0; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .player-controls { bottom: env(safe-area-inset-bottom); height: 64px; min-height: 64px; flex-wrap: nowrap; padding: 8px; gap: 4px; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .player-controls button { min-width: 44px; padding: 0 8px; font-size: 11px; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .audio-controls,
+.watch-layout:is(:fullscreen, .window-fullscreen) #theater-button { display: none; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .view-controls { padding-left: 0; border-left: 0; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .chat-panel { width: min(calc(100% - 28px), clamp(340px, 22vw, 430px)); height: 16vh; min-height: 0; position: absolute; z-index: 4; top: 34vh; left: clamp(14px, 1.6vw, 30px); border: 0; background: transparent; overflow: hidden; pointer-events: none; }
+.watch-layout:is(:fullscreen, .window-fullscreen).fullscreen-chat-right .chat-panel { left: auto; right: clamp(14px, 1.6vw, 30px); }
+.watch-layout:is(:fullscreen, .window-fullscreen) .chat-heading, .watch-layout:is(:fullscreen, .window-fullscreen) .chat-warning { display: none; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .chat-messages { height: 100%; max-height: none; padding: 0 2px; overflow: hidden; display: flex; flex-direction: column; justify-content: flex-end; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .chat-message { margin-bottom: 4px; color: #fff; font-size: clamp(12px, .85vw, 16px); font-weight: 700; line-height: 1.3; text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000, 0 1px 2px #000; }
+.watch-layout:is(:fullscreen, .window-fullscreen) .chat-message strong { color: #fff; }
 
 .settings-dialog { width: min(610px, calc(100% - 32px)); max-height: calc(100vh - 40px); padding: 0; border: 1px solid #39443d; background: var(--surface); color: var(--text); box-shadow: 0 24px 90px #000; }
 .settings-dialog::backdrop { background: rgba(0, 0, 0, .82); }

@@ -68,17 +68,18 @@ class Coordinator:
         ):
             bucket = int(source["checkpoint_time"] // 300)
             key = f"twitch-local-alignment:{source['id']}:r{source['reconciled_revision']}:{bucket}"
-            if source["role"] == "watch_party" and source["metadata"].get("vod_id") and source["reconciled_revision"] > 0:
+            if source["role"] == "watch_party" and source["metadata"].get("vod_id"):
                 indexes = self.store.rows("""SELECT i.expected_match_id,max(i.version) AS version FROM pipeline.match_indexes i
                     JOIN pipeline.broadcasts b ON b.id=i.broadcast_id WHERE i.broadcast_id=%s AND i.generation=b.generation
                     AND i.archive_revision=%s AND i.state IN ('provisional','final') GROUP BY i.expected_match_id ORDER BY i.expected_match_id""",
                     (source["broadcast_id"], source["reconciled_revision"]))
-                key += ":scoreboard-v2:" + str(stable_id(indexes))
+                key += ":scoreboard-v3:" + str(stable_id(indexes))
             with self.store.transaction() as connection:
                 if not connection.execute("SELECT id FROM pipeline.jobs WHERE dedupe_key=%s", (key,)).fetchone():
                     prior = connection.execute("""SELECT payload FROM pipeline.jobs WHERE source_id=%s AND kind='twitch_align'
                         AND generation=(SELECT generation FROM pipeline.broadcasts WHERE id=%s)
-                        AND last_error='Twitch scoreboard window exceeded the memory limit' ORDER BY created_at DESC LIMIT 1""",
+                        AND (payload ? 'scoreboard_checks' OR last_error='Twitch scoreboard window exceeded the memory limit')
+                        ORDER BY updated_at DESC LIMIT 1""",
                         (source["id"], source["broadcast_id"])).fetchone()
                     self.store.enqueue(
                         "twitch_align",
@@ -86,7 +87,7 @@ class Coordinator:
                         broadcast=source["broadcast_id"],
                         source=source["id"],
                         payload=prior["payload"] if prior else None,
-                        priority=-40,
+                        priority=5 if source["role"] == "watch_party" and source["metadata"].get("vod_id") else -40,
                         connection=connection,
                     )
 

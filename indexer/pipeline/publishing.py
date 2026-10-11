@@ -31,10 +31,10 @@ def watchparty_contract(canonical, secondary, match, index, mapping, alignment_v
         sections = [section for section in mapping["segments"]
                     if section["canonicalStart"] <= start - 5 * scale and section["canonicalEnd"] >= start + 2 * scale]
         if len(sections) != 1:
-            raise NeedsReview("Watch-party round jump lies outside continuous verified visual coverage")
+            raise NeedsReview("Watch-party round timing has not been verified")
         section = sections[0]
         if section["anchors"] < 5 or section["maximumResidual"] > 2:
-            raise NeedsReview("Watch-party round jump lacks precise visual anchors")
+            raise NeedsReview("Watch-party round timing lacks enough precise matching frames or clock readings")
         target = round((start - section["offset"]) / scale, 3)
         if target < 5 or not math.isfinite(target) or rounds and target <= rounds[-1]["start"]:
             raise NeedsReview("Watch-party round sequence has invalid source timing")

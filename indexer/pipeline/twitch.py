@@ -3,6 +3,7 @@ import hashlib
 import logging
 import math
 import os
+import statistics
 import time
 from dataclasses import asdict
 from datetime import datetime, timedelta, timezone
@@ -471,7 +472,7 @@ class TwitchCapture:
                 raise WaitingWork("Twitch alignment is waiting for additional verified fingerprint coverage") from error
             raise
         canonical_revision = broadcast["archive_revision"] if timeline == "archive" else 0
-        if source["role"] == "watch_party" and source["metadata"].get("vod_id") and timeline == "archive":
+        if source["role"] == "watch_party" and source["metadata"].get("vod_id"):
             with self.store.transaction() as connection:
                 self.store.guard(connection, job)
                 connection.execute("UPDATE pipeline.jobs SET payload=payload||%s WHERE id=%s",
@@ -516,11 +517,27 @@ class TwitchCapture:
         checks.update(cached["checks"])
         checks = {key: check for key, value, start in rounds if (check := checks.get(key))
                   and check["canonical_start"] == start and check.get("scores") == value.get("scores")}
+        scale = alignment["timelineScale"]
+        baseline = statistics.median(section["offset"] for section in alignment["segments"])
+        previous = None
+        for key, value, start in rounds:
+            check = checks.get(key)
+            if not check:
+                continue
+            section = check.get("section")
+            if section:
+                if ((previous and section["sourceStart"] <= previous["sourceEnd"])
+                        or abs(section["offset"] - (previous["offset"] if previous else baseline)) > 90 * scale):
+                    del checks[key]
+                else:
+                    previous = section
+            elif cached.get("version") != 3:
+                del checks[key]
+        cached["version"] = 3
         pending = [(key, value, start) for key, value, start in rounds if key not in checks]
         batch = {item[0] for item in pending[:4]}
         remote = resolve_twitch(source["metadata"]["vod_id"], live=False) if pending else {}
         previous = None
-        scale = alignment["timelineScale"]
         for key, value, start in rounds:
             if key in checks:
                 if checks[key].get("section"):
@@ -529,7 +546,10 @@ class TwitchCapture:
             if key not in batch:
                 break
             nearest = min(alignment["segments"], key=lambda section: max(section["canonicalStart"] - start, start - section["canonicalEnd"], 0))
-            offset = previous["offset"] if previous and 0 < start - previous["canonicalEnd"] < 240 else nearest["offset"]
+            offset = previous["offset"] if previous else baseline
+            if (max(nearest["canonicalStart"] - start, start - nearest["canonicalEnd"], 0) <= 240
+                    and abs(nearest["offset"] - offset) <= 90 * scale):
+                offset = nearest["offset"]
             predicted = (start - offset) / scale
             section = None
             identity = [key, start, value.get("scores"), source["revision"], revision, predicted, scale]
@@ -558,6 +578,8 @@ class TwitchCapture:
                         self.processing.check_stop()
                         samples.append(sample)
                         section = scoreboard_section(samples, value, start, scale)
+                        if section and previous and section["sourceStart"] <= previous["sourceEnd"]:
+                            section = None
                         if section:
                             break
                         if time.monotonic() - begun >= 45:

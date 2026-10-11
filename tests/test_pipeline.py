@@ -540,7 +540,7 @@ class PipelineTests(unittest.TestCase):
                     supervise("fixture.json")
                 self.assertEqual(run.call_count, 8)
 
-    def test_scoreboard_verification_requires_countdown_scores_and_visible_lead(self):
+    def test_scoreboard_verification_requires_countdown_and_scores_but_not_uninterrupted_hud(self):
         value = {"round": 8, "scores": [7, 0]}
         samples = [Observation(200 + second, 8, 100 - second if second >= 0 else 0, .99,
                                scores=(0, 7), buy_phase=second < 0) for second in range(-7, 7)]
@@ -548,7 +548,7 @@ class PipelineTests(unittest.TestCase):
         self.assertEqual(section["offset"], -100)
         self.assertGreaterEqual(section["anchors"], 5)
         self.assertIsNone(scoreboard_section(samples, {"round": 8, "scores": [6, 1]}, 100, 1))
-        self.assertIsNone(scoreboard_section(samples[7:], value, 100, 1))
+        self.assertEqual(scoreboard_section(samples[7:], value, 100, 1)["offset"], -100)
         for sample in samples:
             sample.replay = True
         self.assertIsNone(scoreboard_section(samples, value, 100, 1))
@@ -559,6 +559,17 @@ class PipelineTests(unittest.TestCase):
         for second, sample in enumerate(samples):
             sample.timer = 100 - second
             sample.confidence = .6
+        self.assertIsNone(scoreboard_section(samples, {"round": 8}, 100, 1))
+
+    def test_scoreboard_verification_recovers_after_hidden_start_without_weaker_anchors(self):
+        samples = [Observation(200 + second, 8, 100 - second, .99,
+                               scores=(7, 0)) for second in [30, 31, 35, 36, 37]]
+        section = scoreboard_section(samples, {"round": 8, "scores": [7, 0]}, 100, 1)
+        self.assertEqual(section["offset"], -100)
+        self.assertEqual(section["anchors"], 5)
+        self.assertEqual(section["clockStart"], 230)
+        for sample in samples:
+            sample.confidence = .75
         self.assertIsNone(scoreboard_section(samples, {"round": 8}, 100, 1))
 
     def test_scoreboard_alignment_repairs_local_gap_without_extending_coverage(self):

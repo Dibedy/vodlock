@@ -824,10 +824,10 @@ class DatabasePipelineTests(unittest.TestCase):
         self.store.execute("UPDATE pipeline.sources SET checkpoint_time=800 WHERE id=%s", (twitch,))
         coordinator.discover()
         coordinator.discover()
-        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v2%%'", (twitch,))["total"], 1)
+        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v3%%'", (twitch,))["total"], 1)
         self.store.execute("UPDATE pipeline.match_indexes SET version=2 WHERE expected_match_id=%s", (self.match,))
         coordinator.discover()
-        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v2%%'", (twitch,))["total"], 2)
+        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v3%%'", (twitch,))["total"], 2)
         self.store.execute("DELETE FROM pipeline.alignments WHERE source_id=%s", (twitch,))
         job["payload"] = {}
         media.watchparty_window.side_effect = lambda *args: (value for value in ())
@@ -840,6 +840,69 @@ class DatabasePipelineTests(unittest.TestCase):
         self.assertEqual(media.watchparty_window.call_count, 15)
         self.assertEqual(result["segments"], mapping["segments"])
         self.assertTrue(all(check["section"] is None for check in result["roundChecks"].values()))
+
+    def test_watchparty_checks_extrapolate_across_breaks_without_reusing_an_earlier_round(self):
+        from detector import Observation
+
+        twitch = identifier()
+        self.store.execute("INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role,metadata) VALUES (%s,%s,'twitch','123456789','watch_party',%s)",
+                           (twitch, self.broadcast, Jsonb({"vod_id": "123456789"})))
+        values = series()[:4]
+        for value, start in zip(values, [100, 200, 10000, 10100]):
+            value["start"] = start
+        self.store.execute("""INSERT INTO pipeline.match_indexes(id,broadcast_id,expected_match_id,segment_id,canonical_source_id,generation,version,state,rounds,provenance)
+                           VALUES (%s,%s,%s,%s,%s,1,1,'provisional',%s,'{}')""",
+                           (identifier(), self.broadcast, self.match, self.segment, self.source, Jsonb(values)))
+        wrong = {"sourceStart": 4894.5, "sourceEnd": 4903, "canonicalStart": 9994.5,
+                 "canonicalEnd": 10003, "offset": 5100, "anchors": 5, "maximumResidual": 0}
+        cached = {"source_revision": 1, "canonical_revision": 0, "checks": {
+            f"{self.match}:1:3": {"canonical_start": 10000, "scores": values[2].get("scores"), "section": wrong},
+            f"{self.match}:1:4": {"canonical_start": 10100, "scores": values[3].get("scores"), "section": None}}}
+        self.store.enqueue("twitch_align", "break-checks", broadcast=self.broadcast, source=twitch,
+                           payload={"scoreboard_checks": cached})
+        job = self.store.claim()
+        broadcast = self.store.one("SELECT * FROM pipeline.broadcasts WHERE id=%s", (self.broadcast,))
+        source = self.store.one("SELECT * FROM pipeline.sources WHERE id=%s", (twitch,))
+        mapping = {"timelineScale": 1, "segments": [
+            {"sourceStart": start, "sourceEnd": start + 70, "canonicalStart": start - 100,
+             "canonicalEnd": start - 30, "offset": -100, "anchors": 10, "maximumResidual": 1}
+            for start in [100, 300, 500]] + [wrong]}
+        media = Mock()
+        def window(remote, lower, upper):
+            value = min(values, key=lambda value: abs(value["start"] + 100 - lower - 8))
+            self.assertAlmostEqual(lower + 8, value["start"] + 100)
+            for second in range(-7, 7):
+                yield Observation(value["start"] + 100 + second, value["round"],
+                                  100 - second if second >= 0 else 0, .99,
+                                  scores=(value["round"] - 1, 0), buy_phase=second < 0), {}, None
+        media.watchparty_window.side_effect = window
+        capture = TwitchCapture(self.store, self.config, Processing(self.store, self.config, self.storage), media)
+        with patch("pipeline.twitch.resolve_twitch", return_value={"duration": 20000}):
+            result = capture.check_rounds(job, broadcast, source, self.entities()[1], mapping, 0)
+        self.assertEqual(media.watchparty_window.call_count, 4)
+        self.assertTrue(all(check["section"]["offset"] == -100 for check in result["roundChecks"].values()))
+
+    def test_watchparty_alignment_checks_preliminary_rounds_and_schedules_index_updates(self):
+        twitch = identifier()
+        self.store.execute("INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role,checkpoint_time,metadata) VALUES (%s,%s,'twitch','123456789','watch_party',600,%s)",
+                           (twitch, self.broadcast, Jsonb({"vod_id": "123456789"})))
+        self.store.execute("""INSERT INTO pipeline.match_indexes(id,broadcast_id,expected_match_id,segment_id,canonical_source_id,generation,version,state,rounds,provenance)
+                           VALUES (%s,%s,%s,%s,%s,1,1,'provisional',%s,'{}')""",
+                           (identifier(), self.broadcast, self.match, self.segment, self.source, Jsonb(series())))
+        self.store.enqueue("twitch_align", "preliminary-checks", broadcast=self.broadcast, source=twitch)
+        job = self.store.claim()
+        capture = TwitchCapture(self.store, self.config, Processing(self.store, self.config, self.storage))
+        mapping = {"timelineScale": 1, "segments": [], "anchors": 10, "maximumResidual": 1}
+        with patch("pipeline.twitch.piecewise_alignment", return_value=mapping), patch.object(capture, "check_rounds", return_value=mapping) as check:
+            capture.align(job)
+        self.assertEqual(check.call_args.args[-1], 0)
+        coordinator = Coordinator(self.store, self.config)
+        coordinator.discover()
+        scheduled = self.store.one("SELECT payload,priority FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v3%%'", (twitch,))
+        self.assertEqual(scheduled["priority"], 5)
+        self.store.execute("UPDATE pipeline.match_indexes SET version=2 WHERE expected_match_id=%s", (self.match,))
+        coordinator.discover()
+        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v3%%'", (twitch,))["total"], 2)
 
     def test_watchparty_seed_verifies_short_window_without_full_video_scan(self):
         twitch = identifier()

@@ -13,7 +13,7 @@ def scoreboard_section(samples, expected, canonical_start, scale):
                and sample.scores is not None and sample.confidence >= .85 and not sample.replay
                and sum(sample.scores) == expected["round"] - 1
                and (not expected.get("scores") or sorted(sample.scores) == sorted(expected["scores"]))]
-    clocks = [sample for sample in visible if sample.timer is not None and 85 <= sample.timer <= 100
+    clocks = [sample for sample in visible if sample.timer is not None and 50 <= sample.timer <= 100
               and not sample.buy_phase]
     for seed in clocks:
         start = seed.time - (100 - seed.timer)
@@ -24,18 +24,14 @@ def scoreboard_section(samples, expected, canonical_start, scale):
         if any(right.time <= left.time or right.timer >= left.timer for left, right in zip(anchors, anchors[1:])):
             continue
         start = statistics.median(sample.time - (100 - sample.timer) for sample in anchors)
-        lead = [sample for sample in visible if start - 7 <= sample.time <= start - 5]
-        if len(lead) < 2 or start < 7 or not math.isfinite(start):
-            continue
-        coverage = sorted((sample.time for sample in visible if lead[-1].time <= sample.time <= start + 3))
-        if not coverage or coverage[-1] < start + 2 or any(right - left > 2 for left, right in zip(coverage, coverage[1:])):
+        if start < 7 or not math.isfinite(start):
             continue
         offset = canonical_start - scale * start
         return {"sourceStart": start - 5.5, "sourceEnd": start + 3,
                 "canonicalStart": canonical_start - 5.5 * scale, "canonicalEnd": canonical_start + 3 * scale,
                 "offset": offset, "anchors": len(anchors),
                 "maximumResidual": max(abs(sample.time - (100 - sample.timer) - start) * scale for sample in anchors),
-                "method": "scoreboard"}
+                "clockStart": anchors[0].time, "clockEnd": anchors[-1].time, "method": "scoreboard"}
     return None
 
 

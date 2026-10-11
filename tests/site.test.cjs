@@ -260,6 +260,43 @@ test('grouped settings preserve fullscreen chat preferences with native radio co
   assert.equal(sandbox.readSettings().fullscreenChatPosition, 'hidden');
 });
 
+test('Escape clears only the selected shortcut, persists it and allows reassignment and reset', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  let saved = '{}';
+  const buttons = ['previousRound', 'nextRound', 'skipBackward', 'skipForward'].map(action => ({
+    dataset: {keybind: action}, addEventListener(type, handler) {this.handler = handler;}, focus() {}
+  }));
+  const reset = {addEventListener(type, handler) {this.handler = handler;}};
+  const notices = [];
+  const sandbox = vm.createContext({$: () => reset, toast: value => notices.push(value),
+    document: {querySelectorAll: () => buttons},
+    localStorage: {getItem: () => saved, setItem(key, value) {saved = value;}}});
+  vm.runInContext(app.match(/  const defaultKeybinds = .*;/)[0] +
+    app.slice(app.indexOf('  function readKeybinds('), app.indexOf('  function formatTime(')) + '\nlet keybinds = readKeybinds();\n' +
+    app.slice(app.indexOf("  for (const button of document.querySelectorAll('[data-keybind]')) {", app.indexOf("$('teams-close')")),
+      app.indexOf("  for (const button of $('kind-filters')", app.indexOf("$('keybind-reset').addEventListener"))), sandbox);
+  let prevented = false, stopped = false;
+  buttons[0].handler({code: 'Escape', preventDefault() {prevented = true;}, stopPropagation() {stopped = true;}});
+  assert.equal(prevented, true);
+  assert.equal(stopped, true);
+  assert.equal(buttons[0].textContent, 'Not set');
+  assert.equal(sandbox.readKeybinds().previousRound, '');
+  assert.equal(sandbox.readKeybinds().nextRound, 'ArrowDown');
+  assert.equal(notices.length, 0);
+  buttons[0].handler({code: 'KeyA', preventDefault() {}});
+  assert.equal(sandbox.readKeybinds().previousRound, 'KeyA');
+  assert.equal(buttons[0].textContent, 'A');
+  buttons[1].handler({code: 'KeyA', preventDefault() {}});
+  assert.equal(sandbox.readKeybinds().nextRound, 'ArrowDown');
+  assert.equal(notices.at(-1), 'That key is already in use.');
+  reset.handler();
+  assert.equal(sandbox.readKeybinds().previousRound, 'ArrowUp');
+  saved = JSON.stringify({previousRound: null, nextRound: '', skipForward: '!'});
+  assert.equal(sandbox.readKeybinds().previousRound, 'ArrowUp');
+  assert.equal(sandbox.readKeybinds().nextRound, '');
+  assert.equal(sandbox.readKeybinds().skipForward, 'ArrowRight');
+});
+
 test('auto-skip only runs during playback, avoids repeat seeks and respects manual review', () => {
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   const index = {leadSeconds: 5, rounds: [
@@ -781,6 +818,9 @@ test('website explains processing targets without promising a deadline or exposi
   assert.match(header, /not a fixed deadline/);
   assert.match(header, /official VOD doesn't wait for the watch party/);
   assert.match(header, /Chat can be added separately/);
+  assert.match(header, /I'm aiming/);
+  assert.match(header, /My indexer finds and checks/);
+  assert.doesNotMatch(header, /\b(?:We|We're|we|our)\b/);
   assert.doesNotMatch(index, /faq-section|processing-status/);
   assert.match(styles, /\.info-content[^}]*overflow-y: auto/);
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');

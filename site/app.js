@@ -135,7 +135,7 @@
     try {
       const saved = JSON.parse(localStorage.getItem('spoilless-keybinds') || '{}');
       return Object.fromEntries(Object.keys(defaultKeybinds).map(key => [key,
-        typeof saved[key] === 'string' && /^[A-Za-z0-9]+$/.test(saved[key]) ? saved[key] : defaultKeybinds[key]]));
+        typeof saved[key] === 'string' && (saved[key] === '' || /^[A-Za-z0-9]+$/.test(saved[key])) ? saved[key] : defaultKeybinds[key]]));
     } catch {
       return {...defaultKeybinds};
     }
@@ -146,6 +146,7 @@
   }
 
   function keybindLabel(code) {
+    if (!code) return 'Not set';
     return {ArrowUp: '↑', ArrowDown: '↓', ArrowLeft: '←', ArrowRight: '→', Space: 'Space' }[code] || code.replace(/^Key/, '').replace(/^Digit/, '');
   }
 
@@ -1295,6 +1296,14 @@
     button.addEventListener('keydown', event => {
       event.preventDefault();
       const code = event.code;
+      if (code === 'Escape') {
+        event.stopPropagation();
+        keybinds = {...keybinds, [button.dataset.keybind]: ''};
+        saveKeybinds();
+        renderKeybinds();
+        button.focus();
+        return;
+      }
       if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey || !/^(Arrow(?:Up|Down|Left|Right)|Key[A-Z]|Digit[0-9])$/.test(code)) {
         toast('Choose an arrow key, letter, or number.');
         return;

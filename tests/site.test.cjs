@@ -327,8 +327,8 @@ test('website release surfaces include the favicon and legal pages', () => {
   assert.match(index, /href="\/terms\.html"/);
   for (const page of ['privacy.html', 'terms.html']) {
     const source = readFileSync(resolve(__dirname, '../site/' + page), 'utf8');
-    assert.match(source, /YouTube Terms of Service/);
-    assert.match(source, /Twitch Terms of Service/);
+    assert.match(source, /href="https:\/\/www\.youtube\.com\/t\/terms"/);
+    assert.match(source, /href="https:\/\/www\.twitch\.tv\/p\/en\/legal\/terms-of-service\/"/);
     assert.match(source, /@dibedy/);
     assert.doesNotMatch(source, /draft|inserted here|before public launch/i);
   }
@@ -505,9 +505,9 @@ test('website explains processing targets without promising a deadline or exposi
   assert.match(header, /id="site-info" class="site-info"/);
   assert.match(header, /aria-label="How SPOILLESS works"/);
   assert.match(header, /within about 2 hours after the match ends/);
-  assert.match(header, /target, not a guaranteed countdown/);
+  assert.match(header, /not a fixed deadline/);
   assert.match(header, /official VOD doesn't wait for the watch party/);
-  assert.match(header, /archived chat can be added separately/);
+  assert.match(header, /Chat can be added separately/);
   assert.doesNotMatch(index, /faq-section|processing-status/);
   assert.match(styles, /\.info-content[^}]*overflow-y: auto/);
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
@@ -566,6 +566,24 @@ test('website is ready for crawling and sharing', () => {
   assert.match(terms, /rel="canonical" href="https:\/\/spoilless\.vercel\.app\/terms"/);
   assert.match(robots, /Sitemap: https:\/\/spoilless\.vercel\.app\/sitemap\.xml/);
   assert.match(sitemap, /https:\/\/spoilless\.vercel\.app\//);
+});
+
+test('legal pages stay compact and describe actual browser storage and emote requests', () => {
+  const privacy = readFileSync(resolve(__dirname, '../site/privacy.html'), 'utf8');
+  const terms = readFileSync(resolve(__dirname, '../site/terms.html'), 'utf8');
+  const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
+  for (const source of [privacy, terms]) {
+    assert.doesNotMatch(source, /SPOILLESS LEGAL|class="eyebrow"/);
+    assert.match(source, /Updated 11 October 2026/);
+  }
+  assert.match(terms, /<h1>Terms<\/h1>/);
+  assert.match(privacy, /<h1>Privacy<\/h1>/);
+  assert.match(privacy, /favourite teams, watched matches, keyboard shortcuts and your last playback position/);
+  assert.match(privacy, /7TV to look up emotes/);
+  assert.match(privacy, /IP address and browser details/);
+  assert.match(privacy, /only after you press Start watching/);
+  assert.match(styles, /\.legal-page h1 \{[^}]*font-size: 40px;[^}]*letter-spacing: 0;/);
+  assert.doesNotMatch(styles, /\.legal-intro[^}]*28%/);
 });
 
 test('website loads Vercel Web Analytics on every page', () => {

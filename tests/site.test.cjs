@@ -207,10 +207,13 @@ test('second-round auto-skip stays within a map and requires the exact next roun
     {map: 1, round: 13, start: 1300}, {map: 1, round: 14, start: 1400}, {map: 1, round: 15, start: 1500},
     {map: 2, round: 1, start: 2000}, {map: 2, round: 2, start: 2100}, {map: 2, round: 3, start: 2200}]};
   const skip = context.VodlockSite.autoSkipDestination;
-  for (const time of [0, 100, 194, 300, 1300, 1500, 2000]) assert.equal(skip(index, time), null);
+  for (const time of [0, 100, 174.99, 300, 1300, 1374.99, 1500, 2000, 2074.99]) assert.equal(skip(index, time), null);
+  assert.equal(skip(index, 175), 295);
   assert.equal(skip(index, 195), 295);
+  assert.equal(skip(index, 1375), 1495);
   assert.equal(skip(index, 1395), 1495);
   assert.equal(skip(index, 2100), 2195);
+  assert.equal(skip(index, 2075), 2195);
   assert.equal(skip({...index, rounds: index.rounds.slice(0, 2)}, 200), null);
   assert.equal(skip({...index, rounds: index.rounds.filter(round => round.round !== 3)}, 200), null);
   assert.equal(skip({...index, rounds: [index.rounds[1], index.rounds[6]]}, 200), null);
@@ -302,7 +305,7 @@ test('auto-skip only runs during playback, avoids repeat seeks and respects manu
   const index = {leadSeconds: 5, rounds: [
     {map: 1, round: 1, start: 100}, {map: 1, round: 2, start: 200}, {map: 1, round: 3, start: 300},
     {map: 1, round: 13, start: 1300}, {map: 1, round: 14, start: 1400}, {map: 1, round: 15, start: 1500}]};
-  const clock = {time: 195};
+  const clock = {time: 175};
   const state = {index, ready: true, playing: true, autoSkippedRound: null};
   const settings = {autoSkipSecondRounds: false, hideRoundStatus: false};
   const destinations = [], notices = [];
@@ -324,11 +327,13 @@ test('auto-skip only runs during playback, avoids repeat seeks and respects manu
   assert.deepEqual(destinations, [295]);
   assert.deepEqual(notices, ['Skipped round 2']);
   clock.time = 295;
-  sandbox.seek(195, 'Previous round');
+  sandbox.seek(175, 'Review before round 2');
+  clock.time = 175;
+  sandbox.updateStatus();
   clock.time = 195;
   sandbox.updateStatus();
-  assert.deepEqual(destinations, [295, 195]);
-  clock.time = 1395;
+  assert.deepEqual(destinations, [295, 175]);
+  clock.time = 1375;
   settings.hideRoundStatus = true;
   sandbox.updateStatus();
   assert.equal(destinations.at(-1), 1495);

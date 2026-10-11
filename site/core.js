@@ -125,10 +125,12 @@
   }
 
   function autoSkipDestination(index, time) {
-    const current = position(index, time);
+    let current = position(index, time);
+    const upcoming = index.rounds[current + 1];
+    if (upcoming && [2, 14].includes(upcoming.round) && time >= upcoming.start - 25) current++;
     const round = index.rounds[current];
     const next = index.rounds[current + 1];
-    if (!round || ![2, 14].includes(round.round) || time < round.start - index.leadSeconds ||
+    if (!round || ![2, 14].includes(round.round) || time < round.start - 25 ||
         !next || next.map !== round.map || next.round !== round.round + 1) return null;
     return Math.max(0, next.start - index.leadSeconds);
   }

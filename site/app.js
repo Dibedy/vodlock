@@ -1119,7 +1119,9 @@
     }
     $('end-shield').hidden = true;
     if (!automatic) {
-      const round = state.index.rounds[VodlockSite.position(state.index, destination)];
+      const skippedDestination = VodlockSite.autoSkipDestination(state.index, destination);
+      const position = VodlockSite.position(state.index, skippedDestination === null ? destination : skippedDestination);
+      const round = state.index.rounds[position - (skippedDestination === null ? 0 : 1)];
       state.autoSkippedRound = round ? round.map + ':' + round.round : null;
     }
     const resume = state.playing;
@@ -1136,11 +1138,14 @@
     const round = state.index.rounds[Math.max(position, 0)];
     if (settings.autoSkipSecondRounds && state.ready && state.playing) {
       const destination = VodlockSite.autoSkipDestination(state.index, time);
-      const identity = round.map + ':' + round.round;
-      if (destination !== null && state.autoSkippedRound !== identity) {
-        state.autoSkippedRound = identity;
-        seek(destination, settings.hideRoundStatus ? 'Skipped round' : 'Skipped round ' + round.round, true);
-        return;
+      if (destination !== null) {
+        const skipped = state.index.rounds[VodlockSite.position(state.index, destination) - 1];
+        const identity = skipped.map + ':' + skipped.round;
+        if (state.autoSkippedRound !== identity) {
+          state.autoSkippedRound = identity;
+          seek(destination, settings.hideRoundStatus ? 'Skipped round' : 'Skipped round ' + skipped.round, true);
+          return;
+        }
       }
     }
     if (settings.hideRoundStatus) {

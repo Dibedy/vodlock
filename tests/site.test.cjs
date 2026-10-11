@@ -207,6 +207,7 @@ test('start and resume gates keep their play icon through loading and retry labe
   const gate = html.slice(html.indexOf('<div id="start-gate"'), html.indexOf('<div id="end-shield"'));
   assert.doesNotMatch(gate, /class="gate-icon"/);
   assert.match(gate, /id="start-watching-label"/);
+  assert.match(gate, /class="brand gate-brand" aria-label="SPOILLESS"/);
   assert.match(gate, /<button id="start-watching"[^>]*><svg/);
   assert.doesNotMatch(html, /class="chat-warning"|Viewer messages can still contain spoilers/);
   assert.doesNotMatch(app, /\$\('start-watching'\)\.textContent/);

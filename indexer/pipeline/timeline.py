@@ -17,21 +17,36 @@ def scoreboard_section(samples, expected, canonical_start, scale):
               and not sample.buy_phase]
     for seed in clocks:
         start = seed.time - (100 - seed.timer)
-        anchors = [sample for sample in clocks if abs(sample.time - (100 - sample.timer) - start) <= 1]
-        anchors.sort(key=lambda sample: sample.time)
-        if len(anchors) < 5 or anchors[-1].time - anchors[0].time < 4:
-            continue
-        if any(right.time <= left.time or right.timer >= left.timer for left, right in zip(anchors, anchors[1:])):
+        candidates = sorted((sample for sample in clocks if abs(sample.time - (100 - sample.timer) - start) <= 1),
+                            key=lambda sample: sample.time)
+        anchors = []
+        for sample in candidates:
+            if not anchors or (sample.time > anchors[-1].time and sample.timer < anchors[-1].timer):
+                anchors.append(sample)
+        if len(anchors) < 2:
             continue
         start = statistics.median(sample.time - (100 - sample.timer) for sample in anchors)
-        if start < 7 or not math.isfinite(start):
+        if start < 7 or not math.isfinite(start) or any(abs(sample.time - (100 - sample.timer) - start) > 1 for sample in anchors):
+            continue
+        preroll = []
+        if len(anchors) < 5 and anchors[0].timer >= 97:
+            for sample in sorted(visible, key=lambda sample: sample.time):
+                if (sample.buy_phase and sample.timer is not None and 0 <= sample.timer <= 10
+                        and sample.time < anchors[0].time and abs(sample.time + sample.timer - start) <= 1
+                        and (not preroll or (sample.time > preroll[-1].time and sample.timer < preroll[-1].timer))):
+                    preroll.append(sample)
+            if not preroll or preroll[-1].timer > 1 or anchors[0].time - preroll[-1].time > 3:
+                preroll = []
+        evidence = preroll + anchors
+        if len(evidence) < 5 or evidence[-1].time - evidence[0].time < 4:
             continue
         offset = canonical_start - scale * start
         return {"sourceStart": start - 5.5, "sourceEnd": start + 3,
                 "canonicalStart": canonical_start - 5.5 * scale, "canonicalEnd": canonical_start + 3 * scale,
-                "offset": offset, "anchors": len(anchors),
-                "maximumResidual": max(abs(sample.time - (100 - sample.timer) - start) * scale for sample in anchors),
-                "clockStart": anchors[0].time, "clockEnd": anchors[-1].time, "method": "scoreboard"}
+                "offset": offset, "anchors": len(evidence),
+                "maximumResidual": max(abs(sample.time + sample.timer - start if sample.buy_phase
+                                           else sample.time - (100 - sample.timer) - start) * scale for sample in evidence),
+                "clockStart": evidence[0].time, "clockEnd": evidence[-1].time, "method": "scoreboard"}
     return None
 
 

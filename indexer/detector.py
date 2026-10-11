@@ -227,10 +227,14 @@ class HudReader:
         profiles = ([preferred] if preferred else []) + [profile for profile in HUD_PROFILES if profile != preferred]
         for profile in profiles:
             clock = self.read_clock_lines(frame, time, profile, compact)
-            sample = parse_hud(time, self.read_lines(self.crop(frame, profile["label"], compact), single=True, scale=4) + clock)
-            if sample.round is None or sample.timer is None or sample.confidence < .85:
+            label = self.read_lines(self.crop(frame, profile["label"], compact), single=True, scale=4)
+            sample = parse_hud(time, label + clock)
+            overtime = any(text.upper().replace(" ", "") == "OVERTIME" and confidence >= .85
+                           for text, confidence in label)
+            if (sample.round is None and not overtime) or sample.timer is None or sample.confidence < .85:
                 continue
             scores = []
+            confidences = []
             for left, right in [(0.417, 0.44), (0.56, 0.583)]:
                 crop = frame[int(height * .007):int(height * min(profile["score_top"], .046)),
                              int(width * left):int(width * right)]
@@ -238,7 +242,12 @@ class HudReader:
                 if len(lines) != 1 or lines[0][1] < .65 or not re.fullmatch(r"[0-9]{1,2}", lines[0][0].strip()):
                     break
                 scores.append(int(lines[0][0]))
-            if len(scores) != 2 or sum(scores) + 1 != sample.round:
+                confidences.append(lines[0][1])
+            if len(scores) == 2 and sample.round is None and overtime and min(scores) >= 12 and sum(scores) < 60:
+                sample.round = sum(scores) + 1
+                sample.confidence = min(sample.confidence, *confidences,
+                                        *(confidence for text, confidence in label if text.upper().replace(" ", "") == "OVERTIME"))
+            if len(scores) != 2 or sum(scores) + 1 != sample.round or sample.confidence < .85:
                 continue
             sample.scores = tuple(scores)
             replay = frame[208:324, 934:1280] if compact else frame[int(height * .84):, int(width * .73):]

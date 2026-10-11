@@ -73,7 +73,7 @@ class Coordinator:
                     JOIN pipeline.broadcasts b ON b.id=i.broadcast_id WHERE i.broadcast_id=%s AND i.generation=b.generation
                     AND i.archive_revision=%s AND i.state IN ('provisional','final') GROUP BY i.expected_match_id ORDER BY i.expected_match_id""",
                     (source["broadcast_id"], source["reconciled_revision"]))
-                key += ":scoreboard-v3:" + str(stable_id(indexes))
+                key += ":scoreboard-v4:" + str(stable_id(indexes))
             with self.store.transaction() as connection:
                 if not connection.execute("SELECT id FROM pipeline.jobs WHERE dedupe_key=%s", (key,)).fetchone():
                     prior = connection.execute("""SELECT payload FROM pipeline.jobs WHERE source_id=%s AND kind='twitch_align'

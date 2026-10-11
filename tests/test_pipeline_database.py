@@ -824,10 +824,10 @@ class DatabasePipelineTests(unittest.TestCase):
         self.store.execute("UPDATE pipeline.sources SET checkpoint_time=800 WHERE id=%s", (twitch,))
         coordinator.discover()
         coordinator.discover()
-        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v3%%'", (twitch,))["total"], 1)
+        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v4%%'", (twitch,))["total"], 1)
         self.store.execute("UPDATE pipeline.match_indexes SET version=2 WHERE expected_match_id=%s", (self.match,))
         coordinator.discover()
-        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v3%%'", (twitch,))["total"], 2)
+        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v4%%'", (twitch,))["total"], 2)
         self.store.execute("DELETE FROM pipeline.alignments WHERE source_id=%s", (twitch,))
         job["payload"] = {}
         media.watchparty_window.side_effect = lambda *args: (value for value in ())
@@ -855,7 +855,7 @@ class DatabasePipelineTests(unittest.TestCase):
                            (identifier(), self.broadcast, self.match, self.segment, self.source, Jsonb(values)))
         wrong = {"sourceStart": 4894.5, "sourceEnd": 4903, "canonicalStart": 9994.5,
                  "canonicalEnd": 10003, "offset": 5100, "anchors": 5, "maximumResidual": 0}
-        cached = {"source_revision": 1, "canonical_revision": 0, "checks": {
+        cached = {"version": 3, "source_revision": 1, "canonical_revision": 0, "checks": {
             f"{self.match}:1:3": {"canonical_start": 10000, "scores": values[2].get("scores"), "section": wrong},
             f"{self.match}:1:4": {"canonical_start": 10100, "scores": values[3].get("scores"), "section": None}}}
         self.store.enqueue("twitch_align", "break-checks", broadcast=self.broadcast, source=twitch,
@@ -898,11 +898,11 @@ class DatabasePipelineTests(unittest.TestCase):
         self.assertEqual(check.call_args.args[-1], 0)
         coordinator = Coordinator(self.store, self.config)
         coordinator.discover()
-        scheduled = self.store.one("SELECT payload,priority FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v3%%'", (twitch,))
+        scheduled = self.store.one("SELECT payload,priority FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v4%%'", (twitch,))
         self.assertEqual(scheduled["priority"], 5)
         self.store.execute("UPDATE pipeline.match_indexes SET version=2 WHERE expected_match_id=%s", (self.match,))
         coordinator.discover()
-        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v3%%'", (twitch,))["total"], 2)
+        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v4%%'", (twitch,))["total"], 2)
 
     def test_watchparty_seed_verifies_short_window_without_full_video_scan(self):
         twitch = identifier()

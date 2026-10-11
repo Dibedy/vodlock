@@ -531,9 +531,9 @@ class TwitchCapture:
                     del checks[key]
                 else:
                     previous = section
-            elif cached.get("version") != 3:
+            elif cached.get("version") != 4:
                 del checks[key]
-        cached["version"] = 3
+        cached["version"] = 4
         pending = [(key, value, start) for key, value, start in rounds if key not in checks]
         batch = {item[0] for item in pending[:4]}
         remote = resolve_twitch(source["metadata"]["vod_id"], live=False) if pending else {}

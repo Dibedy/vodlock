@@ -437,6 +437,23 @@ class PipelineTests(unittest.TestCase):
         reader.read_lines = Mock(side_effect=[[('ROUND 8', .99)], [('7', .8)], [('1', .8)]] * 3)
         self.assertIsNone(reader.read_scoreboard(np.zeros((720, 1280, 3), dtype=np.uint8), 100).round)
 
+    def test_watchparty_reader_verifies_overtime_label_with_confident_scores(self):
+        import numpy as np
+
+        reader = HudReader.__new__(HudReader)
+        reader.read_clock_lines = Mock(return_value=[("1:39", .99)])
+        reader.read_lines = Mock(side_effect=[[('OVERTIME', .99)], [('12', .98)], [('12', .98)], []])
+        sample = reader.read_scoreboard(np.zeros((720, 1280, 3), dtype=np.uint8), 100)
+        self.assertEqual((sample.round, sample.timer, sample.scores), (25, 99, (12, 12)))
+        self.assertEqual(sample.confidence, .98)
+        for label, scores in [('OVERTIME', [('12', .8), ('12', .98)]),
+                              ('OVERTIME', [('11', .98), ('12', .98)]),
+                              ('MATCH STATS', [('12', .98), ('12', .98)])]:
+            with self.subTest(label=label, scores=scores):
+                reader.read_lines = Mock(side_effect=[[(label, .99)], [scores[0]], [scores[1]]] * 3 if label == 'OVERTIME'
+                                         else [[(label, .99)]] * 3)
+                self.assertIsNone(reader.read_scoreboard(np.zeros((720, 1280, 3), dtype=np.uint8), 100).round)
+
     def test_watchparty_windows_fetch_only_local_segments_and_seek_accurately(self):
         import numpy as np
 
@@ -571,6 +588,43 @@ class PipelineTests(unittest.TestCase):
         for sample in samples:
             sample.confidence = .75
         self.assertIsNone(scoreboard_section(samples, {"round": 8}, 100, 1))
+
+    def test_scoreboard_verification_does_not_let_repeated_timer_poison_valid_countdown(self):
+        samples = [Observation(200 + second, 8, timer, .99, scores=(7, 0))
+                   for second, timer in enumerate([99, 98, 97, 95, 95, 94, 93])]
+        section = scoreboard_section(samples, {"round": 8, "scores": [7, 0]}, 100, 1)
+        self.assertIsNotNone(section)
+        self.assertGreaterEqual(section["anchors"], 5)
+        self.assertLessEqual(section["maximumResidual"], 1)
+        self.assertAlmostEqual(section["offset"], -99, delta=1)
+        frozen = [Observation(200 + second, 8, 95, .99, scores=(7, 0)) for second in range(20)]
+        self.assertIsNone(scoreboard_section(frozen, {"round": 8}, 100, 1))
+        for sample in samples:
+            sample.replay = True
+        self.assertIsNone(scoreboard_section(samples, {"round": 8}, 100, 1))
+
+    def test_scoreboard_verification_uses_visible_buy_to_gameplay_transition_for_short_round(self):
+        samples = [Observation(200 + second, 8, -second if second <= 0 else 100 - second,
+                               .99, scores=(7, 0), buy_phase=second <= 0) for second in range(-4, 4)]
+        section = scoreboard_section(samples, {"round": 8, "scores": [7, 0]}, 100, 1)
+        self.assertEqual(section["offset"], -100)
+        self.assertGreaterEqual(section["anchors"], 5)
+        self.assertEqual(section["maximumResidual"], 0)
+        self.assertIsNone(scoreboard_section(samples[:-2], {"round": 8}, 100, 1))
+        self.assertIsNone(scoreboard_section(samples[5:], {"round": 8}, 100, 1))
+        for sample in samples:
+            if not sample.buy_phase:
+                sample.timer = 99
+        self.assertIsNone(scoreboard_section(samples, {"round": 8}, 100, 1))
+
+    def test_scoreboard_transition_requires_matching_scores_and_adjacent_zero_countdown(self):
+        for delay, last_buy, scores in [(5, 0, (7, 0)), (0, 3, (7, 0)), (0, 0, (6, 1))]:
+            with self.subTest(delay=delay, last_buy=last_buy, scores=scores):
+                samples = [Observation(200 - timer, 8, timer, .99, scores=scores, buy_phase=True)
+                           for timer in range(7, last_buy - 1, -1)]
+                samples.extend(Observation(200 + second + delay, 8, 100 - second - delay, .99, scores=(7, 0))
+                               for second in range(1, 4))
+                self.assertIsNone(scoreboard_section(samples, {"round": 8, "scores": [7, 0]}, 100, 1))
 
     def test_scoreboard_alignment_repairs_local_gap_without_extending_coverage(self):
         original = {"timelineScale": 1, "segments": [

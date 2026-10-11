@@ -5,11 +5,31 @@
     {
       "provider": "youtube",
       "sourceId": "jdQfyr5hpOU",
+      "catalogId": "youtube:06768befe3765ee2:jdQfyr5hpOU",
+      "title": "T1 vs G2",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Full match",
+      "index": "/indexes/youtube-jdQfyr5hpOU-06768befe3765ee2-v2-46e51028aaf4.json",
+      "playedAt": "2026-10-11T13:15:59.322177+02:00",
+      "pipelineState": "provisional",
+      "expectedMatchId": "be2b4691-cc65-52ea-9187-01450d120f89",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 2,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "chat": "/chats/twitch-2897752834.json",
+      "chatSourceId": "2897752834",
+      "chatChannelId": "490592527",
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
+      "sourceId": "jdQfyr5hpOU",
       "catalogId": "youtube:cd1f9a4636255fbf:jdQfyr5hpOU",
       "title": "100T vs NRG",
       "event": "Champions Shanghai | Playoffs",
       "label": "Full match",
-      "index": "/indexes/youtube-jdQfyr5hpOU-cd1f9a4636255fbf-v6-593091e09822.json",
+      "index": "/indexes/youtube-jdQfyr5hpOU-cd1f9a4636255fbf-v6-298b1ebdf0b5.json",
       "playedAt": "2026-10-11T11:06:42.302949+02:00",
       "pipelineState": "provisional",
       "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
@@ -17,10 +37,10 @@
       "pipelineVersion": 6,
       "tournament": "Champions Shanghai",
       "tournamentKey": "champions-shanghai",
-      "chat": "/chats/twitch-316085678673.json",
-      "chatSourceId": "316085678673",
-      "canonicalPipeline": true,
-      "chatChannelId": "490592527"
+      "chat": "/chats/twitch-2897752834.json",
+      "chatSourceId": "2897752834",
+      "chatChannelId": "490592527",
+      "canonicalPipeline": true
     },
     {
       "provider": "youtube",
@@ -107,8 +127,8 @@
       "tournamentKey": "champions-shanghai",
       "chat": "/chats/twitch-2895001673.json",
       "chatSourceId": "2895001673",
-      "canonicalPipeline": true,
-      "chatChannelId": "490592527"
+      "chatChannelId": null,
+      "canonicalPipeline": true
     },
     {
       "provider": "youtube",
@@ -127,8 +147,8 @@
       "tournamentKey": "champions-shanghai",
       "chat": "/chats/twitch-2895001673.json",
       "chatSourceId": "2895001673",
-      "canonicalPipeline": true,
-      "chatChannelId": "490592527"
+      "chatChannelId": null,
+      "canonicalPipeline": true
     },
     {
       "provider": "youtube",
@@ -147,8 +167,8 @@
       "tournamentKey": "champions-shanghai",
       "chat": "/chats/twitch-2894136432.json",
       "chatSourceId": "2894136432",
-      "canonicalPipeline": true,
-      "chatChannelId": "490592527"
+      "chatChannelId": null,
+      "canonicalPipeline": true
     },
     {
       "provider": "youtube",
@@ -167,8 +187,8 @@
       "tournamentKey": "champions-shanghai",
       "chat": "/chats/twitch-2894136432.json",
       "chatSourceId": "2894136432",
-      "canonicalPipeline": true,
-      "chatChannelId": "490592527"
+      "chatChannelId": null,
+      "canonicalPipeline": true
     },
     {
       "provider": "youtube",
@@ -595,7 +615,7 @@
       "pipelineVersion": 6,
       "pipelineSourceRevision": 1,
       "pipelineAlignmentVersion": 54,
-      "reason": "needs_review",
+      "reason": "waiting_alignment",
       "canonicalPipeline": true
     },
     {
@@ -607,7 +627,7 @@
       "pipelineVersion": 12,
       "pipelineSourceRevision": 1,
       "pipelineAlignmentVersion": 2,
-      "reason": "needs_review",
+      "reason": "waiting_alignment",
       "canonicalPipeline": true
     },
     {
@@ -619,7 +639,7 @@
       "pipelineVersion": 24,
       "pipelineSourceRevision": 1,
       "pipelineAlignmentVersion": 2,
-      "reason": "needs_review",
+      "reason": "waiting_alignment",
       "canonicalPipeline": true
     },
     {
@@ -631,7 +651,7 @@
       "pipelineVersion": 4,
       "pipelineSourceRevision": 1,
       "pipelineAlignmentVersion": 54,
-      "reason": "needs_review",
+      "reason": "waiting_alignment",
       "canonicalPipeline": true
     },
     {
@@ -643,7 +663,7 @@
       "pipelineVersion": 68,
       "pipelineSourceRevision": 1,
       "pipelineAlignmentVersion": 1,
-      "reason": "needs_review",
+      "reason": "waiting_alignment",
       "canonicalPipeline": true
     },
     {
@@ -655,7 +675,31 @@
       "pipelineVersion": 29,
       "pipelineSourceRevision": 1,
       "pipelineAlignmentVersion": 1,
-      "reason": "needs_review",
+      "reason": "waiting_alignment",
+      "canonicalPipeline": true
+    },
+    {
+      "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
+      "catalogId": "twitch:2897760313:cd1f9a4636255fbf",
+      "provider": "twitch",
+      "sourceId": "2897760313",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 6,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 15,
+      "reason": "waiting_alignment",
+      "canonicalPipeline": true
+    },
+    {
+      "expectedMatchId": "be2b4691-cc65-52ea-9187-01450d120f89",
+      "catalogId": "twitch:2897760313:06768befe3765ee2",
+      "provider": "twitch",
+      "sourceId": "2897760313",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 2,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 15,
+      "reason": "waiting_alignment",
       "canonicalPipeline": true
     }
   ]

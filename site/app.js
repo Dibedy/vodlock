@@ -3,7 +3,6 @@
 
   const $ = id => document.getElementById(id);
   const chatEmoteSets = new Map();
-  let revealedChatMessages = new WeakSet();
   let chatEmotes = new Map();
   const defaultSettings = {hideTwitchTimeline: true, hideMetadata: false, hideRoundStatus: false, showChat: true, hideChatBots: true, filterChatSpoilers: true, fullscreenChatPosition: 'left', showChatTimestamps: false, endScreenProtection: true};
   const defaultKeybinds = {previousRound: 'ArrowUp', nextRound: 'ArrowDown', skipBackward: 'ArrowLeft', skipForward: 'ArrowRight'};
@@ -253,7 +252,8 @@
     state.chatPosition = position;
     const maxMessages = fullscreen ? 5 : 120;
     const messages = state.chat.filter(message => message.time <= now && message.time >= now - 90 &&
-      !(settings.hideChatBots && VodlockSite.isChatBot(message.user))).slice(-maxMessages);
+      !(settings.hideChatBots && VodlockSite.isChatBot(message.user)) &&
+      !(settings.filterChatSpoilers && VodlockSite.isChatSpoiler(message.fragments))).slice(-maxMessages);
     const host = $('chat-messages');
     host.replaceChildren();
     if (!messages.length) {
@@ -290,30 +290,13 @@
           row.append(document.createTextNode(text));
         }
       }
-      if (settings.filterChatSpoilers && VodlockSite.isChatSpoiler(message.fragments)) {
-        const spoiler = document.createElement('details');
-        spoiler.className = 'chat-spoiler';
-        const summary = document.createElement('summary');
-        spoiler.append(summary, row);
-        spoiler.open = revealedChatMessages.has(message);
-        summary.textContent = spoiler.open ? 'Possible spoiler · Hide' : 'Possible spoiler · Reveal';
-        spoiler.addEventListener('toggle', () => {
-          if (!spoiler.isConnected) return;
-          if (spoiler.open) revealedChatMessages.add(message);
-          else revealedChatMessages.delete(message);
-          summary.textContent = spoiler.open ? 'Possible spoiler · Hide' : 'Possible spoiler · Reveal';
-        });
-        host.append(spoiler);
-      } else {
-        host.append(row);
-      }
+      host.append(row);
     }
     host.scrollTop = host.scrollHeight;
   }
 
   async function loadChat(entry, index) {
     chatEmotes = new Map();
-    revealedChatMessages = new WeakSet();
     state.chat = [];
     state.chatIndex = null;
     state.chatPosition = null;
@@ -1317,7 +1300,6 @@
 
   document.addEventListener('keydown', event => {
     if ($('player-view').hidden || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
-    if (event.target.closest('.chat-spoiler summary') && [' ', 'Enter'].includes(event.key)) return;
     if ($('settings-dialog').open || $('site-info').open || event.defaultPrevented) return;
     const key = event.code === 'Space' ? ' ' : event.key;
     if (!state.started) {

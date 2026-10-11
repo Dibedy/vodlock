@@ -222,7 +222,7 @@ test('7TV emotes match whole case-sensitive tokens and preserve native emotes an
 function chatLoader(fetch) {
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   const sandbox = vm.createContext({fetch, AbortSignal, VodlockSite: context.VodlockSite, console: {warn() {}}});
-  vm.runInContext('const state = {chat: []}; const chatEmoteSets = new Map(); let chatEmotes = new Map(); let revealedChatMessages = new WeakSet();\n' +
+  vm.runInContext('const state = {chat: []}; const chatEmoteSets = new Map(); let chatEmotes = new Map();\n' +
     app.slice(app.indexOf('  async function loadChat('), app.indexOf('  function resetPlayerHost(')), sandbox);
   return {
     load: entry => sandbox.loadChat(entry, {}),
@@ -260,7 +260,7 @@ test('chat protection defaults on for existing users and preserves explicit opt-
   }
 });
 
-test('chat rendering hides bots before the cap, collapses spoilers and remembers reveals', () => {
+test('chat rendering removes bots and spoilers before the cap without placeholders', () => {
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   const makeNode = tag => ({tag, children: [], style: {}, handlers: {}, isConnected: true,
     append(...nodes) { this.children.push(...nodes); },
@@ -271,37 +271,37 @@ test('chat rendering hides bots before the cap, collapses spoilers and remembers
   const $ = id => {if (!elements.has(id)) elements.set(id, makeNode('div')); return elements.get(id);};
   const message = (user, text, time = 100) => ({user, fragments: [[text]], time});
   const state = {chat: [message('Viewer', 'nice shot'), message('Other', 'who won earlier?'),
-    ...Array.from({length: 125}, () => message('Fossabot', 'bot text')), message('Future', 'future text', 999)], chatPosition: null};
+    ...Array.from({length: 125}, () => message('Fossabot', 'bot text')),
+    ...Array.from({length: 125}, () => message('Other', 'who won earlier?')), message('Future', 'future text', 999)], chatPosition: null};
   const settings = {showChat: true, hideChatBots: true, filterChatSpoilers: true};
   const sandbox = vm.createContext({$, state, settings, VodlockSite: context.VodlockSite,
     document: {fullscreenElement: null, createElement: makeNode, createTextNode: text => ({text})},
     currentTime: () => 100, syncFullscreenButton() {}, formatTime: String});
-  vm.runInContext('let revealedChatMessages = new WeakSet(); const chatEmotes = new Map();' +
+  vm.runInContext('const chatEmotes = new Map();' +
     app.slice(app.indexOf('  function renderChat('), app.indexOf('  async function loadChat(')), sandbox);
   sandbox.renderChat();
   const host = $('chat-messages');
-  assert.equal(host.children.length, 2);
+  assert.equal(host.children.length, 1);
   assert.equal(host.children[0].tag, 'p');
-  let spoiler = host.children[1];
-  assert.equal(spoiler.tag, 'details');
-  assert.equal(spoiler.open, false);
-  spoiler.open = true;
-  spoiler.handlers.toggle();
   sandbox.renderChat(true);
-  assert.equal(host.children[1].open, true);
-  spoiler.open = false;
-  spoiler.handlers.toggle();
+  assert.equal(host.children.length, 1);
+  sandbox.document.fullscreenElement = $('watch-layout');
   sandbox.renderChat(true);
-  assert.equal(host.children[1].open, true);
-  vm.runInContext('revealedChatMessages = new WeakSet()', sandbox);
-  sandbox.renderChat(true);
-  assert.equal(host.children[1].open, false);
+  assert.equal(host.children.length, 1);
+  sandbox.document.fullscreenElement = null;
   settings.filterChatSpoilers = false;
   sandbox.renderChat(true);
+  assert.equal(host.children.length, 120);
   assert.equal(host.children[1].tag, 'p');
   settings.hideChatBots = false;
   sandbox.renderChat(true);
   assert.equal(host.children.length, 120);
+  settings.filterChatSpoilers = true;
+  settings.hideChatBots = true;
+  state.chat = [message('Other', 'who won earlier?')];
+  sandbox.renderChat(true);
+  assert.equal(host.children.length, 1);
+  assert.equal(host.children[0].className, 'chat-empty');
 });
 
 test('chat toggle displays its current visibility rather than the opposite action', () => {

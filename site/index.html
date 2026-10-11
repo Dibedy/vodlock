@@ -31,12 +31,17 @@
       <span>SPOILLESS</span>
     </button>
     <div class="top-actions">
-      <details class="processing-status">
-        <summary aria-label="Processing status"><span class="processing-status-dot" aria-hidden="true"></span><span class="processing-status-label">Processing update</span></summary>
-        <div class="processing-status-card">
-          <span>Currently improving</span>
-          <strong>Livestream matching + watch-party sync</strong>
-          <p>Newly finished matches may take longer than usual to appear while this work is underway.</p>
+      <details id="site-info" class="site-info">
+        <summary id="info-button" aria-label="How SPOILLESS works" aria-controls="info-panel" title="How SPOILLESS works"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><span>Info</span></summary>
+        <div id="info-panel" class="info-panel" role="region" aria-labelledby="info-title">
+          <div class="info-heading"><h2 id="info-title">Good to know</h2><button id="info-close" type="button" aria-label="Close information" title="Close information"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg></button></div>
+          <div class="info-content">
+            <section><h3>When will a new match be up?</h3><p>The goal is <strong>within about 2 hours after the match ends</strong>. That's a target, not a guaranteed countdown. Some matches go up sooner; others need a bit more time.</p></section>
+            <section><h3>What happens before it goes up?</h3><p>We find the round starts, check the timestamps and make sure the recording is usable. A match can be published while the rest of the stream is still live, with final checks following later.</p></section>
+            <section><h3>Why do watch parties take longer?</h3><p>They need to line up with the official match first. Pauses, replays and the streamer switching away can make that trickier. The official VOD doesn't wait for the watch party, and archived chat can be added separately once its timing is verified.</p></section>
+            <section><h3>Still waiting?</h3><p>A delayed recording, unclear timestamps or a failed check can hold a VOD back. It gets retried or reviewed before going up. We don't publish broken round navigation just to get it out faster. Not every broadcast is supported yet.</p></section>
+            <section><h3>What stays hidden while watching?</h3><p>Scores, video length and the provider timeline stay out of the way. You can move round by round or jump between maps without seeing how much of the match is left. Choose what to reveal in Settings.</p></section>
+          </div>
         </div>
       </details>
       <a class="header-support" href="https://ko-fi.com/dibedy" target="_blank" rel="noopener noreferrer">Support</a><button id="settings-button" class="header-settings" type="button" aria-label="Settings"><span aria-hidden="true">⚙</span> Settings</button>
@@ -102,16 +107,6 @@
           </div>
         </div>
         <div id="catalog" class="catalog-library" aria-live="polite"><p class="loading-copy">Loading library...</p></div>
-      </section>
-      <section class="faq-section" aria-labelledby="faq-title">
-        <div class="section-heading">
-          <h2 id="faq-title" class="major-heading">Watch without spoilers</h2>
-        </div>
-        <div class="faq-grid">
-          <article><h3>How does SPOILLESS avoid spoilers?</h3><p>It keeps scores, video length, thumbnails, and the provider timeline out of the way, so you can choose what to reveal as you watch.</p></article>
-          <article><h3>Can I jump to the next round?</h3><p>Yes. Every indexed broadcast has round and map navigation, with controls for moving past pauses, replays, and timeouts.</p></article>
-          <article><h3>Which broadcasts are available?</h3><p>SPOILLESS indexes selected official VCT YouTube broadcasts and supported Twitch watch parties when a reliable round index is available.</p></article>
-        </div>
       </section>
     </section>
     <section id="player-view" class="player-view" hidden>

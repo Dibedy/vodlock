@@ -1153,7 +1153,7 @@
   }
 
   function reclaimPlayerFocus() {
-    if ($('player-view').hidden || !state.started || $('settings-dialog').open) return;
+    if ($('player-view').hidden || !state.started || $('settings-dialog').open || $('site-info').open) return;
     setTimeout(() => {
       if (document.activeElement?.tagName === 'IFRAME') $('player-shell').focus({preventScroll: true});
     }, 150);
@@ -1167,6 +1167,20 @@
   }
 
   $('settings-button').addEventListener('click', () => $('settings-dialog').showModal());
+  $('info-close').addEventListener('click', () => {
+    $('site-info').open = false;
+    $('info-button').focus();
+  });
+  document.addEventListener('click', event => {
+    if ($('site-info').open && !$('site-info').contains(event.target)) $('site-info').open = false;
+  });
+  document.addEventListener('keydown', event => {
+    if (event.key === 'Escape' && $('site-info').open) {
+      event.preventDefault();
+      $('site-info').open = false;
+      $('info-button').focus();
+    }
+  });
   $('settings-close').addEventListener('click', () => $('settings-dialog').close());
   $('settings-dialog').addEventListener('click', event => {
     if (event.target === $('settings-dialog')) $('settings-dialog').close();
@@ -1282,7 +1296,7 @@
 
   document.addEventListener('keydown', event => {
     if ($('player-view').hidden || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
-    if ($('settings-dialog').open) return;
+    if ($('settings-dialog').open || $('site-info').open || event.defaultPrevented) return;
     const key = event.code === 'Space' ? ' ' : event.key;
     if (!state.started) {
       if (key === ' ') {

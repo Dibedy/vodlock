@@ -498,15 +498,22 @@ test('canonical chat alignment does not guess inside an unverified discontinuity
   assert.ok(Number.isNaN(playbackTime(index, 700, 500)));
 });
 
-test('website communicates temporary VOD processing delays without spoilers', () => {
+test('website explains processing targets without promising a deadline or exposing spoilers', () => {
   const index = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
   const styles = readFileSync(resolve(__dirname, '../site/styles.css'), 'utf8');
   const header = index.match(/<header[\s\S]*?<\/header>/)?.[0] || '';
-  assert.match(header, /class="processing-status"/);
-  assert.match(header, /Livestream matching \+ watch-party sync/);
-  assert.match(header, /Newly finished matches may take longer than usual to appear/);
-  assert.match(styles, /\.processing-status-card/);
-  assert.match(styles, /\.processing-status-dot/);
+  assert.match(header, /id="site-info" class="site-info"/);
+  assert.match(header, /aria-label="How SPOILLESS works"/);
+  assert.match(header, /within about 2 hours after the match ends/);
+  assert.match(header, /target, not a guaranteed countdown/);
+  assert.match(header, /official VOD doesn't wait for the watch party/);
+  assert.match(header, /archived chat can be added separately/);
+  assert.doesNotMatch(index, /faq-section|processing-status/);
+  assert.match(styles, /\.info-content[^}]*overflow-y: auto/);
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  assert.match(app, /\$\('site-info'\)\.contains\(event\.target\)/);
+  assert.match(app, /event\.key === 'Escape' && \$\('site-info'\)\.open/);
+  assert.match(app, /\$\('settings-dialog'\)\.open \|\| \$\('site-info'\)\.open \|\| event\.defaultPrevented/);
 });
 
 test('website exposes Twitch quality without exposing playback length', () => {
@@ -554,7 +561,7 @@ test('website is ready for crawling and sharing', () => {
   assert.match(index, /rel="canonical" href="https:\/\/spoilless\.vercel\.app\/"/);
   assert.match(index, /property="og:title" content="SPOILLESS \| Spoiler-free VALORANT VODs"/);
   assert.match(index, /application\/ld\+json/);
-  assert.match(index, /id="faq-title"/);
+  assert.match(index, /id="info-title"/);
   assert.match(privacy, /rel="canonical" href="https:\/\/spoilless\.vercel\.app\/privacy"/);
   assert.match(terms, /rel="canonical" href="https:\/\/spoilless\.vercel\.app\/terms"/);
   assert.match(robots, /Sitemap: https:\/\/spoilless\.vercel\.app\/sitemap\.xml/);

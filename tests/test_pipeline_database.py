@@ -864,13 +864,13 @@ class DatabasePipelineTests(unittest.TestCase):
         broadcast = self.store.one("SELECT * FROM pipeline.broadcasts WHERE id=%s", (self.broadcast,))
         source = self.store.one("SELECT * FROM pipeline.sources WHERE id=%s", (twitch,))
         mapping = {"timelineScale": 1, "segments": [
-            {"sourceStart": start, "sourceEnd": start + 70, "canonicalStart": start - 100,
-             "canonicalEnd": start - 30, "offset": -100, "anchors": 10, "maximumResidual": 1}
+            {"sourceStart": start, "sourceEnd": start + 70, "canonicalStart": start - 95,
+             "canonicalEnd": start - 25, "offset": -95, "anchors": 10, "maximumResidual": 1}
             for start in [100, 300, 500]] + [wrong]}
         media = Mock()
         def window(remote, lower, upper):
             value = min(values, key=lambda value: abs(value["start"] + 100 - lower - 8))
-            self.assertAlmostEqual(lower + 8, value["start"] + 100)
+            self.assertAlmostEqual(lower + (8 if value["round"] == 1 else 1), value["start"] + (95 if value["round"] == 1 else 100))
             for second in range(-7, 7):
                 yield Observation(value["start"] + 100 + second, value["round"],
                                   100 - second if second >= 0 else 0, .99,

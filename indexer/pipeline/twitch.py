@@ -547,7 +547,7 @@ class TwitchCapture:
                 break
             nearest = min(alignment["segments"], key=lambda section: max(section["canonicalStart"] - start, start - section["canonicalEnd"], 0))
             offset = previous["offset"] if previous else baseline
-            if (max(nearest["canonicalStart"] - start, start - nearest["canonicalEnd"], 0) <= 240
+            if (previous is None and max(nearest["canonicalStart"] - start, start - nearest["canonicalEnd"], 0) <= 240
                     and abs(nearest["offset"] - offset) <= 90 * scale):
                 offset = nearest["offset"]
             predicted = (start - offset) / scale
@@ -556,13 +556,13 @@ class TwitchCapture:
             search = job["payload"].get("scoreboard_search", {})
             if search.get("identity") != identity:
                 search = {"identity": identity, "attempt": 0, "samples": []}
-            for attempt, (before, after) in enumerate([(8, 9), (24, 24), (90, 90)]):
+            for attempt, (before, after) in enumerate([(1, 12) if previous else (8, 9), (24, 24), (90, 90)]):
                 if attempt < search["attempt"]:
                     continue
                 with self.store.transaction() as connection:
                     self.store.guard(connection, job)
                     connection.execute("UPDATE pipeline.jobs SET payload=payload||%s WHERE id=%s",
-                                       (Jsonb({"activity": {"phase": "scoreboard" if before == 8 else "searching",
+                                       (Jsonb({"activity": {"phase": "scoreboard" if attempt == 0 else "searching",
                                                             "completed": len(checks), "total": len(rounds),
                                                             "match_id": key.split(":")[0], "map": value["map"], "round": value["round"]}}), job["id"]))
                 lower, upper = max(0, predicted - before), predicted + after

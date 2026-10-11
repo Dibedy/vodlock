@@ -786,9 +786,9 @@
     $('end-shield').hidden = true;
     $('start-gate').hidden = false;
     $('start-watching').disabled = false;
-    $('start-watching').textContent = 'Start watching';
-    $('start-gate-title').textContent = 'Start at round one';
-    $('start-gate-copy').textContent = 'The original video loads only after you choose to start.';
+    $('start-watching-label').textContent = 'Play match';
+    $('start-gate-title').textContent = 'Watch from the start';
+    $('start-gate-copy').textContent = 'Starts just before round one.';
     state.theater = false;
     document.body.classList.remove('theater-mode');
     $('player-view').classList.remove('theater-active');
@@ -839,9 +839,9 @@
     $('start-gate').hidden = false;
     $('end-shield').hidden = true;
     $('start-watching').disabled = false;
-    $('start-gate-title').textContent = state.resumeTime === null ? 'Start at round one' : 'Continue watching';
-    $('start-gate-copy').textContent = state.resumeTime === null ? 'The original video loads only after you choose to start.' : 'The player will return to your saved position.';
-    $('start-watching').textContent = state.resumeTime === null ? 'Start watching' : 'Continue watching';
+    $('start-gate-title').textContent = state.resumeTime === null ? 'Watch from the start' : 'Continue watching';
+    $('start-gate-copy').textContent = state.resumeTime === null ? 'Starts just before round one.' : 'Resume from where you left off.';
+    $('start-watching-label').textContent = state.resumeTime === null ? 'Play match' : 'Resume';
     applySettings();
     if (updateHistory) history.pushState({source: entryKey(entry)}, '', '?v=' + encodeURIComponent(entryKey(entry)));
     document.title = entry.title + ' | SPOILLESS';
@@ -927,7 +927,7 @@
           state.started = false;
           $('start-gate').hidden = false;
           $('start-watching').disabled = false;
-          $('start-watching').textContent = 'Try again';
+          $('start-watching-label').textContent = 'Try again';
           toast('The indexed start is not available in this player yet. Please try again shortly.');
         }
       }, 100);
@@ -952,7 +952,7 @@
     setTimeout(() => {
       if (!state.ready || state.player !== player) return;
       $('start-gate').hidden = true;
-      $('start-watching').textContent = 'Start watching';
+      $('start-watching-label').textContent = 'Play match';
     }, revealDelay);
     updateStatus();
     clearInterval(state.statusTimer);
@@ -1005,7 +1005,7 @@
       state.started = false;
       $('start-gate').hidden = false;
       $('start-watching').disabled = false;
-      $('start-watching').textContent = 'Try again';
+      $('start-watching-label').textContent = 'Try again';
       toast(error.message);
     }
   }
@@ -1178,7 +1178,7 @@
     if (state.started) return;
     state.started = true;
     $('start-watching').disabled = true;
-    $('start-watching').textContent = 'Loading ' + (state.entry.provider === 'youtube' ? 'YouTube' : 'Twitch') + '...';
+    $('start-watching-label').textContent = 'Loading ' + (state.entry.provider === 'youtube' ? 'YouTube' : 'Twitch') + '...';
     createPlayer();
   }
 

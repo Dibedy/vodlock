@@ -200,6 +200,13 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .player-gate button { border: 0; background: var(--lime); color: var(--bg); padding: 12px 18px; font-weight: 900; cursor: pointer; }
 .player-gate button:hover { background: #d0ff65; }
 .gate-icon { width: 56px; height: 56px; margin-bottom: 5px; fill: none; stroke: var(--lime); stroke-width: 2; }
+#start-gate { gap: 8px; padding: 18px; background: var(--bg); }
+#start-gate::before { display: none; }
+#start-gate strong { max-width: 100%; font-family: inherit; font-size: 22px; font-weight: 600; line-height: 1.3; letter-spacing: 0; text-transform: none; }
+#start-gate > span { max-width: 100%; font-size: 13px; line-height: 1.5; }
+#start-watching { width: 180px; max-width: 100%; min-height: 44px; margin-top: 10px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 10px 18px; border-radius: 4px; font-size: 13px; font-weight: 700; }
+#start-watching svg { width: 16px; height: 16px; flex: 0 0 16px; }
+#start-watching:disabled { opacity: .65; cursor: wait; }
 
 .round-dock { min-height: 104px; display: grid; grid-template-columns: 230px minmax(0, 1fr); border: 1px solid var(--line); border-top: 3px solid var(--lime); background: var(--raised); }
 .round-position { padding: 15px 18px; display: flex; flex-direction: column; justify-content: center; gap: 7px; border-right: 1px solid var(--line); }

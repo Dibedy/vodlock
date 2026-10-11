@@ -201,6 +201,26 @@ test('map navigation lands on the first round without exposing map totals', () =
   assert.equal(mapDestination(index, 800, 1), null);
 });
 
+test('start and resume gates keep their play icon through loading and retry labels', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const html = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  const gate = html.slice(html.indexOf('<div id="start-gate"'), html.indexOf('<div id="end-shield"'));
+  assert.doesNotMatch(gate, /class="gate-icon"/);
+  assert.match(gate, /id="start-watching-label"/);
+  assert.match(gate, /<button id="start-watching"[^>]*><svg/);
+  assert.doesNotMatch(app, /\$\('start-watching'\)\.textContent/);
+  const start = app.indexOf("    $('start-gate-title').textContent = state.resumeTime");
+  for (const resumeTime of [null, 321.25]) {
+    const elements = new Map();
+    const $ = id => {if (!elements.has(id)) elements.set(id, {}); return elements.get(id);};
+    const state = {resumeTime};
+    vm.runInContext(app.slice(start, app.indexOf('    applySettings();', start)), vm.createContext({$, state}));
+    assert.equal($('start-gate-title').textContent, resumeTime === null ? 'Watch from the start' : 'Continue watching');
+    assert.equal($('start-watching-label').textContent, resumeTime === null ? 'Play match' : 'Resume');
+    assert.equal(state.resumeTime, resumeTime);
+  }
+});
+
 test('second-round auto-skip stays within a map and requires the exact next round', () => {
   const index = {leadSeconds: 5, rounds: [
     {map: 1, round: 1, start: 100}, {map: 1, round: 2, start: 200}, {map: 1, round: 3, start: 300},

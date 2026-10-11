@@ -488,6 +488,24 @@ test('website keeps settings visible in the sticky header', () => {
   assert.match(styles, /\.header-settings/);
 });
 
+test('website accepts bounded round-level alignments without filling their unverified gaps', () => {
+  const segments = Array.from({length: 250}, (_, index) => ({offset: 100, targetStart: index * 20, targetEnd: index * 20 + 10}));
+  const value = {...sample(), schemaVersion: 2, provider: 'twitch', sourceId: '1234567890',
+    alignment: {source: 'youtube:ZphbktbT26k', timelineScale: 1, strictCoverage: true, segments}};
+  const index = validateIndex(value);
+  assert.equal(index.alignment.segments.length, 250);
+  assert.equal(sourceTime(index, 2005), 2105);
+  assert.ok(Number.isNaN(sourceTime(index, 2015)));
+  assert.throws(() => validateIndex({...value, alignment: {...value.alignment,
+    segments: Array.from({length: 5001}, (_, index) => ({offset: 100, targetStart: index * 20, targetEnd: index * 20 + 10}))}}));
+  const overlapping = segments.map(segment => ({...segment}));
+  overlapping[200].targetStart = overlapping[199].targetEnd - 1;
+  assert.throws(() => validateIndex({...value, alignment: {...value.alignment, segments: overlapping}}));
+  const invalid = segments.map(segment => ({...segment}));
+  invalid[200].offset = NaN;
+  assert.throws(() => validateIndex({...value, alignment: {...value.alignment, segments: invalid}}));
+});
+
 test('canonical chat alignment does not guess inside an unverified discontinuity', () => {
   const index = validateIndex({schemaVersion: 2, provider: 'youtube', sourceId: 'ZphbktbT26k', rounds: sample().rounds,
     alignment: {source: 'twitch:1234567890', timelineScale: 1, strictCoverage: true, segments: [

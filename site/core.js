@@ -46,7 +46,7 @@
     if (value === undefined) return null;
     const source = mediaSource(value?.source);
     const scale = value?.timelineScale;
-    if (!source || !Number.isFinite(scale) || scale < 0.95 || scale > 1.05 || !Array.isArray(value.segments) || !value.segments.length || value.segments.length > 100) {
+    if (!source || !Number.isFinite(scale) || scale < 0.95 || scale > 1.05 || !Array.isArray(value.segments) || !value.segments.length || value.segments.length > 5000) {
       throw new Error('The hosted index has invalid timeline alignment.');
     }
     let previousEnd = 0;

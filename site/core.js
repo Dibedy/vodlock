@@ -185,5 +185,18 @@
     return Number.isFinite(time) ? time : 0;
   }
 
-  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, seventvEmotes, chatFragments, playedTime, position, roundDestination, mapDestination, sourceTime, playbackTime});
+  const chatBots = new Set(['fossabot', 'nightbot', 'streamelements', 'streamlabs', 'moobot', 'wizebot']);
+
+  function isChatBot(user) {
+    return chatBots.has(user.toLowerCase());
+  }
+
+  function isChatSpoiler(fragments) {
+    const text = fragments.map(fragment => fragment.length === 1 ? fragment[0] : ' ').join('');
+    return /(?:^|[^\w\d/:\-\u2013\u2014])(\d{1,2})\s*[-\u2013\u2014]\s*(\d{1,2})(?![\w\d/:]|\s*[-\u2013\u2014]\s*\d)/.test(text) ||
+      /\b(?:who\s+(?:won|lost)|(?:what|how).{0,25}\b(?:score|result)|(?:final|series|match|map)\s+(?:score|result)|(?:won|lost|beat|defeated|eliminated|swept|sweep|results))\b/i.test(text) ||
+      /\b(?:score|result)\b.{0,30}\b\d{1,2}\s*:\s*\d{1,2}\b/i.test(text);
+  }
+
+  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, seventvEmotes, chatFragments, isChatBot, isChatSpoiler, playedTime, position, roundDestination, mapDestination, sourceTime, playbackTime});
 })();

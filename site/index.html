@@ -162,6 +162,7 @@
         </section>
         <aside id="chat-panel" class="chat-panel" hidden>
           <div class="chat-heading"><span>Chat</span><i aria-hidden="true"></i></div>
+          <p class="chat-warning">Viewer messages can still contain spoilers.</p>
           <div id="chat-messages" class="chat-messages" aria-live="off"></div>
         </aside>
       </div>
@@ -174,6 +175,8 @@
       <label><span><strong>Hide match details</strong><small>Hide the broadcast title and event while watching.</small></span><input id="setting-hide-metadata" type="checkbox"></label>
       <label><span><strong>Hide current map and round</strong><small>Keep the navigation buttons without showing your position.</small></span><input id="setting-hide-round-status" type="checkbox"></label>
       <label><span><strong>Show archived VOD chat</strong><small>Display synchronized Twitch messages, including on aligned YouTube matches.</small></span><input id="setting-show-chat" type="checkbox"></label>
+      <label><span><strong>Hide known bots</strong><small>Keep messages from Fossabot and other common bots out of chat.</small></span><input id="setting-hide-chat-bots" type="checkbox"></label>
+      <label><span><strong>Filter possible spoilers</strong><small>Hide likely scores and results until you choose to reveal them. Some spoilers can slip through.</small></span><input id="setting-filter-chat-spoilers" type="checkbox"></label>
       <label><span><strong>Fullscreen chat position</strong><small>Choose where archived chat appears while watching fullscreen.</small></span><select id="setting-fullscreen-chat-position" aria-label="Fullscreen chat position"><option value="left">Left</option><option value="right">Right</option><option value="hidden">Hidden</option></select></label>
       <label><span><strong>Show chat timestamps</strong><small>Reveal each message's position within the broadcast.</small></span><input id="setting-show-chat-timestamps" type="checkbox"></label>
       <label><span><strong>Protect the end screen</strong><small>Remove the player when playback finishes.</small></span><input id="setting-end-screen-protection" type="checkbox"></label>

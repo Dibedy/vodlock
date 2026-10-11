@@ -222,7 +222,7 @@ test('7TV emotes match whole case-sensitive tokens and preserve native emotes an
 function chatLoader(fetch) {
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   const sandbox = vm.createContext({fetch, AbortSignal, VodlockSite: context.VodlockSite, console: {warn() {}}});
-  vm.runInContext('const state = {chat: []}; const chatEmoteSets = new Map(); let chatEmotes = new Map();\n' +
+  vm.runInContext('const state = {chat: []}; const chatEmoteSets = new Map(); let chatEmotes = new Map(); let revealedChatMessages = new WeakSet();\n' +
     app.slice(app.indexOf('  async function loadChat('), app.indexOf('  function resetPlayerHost(')), sandbox);
   return {
     load: entry => sandbox.loadChat(entry, {}),
@@ -230,6 +230,79 @@ function chatLoader(fetch) {
     emotes: () => vm.runInContext('chatEmotes', sandbox)
   };
 }
+
+test('chat protection flags likely results without changing messages or hiding ordinary chat', () => {
+  const {isChatBot, isChatSpoiler} = context.VodlockSite;
+  for (const name of ['Fossabot', 'NIGHTBOT', 'StreamElements']) assert.equal(isChatBot(name), true);
+  for (const name of ['robot', 'fossabotfan', 'SomeViewer']) assert.equal(isChatBot(name), false);
+  for (const text of ['who won earlier?', 'what was the score?', 'Team A won', 'A beat B', 'final score', 'A 2-0 B', 'A 13–8 B', 'score was 13:8']) {
+    assert.equal(isChatSpoiler([[text]]), true, text);
+  }
+  for (const text of ['nice shot', 'they can win this', 'stream started at 13:08', '2026-10-11', '100T', 'see you at 4:30', 'I have 100-200 points']) {
+    assert.equal(isChatSpoiler([[text]]), false, text);
+  }
+  const fragments = [['A 2'], ['-0 B'], ['KEKW', '25']];
+  const before = JSON.stringify(fragments);
+  assert.equal(isChatSpoiler(fragments), true);
+  assert.equal(JSON.stringify(fragments), before);
+  assert.equal(isChatSpoiler([['WON', '25']]), false);
+});
+
+test('chat protection defaults on for existing users and preserves explicit opt-outs', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const declaration = app.match(/  const defaultSettings = .*;/)[0];
+  for (const saved of [{}, {showChat: false}, {hideChatBots: false, filterChatSpoilers: false}]) {
+    const sandbox = vm.createContext({localStorage: {getItem: () => JSON.stringify(saved)}});
+    vm.runInContext(declaration + app.slice(app.indexOf('  function readSettings('), app.indexOf('  function saveSettings(')), sandbox);
+    const settings = sandbox.readSettings();
+    assert.equal(settings.hideChatBots, saved.hideChatBots ?? true);
+    assert.equal(settings.filterChatSpoilers, saved.filterChatSpoilers ?? true);
+  }
+});
+
+test('chat rendering hides bots before the cap, collapses spoilers and remembers reveals', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const makeNode = tag => ({tag, children: [], style: {}, handlers: {}, isConnected: true,
+    append(...nodes) { this.children.push(...nodes); },
+    replaceChildren() { this.children.forEach(node => {node.isConnected = false;}); this.children = []; },
+    addEventListener(event, callback) { this.handlers[event] = callback; },
+    setAttribute() {}, classList: {toggle() {}}});
+  const elements = new Map();
+  const $ = id => {if (!elements.has(id)) elements.set(id, makeNode('div')); return elements.get(id);};
+  const message = (user, text, time = 100) => ({user, fragments: [[text]], time});
+  const state = {chat: [message('Viewer', 'nice shot'), message('Other', 'who won earlier?'),
+    ...Array.from({length: 125}, () => message('Fossabot', 'bot text')), message('Future', 'future text', 999)], chatPosition: null};
+  const settings = {showChat: true, hideChatBots: true, filterChatSpoilers: true};
+  const sandbox = vm.createContext({$, state, settings, VodlockSite: context.VodlockSite,
+    document: {fullscreenElement: null, createElement: makeNode, createTextNode: text => ({text})},
+    currentTime: () => 100, syncFullscreenButton() {}, formatTime: String});
+  vm.runInContext('let revealedChatMessages = new WeakSet(); const chatEmotes = new Map();' +
+    app.slice(app.indexOf('  function renderChat('), app.indexOf('  async function loadChat(')), sandbox);
+  sandbox.renderChat();
+  const host = $('chat-messages');
+  assert.equal(host.children.length, 2);
+  assert.equal(host.children[0].tag, 'p');
+  let spoiler = host.children[1];
+  assert.equal(spoiler.tag, 'details');
+  assert.equal(spoiler.open, false);
+  spoiler.open = true;
+  spoiler.handlers.toggle();
+  sandbox.renderChat(true);
+  assert.equal(host.children[1].open, true);
+  spoiler.open = false;
+  spoiler.handlers.toggle();
+  sandbox.renderChat(true);
+  assert.equal(host.children[1].open, true);
+  vm.runInContext('revealedChatMessages = new WeakSet()', sandbox);
+  sandbox.renderChat(true);
+  assert.equal(host.children[1].open, false);
+  settings.filterChatSpoilers = false;
+  sandbox.renderChat(true);
+  assert.equal(host.children[1].tag, 'p');
+  settings.hideChatBots = false;
+  sandbox.renderChat(true);
+  assert.equal(host.children.length, 120);
+});
 
 test('chat toggle displays its current visibility rather than the opposite action', () => {
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');

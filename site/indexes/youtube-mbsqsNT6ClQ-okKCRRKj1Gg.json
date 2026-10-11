@@ -4,7 +4,7 @@
   "sourceId": "okKCRRKj1Gg",
   "label": "T1 vs PRX",
   "leadSeconds": 5,
-  "detector": "vct-clock-ocr-v9+storyboard-v4",
+  "detector": "vct-clock-ocr-v10+storyboard-v5",
   "roundTimingVersion": "round-timing-v2",
   "rounds": [
     {

@@ -4,7 +4,7 @@
   "sourceId": "jbQHpGuy-lU",
   "label": "NRG vs T1",
   "leadSeconds": 5,
-  "detector": "vct-clock-ocr-v9+storyboard-v4",
+  "detector": "vct-clock-ocr-v10+storyboard-v5",
   "roundTimingVersion": "round-timing-v2",
   "rounds": [
     {

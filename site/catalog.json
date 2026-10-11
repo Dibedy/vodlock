@@ -4,6 +4,25 @@
   "videos": [
     {
       "provider": "youtube",
+      "sourceId": "jdQfyr5hpOU",
+      "catalogId": "youtube:cd1f9a4636255fbf:jdQfyr5hpOU",
+      "title": "100T vs NRG",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Full match",
+      "index": "/indexes/youtube-jdQfyr5hpOU-cd1f9a4636255fbf-v2-614e78b6a34f.json",
+      "playedAt": "2026-10-11T11:06:42.302949+02:00",
+      "pipelineState": "provisional",
+      "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 2,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "chat": "/chats/twitch-316085678673.json",
+      "chatSourceId": "316085678673",
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
       "sourceId": "RMBxo7P3cbk",
       "catalogId": "youtube:9567a492a3bd56e0:RMBxo7P3cbk",
       "title": "G2 vs VIT",

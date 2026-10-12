@@ -560618,6 +560618,26 @@
           "!born"
         ]
       ]
+    },
+    {
+      "t": 131924.54,
+      "u": "DatelBunBoi",
+      "c": "#22B247",
+      "f": [
+        [
+          "!discord"
+        ]
+      ]
+    },
+    {
+      "t": 131924.79,
+      "u": "Nightbot",
+      "c": "#7C7CE1",
+      "f": [
+        [
+          "https://discord.gg/bQf67YXjG8"
+        ]
+      ]
     }
   ]
 }

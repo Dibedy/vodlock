@@ -234,7 +234,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-11T20:13:54.066460+00:00"
+      "checkedAt": "2026-10-12T03:24:08.759611+00:00"
     },
     "twitch:2887057207": {
       "status": "held",
@@ -510,7 +510,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-12T00:22:45.452328+00:00"
+      "checkedAt": "2026-10-12T03:25:12.756298+00:00"
     },
     "twitch:2889647074": {
       "status": "published",
@@ -633,16 +633,16 @@
       "checkedAt": "2026-10-11T03:06:33.561700+00:00"
     },
     "twitch:2891551596": {
-      "status": "held",
+      "status": "published",
       "provider": "twitch",
       "channel": "FNS on Twitch",
       "title": "EG FNS | LOUD vs GE - VCT Champions Group Stage Elimination #VCTWatchparty | !vote !inzone !noYT",
-      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
+      "message": "Published 2 complete matches from the watch-party archive",
       "publishedAt": "2026-10-04T08:51:36Z",
-      "detectorVersion": "vct-clock-ocr-v9",
-      "pipelineVersion": "vct-clock-ocr-v9+storyboard-v4+publisher-v23",
-      "retryClass": "cooldown",
-      "checkedAt": "2026-10-10T21:49:48.034234+00:00"
+      "detectorVersion": "vct-clock-ocr-v10",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "retryClass": "none",
+      "checkedAt": "2026-10-12T03:30:27.057849+00:00"
     },
     "youtube:ANktybjyQ4k": {
       "status": "indexed",
@@ -726,7 +726,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-11T19:57:58.559558+00:00"
+      "checkedAt": "2026-10-12T03:09:03.562617+00:00"
     },
     "youtube:7zKE36y96zo": {
       "status": "waiting",
@@ -738,7 +738,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-11T20:04:05.801486+00:00"
+      "checkedAt": "2026-10-12T03:15:31.907410+00:00"
     },
     "twitch:2895001673": {
       "status": "indexed",
@@ -810,7 +810,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-12T00:24:21.865332+00:00"
+      "checkedAt": "2026-10-12T03:26:34.621664+00:00"
     },
     "twitch:2895872598": {
       "status": "held",
@@ -846,7 +846,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-11T23:22:11.517866+00:00"
+      "checkedAt": "2026-10-12T03:22:03.993198+00:00"
     },
     "youtube:91OQEM7i78w": {
       "status": "indexed",
@@ -906,7 +906,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-11T19:49:24.740614+00:00"
+      "checkedAt": "2026-10-12T02:58:49.516547+00:00"
     },
     "twitch:2897752834": {
       "status": "waiting",
@@ -918,7 +918,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-11T20:10:59.429254+00:00"
+      "checkedAt": "2026-10-12T03:23:39.903114+00:00"
     }
   }
 }

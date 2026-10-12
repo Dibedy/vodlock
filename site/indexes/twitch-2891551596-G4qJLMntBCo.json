@@ -1,0 +1,264 @@
+{
+  "schemaVersion": 2,
+  "provider": "twitch",
+  "sourceId": "2891551596",
+  "label": "FUT vs T1",
+  "leadSeconds": 5,
+  "detector": "vct-clock-ocr-v10+storyboard-v5",
+  "rounds": [
+    {
+      "map": 1,
+      "round": 1,
+      "start": 9370.14
+    },
+    {
+      "map": 1,
+      "round": 2,
+      "start": 9446.27
+    },
+    {
+      "map": 1,
+      "round": 3,
+      "start": 9555.46
+    },
+    {
+      "map": 1,
+      "round": 4,
+      "start": 9642.61
+    },
+    {
+      "map": 1,
+      "round": 5,
+      "start": 9739.78
+    },
+    {
+      "map": 1,
+      "round": 6,
+      "start": 9965.17
+    },
+    {
+      "map": 1,
+      "round": 7,
+      "start": 10116.44
+    },
+    {
+      "map": 1,
+      "round": 8,
+      "start": 10266.7
+    },
+    {
+      "map": 1,
+      "round": 9,
+      "start": 10399.93
+    },
+    {
+      "map": 1,
+      "round": 10,
+      "start": 10550.19
+    },
+    {
+      "map": 1,
+      "round": 11,
+      "start": 10669.4
+    },
+    {
+      "map": 1,
+      "round": 12,
+      "start": 10817.66
+    },
+    {
+      "map": 1,
+      "round": 13,
+      "start": 11049.06
+    },
+    {
+      "map": 1,
+      "round": 14,
+      "start": 11146.22
+    },
+    {
+      "map": 1,
+      "round": 15,
+      "start": 11259.42
+    },
+    {
+      "map": 1,
+      "round": 16,
+      "start": 11412.69
+    },
+    {
+      "map": 1,
+      "round": 17,
+      "start": 11524.88
+    },
+    {
+      "map": 1,
+      "round": 18,
+      "start": 11655.11
+    },
+    {
+      "map": 1,
+      "round": 19,
+      "start": 11863.47
+    },
+    {
+      "map": 1,
+      "round": 20,
+      "start": 11963.65
+    },
+    {
+      "map": 1,
+      "round": 21,
+      "start": 12027.76
+    },
+    {
+      "map": 1,
+      "round": 22,
+      "start": 12118.92
+    },
+    {
+      "map": 1,
+      "round": 23,
+      "start": 12265.17
+    },
+    {
+      "map": 2,
+      "round": 1,
+      "start": 12508.6
+    },
+    {
+      "map": 2,
+      "round": 2,
+      "start": 12597.75
+    },
+    {
+      "map": 2,
+      "round": 3,
+      "start": 12641.33
+    },
+    {
+      "map": 2,
+      "round": 4,
+      "start": 13502.06
+    },
+    {
+      "map": 2,
+      "round": 5,
+      "start": 13633.29
+    },
+    {
+      "map": 2,
+      "round": 6,
+      "start": 13779.54
+    },
+    {
+      "map": 2,
+      "round": 7,
+      "start": 13882.72
+    },
+    {
+      "map": 2,
+      "round": 8,
+      "start": 14075.05
+    },
+    {
+      "map": 2,
+      "round": 9,
+      "start": 14203.28
+    },
+    {
+      "map": 2,
+      "round": 10,
+      "start": 14350.53
+    },
+    {
+      "map": 2,
+      "round": 11,
+      "start": 14523.84
+    },
+    {
+      "map": 2,
+      "round": 12,
+      "start": 14592.95
+    },
+    {
+      "map": 2,
+      "round": 13,
+      "start": 14857.41
+    },
+    {
+      "map": 2,
+      "round": 14,
+      "start": 14962.6
+    },
+    {
+      "map": 2,
+      "round": 15,
+      "start": 15068.78
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 15165.96
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 15303.19
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 15490.52
+    },
+    {
+      "map": 2,
+      "round": 19,
+      "start": 15612.73
+    },
+    {
+      "map": 2,
+      "round": 20,
+      "start": 15752.98
+    },
+    {
+      "map": 2,
+      "round": 21,
+      "start": 15863.16
+    },
+    {
+      "map": 2,
+      "round": 22,
+      "start": 16079.55
+    },
+    {
+      "map": 2,
+      "round": 23,
+      "start": 16160.68
+    }
+  ],
+  "alignment": {
+    "version": "storyboard-v5",
+    "offset": 1207.362,
+    "segments": [
+      {
+        "offset": 1207.362,
+        "anchors": 1411,
+        "medianDistance": 8.0,
+        "maximumResidual": 3.998,
+        "targetStart": 0,
+        "targetEnd": 17284.433
+      }
+    ],
+    "timelineScale": 0.99947203,
+    "anchors": 1411,
+    "coverage": [
+      438,
+      569,
+      404
+    ],
+    "medianDistance": 8.0,
+    "maximumResidual": 3.998,
+    "source": "youtube:j12hJ1miDfE"
+  }
+}

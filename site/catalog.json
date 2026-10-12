@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "updatedAt": "2026-10-11",
+  "updatedAt": "2026-10-12",
   "videos": [
     {
       "provider": "youtube",
@@ -419,6 +419,21 @@
       "catalogId": "youtube:G4qJLMntBCo:j12hJ1miDfE"
     },
     {
+      "provider": "twitch",
+      "sourceId": "2891551596",
+      "catalogId": "twitch:2891551596:G4qJLMntBCo",
+      "kind": "watch-party",
+      "creator": "FNS",
+      "title": "FUT vs T1",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Watch party",
+      "index": "/indexes/twitch-2891551596-G4qJLMntBCo.json",
+      "playedAt": "2026-10-04T11:27:34Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai",
+      "chat": "/chats/twitch-2891551596.json"
+    },
+    {
       "provider": "youtube",
       "sourceId": "j12hJ1miDfE",
       "title": "LOUD vs GE",
@@ -429,6 +444,21 @@
       "tournament": "VALORANT Champions Shanghai",
       "tournamentKey": "valorant-champions-shanghai",
       "catalogId": "youtube:0Yr0XKJJmZE:j12hJ1miDfE"
+    },
+    {
+      "provider": "twitch",
+      "sourceId": "2891551596",
+      "catalogId": "twitch:2891551596:0Yr0XKJJmZE",
+      "kind": "watch-party",
+      "creator": "FNS",
+      "title": "LOUD vs GE",
+      "event": "VALORANT Champions Shanghai | Group Stage",
+      "label": "Watch party",
+      "index": "/indexes/twitch-2891551596-0Yr0XKJJmZE.json",
+      "playedAt": "2026-10-04T09:07:15Z",
+      "tournament": "VALORANT Champions Shanghai",
+      "tournamentKey": "valorant-champions-shanghai",
+      "chat": "/chats/twitch-2891551596.json"
     },
     {
       "provider": "youtube",

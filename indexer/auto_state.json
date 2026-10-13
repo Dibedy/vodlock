@@ -234,7 +234,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-12T10:06:11.341502+00:00"
+      "checkedAt": "2026-10-13T02:19:03.993949+00:00"
     },
     "twitch:2887057207": {
       "status": "held",
@@ -510,7 +510,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-12T19:54:32.931582+00:00"
+      "checkedAt": "2026-10-13T02:20:14.186039+00:00"
     },
     "twitch:2889647074": {
       "status": "published",
@@ -726,7 +726,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-12T19:29:15.787347+00:00"
+      "checkedAt": "2026-10-13T02:16:35.672945+00:00"
     },
     "youtube:7zKE36y96zo": {
       "status": "waiting",
@@ -798,7 +798,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-12T09:48:32.998388+00:00"
+      "checkedAt": "2026-10-13T01:41:18.314912+00:00"
     },
     "twitch:2895868132": {
       "status": "waiting",
@@ -810,7 +810,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-12T19:56:23.875921+00:00"
+      "checkedAt": "2026-10-13T02:21:46.379070+00:00"
     },
     "twitch:2895872598": {
       "status": "held",
@@ -822,7 +822,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-11T09:34:25.360112+00:00"
+      "checkedAt": "2026-10-13T02:22:45.898831+00:00"
     },
     "youtube:RMBxo7P3cbk": {
       "status": "indexed",
@@ -894,7 +894,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-12T09:57:32.865005+00:00"
+      "checkedAt": "2026-10-13T01:53:40.329993+00:00"
     },
     "youtube:UMIkxgmsOTA": {
       "status": "waiting",
@@ -906,7 +906,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-12T10:03:51.115060+00:00"
+      "checkedAt": "2026-10-13T02:02:43.495409+00:00"
     },
     "twitch:2897752834": {
       "status": "waiting",
@@ -918,7 +918,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-12T10:05:45.115526+00:00"
+      "checkedAt": "2026-10-13T02:18:17.171350+00:00"
     }
   }
 }

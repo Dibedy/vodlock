@@ -32,6 +32,13 @@
       "login": "gofns",
       "creator": "FNS",
       "excludeTitle": "\\b(HIGHLIGHTS|SHORTS|REBROADCAST)\\b|#shorts\\b"
+    },
+    {
+      "channel_id": "UC3ti8PjJczdDKHSwk7TESkw",
+      "official_youtube_channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
+      "login": "ohnepixel",
+      "creator": "ohnepixel",
+      "excludeTitle": "\\b(HIGHLIGHTS|SHORTS|REBROADCAST)\\b|#shorts\\b"
     }
   ],
   "youtube_archive_client": "android",
@@ -44,6 +51,11 @@
     },
     {
       "login": "gofns",
+      "role": "watch_party",
+      "official_youtube_channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw"
+    },
+    {
+      "login": "ohnepixel",
       "role": "watch_party",
       "official_youtube_channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw"
     }

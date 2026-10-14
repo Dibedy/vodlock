@@ -475,7 +475,7 @@ test('match source selection prefers verified YouTube watch parties per creator 
   const official = {id: 'official', kind: 'match', provider: 'youtube', match: 'first', playedAt: '2026-10-11T10:00:00Z'};
   const twitch = {id: 'twitch', kind: 'watch-party', provider: 'twitch', creator: 'FNS', match: 'first', playedAt: '2026-10-11T10:00:00Z'};
   const youtube = {...twitch, id: 'youtube', provider: 'youtube'};
-  const other = {...twitch, id: 'other', creator: 'Other'};
+  const other = {...twitch, id: 'other', creator: 'ohnepixel'};
   const state = {catalog: [official, twitch, youtube, other, {...twitch, id: 'second', match: 'second'}]};
   const sandbox = vm.createContext({state, VodlockSite: context.VodlockSite, matchKey: entry => entry.match,
     matchup: () => [], entryKind: entry => entry.kind, creatorName: entry => entry.creator});
@@ -489,6 +489,8 @@ test('match source selection prefers verified YouTube watch parties per creator 
   state.catalog = [official, twitch, other];
   groups = sandbox.groupedMatches();
   assert.deepEqual(Array.from(groups[0].entries, entry => entry.id), ['official', 'twitch', 'other']);
+  state.catalog.push({...other, id: 'ohne-youtube', provider: 'youtube'});
+  assert.deepEqual(Array.from(sandbox.groupedMatches()[0].entries, entry => entry.id), ['official', 'ohne-youtube', 'twitch']);
 });
 
 test('chat protection defaults on for existing users and preserves explicit opt-outs', () => {

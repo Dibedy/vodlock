@@ -694,6 +694,29 @@ class PipelineTests(unittest.TestCase):
             self.assertTrue(config.shadow_for({**broadcast, **changes}))
         self.assertTrue(Config("test", settings=config.settings).shadow_for(broadcast))
 
+    def test_rollout_discovers_fns_and_ohnepixel_youtube_without_matchup_titles(self):
+        from pipeline.coordinator import Coordinator
+
+        path = Path(__file__).resolve().parents[1] / "indexer" / "pipeline.rollout.json"
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://test", "SPOILLESS_PIPELINE_MODE": "shadow"}):
+            config = Config.load(path)
+        channels = {channel["login"]: channel for channel in config.settings["watchparty_youtube_channels"]}
+        self.assertEqual(set(channels), {"gofns", "ohnepixel"})
+        self.assertEqual(channels["ohnepixel"]["channel_id"], "UC3ti8PjJczdDKHSwk7TESkw")
+        for login, channel in channels.items():
+            fallback = next(item for item in config.settings["twitch_channels"] if item["login"] == login)
+            self.assertEqual(fallback["role"], "watch_party")
+            self.assertEqual(fallback["official_youtube_channel_id"], channel["official_youtube_channel_id"])
+            store, youtube = Mock(), Mock()
+            store.one.return_value = None
+            entry = {"id": "abcdefghijk", "title": "watching games with chat"}
+            youtube.discover.return_value = [entry]
+            Coordinator(store, config, youtube).discover_youtube({"payload": {
+                "routes": [{"kind": "associate_watchparty", "channel": channel}]}})
+            youtube.discover.assert_called_once_with(channel, streams_only=True)
+            store.enqueue.assert_called_once_with("associate_watchparty", "associate-watchparty:abcdefghijk",
+                                                  payload={"entry": entry, "channel": channel})
+
     def test_youtube_watchparty_keeps_verified_canonical_rounds(self):
         canonical = {"provider": "youtube", "role": "canonical", "broadcast_id": "broadcast", "external_id": "abcdefghijk"}
         secondary = {"provider": "youtube", "role": "watch_party", "external_id": "lmnopqrstuv", "revision": 1, "metadata": {}}

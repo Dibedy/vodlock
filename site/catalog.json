@@ -946,6 +946,84 @@
       "pipelineAlignmentVersion": 0,
       "reason": "waiting_alignment",
       "canonicalPipeline": true
+    },
+    {
+      "expectedMatchId": "0c108faf-4be5-51fd-b900-aafd648dee5c",
+      "catalogId": "youtube:HYQ447Ftyeg:50b930d375455b16",
+      "provider": "youtube",
+      "sourceId": "HYQ447Ftyeg",
+      "kind": "watch-party",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 4,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 0,
+      "reason": "waiting_alignment",
+      "canonicalPipeline": true
+    },
+    {
+      "expectedMatchId": "3b6fca91-592c-558d-ae0e-ddc2aba76080",
+      "catalogId": "youtube:HYQ447Ftyeg:91ca113dab95551e",
+      "provider": "youtube",
+      "sourceId": "HYQ447Ftyeg",
+      "kind": "watch-party",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 6,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 0,
+      "reason": "waiting_alignment",
+      "canonicalPipeline": true
+    },
+    {
+      "expectedMatchId": "3e20965b-02c1-5094-84bc-18bd605f1adf",
+      "catalogId": "youtube:-Zng06JzDdw:c4181ad29a465d53",
+      "provider": "youtube",
+      "sourceId": "-Zng06JzDdw",
+      "kind": "watch-party",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 6,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 0,
+      "reason": "waiting_alignment",
+      "canonicalPipeline": true
+    },
+    {
+      "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
+      "catalogId": "youtube:hMg6-9QqPvI:cd1f9a4636255fbf",
+      "provider": "youtube",
+      "sourceId": "hMg6-9QqPvI",
+      "kind": "watch-party",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 6,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 0,
+      "reason": "waiting_alignment",
+      "canonicalPipeline": true
+    },
+    {
+      "expectedMatchId": "be2b4691-cc65-52ea-9187-01450d120f89",
+      "catalogId": "youtube:hMg6-9QqPvI:06768befe3765ee2",
+      "provider": "youtube",
+      "sourceId": "hMg6-9QqPvI",
+      "kind": "watch-party",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 2,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 0,
+      "reason": "waiting_alignment",
+      "canonicalPipeline": true
+    },
+    {
+      "expectedMatchId": "e46c2699-21da-5bda-8f9b-b6b92fd9404e",
+      "catalogId": "youtube:-Zng06JzDdw:f3f4635c9ed953f5",
+      "provider": "youtube",
+      "sourceId": "-Zng06JzDdw",
+      "kind": "watch-party",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 4,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 0,
+      "reason": "waiting_alignment",
+      "canonicalPipeline": true
     }
   ]
 }

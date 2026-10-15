@@ -150,7 +150,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-14T06:15:50.229238+00:00"
+      "checkedAt": "2026-10-15T01:19:15.419201+00:00"
     },
     "twitch:2877469732": {
       "status": "held",
@@ -510,7 +510,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-14T16:10:08.174350+00:00"
+      "checkedAt": "2026-10-15T01:17:43.439089+00:00"
     },
     "twitch:2889647074": {
       "status": "published",
@@ -726,7 +726,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-14T16:05:39.715755+00:00"
+      "checkedAt": "2026-10-15T01:08:23.763201+00:00"
     },
     "youtube:7zKE36y96zo": {
       "status": "waiting",
@@ -738,7 +738,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-14T19:33:17.479388+00:00"
+      "checkedAt": "2026-10-15T01:14:57.314961+00:00"
     },
     "twitch:2895001673": {
       "status": "indexed",
@@ -810,7 +810,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-14T20:23:03.895785+00:00"
+      "checkedAt": "2026-10-15T01:19:11.049251+00:00"
     },
     "twitch:2895872598": {
       "status": "held",
@@ -894,7 +894,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-14T15:38:07.535072+00:00"
+      "checkedAt": "2026-10-15T00:51:40.777749+00:00"
     },
     "youtube:UMIkxgmsOTA": {
       "status": "waiting",
@@ -906,7 +906,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-14T15:48:55.808489+00:00"
+      "checkedAt": "2026-10-15T00:58:28.396835+00:00"
     },
     "twitch:2897752834": {
       "status": "waiting",
@@ -918,7 +918,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-14T16:08:56.212334+00:00"
+      "checkedAt": "2026-10-15T01:16:40.089387+00:00"
     }
   }
 }

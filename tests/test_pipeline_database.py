@@ -947,11 +947,14 @@ class DatabasePipelineTests(unittest.TestCase):
         self.assertEqual(check.call_args.args[-1], 0)
         coordinator = Coordinator(self.store, self.config)
         coordinator.discover()
-        scheduled = self.store.one("SELECT payload,priority FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v4%%'", (twitch,))
+        scheduled = self.store.one("SELECT payload,priority FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v5%%'", (twitch,))
         self.assertEqual(scheduled["priority"], 5)
+        self.store.execute("UPDATE pipeline.jobs SET dedupe_key=replace(dedupe_key,'scoreboard-v5','scoreboard-v4'),state='needs_review' WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v5%%'", (twitch,))
+        coordinator.discover()
+        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v5%%'", (twitch,))["total"], 1)
         self.store.execute("UPDATE pipeline.match_indexes SET version=2 WHERE expected_match_id=%s", (self.match,))
         coordinator.discover()
-        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v4%%'", (twitch,))["total"], 2)
+        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v5%%'", (twitch,))["total"], 2)
 
     def test_watchparty_seed_verifies_short_window_without_full_video_scan(self):
         twitch = identifier()

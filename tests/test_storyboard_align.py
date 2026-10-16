@@ -196,6 +196,59 @@ class StoryboardAlignmentTests(unittest.TestCase):
         self.assertEqual(result["maximumResidual"], 0)
         self.assertEqual(result["coverage"], [18, 20, 19])
 
+    def test_precise_alignment_accepts_sustained_small_clock_steps_and_drift(self):
+        for scale in [1, 1.001]:
+            with self.subTest(scale=scale):
+                target = {"duration": 590, "interval": 10,
+                          "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}
+                reference = {"duration": 700, "interval": 2,
+                             "frames": [{"time": index * 10 * scale + (8 if index < 30 else 0),
+                                         "hash": unique_hash(index)} for index in range(60)]}
+                result = align_storyboards(reference, target, maximum_distance=0, maximum_residual=2)
+                self.assertEqual(len(result["segments"]), 2)
+                self.assertEqual(result["anchors"], 60)
+                self.assertAlmostEqual(result["timelineScale"], scale)
+                self.assertEqual([value["offset"] for value in result["segments"]], [8, 0])
+                self.assertEqual(result["maximumResidual"], 0)
+
+    def test_precise_alignment_rejects_unique_timestamp_jitter(self):
+        reference = {"duration": 700, "interval": 2,
+                     "frames": [{"time": index * 10 + (8 if index % 2 else 0), "hash": unique_hash(index)}
+                                for index in range(60)]}
+        target = {"duration": 600, "interval": 10,
+                  "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}
+        with self.assertRaisesRegex(ValueError, "precise storyboard alignment"):
+            align_storyboards(reference, target, maximum_distance=0, maximum_residual=2)
+
+    def test_precise_alignment_does_not_turn_isolated_ambiguities_into_clock_steps(self):
+        target = {"duration": 590, "interval": 10,
+                  "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}
+        reference = {"duration": 700, "interval": 2,
+                     "frames": [{"time": index * 10 + (8 if (index < 30 and index != 15) or index == 44 else 0),
+                                 "hash": unique_hash(index)} for index in range(60)]}
+        result = align_storyboards(reference, target, maximum_distance=0, maximum_residual=2)
+        self.assertEqual([value["offset"] for value in result["segments"]], [8, 0])
+        self.assertEqual(result["anchors"], 58)
+
+    def test_precise_alignment_keeps_separate_sustained_returns_to_an_offset(self):
+        target = {"duration": 890, "interval": 10,
+                  "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(90)]}
+        reference = {"duration": 1000, "interval": 2,
+                     "frames": [{"time": index * 10 + (0 if 30 <= index < 60 else 8),
+                                 "hash": unique_hash(index)} for index in range(90)]}
+        result = align_storyboards(reference, target, maximum_distance=0, maximum_residual=2)
+        self.assertEqual([value["offset"] for value in result["segments"]], [8, 0, 8])
+        self.assertEqual(result["anchors"], 90)
+
+    def test_precise_alignment_rejects_interleaved_offsets_between_stable_ends(self):
+        target = {"duration": 600, "interval": 10,
+                  "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}
+        reference = {"duration": 700, "interval": 2,
+                     "frames": [{"time": index * 10 + (8 if 20 <= index < 40 and index % 2 else 0),
+                                 "hash": unique_hash(index)} for index in range(60)]}
+        with self.assertRaisesRegex(ValueError, "interleaved clock offsets"):
+            align_storyboards(reference, target, maximum_distance=0, maximum_residual=2)
+
     def test_alignment_accepts_small_verified_timebase_drift(self):
         target = {"duration": 600, "interval": 10,
                   "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}

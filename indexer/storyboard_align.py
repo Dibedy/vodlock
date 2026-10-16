@@ -11,7 +11,7 @@ import imageio_ffmpeg
 import numpy as np
 
 
-ALIGNER_VERSION = "storyboard-v5"
+ALIGNER_VERSION = "storyboard-v6"
 
 
 def frame_hash(image):
@@ -208,6 +208,60 @@ def matching_frames(reference_frames, target_frames, maximum_distance):
             yield target, reference_frames[best], distance
 
 
+def precise_segments(matches, scale, tolerance):
+    corrected = [{**match, "offset": match["reference"] - scale * match["target"]} for match in matches]
+
+    def supported(values):
+        return len(values) >= 5 and max(value["target"] for value in values) - min(value["target"] for value in values) >= 60
+
+    candidates = []
+    for match in corrected:
+        cluster = [value for value in corrected if abs(value["offset"] - match["offset"]) <= tolerance]
+        if supported(cluster):
+            candidates.append(cluster)
+    offsets = []
+    for cluster in sorted(candidates, key=len, reverse=True):
+        offset = float(np.median([value["offset"] for value in cluster]))
+        if not any(abs(offset - previous) <= tolerance * 2 for previous in offsets):
+            offsets.append(offset)
+
+    # A clock change needs sustained chronological support, not interleaved subsets
+    # that happen to fit different offsets. Isolated visual ambiguities are not steps.
+    runs = []
+    for match in sorted(corrected, key=lambda value: (value["target"], value["reference"])):
+        if not offsets:
+            break
+        group = min(range(len(offsets)), key=lambda index: abs(match["offset"] - offsets[index]))
+        if abs(match["offset"] - offsets[group]) > tolerance:
+            continue
+        if not runs or runs[-1]["group"] != group:
+            runs.append({"group": group, "matches": []})
+        runs[-1]["matches"].append(match)
+    stable = []
+    for run in runs:
+        if not supported(run["matches"]):
+            continue
+        if stable and stable[-1]["group"] == run["group"]:
+            stable[-1]["matches"].extend(run["matches"])
+        else:
+            stable.append({"group": run["group"], "matches": list(run["matches"])})
+    segments = []
+    for run in stable:
+        start = min(value["target"] for value in run["matches"])
+        end = max(value["target"] for value in run["matches"])
+        within = [value for value in corrected if start <= value["target"] <= end]
+        for group, offset in enumerate(offsets):
+            if group != run["group"] and supported([value for value in within if abs(value["offset"] - offset) <= tolerance]):
+                raise ValueError("The videos do not have a precise storyboard alignment: interleaved clock offsets")
+        verified = [value for value in within if abs(value["offset"] - offsets[run["group"]]) <= tolerance]
+        segments.append({"offset": offsets[run["group"]], "matches": verified,
+                         "anchorStart": start, "anchorEnd": end,
+                         "referenceEnd": max(value["reference"] for value in verified), "anchors": len(verified)})
+    if not segments:
+        raise ValueError("The videos do not have a precise storyboard alignment: no sustained clock offsets")
+    return segments
+
+
 def align_storyboards(reference, target, maximum_distance=12, require_target_coverage=True, maximum_residual=None):
     if len(reference.get("frames", [])) < 30 or len(target.get("frames", [])) < 30:
         raise ValueError("Not enough storyboard frames for a verified alignment")
@@ -263,6 +317,8 @@ def align_storyboards(reference, target, maximum_distance=12, require_target_cov
     scale = float(np.median(slopes)) if slopes else 1.0
     if not 0.95 <= scale <= 1.05:
         raise ValueError("The videos do not share a stable timeline scale")
+    if maximum_residual is not None:
+        segments = precise_segments(matches, scale, min(tolerance, maximum_residual))
     for segment in segments:
         segment["offset"] = float(np.median([match["reference"] - scale * match["target"]
                                               for match in segment["matches"]]))

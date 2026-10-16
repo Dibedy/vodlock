@@ -536,6 +536,33 @@ class PipelineTests(unittest.TestCase):
                                          else [[(label, .99)]] * 3)
                 self.assertIsNone(reader.read_scoreboard(np.zeros((720, 1280, 3), dtype=np.uint8), 100).round)
 
+    def test_youtube_watchparty_windows_use_scoreboard_reader_and_close_early(self):
+        reader = Mock()
+        expected = Observation(100, 1, 99, confidence=.95, scores=(0, 0))
+        reader.read_scoreboard.return_value = expected
+        media = MediaAnalysis(reader=reader)
+        closed = []
+        frame = object()
+
+        def frames(*args, **kwargs):
+            try:
+                yield 100, frame
+                yield 101, frame
+            finally:
+                closed.append(True)
+
+        media.archive_frames = Mock(side_effect=frames)
+        media.manifest = Mock(side_effect=AssertionError("YouTube must not enter the Twitch segment path"))
+        remote = {"provider": "youtube", "url": "fixture"}
+        stream = media.watchparty_window(remote, 100, 110)
+        self.assertEqual(next(stream), (expected, {}, frame))
+        stream.close()
+        self.assertEqual(closed, [True])
+        media.archive_frames.assert_called_once_with(remote, 100, 110, compact=False)
+        reader.read_scoreboard.assert_called_once_with(frame, 100)
+        reader.read.assert_not_called()
+        media.manifest.assert_not_called()
+
     def test_watchparty_windows_fetch_only_local_segments_and_seek_accurately(self):
         import numpy as np
 
@@ -840,7 +867,7 @@ class PipelineTests(unittest.TestCase):
         processing.youtube.metadata.return_value = {"state": "ended_waiting_archive"}
         processing.youtube.resolve.return_value = {"url": "archive", "duration": 3600}
         self.assertEqual(capture.resolve_archive(source)["provider"], "youtube")
-        processing.youtube.resolve.assert_called_once_with("lmnopqrstuv", cached=True)
+        processing.youtube.resolve.assert_called_once_with("lmnopqrstuv", height=720, minimum_height=720, cached=True)
 
     def test_auto_approval_configuration_rejects_unconfigured_channels(self):
         with tempfile.TemporaryDirectory() as directory:

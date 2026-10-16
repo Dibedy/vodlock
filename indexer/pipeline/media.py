@@ -672,7 +672,14 @@ class MediaAnalysis:
         from pathlib import Path
 
         if remote.get("provider") == "youtube":
-            yield from self.window(remote, start, end)
+            if self.reader is None:
+                self.reader = HudReader()
+            frames = self.archive_frames(remote, start, end, compact=False)
+            try:
+                for timestamp, frame in frames:
+                    yield self.reader.read_scoreboard(frame, timestamp), {}, frame
+            finally:
+                frames.close()
             return
         if "vod_segments" not in remote:
             remote["vod_segments"] = self.manifest(remote)

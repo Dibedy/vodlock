@@ -976,6 +976,9 @@ class DatabasePipelineTests(unittest.TestCase):
             capture.vod(job)
             updated = self.store.one("SELECT * FROM pipeline.jobs WHERE id=%s", (job["id"],))
             capture.vod(updated)
+            fallback = {**updated, "payload": {**updated["payload"],
+                        "round_seed": {**updated["payload"]["round_seed"], "state": "fallback"}}}
+            capture.vod(fallback)
         self.assertEqual(updated["payload"]["round_seed"]["state"], "verified")
         self.assertNotIn("checkpoint", updated["payload"])
         self.assertEqual(media.archive_fingerprints.call_count, 1)
@@ -983,6 +986,35 @@ class DatabasePipelineTests(unittest.TestCase):
         alignment_job = self.store.one("SELECT * FROM pipeline.jobs WHERE kind='twitch_align' AND source_id=%s", (twitch,))
         self.assertTrue(alignment_job["payload"]["visual_alignment"]["mapping"]["segments"])
         self.assertEqual(self.entities()[1]["checkpoint_time"], canonical["checkpoint_time"])
+
+    def test_late_watchparty_seed_uses_an_overlapping_round_and_upgrades_old_fallback(self):
+        secondary = identifier()
+        self.store.execute("INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role,actual_start) VALUES (%s,%s,'youtube','lmnopqrstuv','watch_party','2026-10-04T10:03:20Z')",
+                           (secondary, self.broadcast))
+        self.store.execute("UPDATE pipeline.broadcasts SET state='archive_ready',archive_revision=1,reconciled_revision=1 WHERE id=%s", (self.broadcast,))
+        self.store.execute("""INSERT INTO pipeline.match_indexes(id,broadcast_id,expected_match_id,segment_id,canonical_source_id,generation,version,archive_revision,state,rounds,provenance)
+                           VALUES (%s,%s,%s,%s,%s,1,1,1,'final',%s,'{}')""",
+                           (identifier(), self.broadcast, self.match, self.segment, self.source, Jsonb(series())))
+        job = self.job("fingerprint_archive")
+        canonical = self.entities()[1]
+        frames = fingerprints(count=90, base=100, interval=2)["frames"]
+        self.store.checkpoint(job, canonical, canonical["checkpoint_time"], {}, [], frames, timeline="archive", revision=1)
+        self.store.finish(job)
+        self.store.enqueue("watchparty_vod", "late-seed", broadcast=self.broadcast, source=secondary,
+                           payload={"round_seed": {"state": "fallback", "version": 1, "canonical_revision": 1, "source_revision": 1}})
+        job = self.store.claim()
+        media = Mock()
+        media.archive_fingerprints.side_effect = lambda remote, lower, upper, **kwargs: [
+            {**value, "time": value["time"] - 200} for value in frames if lower <= value["time"] - 200 < upper]
+        capture = TwitchCapture(self.store, self.config, Processing(self.store, self.config, self.storage), media)
+        with patch.object(capture, "resolve_archive", return_value={"url": "fixture", "duration": 20000}):
+            capture.vod(job)
+        updated = self.store.one("SELECT payload FROM pipeline.jobs WHERE id=%s", (job["id"],))["payload"]
+        self.assertEqual(updated["round_seed"]["state"], "verified")
+        self.assertEqual(updated["round_seed"]["version"], 2)
+        self.assertNotIn("checkpoint", updated)
+        self.assertEqual(media.archive_fingerprints.call_count, 1)
+        self.assertEqual(media.archive_fingerprints.call_args.args[1:3], (0, 120))
 
     def test_watchparty_seed_waits_for_official_rounds_without_scanning_video(self):
         twitch = identifier()

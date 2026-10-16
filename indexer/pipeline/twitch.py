@@ -23,6 +23,8 @@ from .youtube import timestamp
 
 
 LOG = logging.getLogger(__name__)
+SCOREBOARD_CHECK_VERSION = 5
+ROUND_SEED_VERSION = 2
 
 
 def resolve_twitch(value, live=True):
@@ -215,7 +217,7 @@ class TwitchCapture:
             info = self.processing.youtube.metadata(source["external_id"])
             if info["state"] in {"scheduled", "live", "unavailable", "discovered"}:
                 raise WaitingWork("YouTube watch-party is waiting for a seekable archive; Twitch remains available")
-            return {**self.processing.youtube.resolve(source["external_id"], cached=True), "provider": "youtube"}
+            return {**self.processing.youtube.resolve(source["external_id"], height=720, minimum_height=720, cached=True), "provider": "youtube"}
         return resolve_twitch(source["metadata"]["vod_id"], live=False)
 
     def discover_vods(self, job):
@@ -351,32 +353,40 @@ class TwitchCapture:
     def seed_rounds(self, job, broadcast, source, remote, source_start):
         progress = job["payload"].get("round_seed", {})
         revision = broadcast["archive_revision"]
-        current_seed = progress.get("canonical_revision") == revision and progress.get("source_revision") == source["revision"]
-        if current_seed and progress.get("state") == "fallback":
-            return False
+        current_seed = (progress.get("canonical_revision") == revision
+                        and progress.get("source_revision") == source["revision"]
+                        and progress.get("version") == ROUND_SEED_VERSION)
         if current_seed and progress.get("state") == "verified":
             return True
         if not revision or broadcast["reconciled_revision"] != revision:
             raise WaitingWork("Watch-party round search is waiting for the verified official archive")
-        index = self.store.one("""SELECT i.* FROM pipeline.match_indexes i WHERE i.broadcast_id=%s
+        indexes = self.store.rows("""SELECT DISTINCT ON (expected_match_id) i.* FROM pipeline.match_indexes i WHERE i.broadcast_id=%s
             AND i.generation=%s AND i.archive_revision=%s AND i.state IN ('provisional','final')
-            ORDER BY (i.rounds->0->>'start')::double precision,version DESC LIMIT 1""",
+            ORDER BY expected_match_id,version DESC""",
             (broadcast["id"], broadcast["generation"], revision))
-        if not index or not index["rounds"]:
+        if not indexes or not any(index["rounds"] for index in indexes):
             raise WaitingWork("Watch-party round search is waiting for ready official round timestamps")
         canonical = self.store.one("SELECT * FROM pipeline.sources WHERE broadcast_id=%s AND role='canonical'", (broadcast["id"],))
         if not canonical["actual_start"]:
             return False
+        clock_offset = (canonical["actual_start"] - source_start).total_seconds()
+        predicted_times = [value["start"] + clock_offset for index in indexes for value in index["rounds"]
+                           if 0 <= value["start"] + clock_offset < float(remote["duration"])]
+        if not predicted_times:
+            raise WaitingWork("Watch-party round search is waiting for official rounds overlapping this recording")
         reference = self.store.fingerprints(canonical, "archive", revision)
         reference["interval"] = 2
         target = self.store.fingerprints(source, "secondary")
         target["interval"] = 2
-        seed = {"canonical_revision": revision, "source_revision": source["revision"], "attempt": progress.get("attempt", 0) if current_seed else 0}
+        seed = {"version": ROUND_SEED_VERSION, "canonical_revision": revision, "source_revision": source["revision"],
+                "attempt": progress.get("attempt", 0) if current_seed else 0}
         try:
             alignment = piecewise_alignment(reference, target, maximum_distance=18,
                                             maximum_residual=self.config.maximum_residual, local=True)
         except NeedsReview:
-            predicted = index["rounds"][0]["start"] + (canonical["actual_start"] - source_start).total_seconds()
+            if current_seed and progress.get("state") == "fallback":
+                return False
+            predicted = min(predicted_times)
             before, after = (60, 120) if seed["attempt"] == 0 else (180, 240)
             lower, upper = max(0, predicted - before), min(float(remote["duration"]), predicted + after)
             if upper > lower:
@@ -548,9 +558,9 @@ class TwitchCapture:
                     del checks[key]
                 else:
                     previous = section
-            elif cached.get("version") != 4:
+            elif cached.get("version") != SCOREBOARD_CHECK_VERSION:
                 del checks[key]
-        cached["version"] = 4
+        cached["version"] = SCOREBOARD_CHECK_VERSION
         pending = [(key, value, start) for key, value, start in rounds if key not in checks]
         batch = {item[0] for item in pending[:4]}
         remote = self.resolve_archive(source) if pending else {}
@@ -569,7 +579,7 @@ class TwitchCapture:
                 offset = nearest["offset"]
             predicted = (start - offset) / scale
             section = None
-            identity = [key, start, value.get("scores"), source["revision"], revision, predicted, scale]
+            identity = [key, start, value.get("scores"), source["revision"], revision, predicted, scale, SCOREBOARD_CHECK_VERSION]
             search = job["payload"].get("scoreboard_search", {})
             if search.get("identity") != identity:
                 search = {"identity": identity, "attempt": 0, "samples": []}

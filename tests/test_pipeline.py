@@ -448,6 +448,18 @@ class PipelineTests(unittest.TestCase):
                         with self.assertRaises(WaitingSource):
                             media.download_clip({"url": "fixture", "duration": 4}, 0, 4, path)
 
+    def test_clip_packet_gaps_in_padding_do_not_reject_continuous_requested_footage(self):
+        media = MediaAnalysis()
+        packets = b"#tb 0: 1/1\n0,0,0,1,10,0\n0,1,1,1,10,0\n0,2,2,1,10,0\n0,3,3,1,10,0\n0,8,8,1,10,0\n"
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "clip.nut"
+            path.write_bytes(b"fixture")
+            with patch("pipeline.media.subprocess.run", side_effect=[Mock(returncode=0), Mock(returncode=0, stdout=packets)]):
+                media.download_clip({"url": "fixture", "duration": 10}, 0, 4, path)
+            with patch("pipeline.media.subprocess.run", side_effect=[Mock(returncode=0), Mock(returncode=0, stdout=packets)]):
+                with self.assertRaisesRegex(WaitingSource, "continuously"):
+                    media.download_clip({"url": "fixture", "duration": 10}, 0, 5, path)
+
     def test_real_video_cache_preserves_fractional_seeks_b_frames_and_chunk_boundaries(self):
         import imageio_ffmpeg
         import numpy as np

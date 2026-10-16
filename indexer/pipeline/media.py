@@ -261,7 +261,8 @@ class MediaAnalysis:
         except (ValueError, IndexError, ZeroDivisionError) as error:
             raise WaitingSource("Archive clip packet timestamps are invalid") from error
         if (not packets or packets[0][0] > lower + .1 or max(position + length for position, length in packets) < upper - .001
-                or any(right[0] - left[0] - left[1] > .1 for left, right in zip(packets, packets[1:]))):
+                or any(min(right[0], upper) - max(left[0] + left[1], lower) > .1
+                       for left, right in zip(packets, packets[1:]))):
             raise WaitingSource("Archive clip packet timestamps do not cover its requested range continuously")
         LOG.info("archive_clip_downloaded start=%.3f end=%.3f bytes=%s elapsed_seconds=%.3f",
                  lower, upper, path.stat().st_size, monotonic() - started)

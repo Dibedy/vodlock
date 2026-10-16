@@ -232,9 +232,9 @@
       "message": "More than one official YouTube stream archive aligns with this Twitch chat",
       "publishedAt": "2026-09-29T08:30:43Z",
       "detectorVersion": "vct-clock-ocr-v10",
-      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v6+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-16T14:22:33.171918+00:00"
+      "checkedAt": "2026-10-16T23:35:18.083203+00:00"
     },
     "twitch:2887057207": {
       "status": "held",
@@ -556,9 +556,9 @@
       "message": "No verified official YouTube stream archive matches this full match",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v10",
-      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v6+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-16T14:07:16.919650+00:00"
+      "checkedAt": "2026-10-16T23:21:18.541673+00:00"
     },
     "twitch:2890572310": {
       "status": "held",
@@ -568,9 +568,9 @@
       "message": "More than one official YouTube stream archive aligns with this Twitch chat",
       "publishedAt": "2026-10-03T08:30:16Z",
       "detectorVersion": "vct-clock-ocr-v10",
-      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v6+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-16T14:23:14.322947+00:00"
+      "checkedAt": "2026-10-16T23:35:51.392025+00:00"
     },
     "twitch:2890592017": {
       "status": "held",
@@ -688,9 +688,9 @@
       "message": "Attached Twitch chat to 2 official stream matches",
       "publishedAt": "2026-10-07T08:30:43Z",
       "detectorVersion": "vct-clock-ocr-v10",
-      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v6+publisher-v23",
       "retryClass": "none",
-      "checkedAt": "2026-10-11T20:13:27.499696+00:00"
+      "checkedAt": "2026-10-16T23:34:34.540013+00:00"
     },
     "twitch:2894139574": {
       "status": "held",
@@ -796,9 +796,9 @@
       "message": "No verified official YouTube stream archive matches this full match",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v10",
-      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v6+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-16T14:21:39.557366+00:00"
+      "checkedAt": "2026-10-16T23:32:37.764378+00:00"
     },
     "twitch:2895868132": {
       "status": "waiting",
@@ -820,9 +820,9 @@
       "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
       "publishedAt": "2026-10-09T08:44:44Z",
       "detectorVersion": "vct-clock-ocr-v10",
-      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v6+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-16T04:23:06.128863+00:00"
+      "checkedAt": "2026-10-16T23:36:51.823273+00:00"
     },
     "youtube:RMBxo7P3cbk": {
       "status": "indexed",
@@ -844,9 +844,9 @@
       "message": "Map 1: check the gap before round 15.",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v10",
-      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v6+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-16T13:51:06.925060+00:00"
+      "checkedAt": "2026-10-16T23:09:01.809953+00:00"
     },
     "youtube:91OQEM7i78w": {
       "status": "indexed",
@@ -868,9 +868,9 @@
       "message": "More than one official YouTube stream archive aligns with this Twitch chat",
       "publishedAt": "2026-10-10T08:30:01Z",
       "detectorVersion": "vct-clock-ocr-v10",
-      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v6+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-16T14:23:52.904705+00:00"
+      "checkedAt": "2026-10-16T23:36:22.747923+00:00"
     },
     "twitch:2896809061": {
       "status": "held",
@@ -928,9 +928,9 @@
       "message": "No verified official YouTube stream archive matches this full match",
       "publishedAt": null,
       "detectorVersion": "vct-clock-ocr-v10",
-      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v6+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-16T13:39:42.291131+00:00"
+      "checkedAt": "2026-10-16T23:00:49.758013+00:00"
     },
     "youtube:QEDpGS4GXBg": {
       "status": "waiting",

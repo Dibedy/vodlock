@@ -4,7 +4,7 @@
   "sourceId": "jbQHpGuy-lU",
   "label": "PRX vs LOUD",
   "leadSeconds": 5,
-  "detector": "vct-clock-ocr-v10+storyboard-v5",
+  "detector": "vct-clock-ocr-v10+storyboard-v6",
   "roundTimingVersion": "round-timing-v2",
   "rounds": [
     {

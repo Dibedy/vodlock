@@ -43,7 +43,7 @@
       "title": "LOUD vs VIT",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/youtube-IBMdpoG-A4s-07ebb5a187b553ea-v41-a21665ba7eca.json",
+      "index": "/indexes/youtube-IBMdpoG-A4s-07ebb5a187b553ea-v41-2b0523e9a270.json",
       "playedAt": "2026-10-16T08:08:45+02:00",
       "pipelineState": "final",
       "expectedMatchId": "7866895f-41d7-5ef2-976e-9badad29ab5d",
@@ -53,7 +53,7 @@
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 2,
+      "pipelineAlignmentVersion": 3,
       "creator": "ohnepixel",
       "coverage": {
         "type": "late-start",
@@ -1147,7 +1147,7 @@
       "pipelineGeneration": 1,
       "pipelineVersion": 43,
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 2,
+      "pipelineAlignmentVersion": 3,
       "reason": "waiting_alignment",
       "canonicalPipeline": true
     }

@@ -217,7 +217,7 @@ test('start and resume gates keep their play icon through loading and retry labe
     const elements = new Map();
     const $ = id => {if (!elements.has(id)) elements.set(id, {}); return elements.get(id);};
     const state = {resumeTime};
-    vm.runInContext(app.slice(start, app.indexOf('    applySettings();', start)), vm.createContext({$, state}));
+    vm.runInContext(app.slice(start, app.indexOf('    applySettings();', start)), vm.createContext({$, state, coverage: ''}));
     assert.equal($('start-gate-title').textContent, resumeTime === null ? 'Watch from the start' : 'Continue watching');
     assert.equal($('start-watching-label').textContent, resumeTime === null ? 'Play match' : 'Resume');
     assert.equal(state.resumeTime, resumeTime);
@@ -491,6 +491,41 @@ test('match source selection prefers verified YouTube watch parties per creator 
   assert.deepEqual(Array.from(groups[0].entries, entry => entry.id), ['official', 'twitch', 'other']);
   state.catalog.push({...other, id: 'ohne-youtube', provider: 'youtube'});
   assert.deepEqual(Array.from(sandbox.groupedMatches()[0].entries, entry => entry.id), ['official', 'ohne-youtube', 'twitch']);
+});
+
+test('rematches keep separate source lists and watched identities across dates and match IDs', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const older = {title: 'VIT vs LOUD', playedAt: '2026-09-30T09:08:51Z', provider: 'youtube', kind: 'match'};
+  const today = {...older, title: 'LOUD vs VIT', playedAt: '2026-10-16T08:08:45+02:00', expectedMatchId: 'today'};
+  const sandbox = vm.createContext({state: {catalog: [today, older, {...older, provider: 'twitch', kind: 'watch-party', creator: 'FNS'}]},
+    VodlockSite: context.VodlockSite, matchup: entry => entry.title.split(' vs '), teamCode: value => value,
+    entryKind: entry => entry.kind, creatorName: entry => entry.creator});
+  vm.runInContext(app.slice(app.indexOf('  function matchKey('), app.indexOf('  function creatorName(')) +
+    app.slice(app.indexOf('  function groupedMatches('), app.indexOf('  function tournamentName(')), sandbox);
+  const groups = sandbox.groupedMatches();
+  assert.equal(groups.length, 2);
+  assert.equal(groups[0].entries.length, 1);
+  assert.equal(groups[1].entries.length, 2);
+  assert.notEqual(sandbox.matchKey(today), sandbox.matchKey(older));
+  assert.notEqual(sandbox.matchKey(today), sandbox.matchKey({...today, expectedMatchId: 'another-same-day-series'}));
+  assert.notEqual(sandbox.matchKey({...today, expectedMatchId: undefined}), sandbox.matchKey(older));
+  assert.equal(sandbox.matchKey({...older, playedAt: '2026-09-30T11:08:51+02:00'}), sandbox.matchKey(older));
+});
+
+test('late-start watch parties retain actual round numbers and clearly label their available start', () => {
+  const raw = {schemaVersion: 2, provider: 'youtube', sourceId: 'abcdefghijk',
+    rounds: [{map: 1, round: 5, start: 55}, {map: 1, round: 6, start: 155}],
+    coverage: {type: 'late-start', omittedOpeningRounds: 4, firstMap: 1, firstRound: 5}};
+  const index = validateIndex(raw);
+  assert.equal(context.VodlockSite.coverageLabel(index.coverage), 'Starts at round 5');
+  assert.equal(roundDestination(index, 55, -1), null);
+  assert.equal(roundDestination(index, 55, 1), 150);
+  for (const change of [{firstRound: 1}, {omittedOpeningRounds: true}, {omittedOpeningRounds: 0}, {type: 'gap'}]) {
+    assert.throws(() => validateIndex({...raw, coverage: {...raw.coverage, ...change}}), /partial coverage/);
+  }
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  assert.match(app, /coverageLabel\(entry.coverage\)/);
+  assert.match(app, /Earlier rounds are not in this recording/);
 });
 
 test('chat protection defaults on for existing users and preserves explicit opt-outs', () => {

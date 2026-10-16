@@ -504,7 +504,11 @@ class TwitchCapture:
                 self.store.guard(connection, job)
                 connection.execute("UPDATE pipeline.jobs SET payload=payload||%s WHERE id=%s",
                                    (Jsonb({"visual_alignment": {"signature": signature, "mapping": alignment}}), job["id"]))
-            alignment = self.check_rounds(job, broadcast, source, canonical, alignment, canonical_revision)
+            try:
+                alignment = self.check_rounds(job, broadcast, source, canonical, alignment, canonical_revision)
+            except ContinueJob:
+                self.save_partial_alignment(job, broadcast, source, canonical, alignment, canonical_revision)
+                raise
         self.processing.save_alignment(job, source, canonical, alignment, "secondary", canonical_revision)
         with self.store.transaction() as connection:
             self.store.guard(connection, job)
@@ -516,6 +520,56 @@ class TwitchCapture:
         self.store.enqueue(
             "export", f"chat-export:{source['id']}:{broadcast['archive_revision']}", broadcast=broadcast["id"]
         )
+
+    def save_partial_alignment(self, job, broadcast, source, canonical, alignment, revision):
+        from .publishing import watchparty_contract
+
+        cached = self.store.one("SELECT payload FROM pipeline.jobs WHERE id=%s", (job["id"],))["payload"].get("scoreboard_checks", {})
+        if cached.get("source_revision") != source["revision"] or cached.get("canonical_revision") != revision:
+            return
+        before = self.store.one("""SELECT mapping,revision FROM pipeline.alignments WHERE source_id=%s
+            AND canonical_source_id=%s AND source_revision=%s AND canonical_revision=%s AND kind='secondary'""",
+            (source["id"], canonical["id"], source["revision"], revision))
+        available = dict((before or {}).get("mapping", {}).get("roundChecks", {}))
+        available.update({key: check for key, check in cached.get("checks", {}).items() if check.get("section")})
+        indexes = self.store.rows("""SELECT DISTINCT ON (expected_match_id) * FROM pipeline.match_indexes
+            WHERE broadcast_id=%s AND canonical_source_id=%s AND generation=%s AND archive_revision=%s
+            AND state IN ('provisional','final') ORDER BY expected_match_id,version DESC""",
+            (broadcast["id"], canonical["id"], broadcast["generation"], revision))
+        checks = {}
+        for index in indexes:
+            shift = index["provenance"].get("clock", {}).get("playback_shift", 0) if index["provenance"].get("method") == "live_presentation_clock" else 0
+            for value in index["rounds"]:
+                key = f"{index['expected_match_id']}:{value['map']}:{value['round']}"
+                check = available.get(key)
+                if (check and check.get("section") and check["canonical_start"] == value["start"] - shift
+                        and check.get("scores") == value.get("scores")):
+                    checks[key] = check
+        if not checks:
+            return
+        seed = dict(alignment)
+        if not seed.get("recordingStart") and before:
+            origin = before["mapping"].get("recordingStart")
+            if origin:
+                seed["recordingStart"] = origin
+        partial = scoreboard_alignment(seed, checks)
+        partial["segments"] = [section for section in partial["segments"] if section.get("method") == "scoreboard"]
+        self.processing.save_alignment(job, source, canonical, partial, "secondary", revision)
+        for index in indexes:
+            match = self.store.one("SELECT * FROM pipeline.expected_matches WHERE id=%s", (index["expected_match_id"],))
+            shift = index["provenance"].get("clock", {}).get("playback_shift", 0) if index["provenance"].get("method") == "live_presentation_clock" else 0
+            try:
+                watchparty_contract(canonical, source, match, index, partial, 1, shift)
+            except NeedsReview:
+                continue
+            try:
+                if before:
+                    watchparty_contract(canonical, source, match, index, before["mapping"], before["revision"], shift)
+                    continue
+            except NeedsReview:
+                pass
+            self.store.enqueue("export", f"chat-export:{source['id']}:{revision}", broadcast=broadcast["id"])
+            break
 
     def check_rounds(self, job, broadcast, source, canonical, alignment, revision):
         begun = time.monotonic()
@@ -541,7 +595,7 @@ class TwitchCapture:
             cached = {"source_revision": source["revision"], "canonical_revision": revision, "checks": {}}
         checks = {key: check for key, check in (saved or {}).get("mapping", {}).get("roundChecks", {}).items()
                   if check.get("section")}
-        checks.update(cached["checks"])
+        checks.update({key: check for key, check in cached["checks"].items() if check.get("section") or key not in checks})
         checks = {key: check for key, value, start in rounds if (check := checks.get(key))
                   and check["canonical_start"] == start and check.get("scores") == value.get("scores")}
         scale = alignment["timelineScale"]

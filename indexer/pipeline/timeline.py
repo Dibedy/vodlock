@@ -52,6 +52,11 @@ def scoreboard_section(samples, expected, canonical_start, scale):
 
 def scoreboard_alignment(mapping, checks):
     scale = mapping["timelineScale"]
+    opening = mapping.get("recordingStart")
+    if not opening:
+        opening = next((section for section in mapping["segments"]
+                        if 0 <= section["sourceStart"] <= 2 and section["sourceEnd"] - section["sourceStart"] >= 60
+                        and section["anchors"] >= 5 and section["maximumResidual"] <= 2), None)
     verified = sorted((check["section"] for check in checks.values() if check.get("section")),
                       key=lambda section: section["sourceStart"])
     for left, right in zip(verified, verified[1:]):
@@ -69,7 +74,8 @@ def scoreboard_alignment(mapping, checks):
                          "canonicalStart": scale * first + section["offset"],
                          "canonicalEnd": scale * last + section["offset"]} for first, last in fragments)
     sections = sorted(sections + verified, key=lambda section: section["sourceStart"])
-    return {**mapping, "segments": sections, "roundChecks": checks}
+    return {**mapping, "segments": sections, "roundChecks": checks,
+            **({"recordingStart": opening} if opening else {})}
 
 
 def local_alignment(canonical, source, maximum_distance=12, maximum_residual=2):

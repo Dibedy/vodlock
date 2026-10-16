@@ -391,8 +391,11 @@
   }
 
   function matchKey(entry) {
+    if (entry.expectedMatchId) return 'match:' + entry.expectedMatchId;
     const teams = matchup(entry);
-    return teams.length === 2 ? teams.map(teamCode).sort().join(':') : entry.title.toUpperCase();
+    const matchupKey = teams.length === 2 ? teams.map(teamCode).sort().join(':') : entry.title.toUpperCase();
+    const time = VodlockSite.playedTime(entry.playedAt);
+    return matchupKey + ':' + (time ? new Date(time).toISOString().slice(0, 10) : entryKey(entry));
   }
 
   function creatorName(entry) {
@@ -708,6 +711,8 @@
       label.textContent = sourceName(entry);
       const provider = document.createElement('span');
       provider.textContent = entry.provider === 'youtube' ? entry.chat ? 'YouTube · archived Twitch chat' : 'YouTube' : entry.chat ? 'Twitch · archived chat' : 'Twitch';
+      const coverage = VodlockSite.coverageLabel(entry.coverage);
+      if (coverage) provider.textContent += ' · ' + coverage;
       watch.append(label, provider);
       watch.addEventListener('click', () => openVideo(entryKey(entry)));
       sources.append(watch);
@@ -833,14 +838,15 @@
       image.hidden = !teamLogos[team];
       image.src = teamLogos[team] || '';
     }
-    $('watch-source').textContent = sourceName(entry) + ' · ' + (entry.provider === 'youtube' ? 'YouTube' : 'Twitch');
+    const coverage = VodlockSite.coverageLabel(index.coverage);
+    $('watch-source').textContent = sourceName(entry) + ' · ' + (entry.provider === 'youtube' ? 'YouTube' : 'Twitch') + (coverage ? ' · ' + coverage : '');
     $('library-view').hidden = true;
     $('player-view').hidden = false;
     $('start-gate').hidden = false;
     $('end-shield').hidden = true;
     $('start-watching').disabled = false;
     $('start-gate-title').textContent = state.resumeTime === null ? 'Watch from the start' : 'Continue watching';
-    $('start-gate-copy').textContent = state.resumeTime === null ? 'Starts just before round one.' : 'Resume from where you left off.';
+    $('start-gate-copy').textContent = state.resumeTime === null ? coverage ? coverage + '. Earlier rounds are not in this recording.' : 'Starts just before round one.' : 'Resume from where you left off.';
     $('start-watching-label').textContent = state.resumeTime === null ? 'Play match' : 'Resume';
     applySettings();
     if (updateHistory) history.pushState({source: entryKey(entry)}, '', '?v=' + encodeURIComponent(entryKey(entry)));

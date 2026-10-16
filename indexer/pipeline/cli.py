@@ -111,9 +111,22 @@ def release_to_site(release, site):
                 raise ValueError("Watch-party release is not derived from its current canonical index")
             alignment = index.get("alignment", {})
             scale = alignment.get("timelineScale", 0)
-            if not isinstance(scale, (int, float)) or not math.isfinite(scale) or not .95 <= scale <= 1.05 or alignment.get("source") != "youtube:" + parent["sourceId"] or not alignment.get("strictCoverage") or len(index["rounds"]) != len(parent_index["rounds"]) or index.get("pipelineState") != parent.get("pipelineState"):
+            coverage = index.get("coverage")
+            omitted = 0
+            if coverage is not None:
+                if not isinstance(coverage, dict):
+                    raise ValueError("Watch-party release has invalid partial coverage")
+                opening_count = coverage.get("omittedOpeningRounds")
+                if (type(opening_count) is not int or not 0 < opening_count < len(parent_index["rounds"])
+                        or coverage != {"type": "late-start", "omittedOpeningRounds": opening_count,
+                                       "firstMap": index["rounds"][0]["map"], "firstRound": index["rounds"][0]["round"]}):
+                    raise ValueError("Watch-party release has invalid partial coverage")
+                omitted = opening_count
+            if entry.get("coverage") != coverage:
+                raise ValueError("Watch-party catalog coverage does not match its index")
+            if not isinstance(scale, (int, float)) or not math.isfinite(scale) or not .95 <= scale <= 1.05 or alignment.get("source") != "youtube:" + parent["sourceId"] or not alignment.get("strictCoverage") or len(index["rounds"]) + omitted != len(parent_index["rounds"]) or index.get("pipelineState") != parent.get("pipelineState"):
                 raise ValueError("Watch-party release has invalid canonical alignment")
-            for target, canonical in zip(index["rounds"], parent_index["rounds"]):
+            for target, canonical in zip(index["rounds"], parent_index["rounds"][omitted:]):
                 sections = [section for section in alignment.get("segments", []) if section["targetStart"] <= target["start"] - 5 and section["targetEnd"] >= target["start"] + 2]
                 if (target["map"], target["round"]) != (canonical["map"], canonical["round"]) or len(sections) != 1 or abs(scale * target["start"] + sections[0]["offset"] - canonical["start"]) > .002:
                     raise ValueError("Watch-party rounds do not match verified canonical timestamps")

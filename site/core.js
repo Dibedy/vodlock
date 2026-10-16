@@ -61,6 +61,14 @@
     return {source: sourceKey(source.provider, source.sourceId), timelineScale: scale, segments, ...(value.strictCoverage === true ? {strictCoverage: true} : {})};
   }
 
+  function coverageLabel(value) {
+    if (!value || value.type !== 'late-start' || !Number.isInteger(value.omittedOpeningRounds) ||
+        value.omittedOpeningRounds < 1 || value.omittedOpeningRounds >= 5000 ||
+        !Number.isInteger(value.firstMap) || value.firstMap < 1 || value.firstMap > 99 ||
+        !Number.isInteger(value.firstRound) || value.firstRound < 1 || value.firstRound > 100) return '';
+    return value.firstMap === 1 ? 'Starts at round ' + value.firstRound : 'Starts at map ' + value.firstMap + ', round ' + value.firstRound;
+  }
+
   function validateIndex(value) {
     const provider = value?.schemaVersion === 1 ? 'youtube' : value?.provider;
     const sourceId = value?.schemaVersion === 1 ? value?.videoId : value?.sourceId;
@@ -87,7 +95,11 @@
     });
     const alignment = value.schemaVersion === 2 ? validateAlignment(value.alignment) : null;
     const chatAlignment = value.schemaVersion === 2 ? validateAlignment(value.chatAlignment) : null;
-    return {schemaVersion: 2, provider, sourceId, label: String(value.label || 'Indexed VOD').slice(0, 100), leadSeconds: 5, rounds, ...(alignment ? {alignment} : {}), ...(chatAlignment ? {chatAlignment} : {})};
+    const coverage = value.coverage;
+    if (coverage !== undefined && (!coverageLabel(coverage) || coverage.firstMap !== rounds[0].map || coverage.firstRound !== rounds[0].round)) {
+      throw new Error('The hosted index has invalid partial coverage.');
+    }
+    return {schemaVersion: 2, provider, sourceId, label: String(value.label || 'Indexed VOD').slice(0, 100), leadSeconds: 5, rounds, ...(alignment ? {alignment} : {}), ...(chatAlignment ? {chatAlignment} : {}), ...(coverage ? {coverage} : {})};
   }
 
   function sourceTime(index, time) {
@@ -210,5 +222,5 @@
       /\b(?:score|result)\b.{0,30}\b\d{1,2}\s*:\s*\d{1,2}\b/i.test(text);
   }
 
-  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, validateIndex, validateChat, seventvEmotes, chatFragments, isChatBot, isChatSpoiler, playedTime, position, roundDestination, autoSkipDestination, mapDestination, sourceTime, playbackTime});
+  globalThis.VodlockSite = Object.freeze({videoId: youtubeId, youtubeId, twitchId, mediaSource, sourceKey, coverageLabel, validateIndex, validateChat, seventvEmotes, chatFragments, isChatBot, isChatSpoiler, playedTime, position, roundDestination, autoSkipDestination, mapDestination, sourceTime, playbackTime});
 })();

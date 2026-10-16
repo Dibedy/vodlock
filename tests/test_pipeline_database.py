@@ -873,10 +873,10 @@ class DatabasePipelineTests(unittest.TestCase):
         self.store.execute("UPDATE pipeline.sources SET checkpoint_time=800 WHERE id=%s", (twitch,))
         coordinator.discover()
         coordinator.discover()
-        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v4%%'", (twitch,))["total"], 1)
+        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v5%%'", (twitch,))["total"], 1)
         self.store.execute("UPDATE pipeline.match_indexes SET version=2 WHERE expected_match_id=%s", (self.match,))
         coordinator.discover()
-        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v4%%'", (twitch,))["total"], 2)
+        self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v5%%'", (twitch,))["total"], 2)
         self.store.execute("DELETE FROM pipeline.alignments WHERE source_id=%s", (twitch,))
         job["payload"] = {}
         media.watchparty_window.side_effect = lambda *args: (value for value in ())
@@ -889,6 +889,54 @@ class DatabasePipelineTests(unittest.TestCase):
         self.assertEqual(media.watchparty_window.call_count, 15)
         self.assertEqual(result["segments"], mapping["segments"])
         self.assertTrue(all(check["section"] is None for check in result["roundChecks"].values()))
+
+    def test_completed_watchparty_match_exports_while_later_match_checks_are_pending(self):
+        from detector import Observation
+        from pipeline.timeline import scoreboard_section
+
+        secondary, later_match, later_segment = identifier(), identifier(), identifier()
+        self.store.execute("INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role) VALUES (%s,%s,'youtube','lmnopqrstuv','watch_party')", (secondary, self.broadcast))
+        self.store.execute("UPDATE pipeline.broadcasts SET state='archive_ready',archive_revision=1,reconciled_revision=1 WHERE id=%s", (self.broadcast,))
+        self.store.execute("UPDATE pipeline.segments SET state='final' WHERE id=%s", (self.segment,))
+        self.store.execute("""INSERT INTO pipeline.expected_matches(id,broadcast_id,event,stage,day,team_a,team_b,match_order,best_of,region,channel_id,provider,external_id,completion)
+            SELECT %s,broadcast_id,event,stage,day,'C','D',2,best_of,region,channel_id,provider,'later-match','completed'
+            FROM pipeline.expected_matches WHERE id=%s""", (later_match, self.match))
+        self.store.execute("""INSERT INTO pipeline.segments(id,broadcast_id,expected_match_id,generation,start_time,end_time,state,rounds)
+            VALUES (%s,%s,%s,1,3000,4200,'final',%s)""", (later_segment, self.broadcast, later_match, Jsonb(series(base=3000))))
+        for match, segment, values in [(self.match, self.segment, series()), (later_match, later_segment, series(base=3000))]:
+            self.store.execute("""INSERT INTO pipeline.match_indexes(id,broadcast_id,expected_match_id,segment_id,canonical_source_id,generation,version,archive_revision,state,rounds,provenance,shadow)
+                VALUES (%s,%s,%s,%s,%s,1,1,1,'final',%s,'{}',false)""", (identifier(), self.broadcast, match, segment, self.source, Jsonb(values)))
+        checks = {}
+        for value in series():
+            start = value['start'] + 100
+            samples = [Observation(start + second, value['round'], 100 - second, .99, scores=tuple(value['scores'])) for second in range(6)]
+            checks[f"{self.match}:1:{value['round']}"] = {"canonical_start": value['start'], "scores": value['scores'],
+                "section": scoreboard_section(samples, value, value['start'], 1)}
+        self.store.enqueue('watchparty_align', 'incremental-rounds', broadcast=self.broadcast, source=secondary,
+            payload={"scoreboard_checks": {"source_revision": 1, "canonical_revision": 1, "checks": checks}})
+        job = self.store.claim()
+        broadcast = self.store.one('SELECT * FROM pipeline.broadcasts WHERE id=%s', (self.broadcast,))
+        source, canonical = self.store.one('SELECT * FROM pipeline.sources WHERE id=%s', (secondary,)), self.entities()[1]
+        capture = TwitchCapture(self.store, self.config, Processing(self.store, self.config, self.storage))
+        mapping = {"timelineScale": 1, "anchors": 12, "maximumResidual": 1, "segments": [{"sourceStart": 100, "sourceEnd": 8000, "canonicalStart": 0,
+            "canonicalEnd": 7900, "offset": -100, "anchors": 12, "maximumResidual": 1}]}
+        capture.save_partial_alignment(job, broadcast, source, canonical, mapping, 1)
+        saved = self.store.one('SELECT mapping FROM pipeline.alignments WHERE source_id=%s', (secondary,))['mapping']
+        self.assertEqual(len(saved['segments']), 13)
+        self.assertTrue(all(section.get('method') == 'scoreboard' for section in saved['segments']))
+        catalog = export_snapshot(self.store, self.storage, False, ['abcdefghijk'])
+        parties = [entry for entry in catalog['videos'] if entry.get('kind') == 'watch-party']
+        self.assertEqual([entry['expectedMatchId'] for entry in parties], [str(self.match)])
+        self.assertTrue(self.store.one("SELECT id FROM pipeline.jobs WHERE kind='export'"))
+        # A less advanced overlapping task cannot withdraw already verified coverage.
+        self.store.execute('UPDATE pipeline.jobs SET payload=%s WHERE id=%s', (Jsonb({"scoreboard_checks": {"source_revision": 1, "canonical_revision": 1, "checks": {}}}), job['id']))
+        capture.save_partial_alignment(job, broadcast, source, canonical, mapping, 1)
+        self.assertEqual(self.store.one('SELECT mapping FROM pipeline.alignments WHERE source_id=%s', (secondary,))['mapping'], saved)
+        origin = {"sourceStart": 0, "sourceEnd": 70, "canonicalStart": -100, "canonicalEnd": -30,
+            "offset": -100, "anchors": 12, "maximumResidual": 1}
+        capture.save_partial_alignment(job, broadcast, source, canonical, {**mapping, "recordingStart": origin}, 1)
+        capture.save_partial_alignment(job, broadcast, source, canonical, mapping, 1)
+        self.assertEqual(self.store.one('SELECT mapping FROM pipeline.alignments WHERE source_id=%s', (secondary,))['mapping']['recordingStart'], origin)
 
     def test_watchparty_checks_extrapolate_across_breaks_without_reusing_an_earlier_round(self):
         from detector import Observation
@@ -1512,6 +1560,27 @@ class DatabasePipelineTests(unittest.TestCase):
         self.assertEqual([entry["sourceId"] for entry in catalog["videos"]], ["abcdefghijk", "123456789"])
         release_to_site(Path(self.temporary.name) / "release", site)
         self.assertEqual(len(json.loads((site / "catalog.json").read_text())["videos"]), 2)
+
+        opening = {"sourceStart": 0, "sourceEnd": 1100, "canonicalStart": 250, "canonicalEnd": 1350,
+                   "offset": 250, "anchors": 12, "maximumResidual": 1}
+        late = {"timelineScale": 1, "anchors": 12, "maximumResidual": 1,
+                "segments": [opening], "recordingStart": opening}
+        processing.save_alignment(align_job, youtube_source, self.entities()[1], late, "secondary", 0)
+        catalog = export_snapshot(self.store, self.storage, False, ["abcdefghijk"])
+        youtube = next(entry for entry in catalog["videos"] if entry["sourceId"] == "lmnopqrstuv")
+        self.assertEqual(youtube["coverage"]["firstRound"], 3)
+        path = "release/" + youtube["index"].lstrip("/")
+        contract = json.loads(self.storage.get(path))
+        self.assertEqual(contract["rounds"][0]["round"], 3)
+        release_to_site(Path(self.temporary.name) / "release", site)
+        for broken in [
+            {**contract, "rounds": contract["rounds"][:-1]},
+            {**contract, "rounds": contract["rounds"][:2] + contract["rounds"][3:]},
+            {**contract, "coverage": {**contract["coverage"], "omittedOpeningRounds": True}},
+        ]:
+            self.storage.put(path, json_bytes(broken))
+            with self.assertRaises(ValueError):
+                release_to_site(Path(self.temporary.name) / "release", site)
 
     def test_upload_without_segment_cannot_starve_archive_readiness(self):
         self.store.execute("DELETE FROM pipeline.segments")

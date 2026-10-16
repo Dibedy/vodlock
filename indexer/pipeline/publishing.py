@@ -27,9 +27,18 @@ def watchparty_contract(canonical, secondary, match, index, mapping, alignment_v
     scale = mapping["timelineScale"]
     if not math.isfinite(scale) or not .95 <= scale <= 1.05:
         raise NeedsReview("Watch-party alignment has an unsupported timeline scale")
+    opening = mapping.get("recordingStart", {})
+    late_start = (0 <= opening.get("sourceStart", -1) <= 2
+                  and opening.get("sourceEnd", 0) - opening.get("sourceStart", 0) >= 60
+                  and opening.get("anchors", 0) >= 5 and opening.get("maximumResidual", math.inf) <= 2
+                  and math.isfinite(opening.get("offset", math.inf)))
+    omitted = 0
     rounds: list[dict] = []
     for value in index["rounds"]:
         start = value["start"] - playback_shift
+        if not rounds and late_start and (start - opening["offset"]) / scale < 5:
+            omitted += 1
+            continue
         sections = [section for section in mapping["segments"]
                     if section["canonicalStart"] <= start - 5 * scale and section["canonicalEnd"] >= start + 2 * scale]
         if len(sections) != 1:
@@ -41,12 +50,16 @@ def watchparty_contract(canonical, secondary, match, index, mapping, alignment_v
         if target < 5 or not math.isfinite(target) or rounds and target <= rounds[-1]["start"]:
             raise NeedsReview("Watch-party round sequence has invalid source timing")
         rounds.append({"map": value["map"], "round": value["round"], "start": target})
+    if not rounds:
+        raise NeedsReview("Watch-party recording contains no verified available round starts")
     return {
         "schemaVersion": 2, "provider": provider, "sourceId": vod_id,
         "label": match["team_a"] + " vs " + match["team_b"], "leadSeconds": 5,
         "detector": DETECTOR_VERSION + "+canonical-secondary", "pipelineState": index["state"],
         "pipelineVersion": index["version"], "sourceRevision": secondary["revision"],
         "alignmentVersion": alignment_version, "derivedFromCanonical": True, "rounds": rounds,
+        **({"coverage": {"type": "late-start", "omittedOpeningRounds": omitted,
+                         "firstMap": rounds[0]["map"], "firstRound": rounds[0]["round"]}} if omitted else {}),
         "canonical": {"sourceId": canonical["external_id"], "matchIndexId": str(index["id"]),
                       "archiveRevision": index["archive_revision"], "rounds": canonical_contract(canonical, match, index)["rounds"]},
         "alignment": {"source": "youtube:" + canonical["external_id"], "timelineScale": scale, "strictCoverage": True,
@@ -352,7 +365,8 @@ def export_snapshot(store, storage, shadow=True, approved_broadcasts=None, conne
                                    "chatChannelId": chat_source["metadata"].get("broadcaster_user_id")}
                 catalog["videos"].append({**{name: value for name, value in parent.items() if name not in {"chat", "chatSourceId", "chatChannelId"}},
                                           **version, "creator": secondary["metadata"].get("creator") or ("FNS" if secondary["metadata"].get("login") == "gofns" else secondary["metadata"].get("login", "Watch party")),
-                                          "label": "Watch party", "index": "/indexes/" + filename, **chat_fields})
+                                          "label": "Watch party", "index": "/indexes/" + filename,
+                                          **({"coverage": contract["coverage"]} if "coverage" in contract else {}), **chat_fields})
         if not shadow:
             blocked = [entry["expectedMatchId"] for entry in catalog["withheld"] if entry.get("provider") != "twitch" and entry.get("kind") != "watch-party"]
             connection.execute("UPDATE pipeline.watchparty_publications SET state='needs_review',findings=%s,updated_at=now() WHERE expected_match_id=ANY(%s::uuid[])", (Jsonb(["Canonical match is not currently publishable"]), blocked))

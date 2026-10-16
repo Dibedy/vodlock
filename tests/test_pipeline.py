@@ -854,6 +854,33 @@ class PipelineTests(unittest.TestCase):
         video["segments"][0]["canonicalEnd"] = 600
         self.assertIsNone(watchparty_chat_alignment(video, chat, "123456789"))
 
+    def test_watchparty_late_start_only_omits_rounds_before_verified_recording_origin(self):
+        canonical = {"provider": "youtube", "role": "canonical", "broadcast_id": "broadcast", "external_id": "abcdefghijk"}
+        secondary = {"provider": "youtube", "role": "watch_party", "external_id": "lmnopqrstuv", "revision": 1, "metadata": {}}
+        index = {"id": "index", "broadcast_id": "broadcast", "version": 1, "state": "final", "archive_revision": 1, "rounds": series()}
+        section = {"sourceStart": 0, "sourceEnd": 1100, "canonicalStart": 250, "canonicalEnd": 1350,
+                   "offset": 250, "anchors": 12, "maximumResidual": 1}
+        mapping = scoreboard_alignment({"timelineScale": 1, "segments": [section]}, {})
+        contract = watchparty_contract(canonical, secondary, expected(), index, mapping, 1)
+        self.assertEqual(contract["coverage"], {"type": "late-start", "omittedOpeningRounds": 2, "firstMap": 1, "firstRound": 3})
+        self.assertEqual(contract["rounds"][0], {"map": 1, "round": 3, "start": 50})
+        self.assertEqual(contract["canonical"]["rounds"], canonical_contract(canonical, expected(), index)["rounds"])
+        shifted = {**index, "rounds": [{**value, "start": value["start"] + 7.5} for value in index["rounds"]]}
+        self.assertEqual(watchparty_contract(canonical, secondary, expected(), shifted, mapping, 1, 7.5)["rounds"], contract["rounds"])
+        for invalid in [
+            {**mapping, "recordingStart": {}},
+            {**mapping, "recordingStart": {**section, "sourceStart": 40}},
+            {**mapping, "recordingStart": {**section, "anchors": 4}},
+            {**mapping, "recordingStart": {**section, "maximumResidual": 3}},
+            {**mapping, "segments": [{**section, "canonicalEnd": 1200}]},
+            {**mapping, "segments": [{**section, "canonicalEnd": 650}, {**section, "canonicalStart": 750}]},
+        ]:
+            with self.subTest(mapping=invalid), self.assertRaises(NeedsReview):
+                watchparty_contract(canonical, secondary, expected(), index, invalid, 1)
+        split = scoreboard_alignment(mapping, {"round": {"section": {**section, "sourceStart": 49.5, "sourceEnd": 58,
+                                      "canonicalStart": 299.5, "canonicalEnd": 308}}})
+        self.assertEqual(split["recordingStart"], section)
+
     def test_youtube_watchparty_waits_for_archive_without_using_twitch_resolver(self):
         from pipeline.twitch import TwitchCapture
 

@@ -38,6 +38,33 @@
     },
     {
       "provider": "youtube",
+      "sourceId": "IBMdpoG-A4s",
+      "catalogId": "youtube:IBMdpoG-A4s:07ebb5a187b553ea",
+      "title": "LOUD vs VIT",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Watch party",
+      "index": "/indexes/youtube-IBMdpoG-A4s-07ebb5a187b553ea-v41-a21665ba7eca.json",
+      "playedAt": "2026-10-16T08:08:45+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "7866895f-41d7-5ef2-976e-9badad29ab5d",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 41,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "kind": "watch-party",
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 2,
+      "creator": "ohnepixel",
+      "coverage": {
+        "type": "late-start",
+        "omittedOpeningRounds": 4,
+        "firstMap": 1,
+        "firstRound": 5
+      },
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
       "sourceId": "jdQfyr5hpOU",
       "catalogId": "youtube:06768befe3765ee2:jdQfyr5hpOU",
       "title": "T1 vs G2",
@@ -1081,20 +1108,7 @@
       "pipelineGeneration": 1,
       "pipelineVersion": 41,
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 1,
-      "reason": "waiting_alignment",
-      "canonicalPipeline": true
-    },
-    {
-      "expectedMatchId": "7866895f-41d7-5ef2-976e-9badad29ab5d",
-      "catalogId": "youtube:IBMdpoG-A4s:07ebb5a187b553ea",
-      "provider": "youtube",
-      "sourceId": "IBMdpoG-A4s",
-      "kind": "watch-party",
-      "pipelineGeneration": 1,
-      "pipelineVersion": 41,
-      "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 0,
+      "pipelineAlignmentVersion": 2,
       "reason": "waiting_alignment",
       "canonicalPipeline": true
     },
@@ -1120,7 +1134,7 @@
       "pipelineGeneration": 1,
       "pipelineVersion": 43,
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 1,
+      "pipelineAlignmentVersion": 2,
       "reason": "waiting_alignment",
       "canonicalPipeline": true
     },
@@ -1133,7 +1147,7 @@
       "pipelineGeneration": 1,
       "pipelineVersion": 43,
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 0,
+      "pipelineAlignmentVersion": 2,
       "reason": "waiting_alignment",
       "canonicalPipeline": true
     }

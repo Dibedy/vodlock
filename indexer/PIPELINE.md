@@ -36,6 +36,8 @@ Unavoidable prerequisites: the machine must stay awake, PostgreSQL must remain a
 
 ## Processing latency and reliability
 
+The job scheduler gives discovery and source association first access to available processing slots. Current and previous-day broadcasts, exports and deployment verification run ahead of historical backfills. Existing priorities, aging and source serialization still apply within each group; historical work retains its checkpoints and runs when higher-priority work is clear.
+
 The publication objective is 120 minutes from actual match completion. This is a target, not a guaranteed delay timer. Completion, reliable round evidence, correct playback timing and the deployment budget still gate publication. Outcomes are not exposed by the latency report.
 
 Run `python -m pipeline.cli --config indexer/pipeline.rollout.json metrics --broadcast BROADCAST_UUID` with the worker environment to inspect stage attempt time, initial queue delay, source waits, retries, blocking reasons, findings by rule/severity, first-ready time and confirmed provisional/final publication times. Omit `--broadcast` for the recent pipeline. Video-window logs separately report decoded frames, OCR analyses, OCR seconds and elapsed seconds. Repeated unchanged dependency messages are debug-level; their attempts remain measurable in PostgreSQL.

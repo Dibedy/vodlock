@@ -485,6 +485,35 @@ class DatabasePipelineTests(unittest.TestCase):
         archive = self.store.one("SELECT disconnected_at,updated_at FROM pipeline.chat_archives WHERE source_id=%s", (twitch,))
         self.assertEqual(archive["disconnected_at"], archive["updated_at"])
 
+    def test_discovery_precedes_aged_historical_watchparty_work(self):
+        self.store.execute("UPDATE pipeline.broadcasts SET day=CURRENT_DATE-7 WHERE id=%s", (self.broadcast,))
+        self.store.enqueue("watchparty_align", "historical", broadcast=self.broadcast, priority=100)
+        self.store.execute("UPDATE pipeline.jobs SET available_at=now()-interval '2 days' WHERE dedupe_key='historical'")
+        for kind in ("discover_youtube", "discover_twitch_vods", "associate", "associate_watchparty", "associate_twitch_vod"):
+            with self.subTest(kind=kind):
+                self.store.enqueue(kind, kind, priority=-50)
+                job = self.store.claim()
+                self.assertEqual(job["kind"], kind)
+                self.store.finish(job)
+        self.assertEqual(self.store.claim()["dedupe_key"], "historical")
+
+    def test_current_broadcast_and_publication_precede_historical_work(self):
+        self.store.execute("UPDATE pipeline.broadcasts SET day=CURRENT_DATE-7 WHERE id=%s", (self.broadcast,))
+        self.store.enqueue("watchparty_align", "historical", broadcast=self.broadcast, priority=100)
+        current = identifier()
+        self.store.execute("INSERT INTO pipeline.broadcasts(id,event,day,region,channel_id,youtube_id) VALUES (%s,'Champions',CURRENT_DATE,'international','official','currenttest')", (current,))
+        self.store.enqueue("live", "current", broadcast=current, priority=30)
+        job = self.store.claim()
+        self.assertEqual(job["dedupe_key"], "current")
+        self.store.finish(job)
+        for kind in ("export", "deploy", "verify_deployment"):
+            with self.subTest(kind=kind):
+                self.store.enqueue(kind, kind)
+                job = self.store.claim()
+                self.assertEqual(job["kind"], kind)
+                self.store.finish(job)
+        self.assertEqual(self.store.claim()["dedupe_key"], "historical")
+
     def test_chat_download_does_not_block_canonical_indexing_or_overlap_its_source(self):
         twitch = identifier()
         self.store.execute("INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role) VALUES (%s,%s,'twitch','123456789','official_twitch')", (twitch, self.broadcast))

@@ -146,7 +146,11 @@ class Store:
                         AND (j.kind<>'validate_upload' OR EXISTS (
                             SELECT 1 FROM pipeline.segments s WHERE s.expected_match_id=j.expected_match_id
                             AND s.broadcast_id=j.broadcast_id AND s.generation=j.generation))
-                        ORDER BY CASE WHEN j.kind IN ('segment','validate','finalize','reconcile_segment','export')
+                        ORDER BY CASE
+                        WHEN j.kind IN ('discover_youtube','discover_twitch_vods','associate','associate_watchparty','associate_twitch_vod') THEN 2
+                        WHEN b.day>=CURRENT_DATE-1 OR j.kind IN ('export','deploy','verify_deployment') THEN 1
+                        ELSE 0 END DESC,
+                        CASE WHEN j.kind IN ('segment','validate','finalize','reconcile_segment','export')
                         AND j.available_at<=now()-interval '60 seconds' THEN 1 ELSE 0 END DESC,
                         j.priority+LEAST(20,floor(extract(epoch FROM (now()-j.available_at))/30)) DESC,
                         j.available_at,j.created_at FOR UPDATE OF j SKIP LOCKED LIMIT 1""", (job_id, job_id)).fetchone()

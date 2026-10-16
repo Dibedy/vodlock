@@ -38,12 +38,12 @@
     },
     {
       "provider": "youtube",
-      "sourceId": "IBMdpoG-A4s",
-      "catalogId": "youtube:IBMdpoG-A4s:07ebb5a187b553ea",
+      "sourceId": "E_OBNfj8Cf0",
+      "catalogId": "youtube:E_OBNfj8Cf0:07ebb5a187b553ea",
       "title": "LOUD vs VIT",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/youtube-IBMdpoG-A4s-07ebb5a187b553ea-v41-2b0523e9a270.json",
+      "index": "/indexes/youtube-E_OBNfj8Cf0-07ebb5a187b553ea-v41-f54cab53248f.json",
       "playedAt": "2026-10-16T08:08:45+02:00",
       "pipelineState": "final",
       "expectedMatchId": "7866895f-41d7-5ef2-976e-9badad29ab5d",
@@ -53,7 +53,28 @@
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 3,
+      "pipelineAlignmentVersion": 10,
+      "creator": "FNS",
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
+      "sourceId": "IBMdpoG-A4s",
+      "catalogId": "youtube:IBMdpoG-A4s:07ebb5a187b553ea",
+      "title": "LOUD vs VIT",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Watch party",
+      "index": "/indexes/youtube-IBMdpoG-A4s-07ebb5a187b553ea-v41-18fc7e2a0e79.json",
+      "playedAt": "2026-10-16T08:08:45+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "7866895f-41d7-5ef2-976e-9badad29ab5d",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 41,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "kind": "watch-party",
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 12,
       "creator": "ohnepixel",
       "coverage": {
         "type": "late-start",
@@ -1100,19 +1121,6 @@
       "canonicalPipeline": true
     },
     {
-      "expectedMatchId": "7866895f-41d7-5ef2-976e-9badad29ab5d",
-      "catalogId": "youtube:E_OBNfj8Cf0:07ebb5a187b553ea",
-      "provider": "youtube",
-      "sourceId": "E_OBNfj8Cf0",
-      "kind": "watch-party",
-      "pipelineGeneration": 1,
-      "pipelineVersion": 41,
-      "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 2,
-      "reason": "waiting_alignment",
-      "canonicalPipeline": true
-    },
-    {
       "expectedMatchId": "780d36e2-f674-5b90-bafd-8b66055c3494",
       "catalogId": "twitch:2902063268:53a0364234f15f96",
       "provider": "twitch",
@@ -1134,7 +1142,7 @@
       "pipelineGeneration": 1,
       "pipelineVersion": 43,
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 2,
+      "pipelineAlignmentVersion": 10,
       "reason": "waiting_alignment",
       "canonicalPipeline": true
     },
@@ -1147,7 +1155,7 @@
       "pipelineGeneration": 1,
       "pipelineVersion": 43,
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 3,
+      "pipelineAlignmentVersion": 12,
       "reason": "waiting_alignment",
       "canonicalPipeline": true
     }

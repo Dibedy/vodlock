@@ -7,6 +7,7 @@ import time
 import threading
 import csv
 from collections import deque
+from contextlib import nullcontext
 from datetime import timedelta
 from fractions import Fraction
 from pathlib import Path
@@ -226,12 +227,19 @@ class MediaAnalysis:
                    if not re.search(r"[\r\n]", str(key) + str(value))}
         if headers:
             command.extend(["-headers", "".join(f"{key}: {value}\r\n" for key, value in headers.items())])
-        command.extend(["-ss", str(beginning), "-t", str(ending - beginning), "-copyts", "-start_at_zero",
-                        "-i", str(remote["url"]), "-an", "-map", "0:v:0", "-c:v", "copy",
-                        "-avoid_negative_ts", "disabled", "-fs", str(128 * 1024 * 1024), "-f", "nut", "-y", str(path)])
         try:
-            result = subprocess.run(command, capture_output=True, timeout=150,
-                                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+            with (tempfile.TemporaryDirectory(prefix="spoilless-dash-") if remote.get("fragments") else nullcontext()) as directory:
+                if directory:
+                    source = Path(directory) / "window.mp4"
+                    self.download_dash_window(remote, beginning, ending, source)
+                    command.extend(["-copyts", "-i", str(source)])
+                else:
+                    command.extend(["-ss", str(beginning), "-t", str(ending - beginning), "-copyts", "-start_at_zero",
+                                    "-i", str(remote["url"])])
+                command.extend(["-an", "-map", "0:v:0", "-c:v", "copy", "-avoid_negative_ts", "disabled",
+                                "-fs", str(128 * 1024 * 1024), "-f", "nut", "-y", str(path)])
+                result = subprocess.run(command, capture_output=True, timeout=150,
+                                        creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
             if result.returncode:
                 evidence = re.sub(r"https?://[^\s\"']+", "[media URL]", result.stderr.decode(errors="replace"))
                 raise WaitingSource("Archive clip download failed: " + evidence[-1000:])
@@ -257,6 +265,49 @@ class MediaAnalysis:
             raise WaitingSource("Archive clip packet timestamps do not cover its requested range continuously")
         LOG.info("archive_clip_downloaded start=%.3f end=%.3f bytes=%s elapsed_seconds=%.3f",
                  lower, upper, path.stat().st_size, monotonic() - started)
+
+    def download_dash_window(self, remote, lower, upper, path):
+        import yt_dlp
+
+        fragments = remote["fragments"]
+        if not fragments or fragments[0].get("duration") is not None:
+            raise WaitingSource("Fragmented archive has no initialization segment")
+        selected, position = [fragments[0]], 0.0
+        for fragment in fragments[1:]:
+            duration = fragment.get("duration")
+            if isinstance(duration, bool) or not isinstance(duration, (int, float)) or not math.isfinite(duration) or duration <= 0:
+                raise WaitingSource("Fragmented archive has invalid segment timing")
+            ending = position + duration
+            if ending > lower and position < upper:
+                selected.append(fragment)
+            position = ending
+            if position >= upper:
+                break
+        if len(selected) < 2 or position < upper - .001:
+            raise WaitingSource("Fragmented archive does not cover the requested range")
+        started = monotonic()
+
+        def progress(value):
+            if value.get("downloaded_bytes", 0) > 128 * 1024 * 1024:
+                raise WaitingSource("Fragmented archive clip exceeded its cache size limit")
+            if monotonic() - started > 150:
+                raise WaitingSource("Fragmented archive clip download timed out")
+
+        options = {"outtmpl": str(path), "quiet": True, "no_warnings": True, "noprogress": True,
+                   "nopart": True, "continuedl": False, "fixup": "never", "socket_timeout": 20,
+                   "retries": 1, "fragment_retries": 1, "concurrent_fragment_downloads": 4,
+                   "skip_unavailable_fragments": False, "progress_hooks": [progress]}
+        info = {name: remote[name] for name in ("url", "protocol", "format_id", "fragment_base_url", "ext") if name in remote}
+        info.update(id="archive-window", title="Archive window", fragments=selected,
+                    http_headers=remote.get("headers", {}))
+        try:
+            with yt_dlp.YoutubeDL(options) as downloader:
+                downloader.process_info(info)
+        except yt_dlp.utils.DownloadError as error:
+            evidence = re.sub(r"https?://[^\s\"']+", "[media URL]", str(error))
+            raise WaitingSource("Fragmented archive clip download failed: " + evidence[-1000:]) from error
+        if not path.is_file() or not 0 < path.stat().st_size <= 128 * 1024 * 1024:
+            raise WaitingSource("Fragmented archive clip is missing or exceeds its cache size limit")
 
     def cached_archive_frames(self, remote, duration, start=0, compact=False, interval=1):
         position = start
@@ -589,7 +640,7 @@ class MediaAnalysis:
         ocr_before, calls_before = self.ocr_seconds, self.ocr_calls
         decoded = analyzed = 0
         selected = remote
-        if adaptive and remote.get("cache_identity"):
+        if adaptive and remote.get("cache_identity") and not remote.get("fragments"):
             identity = (tuple(remote["cache_identity"]), tuple(remote.get("cache_revision", ())))
             with self.video_lock:
                 available = any(key[:2] == identity and value["ready"].is_set() and not value.get("error")

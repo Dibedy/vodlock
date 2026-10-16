@@ -336,6 +336,76 @@ class PipelineTests(unittest.TestCase):
         self.assertTrue(decoder.call_args.kwargs["absolute"])
         self.assertEqual(media.download_clip.call_count, 1)
 
+    def test_adaptive_dash_scan_keeps_the_bounded_video_cache(self):
+        media = MediaAnalysis()
+        media.archive_frames = Mock(side_effect=lambda *args, **kwargs: (value for value in []))
+        list(media.window({"url": "fixture", "duration": 10, "cache_identity": ("source",),
+                           "fragments": [{"url": "init"}]}, 0, 4, adaptive=True))
+        self.assertEqual(media.archive_frames.call_args.args[0]["cache_identity"], ("source",))
+
+    def test_dash_window_rejects_missing_initialization_unknown_timing_and_short_coverage(self):
+        media = MediaAnalysis()
+        for fragments in ([{"duration": 5}], [{"url": "init"}, {"duration": None}],
+                          [{"url": "init"}, {"duration": float("nan")}],
+                          [{"url": "init"}, {"duration": True}], [{"url": "init"}, {"duration": 1}]):
+            with self.subTest(fragments=fragments), self.assertRaises(WaitingSource):
+                media.download_dash_window({"fragments": fragments}, 0, 2, Path("unused.mp4"))
+
+    def test_real_dash_windows_preserve_absolute_timestamps_without_downloading_the_archive(self):
+        import imageio_ffmpeg
+        import functools
+        import numpy as np
+        from http.server import SimpleHTTPRequestHandler, ThreadingHTTPServer
+
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            source = root / "source.mp4"
+            ffmpeg = imageio_ffmpeg.get_ffmpeg_exe()
+            subprocess.run([ffmpeg, "-loglevel", "error", "-f", "lavfi", "-i", "testsrc2=size=160x90:rate=10",
+                            "-t", "24", "-c:v", "libx264", "-g", "20", "-bf", "2", str(source)],
+                           check=True, capture_output=True)
+            subprocess.run([ffmpeg, "-loglevel", "error", "-i", str(source), "-c:v", "copy", "-an",
+                            "-f", "dash", "-seg_duration", "2", "-use_template", "0", "-use_timeline", "0",
+                            "manifest.mpd"], check=True, capture_output=True, cwd=root)
+            requests = []
+
+            class Handler(SimpleHTTPRequestHandler):
+                def do_GET(self):
+                    requests.append(self.path)
+                    super().do_GET()
+
+                def log_message(self, *args):
+                    pass
+
+            server = ThreadingHTTPServer(("127.0.0.1", 0), functools.partial(Handler, directory=directory))
+            thread = threading.Thread(target=server.serve_forever)
+            thread.start()
+            try:
+                base = f"http://127.0.0.1:{server.server_port}/"
+                fragments = [{"url": base + "init-stream0.m4s"}] + [
+                    {"url": base + path.name, "duration": 2} for path in sorted(root.glob("chunk-stream0-*.m4s"))]
+                remote = {"url": fragments[0]["url"], "duration": 24, "fragments": fragments,
+                          "protocol": "http_dash_segments", "ext": "mp4", "format_id": "test",
+                          "cache_identity": ("dash-fixture",)}
+                media = MediaAnalysis()
+                try:
+                    for start, end in [(8.25, 11.25), (0, 1), (22, 24)]:
+                        expected = list(decode_frames(source, end - start, start=start, interval=.5))
+                        actual = list(media.archive_frames(remote, start, end, interval=.5))
+                        self.assertEqual(len(actual), len(expected))
+                        for (position, frame), (offset, original) in zip(actual, expected):
+                            self.assertAlmostEqual(position, start + offset)
+                            self.assertTrue(np.array_equal(frame, original))
+                        if start == 8.25:
+                            self.assertLess(len(requests), len(fragments))
+                            self.assertNotIn("/chunk-stream0-00001.m4s", requests)
+                finally:
+                    media.close()
+            finally:
+                server.shutdown()
+                server.server_close()
+                thread.join()
+
     def test_concurrent_video_chunk_readers_share_one_completed_download(self):
         media = MediaAnalysis(decoder=lambda path, duration, **kwargs: ((second, None) for second in range(math.ceil(duration))))
         self.addCleanup(media.close)
@@ -1576,6 +1646,33 @@ if has_bgutil:
             self.assertEqual(seen[-1]["cookiefile"], "fixture")
             self.assertNotIn("youtube", seen[-1].get("extractor_args", {}))
             self.assertEqual(YouTube(archive_client="android").resolve("differentid")["player_client"], "android")
+
+    def test_android_ended_archive_falls_back_to_default_client_and_retains_dash_fragments(self):
+        import yt_dlp
+
+        fragments = [{"url": "https://media.invalid/init"}, {"url": "https://media.invalid/segment", "duration": 5}]
+        with patch.object(yt_dlp.YoutubeDL, "extract_info", side_effect=[
+            yt_dlp.utils.DownloadError("This live event has ended."),
+            {"url": "https://media.invalid/init", "height": 480, "duration": 5, "format_id": "135",
+             "protocol": "http_dash_segments", "ext": "mp4", "fragments": fragments},
+        ]) as extract:
+            youtube = YouTube(archive_client="android")
+            remote = youtube.resolve("abcdefghijk", cached=True)
+            self.assertIsNone(remote["player_client"])
+            self.assertEqual(remote["fragments"], fragments)
+            self.assertIsNot(remote["fragments"], fragments)
+            self.assertIsNotNone(remote["cache_identity"])
+            self.assertEqual(youtube.resolve("abcdefghijk", cached=True), remote)
+            self.assertEqual(extract.call_count, 2)
+
+    def test_dash_archive_without_a_bounded_fragment_list_is_not_exposed_as_a_direct_url(self):
+        import yt_dlp
+
+        for fragments in (None, [], "generator"):
+            with self.subTest(fragments=fragments), patch.object(yt_dlp.YoutubeDL, "extract_info", return_value={
+                "url": "https://media.invalid/init", "protocol": "http_dash_segments", "fragments": fragments,
+            }), self.assertRaisesRegex(WaitingSource, "fragment listing"):
+                YouTube().resolve("abcdefghijk")
 
     def test_ffmpeg_access_errors_redact_signed_urls_without_hiding_status(self):
         import io

@@ -2,6 +2,8 @@
 
 ## YouTube watch-party preference
 
+Fragmented YouTube DASH archives retain their initialization and timed segment listing. Archive reads download only the segments covering the requested window, then verify original packet timestamps and continuous coverage through the existing bounded video cache. Missing segments and unknown timing remain source waits, not guessed offsets. A configured Android archive client falls back to the normal authenticated clients when that client reports unavailable media; live extraction is unchanged.
+
 `watchparty_youtube_channels` configures a verified creator channel, its Twitch login and creator name, and the corresponding official YouTube channel. The rollout includes FNS and ohnepixel, with Twitch fallback for both. Discovery accepts livestreams and archived livestreams without requiring every matchup in their titles. Actual stream timestamps must overlap exactly one official broadcast; ambiguous overlaps require review. Every match on that broadcast still needs its own complete verified round alignment before publication.
 
 YouTube watch parties reuse the bounded visual seed and round-clock checks. A running YouTube stream waits for its seekable archive rather than guessing DVR positions. Twitch capture, indexing and publication continue independently. The website prefers verified YouTube playback per creator and match, retaining Twitch when that YouTube match is not ready. Twitch chat can accompany YouTube playback only where both sources have verified overlapping alignment to the same official timeline. No new database migration is required. Restart the worker after updating the configuration and code.

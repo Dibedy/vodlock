@@ -168,8 +168,17 @@ class YouTube:
             options.pop("cookiefile", None)
             options.setdefault("extractor_args", {})["youtube"] = {"player_client": [client]}
         try:
-            with yt_dlp.YoutubeDL(options) as downloader:
-                info = downloader.extract_info(url, download=False)
+            try:
+                with yt_dlp.YoutubeDL(options) as downloader:
+                    info = downloader.extract_info(url, download=False)
+            except yt_dlp.utils.DownloadError as error:
+                if live or client != "android" or not any(value in str(error).lower() for value in (
+                    "no video formats", "requested format", "live event has ended", "not yet available", "403", "404"
+                )):
+                    raise
+                with yt_dlp.YoutubeDL(public_options) as downloader:
+                    info = downloader.extract_info(url, download=False)
+                client = None
             if not live and client == "android" and info and (info.get("height") or 0) < minimum_height:
                 with yt_dlp.YoutubeDL(public_options) as downloader:
                     info = downloader.extract_info(url, download=False)
@@ -206,6 +215,12 @@ class YouTube:
             if not live and not info.get("is_live") and info.get("live_status") != "is_live"
             and info.get("format_id") and info.get("duration") else None,
         }
+        if not live and info.get("protocol") == "http_dash_segments":
+            if not isinstance(info.get("fragments"), list) or not info["fragments"]:
+                raise WaitingSource("Fragmented YouTube archive has no bounded fragment listing")
+            remote.update({name: deepcopy(info[name]) for name in (
+                "fragments", "fragment_base_url", "protocol", "format_id", "ext"
+            ) if name in info})
         if not live and not info.get("is_live") and info.get("live_status") != "is_live":
             lifetime = 300.0
             expiry = parse_qs(urlsplit(info["url"]).query).get("expire", [])

@@ -210,7 +210,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "cooldown",
-      "checkedAt": "2026-10-15T22:50:57.787599+00:00"
+      "checkedAt": "2026-10-16T18:50:22.969032+00:00"
     },
     "youtube:y6wwIZysHns": {
       "status": "published",
@@ -510,7 +510,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-16T04:21:03.889402+00:00"
+      "checkedAt": "2026-10-16T18:46:43.349224+00:00"
     },
     "twitch:2889647074": {
       "status": "published",
@@ -726,7 +726,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-16T04:05:42.854991+00:00"
+      "checkedAt": "2026-10-16T18:31:29.800737+00:00"
     },
     "youtube:7zKE36y96zo": {
       "status": "waiting",
@@ -810,7 +810,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-16T04:22:36.215328+00:00"
+      "checkedAt": "2026-10-16T18:48:31.513662+00:00"
     },
     "twitch:2895872598": {
       "status": "held",
@@ -894,7 +894,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-16T03:35:44.944626+00:00"
+      "checkedAt": "2026-10-16T18:06:28.438626+00:00"
     },
     "youtube:UMIkxgmsOTA": {
       "status": "waiting",
@@ -906,7 +906,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-16T03:47:08.823941+00:00"
+      "checkedAt": "2026-10-16T18:16:00.836571+00:00"
     },
     "twitch:2897752834": {
       "status": "waiting",
@@ -918,7 +918,7 @@
       "detectorVersion": "vct-clock-ocr-v10",
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
-      "checkedAt": "2026-10-16T14:25:47.377663+00:00"
+      "checkedAt": "2026-10-16T18:49:56.608741+00:00"
     },
     "youtube:lXdvR5iMU3Y": {
       "status": "waiting",
@@ -931,6 +931,54 @@
       "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
       "retryClass": "dependency",
       "checkedAt": "2026-10-16T13:39:42.291131+00:00"
+    },
+    "youtube:QEDpGS4GXBg": {
+      "status": "waiting",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour streams",
+      "title": "VALORANT Champions Shanghai - Playoffs Stage - Day 16",
+      "message": "YouTube is still preparing this stream archive; it will retry automatically",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v10",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "retryClass": "dependency",
+      "checkedAt": "2026-10-16T17:34:28.666252+00:00"
+    },
+    "youtube:a0sIMtIto6g": {
+      "status": "waiting",
+      "provider": "youtube",
+      "channel": "VALORANT Champions Tour full matches",
+      "title": "100T vs. G2 - FULL MATCH - VALORANT Champions Shanghai - Playoffs Stage",
+      "message": "No verified official YouTube stream archive matches this full match",
+      "publishedAt": null,
+      "detectorVersion": "vct-clock-ocr-v10",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "retryClass": "dependency",
+      "checkedAt": "2026-10-16T17:51:28.237680+00:00"
+    },
+    "twitch:2902056335": {
+      "status": "waiting",
+      "provider": "twitch",
+      "channel": "VALORANT on Twitch",
+      "title": "LOUD vs. VIT - VALORANT Champions Shanghai - Playoffs Stage - Day 16",
+      "message": "No verified official YouTube stream archive aligns with this Twitch chat",
+      "publishedAt": "2026-10-16T05:21:33Z",
+      "detectorVersion": "vct-clock-ocr-v10",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "retryClass": "dependency",
+      "checkedAt": "2026-10-16T18:45:03.077213+00:00"
+    },
+    "twitch:2902063268": {
+      "status": "held",
+      "provider": "twitch",
+      "channel": "FNS on Twitch",
+      "title": "EG FNS | VIT vs LOUD - VCT Champions Playoffs Upper FInal #VCTWatchparty | !vote !inzone !pickems",
+      "message": "Official match alignment failed: No verified official-broadcast alignment was found for this watch party",
+      "publishedAt": "2026-10-16T05:39:42Z",
+      "detectorVersion": "vct-clock-ocr-v10",
+      "pipelineVersion": "vct-clock-ocr-v10+storyboard-v5+publisher-v23",
+      "retryClass": "cooldown",
+      "checkedAt": "2026-10-16T18:59:48.192006+00:00"
     }
   }
 }

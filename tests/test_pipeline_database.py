@@ -1413,6 +1413,7 @@ class DatabasePipelineTests(unittest.TestCase):
             job = self.store.claim()
             if 'batching' in reason:
                 self.assertIsNotNone(job)
+                self.assertEqual(job['priority'], 90)
                 self.store.finish(job)
             else:
                 self.assertIsNone(job)

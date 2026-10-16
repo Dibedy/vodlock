@@ -111,8 +111,9 @@ class Store:
     def request_publication(self, ready=False):
         self.enqueue("deploy", "deploy:site", priority=50)
         if ready:
-            self.execute("""UPDATE pipeline.jobs SET available_at=now(),wait_count=0 WHERE dedupe_key='deploy:site'
-                AND state='waiting_source' AND last_error='Website publication is batching incremental chat and alignment updates'""")
+            self.execute("""UPDATE pipeline.jobs SET available_at=now(),wait_count=0,priority=90 WHERE dedupe_key='deploy:site'
+                AND (state='queued' OR (state='waiting_source'
+                AND last_error='Website publication is batching incremental chat and alignment updates'))""")
 
     def claim(self, lease_seconds=180, job_id=None):
         token = identifier()

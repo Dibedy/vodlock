@@ -714,6 +714,38 @@ class DatabasePipelineTests(unittest.TestCase):
         self.assertEqual(next(iter(result["roundChecks"].values()))["status"], "verified")
         self.assertEqual(self.store.one("SELECT payload FROM pipeline.jobs WHERE id=%s", (job["id"],))["payload"]["scoreboard_search"], {})
 
+    def test_youtube_short_scoreboard_check_finishes_before_yielding_but_broad_search_checkpoints(self):
+        from detector import Observation
+
+        source_id = identifier()
+        self.store.execute("INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role) VALUES (%s,%s,'youtube','lmnopqrstuv','watch_party')", (source_id, self.broadcast))
+        self.store.execute("""INSERT INTO pipeline.match_indexes(id,broadcast_id,expected_match_id,segment_id,canonical_source_id,generation,version,state,rounds,provenance)
+            VALUES (%s,%s,%s,%s,%s,1,1,'provisional',%s,'{}')""", (identifier(), self.broadcast, self.match, self.segment, self.source, Jsonb(series()[:1])))
+        self.store.enqueue('watchparty_align', 'short-youtube', broadcast=self.broadcast, source=source_id)
+        job = self.store.claim()
+        broadcast = self.store.one('SELECT * FROM pipeline.broadcasts WHERE id=%s', (self.broadcast,))
+        source = self.store.one('SELECT * FROM pipeline.sources WHERE id=%s', (source_id,))
+        canonical = self.entities()[1]
+        mapping = {'timelineScale': 1, 'segments': [{'sourceStart': 100, 'sourceEnd': 800, 'canonicalStart': 0,
+            'canonicalEnd': 700, 'offset': -100, 'anchors': 10, 'maximumResidual': 1}]}
+        media = Mock()
+        media.watchparty_window.side_effect = lambda *args: ((Observation(200 + second, 1, 100 - second, .99, scores=(0, 0)), {}, None) for second in range(6))
+        capture = TwitchCapture(self.store, self.config, Processing(self.store, self.config, self.storage), media)
+        with patch.object(capture, 'resolve_archive', return_value={'duration': 1000}), patch('pipeline.twitch.time.monotonic', side_effect=[0, 50]):
+            result = capture.check_rounds(job, broadcast, source, canonical, mapping, 0)
+        self.assertEqual(media.watchparty_window.call_count, 1)
+        self.assertEqual(next(iter(result['roundChecks'].values()))['status'], 'verified')
+        self.store.execute("UPDATE pipeline.jobs SET payload='{}' WHERE id=%s", (job['id'],))
+        media.watchparty_window.reset_mock()
+        media.watchparty_window.side_effect = lambda remote, lower, upper: (item for item in [(Observation(lower, None, None, 0), {}, None)])
+        with patch.object(capture, 'resolve_archive', return_value={'duration': 1000}), patch('pipeline.twitch.time.monotonic', side_effect=[0, 50]):
+            with self.assertRaisesRegex(ContinueJob, 'time slice'):
+                capture.check_rounds(job, broadcast, source, canonical, mapping, 0)
+        search = self.store.one('SELECT payload FROM pipeline.jobs WHERE id=%s', (job['id'],))['payload']['scoreboard_search']
+        self.assertEqual(media.watchparty_window.call_count, 2)
+        self.assertEqual(search['attempt'], 1)
+        self.assertEqual(len(search['samples']), 1)
+
     def test_optional_alignment_does_not_block_official_work_and_rejects_stale_sources(self):
         twitch = identifier()
         self.store.execute("INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role) VALUES (%s,%s,'twitch','123456789','watch_party')", (twitch, self.broadcast))
@@ -917,7 +949,11 @@ class DatabasePipelineTests(unittest.TestCase):
         job = self.store.claim()
         broadcast = self.store.one('SELECT * FROM pipeline.broadcasts WHERE id=%s', (self.broadcast,))
         source, canonical = self.store.one('SELECT * FROM pipeline.sources WHERE id=%s', (secondary,)), self.entities()[1]
-        capture = TwitchCapture(self.store, self.config, Processing(self.store, self.config, self.storage))
+        config = Config(DATABASE, shadow=False, storage_path=self.config.storage_path,
+            settings={'deployment': {'repository': 'https://github.com/a/b.git'}})
+        capture = TwitchCapture(self.store, config, Processing(self.store, config, self.storage))
+        self.store.request_publication()
+        self.store.execute("UPDATE pipeline.jobs SET state='waiting_source',available_at=now()+interval '6 hours',last_error='Website publication is batching incremental chat and alignment updates' WHERE dedupe_key='deploy:site'")
         mapping = {"timelineScale": 1, "anchors": 12, "maximumResidual": 1, "segments": [{"sourceStart": 100, "sourceEnd": 8000, "canonicalStart": 0,
             "canonicalEnd": 7900, "offset": -100, "anchors": 12, "maximumResidual": 1}]}
         capture.save_partial_alignment(job, broadcast, source, canonical, mapping, 1)
@@ -928,6 +964,7 @@ class DatabasePipelineTests(unittest.TestCase):
         parties = [entry for entry in catalog['videos'] if entry.get('kind') == 'watch-party']
         self.assertEqual([entry['expectedMatchId'] for entry in parties], [str(self.match)])
         self.assertTrue(self.store.one("SELECT id FROM pipeline.jobs WHERE kind='export'"))
+        self.assertTrue(self.store.one("SELECT available_at<=now() AS awake FROM pipeline.jobs WHERE dedupe_key='deploy:site'")['awake'])
         # A less advanced overlapping task cannot withdraw already verified coverage.
         self.store.execute('UPDATE pipeline.jobs SET payload=%s WHERE id=%s', (Jsonb({"scoreboard_checks": {"source_revision": 1, "canonical_revision": 1, "checks": {}}}), job['id']))
         capture.save_partial_alignment(job, broadcast, source, canonical, mapping, 1)
@@ -1343,6 +1380,42 @@ class DatabasePipelineTests(unittest.TestCase):
         self.assertEqual(len(jobs), 1)
         self.store.finish(jobs[0])
         self.assertIsNotNone(self.store.claim())
+
+    def test_distinct_watchparty_alignments_and_export_can_share_a_broadcast(self):
+        secondary = []
+        for number in range(2):
+            source = identifier()
+            self.store.execute("INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role) VALUES (%s,%s,'youtube',%s,'watch_party')",
+                (source, self.broadcast, f'watchparty{number}'))
+            secondary.append(self.store.enqueue('watchparty_align', f'party:{number}', broadcast=self.broadcast, source=source)['id'])
+        first = self.store.claim(job_id=secondary[0])
+        second = self.store.claim(job_id=secondary[1])
+        self.assertIsNotNone(first)
+        self.assertIsNotNone(second)
+        same = self.store.enqueue('watchparty_align', 'same-source', broadcast=self.broadcast, source=first['source_id'])['id']
+        self.assertIsNone(self.store.claim(job_id=same))
+        export = self.store.enqueue('export', 'parallel-export', broadcast=self.broadcast)['id']
+        exporting = self.store.claim(job_id=export)
+        self.assertIsNotNone(exporting)
+        validation = self.store.enqueue('validate', 'locked-official', broadcast=self.broadcast)['id']
+        self.assertIsNone(self.store.claim(job_id=validation))
+        self.store.finish(first)
+        self.assertIsNotNone(self.store.claim(job_id=same))
+
+    def test_ready_publication_wakes_incremental_cooldown_but_not_daily_budget(self):
+        self.store.request_publication()
+        for reason in ['Website publication is batching incremental chat and alignment updates',
+                       'Website publication is waiting for the rolling 24-hour worker budget']:
+            self.store.execute("UPDATE pipeline.jobs SET state='waiting_source',last_error=%s,available_at=now()+interval '6 hours' WHERE dedupe_key='deploy:site'", (reason,))
+            self.store.request_publication()
+            self.assertIsNone(self.store.claim())
+            self.store.request_publication(ready=True)
+            job = self.store.claim()
+            if 'batching' in reason:
+                self.assertIsNotNone(job)
+                self.store.finish(job)
+            else:
+                self.assertIsNone(job)
 
     def test_concurrent_claims_serialize_sources_without_broadcast_assignment(self):
         for number in range(4):

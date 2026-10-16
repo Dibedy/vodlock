@@ -926,6 +926,13 @@ class PipelineTests(unittest.TestCase):
             self.assertNotIn("private-token", str(error.exception))
             self.assertNotIn("private-token", str(run.call_args.args))
 
+    def test_deployment_git_push_race_retries_without_misreporting_authentication(self):
+        deploy = Deployment(Mock(), Config("test"))
+        for reason in ["[rejected] main -> main (fetch first)", "non-fast-forward"]:
+            with patch("pipeline.deployment.subprocess.run", return_value=Mock(returncode=1, stderr=reason)):
+                with self.assertRaisesRegex(WaitingWork, "newer repository changes"):
+                    deploy.git(Path("."), "push", "origin", "main")
+
     def test_deployment_budget_prioritizes_readiness_and_reserves_capacity(self):
         connection = Mock()
         settings = {"deployment": {"repository": "https://github.com/a/b.git", "branch": "main"}}

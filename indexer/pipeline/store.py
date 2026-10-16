@@ -108,6 +108,12 @@ class Store:
             return connection.execute(query, parameters).fetchone()
         return self.one(query, parameters)
 
+    def request_publication(self, ready=False):
+        self.enqueue("deploy", "deploy:site", priority=50)
+        if ready:
+            self.execute("""UPDATE pipeline.jobs SET available_at=now(),wait_count=0 WHERE dedupe_key='deploy:site'
+                AND state='waiting_source' AND last_error='Website publication is batching incremental chat and alignment updates'""")
+
     def claim(self, lease_seconds=180, job_id=None):
         token = identifier()
         with self.transaction() as connection:
@@ -139,6 +145,10 @@ class Store:
                             SELECT 1 FROM pipeline.jobs active WHERE active.state='running'
                             AND ((j.broadcast_id IS NOT NULL AND active.broadcast_id=j.broadcast_id
                                   AND j.kind<>'chat_gaps' AND active.kind<>'chat_gaps'
+                                  AND NOT (j.kind IN ('watchparty_align','export') AND active.kind IN ('watchparty_align','export')
+                                           AND (j.kind='watchparty_align' OR active.kind='watchparty_align')
+                                           AND (j.kind='export' OR active.kind='export'
+                                                OR (j.source_id IS NOT NULL AND active.source_id IS NOT NULL AND j.source_id<>active.source_id)))
                                   AND NOT ((j.source_id IS NULL OR active.source_id IS NULL OR j.source_id<>active.source_id) AND (
                                           (j.kind IN ('twitch_vod','twitch_live','twitch_align','watchparty_vod','watchparty_align','validate_upload') AND active.kind IN ('live','recover','probe_archive','fingerprint_archive','reconcile','segment','validate','reconcile_segment','finalize'))
                                           OR (active.kind IN ('twitch_vod','twitch_live','twitch_align','watchparty_vod','watchparty_align','validate_upload') AND j.kind IN ('live','recover','probe_archive','fingerprint_archive','reconcile','segment','validate','reconcile_segment','finalize')))))

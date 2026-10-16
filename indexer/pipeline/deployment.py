@@ -35,6 +35,10 @@ class Deployment:
         result = subprocess.run(["git", "-C", str(directory), *arguments], env=environment,
                                 capture_output=True, text=True, timeout=45)
         if result.returncode:
+            if arguments[0] == "push" and any(reason in result.stderr.lower() for reason in (
+                "non-fast-forward", "fetch first", "[rejected]"
+            )):
+                raise WaitingWork("Website publication is retrying against newer repository changes")
             raise WaitingSource("Website Git operation failed: " + arguments[0] + "; check repository credentials and branch access")
         return result.stdout.strip()
 

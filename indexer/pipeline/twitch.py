@@ -520,6 +520,8 @@ class TwitchCapture:
         self.store.enqueue(
             "export", f"chat-export:{source['id']}:{broadcast['archive_revision']}", broadcast=broadcast["id"]
         )
+        if not self.config.shadow and source["role"] == "watch_party" and (self.config.settings or {}).get("deployment"):
+            self.store.request_publication(ready=True)
 
     def save_partial_alignment(self, job, broadcast, source, canonical, alignment, revision):
         from .publishing import watchparty_contract
@@ -569,10 +571,11 @@ class TwitchCapture:
             except NeedsReview:
                 pass
             self.store.enqueue("export", f"chat-export:{source['id']}:{revision}", broadcast=broadcast["id"])
+            if not self.config.shadow and (self.config.settings or {}).get("deployment"):
+                self.store.request_publication(ready=True)
             break
 
     def check_rounds(self, job, broadcast, source, canonical, alignment, revision):
-        begun = time.monotonic()
         indexes = self.store.rows(
             """SELECT DISTINCT ON (expected_match_id) * FROM pipeline.match_indexes
                WHERE broadcast_id=%s AND canonical_source_id=%s AND generation=%s AND archive_revision=%s
@@ -618,6 +621,7 @@ class TwitchCapture:
         pending = [(key, value, start) for key, value, start in rounds if key not in checks]
         batch = {item[0] for item in pending[:4]}
         remote = self.resolve_archive(source) if pending else {}
+        begun = time.monotonic()
         previous = None
         for key, value, start in rounds:
             if key in checks:
@@ -663,7 +667,8 @@ class TwitchCapture:
                             section = None
                         if section:
                             break
-                        if time.monotonic() - begun >= 45:
+                        # Finish bounded opening windows rather than downloading their tail again next turn.
+                        if (attempt > 0 or source["provider"] != "youtube") and time.monotonic() - begun >= 45:
                             with self.store.transaction() as connection:
                                 self.store.guard(connection, job)
                                 connection.execute("UPDATE pipeline.jobs SET payload=payload||%s WHERE id=%s",

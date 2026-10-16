@@ -71,7 +71,7 @@ class Worker:
         for shadow in [True, False] if not self.config.shadow else [True]:
             export_snapshot(self.store, self.storage, shadow, None if shadow else self.config.approved_ids(self.store))
         if not self.config.shadow and (self.config.settings or {}).get("deployment"):
-            self.store.enqueue("deploy", "deploy:site", priority=50)
+            self.store.request_publication()
 
     def lease_loop(self, job, done):
         while not done.wait(max(1, self.config.lease_seconds // 3)):
@@ -92,8 +92,7 @@ class Worker:
             return
         self.store.enqueue("export", f"export:{job['id']}", broadcast=job["broadcast_id"])
         if job["kind"] in {"validate", "finalize", "reconcile_segment"}:
-            self.store.execute("""UPDATE pipeline.jobs SET available_at=now(),wait_count=0 WHERE dedupe_key='deploy:site'
-                AND state='waiting_source' AND last_error='Website publication is batching incremental chat and alignment updates'""")
+            self.store.request_publication(ready=True)
 
     def run_once(self):
         self.last_tick = time.monotonic()
@@ -231,6 +230,8 @@ class Worker:
             worker.processing.media.video_lock = self.processing.media.video_lock
             worker.twitch.media.stream_cache = self.twitch.media.stream_cache
             worker.twitch.media.stream_lock = self.twitch.media.stream_lock
+            worker.twitch.media.video_cache = self.twitch.media.video_cache
+            worker.twitch.media.video_lock = self.twitch.media.video_lock
             worker.stop = self.stop
             worker.processing.stop = self.stop
             processors.append(threading.Thread(target=worker.processing_loop, name=f"processing-{number + 1}"))

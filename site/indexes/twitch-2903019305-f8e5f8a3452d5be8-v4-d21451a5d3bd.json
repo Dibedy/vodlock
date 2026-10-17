@@ -1,0 +1,1352 @@
+{
+  "schemaVersion": 2,
+  "provider": "twitch",
+  "sourceId": "2903019305",
+  "label": "100T vs VIT",
+  "leadSeconds": 5,
+  "detector": "canonical-clock-v5+canonical-secondary",
+  "pipelineState": "final",
+  "pipelineVersion": 4,
+  "sourceRevision": 1,
+  "alignmentVersion": 25,
+  "derivedFromCanonical": true,
+  "rounds": [
+    {
+      "map": 1,
+      "round": 1,
+      "start": 1676.51
+    },
+    {
+      "map": 1,
+      "round": 2,
+      "start": 1746.51
+    },
+    {
+      "map": 1,
+      "round": 3,
+      "start": 1807.51
+    },
+    {
+      "map": 1,
+      "round": 4,
+      "start": 1982.51
+    },
+    {
+      "map": 1,
+      "round": 5,
+      "start": 2046.51
+    },
+    {
+      "map": 1,
+      "round": 6,
+      "start": 2275.51
+    },
+    {
+      "map": 1,
+      "round": 7,
+      "start": 2431.51
+    },
+    {
+      "map": 1,
+      "round": 8,
+      "start": 2625.51
+    },
+    {
+      "map": 1,
+      "round": 9,
+      "start": 2736.51
+    },
+    {
+      "map": 1,
+      "round": 10,
+      "start": 2874.51
+    },
+    {
+      "map": 1,
+      "round": 11,
+      "start": 3010.51
+    },
+    {
+      "map": 1,
+      "round": 12,
+      "start": 3136.51
+    },
+    {
+      "map": 1,
+      "round": 13,
+      "start": 3387.51
+    },
+    {
+      "map": 1,
+      "round": 14,
+      "start": 3526.51
+    },
+    {
+      "map": 1,
+      "round": 15,
+      "start": 3621.51
+    },
+    {
+      "map": 1,
+      "round": 16,
+      "start": 3790.51
+    },
+    {
+      "map": 1,
+      "round": 17,
+      "start": 3893.51
+    },
+    {
+      "map": 1,
+      "round": 18,
+      "start": 3995.51
+    },
+    {
+      "map": 2,
+      "round": 1,
+      "start": 4932.51
+    },
+    {
+      "map": 2,
+      "round": 2,
+      "start": 5062.51
+    },
+    {
+      "map": 2,
+      "round": 3,
+      "start": 5192.51
+    },
+    {
+      "map": 2,
+      "round": 4,
+      "start": 5276.51
+    },
+    {
+      "map": 2,
+      "round": 5,
+      "start": 5380.51
+    },
+    {
+      "map": 2,
+      "round": 6,
+      "start": 5528.51
+    },
+    {
+      "map": 2,
+      "round": 7,
+      "start": 5633.51
+    },
+    {
+      "map": 2,
+      "round": 8,
+      "start": 5762.51
+    },
+    {
+      "map": 2,
+      "round": 9,
+      "start": 5917.51
+    },
+    {
+      "map": 2,
+      "round": 10,
+      "start": 5994.51
+    },
+    {
+      "map": 2,
+      "round": 11,
+      "start": 6137.51
+    },
+    {
+      "map": 2,
+      "round": 12,
+      "start": 6283.51
+    },
+    {
+      "map": 2,
+      "round": 13,
+      "start": 6518.51
+    },
+    {
+      "map": 2,
+      "round": 14,
+      "start": 6632.51
+    },
+    {
+      "map": 2,
+      "round": 15,
+      "start": 6745.51
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 6875.51
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 7007.51
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 7187.51
+    },
+    {
+      "map": 2,
+      "round": 19,
+      "start": 7310.51
+    },
+    {
+      "map": 2,
+      "round": 20,
+      "start": 7395.51
+    },
+    {
+      "map": 2,
+      "round": 21,
+      "start": 7583.51
+    },
+    {
+      "map": 2,
+      "round": 22,
+      "start": 7753.51
+    },
+    {
+      "map": 2,
+      "round": 23,
+      "start": 7817.51
+    },
+    {
+      "map": 3,
+      "round": 2,
+      "start": 8757.51
+    },
+    {
+      "map": 3,
+      "round": 3,
+      "start": 8904.51
+    },
+    {
+      "map": 3,
+      "round": 4,
+      "start": 8996.51
+    },
+    {
+      "map": 3,
+      "round": 5,
+      "start": 9125.51
+    },
+    {
+      "map": 3,
+      "round": 6,
+      "start": 9258.51
+    },
+    {
+      "map": 3,
+      "round": 7,
+      "start": 9504.51
+    },
+    {
+      "map": 3,
+      "round": 8,
+      "start": 9612.51
+    },
+    {
+      "map": 3,
+      "round": 9,
+      "start": 9832.51
+    },
+    {
+      "map": 3,
+      "round": 10,
+      "start": 9987.51
+    },
+    {
+      "map": 3,
+      "round": 11,
+      "start": 10135.51
+    },
+    {
+      "map": 3,
+      "round": 12,
+      "start": 10240.51
+    },
+    {
+      "map": 3,
+      "round": 13,
+      "start": 10504.51
+    },
+    {
+      "map": 3,
+      "round": 14,
+      "start": 10580.51
+    },
+    {
+      "map": 3,
+      "round": 15,
+      "start": 10680.51
+    },
+    {
+      "map": 3,
+      "round": 16,
+      "start": 10827.51
+    },
+    {
+      "map": 3,
+      "round": 17,
+      "start": 10953.51
+    },
+    {
+      "map": 3,
+      "round": 18,
+      "start": 11059.51
+    },
+    {
+      "map": 3,
+      "round": 19,
+      "start": 11162.51
+    },
+    {
+      "map": 3,
+      "round": 20,
+      "start": 11350.51
+    },
+    {
+      "map": 3,
+      "round": 21,
+      "start": 11445.51
+    },
+    {
+      "map": 3,
+      "round": 22,
+      "start": 11592.51
+    },
+    {
+      "map": 3,
+      "round": 23,
+      "start": 11759.51
+    },
+    {
+      "map": 3,
+      "round": 24,
+      "start": 11890.51
+    },
+    {
+      "map": 4,
+      "round": 1,
+      "start": 12762.51
+    },
+    {
+      "map": 4,
+      "round": 2,
+      "start": 12865.51
+    },
+    {
+      "map": 4,
+      "round": 3,
+      "start": 12959.51
+    },
+    {
+      "map": 4,
+      "round": 4,
+      "start": 13042.51
+    },
+    {
+      "map": 4,
+      "round": 5,
+      "start": 13198.51
+    },
+    {
+      "map": 4,
+      "round": 6,
+      "start": 13324.51
+    },
+    {
+      "map": 4,
+      "round": 7,
+      "start": 13441.51
+    },
+    {
+      "map": 4,
+      "round": 8,
+      "start": 13642.51
+    },
+    {
+      "map": 4,
+      "round": 9,
+      "start": 13751.51
+    },
+    {
+      "map": 4,
+      "round": 10,
+      "start": 13855.51
+    },
+    {
+      "map": 4,
+      "round": 11,
+      "start": 13991.51
+    },
+    {
+      "map": 4,
+      "round": 12,
+      "start": 14118.51
+    },
+    {
+      "map": 4,
+      "round": 13,
+      "start": 14388.51
+    },
+    {
+      "map": 4,
+      "round": 14,
+      "start": 14472.51
+    },
+    {
+      "map": 4,
+      "round": 15,
+      "start": 14531.51
+    },
+    {
+      "map": 4,
+      "round": 16,
+      "start": 14661.51
+    },
+    {
+      "map": 4,
+      "round": 17,
+      "start": 14800.51
+    },
+    {
+      "map": 4,
+      "round": 18,
+      "start": 15003.51
+    },
+    {
+      "map": 4,
+      "round": 19,
+      "start": 15136.51
+    },
+    {
+      "map": 4,
+      "round": 20,
+      "start": 15328.506
+    },
+    {
+      "map": 4,
+      "round": 21,
+      "start": 15481.506
+    },
+    {
+      "map": 4,
+      "round": 22,
+      "start": 15650.506
+    }
+  ],
+  "coverage": {
+    "type": "partial-navigation",
+    "omittedOpeningRounds": 0,
+    "firstMap": 1,
+    "firstRound": 1,
+    "unavailableRounds": [
+      {
+        "map": 3,
+        "round": 1
+      }
+    ],
+    "checksComplete": true
+  },
+  "canonical": {
+    "sourceId": "QJMvaUZjaNw",
+    "matchIndexId": "c2df7cef-fbac-4fb7-94a5-0619fd772fc5",
+    "archiveRevision": 1,
+    "rounds": [
+      {
+        "map": 1,
+        "round": 1,
+        "start": 6487.0
+      },
+      {
+        "map": 1,
+        "round": 2,
+        "start": 6556.0
+      },
+      {
+        "map": 1,
+        "round": 3,
+        "start": 6618.0
+      },
+      {
+        "map": 1,
+        "round": 4,
+        "start": 6792.0
+      },
+      {
+        "map": 1,
+        "round": 5,
+        "start": 6856.0
+      },
+      {
+        "map": 1,
+        "round": 6,
+        "start": 7085.0
+      },
+      {
+        "map": 1,
+        "round": 7,
+        "start": 7242.0
+      },
+      {
+        "map": 1,
+        "round": 8,
+        "start": 7436.0
+      },
+      {
+        "map": 1,
+        "round": 9,
+        "start": 7547.0
+      },
+      {
+        "map": 1,
+        "round": 10,
+        "start": 7684.0
+      },
+      {
+        "map": 1,
+        "round": 11,
+        "start": 7821.0
+      },
+      {
+        "map": 1,
+        "round": 12,
+        "start": 7946.0
+      },
+      {
+        "map": 1,
+        "round": 13,
+        "start": 8197.0
+      },
+      {
+        "map": 1,
+        "round": 14,
+        "start": 8337.0
+      },
+      {
+        "map": 1,
+        "round": 15,
+        "start": 8432.0
+      },
+      {
+        "map": 1,
+        "round": 16,
+        "start": 8600.0
+      },
+      {
+        "map": 1,
+        "round": 17,
+        "start": 8704.0
+      },
+      {
+        "map": 1,
+        "round": 18,
+        "start": 8804.0
+      },
+      {
+        "map": 2,
+        "round": 1,
+        "start": 9743.0
+      },
+      {
+        "map": 2,
+        "round": 2,
+        "start": 9872.0
+      },
+      {
+        "map": 2,
+        "round": 3,
+        "start": 10002.0
+      },
+      {
+        "map": 2,
+        "round": 4,
+        "start": 10088.0
+      },
+      {
+        "map": 2,
+        "round": 5,
+        "start": 10191.0
+      },
+      {
+        "map": 2,
+        "round": 6,
+        "start": 10340.0
+      },
+      {
+        "map": 2,
+        "round": 7,
+        "start": 10443.0
+      },
+      {
+        "map": 2,
+        "round": 8,
+        "start": 10572.0
+      },
+      {
+        "map": 2,
+        "round": 9,
+        "start": 10729.0
+      },
+      {
+        "map": 2,
+        "round": 10,
+        "start": 10805.0
+      },
+      {
+        "map": 2,
+        "round": 11,
+        "start": 10948.0
+      },
+      {
+        "map": 2,
+        "round": 12,
+        "start": 11093.0
+      },
+      {
+        "map": 2,
+        "round": 13,
+        "start": 11330.0
+      },
+      {
+        "map": 2,
+        "round": 14,
+        "start": 11442.0
+      },
+      {
+        "map": 2,
+        "round": 15,
+        "start": 11557.0
+      },
+      {
+        "map": 2,
+        "round": 16,
+        "start": 11686.0
+      },
+      {
+        "map": 2,
+        "round": 17,
+        "start": 11817.0
+      },
+      {
+        "map": 2,
+        "round": 18,
+        "start": 11997.0
+      },
+      {
+        "map": 2,
+        "round": 19,
+        "start": 12121.0
+      },
+      {
+        "map": 2,
+        "round": 20,
+        "start": 12206.0
+      },
+      {
+        "map": 2,
+        "round": 21,
+        "start": 12394.0
+      },
+      {
+        "map": 2,
+        "round": 22,
+        "start": 12562.0
+      },
+      {
+        "map": 2,
+        "round": 23,
+        "start": 12627.0
+      },
+      {
+        "map": 3,
+        "round": 1,
+        "start": 13451.0
+      },
+      {
+        "map": 3,
+        "round": 2,
+        "start": 13569.0
+      },
+      {
+        "map": 3,
+        "round": 3,
+        "start": 13716.0
+      },
+      {
+        "map": 3,
+        "round": 4,
+        "start": 13808.0
+      },
+      {
+        "map": 3,
+        "round": 5,
+        "start": 13937.0
+      },
+      {
+        "map": 3,
+        "round": 6,
+        "start": 14069.0
+      },
+      {
+        "map": 3,
+        "round": 7,
+        "start": 14316.0
+      },
+      {
+        "map": 3,
+        "round": 8,
+        "start": 14423.0
+      },
+      {
+        "map": 3,
+        "round": 9,
+        "start": 14643.0
+      },
+      {
+        "map": 3,
+        "round": 10,
+        "start": 14798.0
+      },
+      {
+        "map": 3,
+        "round": 11,
+        "start": 14946.0
+      },
+      {
+        "map": 3,
+        "round": 12,
+        "start": 15051.0
+      },
+      {
+        "map": 3,
+        "round": 13,
+        "start": 15316.0
+      },
+      {
+        "map": 3,
+        "round": 14,
+        "start": 15392.0
+      },
+      {
+        "map": 3,
+        "round": 15,
+        "start": 15492.0
+      },
+      {
+        "map": 3,
+        "round": 16,
+        "start": 15639.0
+      },
+      {
+        "map": 3,
+        "round": 17,
+        "start": 15765.0
+      },
+      {
+        "map": 3,
+        "round": 18,
+        "start": 15869.0
+      },
+      {
+        "map": 3,
+        "round": 19,
+        "start": 15972.0
+      },
+      {
+        "map": 3,
+        "round": 20,
+        "start": 16162.0
+      },
+      {
+        "map": 3,
+        "round": 21,
+        "start": 16256.0
+      },
+      {
+        "map": 3,
+        "round": 22,
+        "start": 16403.0
+      },
+      {
+        "map": 3,
+        "round": 23,
+        "start": 16570.0
+      },
+      {
+        "map": 3,
+        "round": 24,
+        "start": 16701.0
+      },
+      {
+        "map": 4,
+        "round": 1,
+        "start": 17573.0
+      },
+      {
+        "map": 4,
+        "round": 2,
+        "start": 17677.0
+      },
+      {
+        "map": 4,
+        "round": 3,
+        "start": 17771.0
+      },
+      {
+        "map": 4,
+        "round": 4,
+        "start": 17853.0
+      },
+      {
+        "map": 4,
+        "round": 5,
+        "start": 18009.0
+      },
+      {
+        "map": 4,
+        "round": 6,
+        "start": 18134.0
+      },
+      {
+        "map": 4,
+        "round": 7,
+        "start": 18252.0
+      },
+      {
+        "map": 4,
+        "round": 8,
+        "start": 18453.0
+      },
+      {
+        "map": 4,
+        "round": 9,
+        "start": 18561.0
+      },
+      {
+        "map": 4,
+        "round": 10,
+        "start": 18665.0
+      },
+      {
+        "map": 4,
+        "round": 11,
+        "start": 18802.0
+      },
+      {
+        "map": 4,
+        "round": 12,
+        "start": 18929.0
+      },
+      {
+        "map": 4,
+        "round": 13,
+        "start": 19200.0
+      },
+      {
+        "map": 4,
+        "round": 14,
+        "start": 19282.0
+      },
+      {
+        "map": 4,
+        "round": 15,
+        "start": 19342.0
+      },
+      {
+        "map": 4,
+        "round": 16,
+        "start": 19472.0
+      },
+      {
+        "map": 4,
+        "round": 17,
+        "start": 19610.0
+      },
+      {
+        "map": 4,
+        "round": 18,
+        "start": 19814.0
+      },
+      {
+        "map": 4,
+        "round": 19,
+        "start": 19948.0
+      },
+      {
+        "map": 4,
+        "round": 20,
+        "start": 20140.996
+      },
+      {
+        "map": 4,
+        "round": 21,
+        "start": 20292.996
+      },
+      {
+        "map": 4,
+        "round": 22,
+        "start": 20461.996
+      }
+    ]
+  },
+  "alignment": {
+    "source": "youtube:QJMvaUZjaNw",
+    "timelineScale": 1.0,
+    "strictCoverage": true,
+    "segments": [
+      {
+        "targetStart": 1671.0100000000002,
+        "targetEnd": 1679.5100000000002,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 1741.0100000000002,
+        "targetEnd": 1749.5100000000002,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 1802.0100000000002,
+        "targetEnd": 1810.5100000000002,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 1977.0100000000002,
+        "targetEnd": 1985.5100000000002,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 2041.0100000000002,
+        "targetEnd": 2049.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 2270.01,
+        "targetEnd": 2278.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 2426.01,
+        "targetEnd": 2434.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 2620.01,
+        "targetEnd": 2628.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 2731.01,
+        "targetEnd": 2739.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 2869.01,
+        "targetEnd": 2877.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 3005.01,
+        "targetEnd": 3013.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 3131.01,
+        "targetEnd": 3139.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 3382.01,
+        "targetEnd": 3390.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 3521.01,
+        "targetEnd": 3529.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 3616.01,
+        "targetEnd": 3624.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 3785.01,
+        "targetEnd": 3793.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 3888.01,
+        "targetEnd": 3896.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 3990.01,
+        "targetEnd": 3998.51,
+        "offset": 4808.49
+      },
+      {
+        "targetStart": 4927.01,
+        "targetEnd": 4935.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 5057.01,
+        "targetEnd": 5065.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 5187.01,
+        "targetEnd": 5195.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 5271.01,
+        "targetEnd": 5279.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 5375.01,
+        "targetEnd": 5383.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 5523.01,
+        "targetEnd": 5531.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 5628.01,
+        "targetEnd": 5636.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 5757.01,
+        "targetEnd": 5765.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 5912.01,
+        "targetEnd": 5920.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 5989.01,
+        "targetEnd": 5997.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 6132.01,
+        "targetEnd": 6140.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 6278.01,
+        "targetEnd": 6286.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 6513.01,
+        "targetEnd": 6521.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 6627.01,
+        "targetEnd": 6635.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 6740.01,
+        "targetEnd": 6748.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 6870.01,
+        "targetEnd": 6878.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 7002.01,
+        "targetEnd": 7010.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 7182.01,
+        "targetEnd": 7190.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 7305.01,
+        "targetEnd": 7313.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 7390.01,
+        "targetEnd": 7398.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 7578.01,
+        "targetEnd": 7586.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 7748.01,
+        "targetEnd": 7756.51,
+        "offset": 4808.49
+      },
+      {
+        "targetStart": 7812.01,
+        "targetEnd": 7820.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 8752.01,
+        "targetEnd": 8760.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 8899.01,
+        "targetEnd": 8907.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 8991.01,
+        "targetEnd": 8999.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 9120.01,
+        "targetEnd": 9128.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 9253.01,
+        "targetEnd": 9261.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 9499.01,
+        "targetEnd": 9507.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 9607.01,
+        "targetEnd": 9615.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 9827.01,
+        "targetEnd": 9835.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 9982.01,
+        "targetEnd": 9990.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 10130.01,
+        "targetEnd": 10138.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 10235.01,
+        "targetEnd": 10243.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 10499.01,
+        "targetEnd": 10507.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 10575.01,
+        "targetEnd": 10583.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 10675.01,
+        "targetEnd": 10683.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 10822.01,
+        "targetEnd": 10830.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 10948.01,
+        "targetEnd": 10956.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 11054.01,
+        "targetEnd": 11062.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 11157.01,
+        "targetEnd": 11165.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 11224.51,
+        "targetEnd": 11345.01,
+        "offset": 4805.49
+      },
+      {
+        "targetStart": 11345.01,
+        "targetEnd": 11353.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 11359.51,
+        "targetEnd": 11440.01,
+        "offset": 4805.49
+      },
+      {
+        "targetStart": 11440.01,
+        "targetEnd": 11448.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 11587.01,
+        "targetEnd": 11595.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 11754.01,
+        "targetEnd": 11762.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 11885.01,
+        "targetEnd": 11893.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 11940.01,
+        "targetEnd": 12052.51,
+        "offset": 4805.49
+      },
+      {
+        "targetStart": 12757.01,
+        "targetEnd": 12765.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 12860.01,
+        "targetEnd": 12868.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 12954.01,
+        "targetEnd": 12962.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 13037.01,
+        "targetEnd": 13045.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 13193.01,
+        "targetEnd": 13201.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 13319.01,
+        "targetEnd": 13327.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 13436.01,
+        "targetEnd": 13444.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 13637.01,
+        "targetEnd": 13645.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 13746.01,
+        "targetEnd": 13754.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 13850.01,
+        "targetEnd": 13858.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 13986.01,
+        "targetEnd": 13994.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 14113.01,
+        "targetEnd": 14121.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 14383.01,
+        "targetEnd": 14391.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 14467.01,
+        "targetEnd": 14475.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 14526.01,
+        "targetEnd": 14534.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 14656.01,
+        "targetEnd": 14664.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 14795.01,
+        "targetEnd": 14803.51,
+        "offset": 4809.49
+      },
+      {
+        "targetStart": 14998.01,
+        "targetEnd": 15006.51,
+        "offset": 4810.49
+      },
+      {
+        "targetStart": 15131.01,
+        "targetEnd": 15139.51,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 15323.006,
+        "targetEnd": 15331.506,
+        "offset": 4812.49
+      },
+      {
+        "targetStart": 15476.006,
+        "targetEnd": 15484.506,
+        "offset": 4811.49
+      },
+      {
+        "targetStart": 15645.006,
+        "targetEnd": 15653.506,
+        "offset": 4811.49
+      }
+    ]
+  }
+}

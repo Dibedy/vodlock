@@ -9,7 +9,7 @@
       "title": "G2 vs 100T",
       "event": "Champions Shanghai | Playoffs",
       "label": "Full match",
-      "index": "/indexes/youtube-QEDpGS4GXBg-53a0364234f15f96-v43-cf14666a63f9.json",
+      "index": "/indexes/youtube-QEDpGS4GXBg-53a0364234f15f96-v43-dac6d37ba64b.json",
       "playedAt": "2026-10-16T12:10:21+02:00",
       "pipelineState": "final",
       "expectedMatchId": "780d36e2-f674-5b90-bafd-8b66055c3494",
@@ -17,6 +17,9 @@
       "pipelineVersion": 43,
       "tournament": "Champions Shanghai",
       "tournamentKey": "champions-shanghai",
+      "chat": "/chats/twitch-2902056335.json",
+      "chatSourceId": "2902056335",
+      "chatChannelId": null,
       "canonicalPipeline": true
     },
     {
@@ -68,7 +71,7 @@
       "title": "LOUD vs VIT",
       "event": "Champions Shanghai | Playoffs",
       "label": "Full match",
-      "index": "/indexes/youtube-QEDpGS4GXBg-07ebb5a187b553ea-v41-92dc98b72133.json",
+      "index": "/indexes/youtube-QEDpGS4GXBg-07ebb5a187b553ea-v41-1a731cd91195.json",
       "playedAt": "2026-10-16T08:08:45+02:00",
       "pipelineState": "final",
       "expectedMatchId": "7866895f-41d7-5ef2-976e-9badad29ab5d",
@@ -76,6 +79,9 @@
       "pipelineVersion": 41,
       "tournament": "Champions Shanghai",
       "tournamentKey": "champions-shanghai",
+      "chat": "/chats/twitch-2902056335.json",
+      "chatSourceId": "2902056335",
+      "chatChannelId": null,
       "canonicalPipeline": true
     },
     {

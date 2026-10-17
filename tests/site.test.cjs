@@ -528,6 +528,19 @@ test('late-start watch parties retain actual round numbers and clearly label the
   assert.match(app, /Earlier rounds are not in this recording/);
 });
 
+test('partial navigation labels unavailable jumps without inventing positions', () => {
+  const raw = {schemaVersion: 2, provider: 'youtube', sourceId: 'abcdefghijk',
+    rounds: [{map: 1, round: 1, start: 100}, {map: 1, round: 3, start: 300}],
+    coverage: {type: 'partial-navigation', omittedOpeningRounds: 0, firstMap: 1, firstRound: 1,
+      unavailableRounds: [{map: 1, round: 2}]}};
+  const index = validateIndex(raw);
+  assert.equal(context.VodlockSite.coverageLabel(index.coverage), 'Some round jumps unavailable');
+  assert.equal(roundDestination(index, 100, 1), 295);
+  for (const missing of [[], [{map: 1, round: 1}], [{map: 1, round: 2}, {map: 1, round: 2}], [{map: true, round: 2}]]) {
+    assert.throws(() => validateIndex({...raw, coverage: {...raw.coverage, unavailableRounds: missing}}));
+  }
+});
+
 test('chat protection defaults on for existing users and preserves explicit opt-outs', () => {
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   const declaration = app.match(/  const defaultSettings = .*;/)[0];

@@ -33,6 +33,8 @@ def watchparty_contract(canonical, secondary, match, index, mapping, alignment_v
                   and opening.get("anchors", 0) >= 5 and opening.get("maximumResidual", math.inf) <= 2
                   and math.isfinite(opening.get("offset", math.inf)))
     omitted = 0
+    unavailable = []
+    partial = str(match["id"]) in secondary["metadata"].get("partial_navigation_matches", [])
     rounds: list[dict] = []
     for value in index["rounds"]:
         start = value["start"] - playback_shift
@@ -42,6 +44,9 @@ def watchparty_contract(canonical, secondary, match, index, mapping, alignment_v
         sections = [section for section in mapping["segments"]
                     if section["canonicalStart"] <= start - 5 * scale and section["canonicalEnd"] >= start + 2 * scale]
         if len(sections) != 1:
+            if partial and rounds and not sections:
+                unavailable.append({"map": value["map"], "round": value["round"]})
+                continue
             raise NeedsReview("Watch-party round timing has not been verified")
         section = sections[0]
         if section["anchors"] < 5 or section["maximumResidual"] > 2:
@@ -58,8 +63,9 @@ def watchparty_contract(canonical, secondary, match, index, mapping, alignment_v
         "detector": DETECTOR_VERSION + "+canonical-secondary", "pipelineState": index["state"],
         "pipelineVersion": index["version"], "sourceRevision": secondary["revision"],
         "alignmentVersion": alignment_version, "derivedFromCanonical": True, "rounds": rounds,
-        **({"coverage": {"type": "late-start", "omittedOpeningRounds": omitted,
-                         "firstMap": rounds[0]["map"], "firstRound": rounds[0]["round"]}} if omitted else {}),
+        **({"coverage": {"type": "partial-navigation" if unavailable else "late-start", "omittedOpeningRounds": omitted,
+                         "firstMap": rounds[0]["map"], "firstRound": rounds[0]["round"],
+                         **({"unavailableRounds": unavailable} if unavailable else {})}} if omitted or unavailable else {}),
         "canonical": {"sourceId": canonical["external_id"], "matchIndexId": str(index["id"]),
                       "archiveRevision": index["archive_revision"], "rounds": canonical_contract(canonical, match, index)["rounds"]},
         "alignment": {"source": "youtube:" + canonical["external_id"], "timelineScale": scale, "strictCoverage": True,

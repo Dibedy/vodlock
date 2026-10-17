@@ -62,11 +62,17 @@
   }
 
   function coverageLabel(value) {
-    if (!value || value.type !== 'late-start' || !Number.isInteger(value.omittedOpeningRounds) ||
-        value.omittedOpeningRounds < 1 || value.omittedOpeningRounds >= 5000 ||
+    const partial = value?.type === 'partial-navigation';
+    if (!value || (!partial && value.type !== 'late-start') || !Number.isInteger(value.omittedOpeningRounds) ||
+        value.omittedOpeningRounds < (partial ? 0 : 1) || value.omittedOpeningRounds >= 5000 ||
         !Number.isInteger(value.firstMap) || value.firstMap < 1 || value.firstMap > 99 ||
         !Number.isInteger(value.firstRound) || value.firstRound < 1 || value.firstRound > 100) return '';
-    return value.firstMap === 1 ? 'Starts at round ' + value.firstRound : 'Starts at map ' + value.firstMap + ', round ' + value.firstRound;
+    if (partial && (!Array.isArray(value.unavailableRounds) || !value.unavailableRounds.length || value.unavailableRounds.length >= 5000 ||
+        value.unavailableRounds.some(round => !Number.isInteger(round?.map) || round.map < 1 || round.map > 99 ||
+          !Number.isInteger(round.round) || round.round < 1 || round.round > 100) ||
+        new Set(value.unavailableRounds.map(round => round.map + ':' + round.round)).size !== value.unavailableRounds.length)) return '';
+    const opening = value.omittedOpeningRounds ? value.firstMap === 1 ? 'Starts at round ' + value.firstRound : 'Starts at map ' + value.firstMap + ', round ' + value.firstRound : '';
+    return partial ? (opening ? opening + ' · ' : '') + 'Some round jumps unavailable' : opening;
   }
 
   function validateIndex(value) {
@@ -98,6 +104,9 @@
     const coverage = value.coverage;
     if (coverage !== undefined && (!coverageLabel(coverage) || coverage.firstMap !== rounds[0].map || coverage.firstRound !== rounds[0].round)) {
       throw new Error('The hosted index has invalid partial coverage.');
+    }
+    if (coverage?.type === 'partial-navigation' && coverage.unavailableRounds.some(round => seen.has(round.map + ':' + round.round))) {
+      throw new Error('The hosted index includes an unavailable round jump.');
     }
     return {schemaVersion: 2, provider, sourceId, label: String(value.label || 'Indexed VOD').slice(0, 100), leadSeconds: 5, rounds, ...(alignment ? {alignment} : {}), ...(chatAlignment ? {chatAlignment} : {}), ...(coverage ? {coverage} : {})};
   }

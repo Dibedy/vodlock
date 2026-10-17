@@ -881,6 +881,23 @@ class PipelineTests(unittest.TestCase):
                                       "canonicalStart": 299.5, "canonicalEnd": 308}}})
         self.assertEqual(split["recordingStart"], section)
 
+    def test_partial_watchparty_navigation_requires_opt_in_and_never_invents_missing_jumps(self):
+        canonical = {"provider": "youtube", "role": "canonical", "broadcast_id": "broadcast", "external_id": "abcdefghijk"}
+        source = {"provider": "youtube", "role": "watch_party", "external_id": "lmnopqrstuv", "revision": 1, "metadata": {}}
+        index = {"id": "index", "broadcast_id": "broadcast", "version": 1, "state": "final", "archive_revision": 1, "rounds": series()}
+        left = {"sourceStart": 100, "sourceEnd": 750, "canonicalStart": 0, "canonicalEnd": 650,
+                "offset": -100, "anchors": 12, "maximumResidual": 1}
+        right = {**left, "sourceStart": 850, "sourceEnd": 1700, "canonicalStart": 750, "canonicalEnd": 1600}
+        mapping = {"timelineScale": 1, "segments": [left, right]}
+        with self.assertRaises(NeedsReview):
+            watchparty_contract(canonical, source, expected(), index, mapping, 1)
+        source['metadata']['partial_navigation_matches'] = [expected()['id']]
+        contract = watchparty_contract(canonical, source, expected(), index, mapping, 1)
+        self.assertEqual(contract['coverage']['unavailableRounds'], [{'map': 1, 'round': 7}])
+        self.assertEqual([value['round'] for value in contract['rounds']], [1, 2, 3, 4, 5, 6, 8, 9, 10, 11, 12, 13])
+        with self.assertRaises(NeedsReview):
+            watchparty_contract(canonical, source, expected(), index, {**mapping, 'segments': [right]}, 1)
+
     def test_youtube_watchparty_waits_for_archive_without_using_twitch_resolver(self):
         from pipeline.twitch import TwitchCapture
 

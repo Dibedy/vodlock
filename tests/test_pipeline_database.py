@@ -1676,6 +1676,26 @@ class DatabasePipelineTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 release_to_site(Path(self.temporary.name) / "release", site)
 
+        self.store.execute("UPDATE pipeline.sources SET metadata=metadata||%s WHERE id=%s",
+            (Jsonb({'partial_navigation_matches': [str(self.match)]}), youtube_source['id']))
+        youtube_source = self.store.one('SELECT * FROM pipeline.sources WHERE id=%s', (youtube_source['id'],))
+        left = {'sourceStart': 50, 'sourceEnd': 700, 'canonicalStart': 0, 'canonicalEnd': 650,
+                'offset': -50, 'anchors': 12, 'maximumResidual': 1}
+        gap = {'timelineScale': 1, 'anchors': 12, 'maximumResidual': 1, 'segments': [left,
+            {**left, 'sourceStart': 800, 'sourceEnd': 1650, 'canonicalStart': 750, 'canonicalEnd': 1600}]}
+        processing.save_alignment(align_job, youtube_source, self.entities()[1], gap, 'secondary', 0)
+        catalog = export_snapshot(self.store, self.storage, False, ['abcdefghijk'])
+        youtube = next(entry for entry in catalog['videos'] if entry['sourceId'] == 'lmnopqrstuv')
+        self.assertEqual(youtube['coverage']['unavailableRounds'], [{'map': 1, 'round': 7}])
+        release_to_site(Path(self.temporary.name) / 'release', site)
+        path = 'release/' + youtube['index'].lstrip('/')
+        contract = json.loads(self.storage.get(path))
+        for missing in [[], [{'map': 1, 'round': 1}], [{'map': 1, 'round': 7}, {'map': 1, 'round': 7}], [{'map': 99, 'round': 1}]]:
+            broken = {**contract, 'coverage': {**contract['coverage'], 'unavailableRounds': missing}}
+            self.storage.put(path, json_bytes(broken))
+            with self.assertRaises(ValueError):
+                release_to_site(Path(self.temporary.name) / 'release', site)
+
     def test_upload_without_segment_cannot_starve_archive_readiness(self):
         self.store.execute("DELETE FROM pipeline.segments")
         self.store.enqueue(

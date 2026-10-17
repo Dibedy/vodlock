@@ -846,7 +846,7 @@
     $('end-shield').hidden = true;
     $('start-watching').disabled = false;
     $('start-gate-title').textContent = state.resumeTime === null ? 'Watch from the start' : 'Continue watching';
-    $('start-gate-copy').textContent = state.resumeTime === null ? coverage ? coverage + '. Earlier rounds are not in this recording.' : 'Starts just before round one.' : 'Resume from where you left off.';
+    $('start-gate-copy').textContent = state.resumeTime === null ? coverage.includes('Some round jumps unavailable') ? 'Only verified round jumps are available. The video is still playable.' : coverage ? coverage + '. Earlier rounds are not in this recording.' : 'Starts just before round one.' : 'Resume from where you left off.';
     $('start-watching-label').textContent = state.resumeTime === null ? 'Play match' : 'Resume';
     applySettings();
     if (updateHistory) history.pushState({source: entryKey(entry)}, '', '?v=' + encodeURIComponent(entryKey(entry)));

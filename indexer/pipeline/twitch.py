@@ -598,6 +598,16 @@ class TwitchCapture:
             cached = {"source_revision": source["revision"], "canonical_revision": revision, "checks": {}}
         checks = {key: check for key, check in (saved or {}).get("mapping", {}).get("roundChecks", {}).items()
                   if check.get("section")}
+        overlapping = self.store.rows("""SELECT payload FROM pipeline.jobs WHERE source_id=%s AND generation=%s
+            AND id<>%s AND kind IN ('watchparty_align','twitch_align')
+            AND state IN ('queued','waiting_source','retryable') ORDER BY updated_at""",
+            (source["id"], job["generation"], job["id"]))
+        for other in overlapping:
+            prior = other["payload"].get("scoreboard_checks", {})
+            if (prior.get("source_revision") == source["revision"] and prior.get("canonical_revision") == revision
+                    and prior.get("version") == SCOREBOARD_CHECK_VERSION):
+                checks.update({key: check for key, check in prior.get("checks", {}).items()
+                               if check.get("section") or key not in checks})
         checks.update({key: check for key, check in cached["checks"].items() if check.get("section") or key not in checks})
         checks = {key: check for key, value, start in rounds if (check := checks.get(key))
                   and check["canonical_start"] == start and check.get("scores") == value.get("scores")}
@@ -639,6 +649,10 @@ class TwitchCapture:
             section = None
             identity = [key, start, value.get("scores"), source["revision"], revision, predicted, scale, SCOREBOARD_CHECK_VERSION]
             search = job["payload"].get("scoreboard_search", {})
+            candidates = [search] + [other["payload"].get("scoreboard_search", {}) for other in overlapping]
+            matching = [candidate for candidate in candidates if candidate.get("identity") == identity]
+            if matching:
+                search = max(matching, key=lambda candidate: (candidate["attempt"], len(candidate["samples"])))
             if search.get("identity") != identity:
                 search = {"identity": identity, "attempt": 0, "samples": []}
             for attempt, (before, after) in enumerate([(1, 12) if previous else (8, 9), (24, 24), (90, 90)]):

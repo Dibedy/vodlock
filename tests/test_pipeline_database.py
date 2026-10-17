@@ -706,8 +706,11 @@ class DatabasePipelineTests(unittest.TestCase):
         with patch("pipeline.twitch.resolve_twitch", return_value={"duration": 1000}), patch("pipeline.twitch.time.monotonic", side_effect=[0, 0, 0, 50]):
             with self.assertRaisesRegex(ContinueJob, "time slice"):
                 capture.check_rounds(job, broadcast, source, canonical, mapping, 1)
-        job = self.store.one("SELECT * FROM pipeline.jobs WHERE id=%s", (job["id"],))
+        job = {**job, **self.store.one("SELECT * FROM pipeline.jobs WHERE id=%s", (job["id"],))}
         self.assertEqual(job["payload"]["scoreboard_search"]["samples"][0]["time"], 193)
+        self.store.finish(job, 'queued', delay=3600)
+        duplicate = self.store.enqueue('twitch_align', 'overlapping-search', broadcast=self.broadcast, source=twitch)
+        job = self.store.claim(job_id=duplicate['id'])
         with patch("pipeline.twitch.resolve_twitch", return_value={"duration": 1000}):
             result = capture.check_rounds(job, broadcast, source, canonical, mapping, 1)
         self.assertEqual(starts, [192, 194])

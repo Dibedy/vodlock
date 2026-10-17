@@ -26,7 +26,7 @@
       "title": "100T vs VIT",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/twitch-2902970797-f8e5f8a3452d5be8-v4-13e7bfbbb9e8.json",
+      "index": "/indexes/twitch-2902970797-f8e5f8a3452d5be8-v4-b7116159ee1d.json",
       "playedAt": "2026-10-17T09:18:59+02:00",
       "pipelineState": "final",
       "expectedMatchId": "4eab6aba-8e40-5de7-b128-4b849e7aeb28",
@@ -36,7 +36,7 @@
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 26,
+      "pipelineAlignmentVersion": 32,
       "creator": "ohnepixel",
       "coverage": {
         "type": "partial-navigation",
@@ -51,92 +51,9 @@
           {
             "map": 4,
             "round": 1
-          },
-          {
-            "map": 4,
-            "round": 2
-          },
-          {
-            "map": 4,
-            "round": 3
-          },
-          {
-            "map": 4,
-            "round": 4
-          },
-          {
-            "map": 4,
-            "round": 5
-          },
-          {
-            "map": 4,
-            "round": 6
-          },
-          {
-            "map": 4,
-            "round": 7
-          },
-          {
-            "map": 4,
-            "round": 8
-          },
-          {
-            "map": 4,
-            "round": 9
-          },
-          {
-            "map": 4,
-            "round": 10
-          },
-          {
-            "map": 4,
-            "round": 11
-          },
-          {
-            "map": 4,
-            "round": 12
-          },
-          {
-            "map": 4,
-            "round": 13
-          },
-          {
-            "map": 4,
-            "round": 14
-          },
-          {
-            "map": 4,
-            "round": 15
-          },
-          {
-            "map": 4,
-            "round": 16
-          },
-          {
-            "map": 4,
-            "round": 17
-          },
-          {
-            "map": 4,
-            "round": 18
-          },
-          {
-            "map": 4,
-            "round": 19
-          },
-          {
-            "map": 4,
-            "round": 20
-          },
-          {
-            "map": 4,
-            "round": 21
-          },
-          {
-            "map": 4,
-            "round": 22
           }
-        ]
+        ],
+        "checksComplete": true
       },
       "chat": "/chats/twitch-2902970797.json",
       "chatSourceId": "2902970797",

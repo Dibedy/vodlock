@@ -4,6 +4,703 @@
   "videos": [
     {
       "provider": "youtube",
+      "sourceId": "QJMvaUZjaNw",
+      "catalogId": "youtube:f8e5f8a3452d5be8:QJMvaUZjaNw",
+      "title": "100T vs VIT",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Full match",
+      "index": "/indexes/youtube-QJMvaUZjaNw-f8e5f8a3452d5be8-v4-41e0e3c68b99.json",
+      "playedAt": "2026-10-17T09:18:59+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "4eab6aba-8e40-5de7-b128-4b849e7aeb28",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 4,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "twitch",
+      "sourceId": "2902970797",
+      "catalogId": "twitch:2902970797:f8e5f8a3452d5be8",
+      "title": "100T vs VIT",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Watch party",
+      "index": "/indexes/twitch-2902970797-f8e5f8a3452d5be8-v4-fe9f9eb630c3.json",
+      "playedAt": "2026-10-17T09:18:59+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "4eab6aba-8e40-5de7-b128-4b849e7aeb28",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 4,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "kind": "watch-party",
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 9,
+      "creator": "ohnepixel",
+      "coverage": {
+        "type": "partial-navigation",
+        "omittedOpeningRounds": 0,
+        "firstMap": 1,
+        "firstRound": 1,
+        "unavailableRounds": [
+          {
+            "map": 1,
+            "round": 13
+          },
+          {
+            "map": 1,
+            "round": 14
+          },
+          {
+            "map": 1,
+            "round": 15
+          },
+          {
+            "map": 1,
+            "round": 16
+          },
+          {
+            "map": 1,
+            "round": 17
+          },
+          {
+            "map": 1,
+            "round": 18
+          },
+          {
+            "map": 2,
+            "round": 1
+          },
+          {
+            "map": 2,
+            "round": 2
+          },
+          {
+            "map": 2,
+            "round": 3
+          },
+          {
+            "map": 2,
+            "round": 4
+          },
+          {
+            "map": 2,
+            "round": 5
+          },
+          {
+            "map": 2,
+            "round": 6
+          },
+          {
+            "map": 2,
+            "round": 7
+          },
+          {
+            "map": 2,
+            "round": 8
+          },
+          {
+            "map": 2,
+            "round": 9
+          },
+          {
+            "map": 2,
+            "round": 10
+          },
+          {
+            "map": 2,
+            "round": 11
+          },
+          {
+            "map": 2,
+            "round": 12
+          },
+          {
+            "map": 2,
+            "round": 13
+          },
+          {
+            "map": 2,
+            "round": 14
+          },
+          {
+            "map": 2,
+            "round": 15
+          },
+          {
+            "map": 2,
+            "round": 16
+          },
+          {
+            "map": 2,
+            "round": 17
+          },
+          {
+            "map": 2,
+            "round": 18
+          },
+          {
+            "map": 2,
+            "round": 19
+          },
+          {
+            "map": 2,
+            "round": 20
+          },
+          {
+            "map": 2,
+            "round": 21
+          },
+          {
+            "map": 2,
+            "round": 22
+          },
+          {
+            "map": 2,
+            "round": 23
+          },
+          {
+            "map": 3,
+            "round": 1
+          },
+          {
+            "map": 3,
+            "round": 2
+          },
+          {
+            "map": 3,
+            "round": 3
+          },
+          {
+            "map": 3,
+            "round": 4
+          },
+          {
+            "map": 3,
+            "round": 5
+          },
+          {
+            "map": 3,
+            "round": 6
+          },
+          {
+            "map": 3,
+            "round": 7
+          },
+          {
+            "map": 3,
+            "round": 8
+          },
+          {
+            "map": 3,
+            "round": 9
+          },
+          {
+            "map": 3,
+            "round": 10
+          },
+          {
+            "map": 3,
+            "round": 11
+          },
+          {
+            "map": 3,
+            "round": 12
+          },
+          {
+            "map": 3,
+            "round": 13
+          },
+          {
+            "map": 3,
+            "round": 14
+          },
+          {
+            "map": 3,
+            "round": 15
+          },
+          {
+            "map": 3,
+            "round": 16
+          },
+          {
+            "map": 3,
+            "round": 17
+          },
+          {
+            "map": 3,
+            "round": 18
+          },
+          {
+            "map": 3,
+            "round": 19
+          },
+          {
+            "map": 3,
+            "round": 20
+          },
+          {
+            "map": 3,
+            "round": 21
+          },
+          {
+            "map": 3,
+            "round": 22
+          },
+          {
+            "map": 3,
+            "round": 23
+          },
+          {
+            "map": 3,
+            "round": 24
+          },
+          {
+            "map": 4,
+            "round": 1
+          },
+          {
+            "map": 4,
+            "round": 2
+          },
+          {
+            "map": 4,
+            "round": 3
+          },
+          {
+            "map": 4,
+            "round": 4
+          },
+          {
+            "map": 4,
+            "round": 5
+          },
+          {
+            "map": 4,
+            "round": 6
+          },
+          {
+            "map": 4,
+            "round": 7
+          },
+          {
+            "map": 4,
+            "round": 8
+          },
+          {
+            "map": 4,
+            "round": 9
+          },
+          {
+            "map": 4,
+            "round": 10
+          },
+          {
+            "map": 4,
+            "round": 11
+          },
+          {
+            "map": 4,
+            "round": 12
+          },
+          {
+            "map": 4,
+            "round": 13
+          },
+          {
+            "map": 4,
+            "round": 14
+          },
+          {
+            "map": 4,
+            "round": 15
+          },
+          {
+            "map": 4,
+            "round": 16
+          },
+          {
+            "map": 4,
+            "round": 17
+          },
+          {
+            "map": 4,
+            "round": 18
+          },
+          {
+            "map": 4,
+            "round": 19
+          },
+          {
+            "map": 4,
+            "round": 20
+          },
+          {
+            "map": 4,
+            "round": 21
+          },
+          {
+            "map": 4,
+            "round": 22
+          }
+        ]
+      },
+      "chat": "/chats/twitch-2902970797.json",
+      "chatSourceId": "2902970797",
+      "chatChannelId": "43683025",
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "twitch",
+      "sourceId": "2903019305",
+      "catalogId": "twitch:2903019305:f8e5f8a3452d5be8",
+      "title": "100T vs VIT",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Watch party",
+      "index": "/indexes/twitch-2903019305-f8e5f8a3452d5be8-v4-763c1691705f.json",
+      "playedAt": "2026-10-17T09:18:59+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "4eab6aba-8e40-5de7-b128-4b849e7aeb28",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 4,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "kind": "watch-party",
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 2,
+      "creator": "FNS",
+      "coverage": {
+        "type": "partial-navigation",
+        "omittedOpeningRounds": 0,
+        "firstMap": 1,
+        "firstRound": 1,
+        "unavailableRounds": [
+          {
+            "map": 1,
+            "round": 9
+          },
+          {
+            "map": 1,
+            "round": 10
+          },
+          {
+            "map": 1,
+            "round": 11
+          },
+          {
+            "map": 1,
+            "round": 12
+          },
+          {
+            "map": 1,
+            "round": 13
+          },
+          {
+            "map": 1,
+            "round": 14
+          },
+          {
+            "map": 1,
+            "round": 15
+          },
+          {
+            "map": 1,
+            "round": 16
+          },
+          {
+            "map": 1,
+            "round": 17
+          },
+          {
+            "map": 1,
+            "round": 18
+          },
+          {
+            "map": 2,
+            "round": 1
+          },
+          {
+            "map": 2,
+            "round": 2
+          },
+          {
+            "map": 2,
+            "round": 3
+          },
+          {
+            "map": 2,
+            "round": 4
+          },
+          {
+            "map": 2,
+            "round": 5
+          },
+          {
+            "map": 2,
+            "round": 6
+          },
+          {
+            "map": 2,
+            "round": 7
+          },
+          {
+            "map": 2,
+            "round": 8
+          },
+          {
+            "map": 2,
+            "round": 9
+          },
+          {
+            "map": 2,
+            "round": 10
+          },
+          {
+            "map": 2,
+            "round": 11
+          },
+          {
+            "map": 2,
+            "round": 12
+          },
+          {
+            "map": 2,
+            "round": 13
+          },
+          {
+            "map": 2,
+            "round": 14
+          },
+          {
+            "map": 2,
+            "round": 15
+          },
+          {
+            "map": 2,
+            "round": 16
+          },
+          {
+            "map": 2,
+            "round": 17
+          },
+          {
+            "map": 2,
+            "round": 18
+          },
+          {
+            "map": 2,
+            "round": 19
+          },
+          {
+            "map": 2,
+            "round": 20
+          },
+          {
+            "map": 2,
+            "round": 21
+          },
+          {
+            "map": 2,
+            "round": 22
+          },
+          {
+            "map": 2,
+            "round": 23
+          },
+          {
+            "map": 3,
+            "round": 1
+          },
+          {
+            "map": 3,
+            "round": 2
+          },
+          {
+            "map": 3,
+            "round": 3
+          },
+          {
+            "map": 3,
+            "round": 4
+          },
+          {
+            "map": 3,
+            "round": 5
+          },
+          {
+            "map": 3,
+            "round": 6
+          },
+          {
+            "map": 3,
+            "round": 7
+          },
+          {
+            "map": 3,
+            "round": 8
+          },
+          {
+            "map": 3,
+            "round": 9
+          },
+          {
+            "map": 3,
+            "round": 10
+          },
+          {
+            "map": 3,
+            "round": 11
+          },
+          {
+            "map": 3,
+            "round": 12
+          },
+          {
+            "map": 3,
+            "round": 13
+          },
+          {
+            "map": 3,
+            "round": 14
+          },
+          {
+            "map": 3,
+            "round": 15
+          },
+          {
+            "map": 3,
+            "round": 16
+          },
+          {
+            "map": 3,
+            "round": 17
+          },
+          {
+            "map": 3,
+            "round": 18
+          },
+          {
+            "map": 3,
+            "round": 19
+          },
+          {
+            "map": 3,
+            "round": 20
+          },
+          {
+            "map": 3,
+            "round": 21
+          },
+          {
+            "map": 3,
+            "round": 22
+          },
+          {
+            "map": 3,
+            "round": 23
+          },
+          {
+            "map": 3,
+            "round": 24
+          },
+          {
+            "map": 4,
+            "round": 1
+          },
+          {
+            "map": 4,
+            "round": 2
+          },
+          {
+            "map": 4,
+            "round": 3
+          },
+          {
+            "map": 4,
+            "round": 4
+          },
+          {
+            "map": 4,
+            "round": 5
+          },
+          {
+            "map": 4,
+            "round": 6
+          },
+          {
+            "map": 4,
+            "round": 7
+          },
+          {
+            "map": 4,
+            "round": 8
+          },
+          {
+            "map": 4,
+            "round": 9
+          },
+          {
+            "map": 4,
+            "round": 10
+          },
+          {
+            "map": 4,
+            "round": 11
+          },
+          {
+            "map": 4,
+            "round": 12
+          },
+          {
+            "map": 4,
+            "round": 13
+          },
+          {
+            "map": 4,
+            "round": 14
+          },
+          {
+            "map": 4,
+            "round": 15
+          },
+          {
+            "map": 4,
+            "round": 16
+          },
+          {
+            "map": 4,
+            "round": 17
+          },
+          {
+            "map": 4,
+            "round": 18
+          },
+          {
+            "map": 4,
+            "round": 19
+          },
+          {
+            "map": 4,
+            "round": 20
+          },
+          {
+            "map": 4,
+            "round": 21
+          },
+          {
+            "map": 4,
+            "round": 22
+          }
+        ]
+      },
+      "chat": "/chats/twitch-2903019305.json",
+      "chatSourceId": "2903019305",
+      "chatChannelId": "66418614",
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
       "sourceId": "QEDpGS4GXBg",
       "catalogId": "youtube:53a0364234f15f96:QEDpGS4GXBg",
       "title": "G2 vs 100T",
@@ -1228,505 +1925,15 @@
     },
     {
       "expectedMatchId": "4eab6aba-8e40-5de7-b128-4b849e7aeb28",
-      "catalogId": "twitch:2903019305:f8e5f8a3452d5be8",
-      "provider": "twitch",
-      "sourceId": "2903019305",
-      "kind": "watch-party",
-      "pipelineGeneration": 1,
-      "pipelineVersion": 3,
-      "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 0,
-      "reason": "waiting_alignment",
-      "canonicalPipeline": true
-    },
-    {
-      "expectedMatchId": "4eab6aba-8e40-5de7-b128-4b849e7aeb28",
       "catalogId": "youtube:TtS9cwu3wcI:f8e5f8a3452d5be8",
       "provider": "youtube",
       "sourceId": "TtS9cwu3wcI",
       "kind": "watch-party",
       "pipelineGeneration": 1,
-      "pipelineVersion": 3,
+      "pipelineVersion": 4,
       "pipelineSourceRevision": 1,
       "pipelineAlignmentVersion": 0,
       "reason": "waiting_alignment",
-      "canonicalPipeline": true
-    },
-    {
-      "provider": "youtube",
-      "sourceId": "QJMvaUZjaNw",
-      "catalogId": "youtube:f8e5f8a3452d5be8:QJMvaUZjaNw",
-      "title": "100T vs VIT",
-      "event": "Champions Shanghai | Playoffs",
-      "label": "Full match",
-      "index": "/indexes/youtube-QJMvaUZjaNw-f8e5f8a3452d5be8-v3-e684c8fe49ce.json",
-      "playedAt": "2026-10-17T08:05:26+02:00",
-      "pipelineState": "final",
-      "expectedMatchId": "4eab6aba-8e40-5de7-b128-4b849e7aeb28",
-      "pipelineGeneration": 1,
-      "pipelineVersion": 3,
-      "tournament": "Champions Shanghai",
-      "tournamentKey": "champions-shanghai",
-      "canonicalPipeline": true
-    },
-    {
-      "provider": "twitch",
-      "sourceId": "2902970797",
-      "catalogId": "twitch:2902970797:f8e5f8a3452d5be8",
-      "title": "100T vs VIT",
-      "event": "Champions Shanghai | Playoffs",
-      "label": "Watch party",
-      "index": "/indexes/twitch-2902970797-f8e5f8a3452d5be8-v3-92655469a2cc.json",
-      "playedAt": "2026-10-17T08:05:26+02:00",
-      "pipelineState": "final",
-      "expectedMatchId": "4eab6aba-8e40-5de7-b128-4b849e7aeb28",
-      "pipelineGeneration": 1,
-      "pipelineVersion": 3,
-      "tournament": "Champions Shanghai",
-      "tournamentKey": "champions-shanghai",
-      "kind": "watch-party",
-      "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 1,
-      "creator": "ohnepixel",
-      "coverage": {
-        "type": "partial-navigation",
-        "omittedOpeningRounds": 0,
-        "firstMap": 1,
-        "firstRound": 1,
-        "unavailableRounds": [
-          {
-            "map": 1,
-            "round": 5
-          },
-          {
-            "map": 1,
-            "round": 6
-          },
-          {
-            "map": 1,
-            "round": 7
-          },
-          {
-            "map": 1,
-            "round": 8
-          },
-          {
-            "map": 1,
-            "round": 9
-          },
-          {
-            "map": 1,
-            "round": 10
-          },
-          {
-            "map": 1,
-            "round": 11
-          },
-          {
-            "map": 1,
-            "round": 12
-          },
-          {
-            "map": 1,
-            "round": 13
-          },
-          {
-            "map": 1,
-            "round": 14
-          },
-          {
-            "map": 1,
-            "round": 15
-          },
-          {
-            "map": 1,
-            "round": 16
-          },
-          {
-            "map": 1,
-            "round": 17
-          },
-          {
-            "map": 1,
-            "round": 18
-          },
-          {
-            "map": 1,
-            "round": 19
-          },
-          {
-            "map": 1,
-            "round": 20
-          },
-          {
-            "map": 1,
-            "round": 21
-          },
-          {
-            "map": 1,
-            "round": 22
-          },
-          {
-            "map": 1,
-            "round": 23
-          },
-          {
-            "map": 1,
-            "round": 24
-          },
-          {
-            "map": 2,
-            "round": 1
-          },
-          {
-            "map": 2,
-            "round": 2
-          },
-          {
-            "map": 2,
-            "round": 3
-          },
-          {
-            "map": 2,
-            "round": 4
-          },
-          {
-            "map": 2,
-            "round": 5
-          },
-          {
-            "map": 2,
-            "round": 6
-          },
-          {
-            "map": 2,
-            "round": 7
-          },
-          {
-            "map": 2,
-            "round": 8
-          },
-          {
-            "map": 2,
-            "round": 9
-          },
-          {
-            "map": 2,
-            "round": 10
-          },
-          {
-            "map": 2,
-            "round": 11
-          },
-          {
-            "map": 2,
-            "round": 12
-          },
-          {
-            "map": 2,
-            "round": 13
-          },
-          {
-            "map": 2,
-            "round": 14
-          },
-          {
-            "map": 2,
-            "round": 15
-          },
-          {
-            "map": 2,
-            "round": 16
-          },
-          {
-            "map": 2,
-            "round": 17
-          },
-          {
-            "map": 2,
-            "round": 18
-          },
-          {
-            "map": 3,
-            "round": 1
-          },
-          {
-            "map": 3,
-            "round": 2
-          },
-          {
-            "map": 3,
-            "round": 3
-          },
-          {
-            "map": 3,
-            "round": 4
-          },
-          {
-            "map": 3,
-            "round": 5
-          },
-          {
-            "map": 3,
-            "round": 6
-          },
-          {
-            "map": 3,
-            "round": 7
-          },
-          {
-            "map": 3,
-            "round": 8
-          },
-          {
-            "map": 3,
-            "round": 9
-          },
-          {
-            "map": 3,
-            "round": 10
-          },
-          {
-            "map": 3,
-            "round": 11
-          },
-          {
-            "map": 3,
-            "round": 12
-          },
-          {
-            "map": 3,
-            "round": 13
-          },
-          {
-            "map": 3,
-            "round": 14
-          },
-          {
-            "map": 3,
-            "round": 15
-          },
-          {
-            "map": 3,
-            "round": 16
-          },
-          {
-            "map": 3,
-            "round": 17
-          },
-          {
-            "map": 3,
-            "round": 18
-          },
-          {
-            "map": 3,
-            "round": 19
-          },
-          {
-            "map": 3,
-            "round": 20
-          },
-          {
-            "map": 3,
-            "round": 21
-          },
-          {
-            "map": 3,
-            "round": 22
-          },
-          {
-            "map": 3,
-            "round": 23
-          },
-          {
-            "map": 4,
-            "round": 1
-          },
-          {
-            "map": 4,
-            "round": 2
-          },
-          {
-            "map": 4,
-            "round": 3
-          },
-          {
-            "map": 4,
-            "round": 4
-          },
-          {
-            "map": 4,
-            "round": 5
-          },
-          {
-            "map": 4,
-            "round": 6
-          },
-          {
-            "map": 4,
-            "round": 7
-          },
-          {
-            "map": 4,
-            "round": 8
-          },
-          {
-            "map": 4,
-            "round": 9
-          },
-          {
-            "map": 4,
-            "round": 10
-          },
-          {
-            "map": 4,
-            "round": 11
-          },
-          {
-            "map": 4,
-            "round": 12
-          },
-          {
-            "map": 4,
-            "round": 13
-          },
-          {
-            "map": 4,
-            "round": 14
-          },
-          {
-            "map": 4,
-            "round": 15
-          },
-          {
-            "map": 4,
-            "round": 16
-          },
-          {
-            "map": 4,
-            "round": 17
-          },
-          {
-            "map": 4,
-            "round": 18
-          },
-          {
-            "map": 4,
-            "round": 19
-          },
-          {
-            "map": 4,
-            "round": 20
-          },
-          {
-            "map": 4,
-            "round": 21
-          },
-          {
-            "map": 4,
-            "round": 22
-          },
-          {
-            "map": 4,
-            "round": 23
-          },
-          {
-            "map": 4,
-            "round": 24
-          },
-          {
-            "map": 5,
-            "round": 1
-          },
-          {
-            "map": 5,
-            "round": 2
-          },
-          {
-            "map": 5,
-            "round": 3
-          },
-          {
-            "map": 5,
-            "round": 4
-          },
-          {
-            "map": 5,
-            "round": 5
-          },
-          {
-            "map": 5,
-            "round": 6
-          },
-          {
-            "map": 5,
-            "round": 7
-          },
-          {
-            "map": 5,
-            "round": 8
-          },
-          {
-            "map": 5,
-            "round": 9
-          },
-          {
-            "map": 5,
-            "round": 10
-          },
-          {
-            "map": 5,
-            "round": 11
-          },
-          {
-            "map": 5,
-            "round": 12
-          },
-          {
-            "map": 5,
-            "round": 13
-          },
-          {
-            "map": 5,
-            "round": 14
-          },
-          {
-            "map": 5,
-            "round": 15
-          },
-          {
-            "map": 5,
-            "round": 16
-          },
-          {
-            "map": 5,
-            "round": 17
-          },
-          {
-            "map": 5,
-            "round": 18
-          },
-          {
-            "map": 5,
-            "round": 19
-          },
-          {
-            "map": 5,
-            "round": 20
-          },
-          {
-            "map": 5,
-            "round": 21
-          },
-          {
-            "map": 5,
-            "round": 22
-          }
-        ]
-      },
-      "chat": "/chats/twitch-2902970797.json",
-      "chatSourceId": "2902970797",
-      "chatChannelId": "43683025",
       "canonicalPipeline": true
     }
   ]

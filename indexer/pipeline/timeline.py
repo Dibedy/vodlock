@@ -347,7 +347,7 @@ def segment_matches(rounds, expected):
                 if count >= 2:
                     teams = pair
         changed_teams = bool(identity and teams and teams != identity)
-        if reset and changed_teams:
+        if reset and teams and (identity is None or changed_teams):
             segments.append((current, identity))
             current = []
             identity = None

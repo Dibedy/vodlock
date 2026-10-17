@@ -2486,6 +2486,32 @@ class DatabasePipelineTests(unittest.TestCase):
         processing.recover(job)
         self.assertEqual(processing.recover_official.call_args.args[3:5], (100, 200))
 
+    def test_reviewed_archive_start_excludes_stored_showmatch_before_renumbering(self):
+        self.store.execute("UPDATE pipeline.broadcasts SET state='archive_ready',archive_revision=1,reconciled_revision=1 WHERE id=%s", (self.broadcast,))
+        config = Config(DATABASE, settings={'archive_start_seconds': {'abcdefghijk': 5000}})
+        processing = Processing(self.store, config, self.storage)
+        job = self.job('segment')
+        source = self.entities()[1]
+        mapping = {'timelineScale': 1, 'anchors': 20, 'maximumResidual': 0, 'segments': [{
+            'sourceStart': 0, 'sourceEnd': 10000, 'canonicalStart': 0, 'canonicalEnd': 10000, 'offset': 0}]}
+        processing.save_alignment(job, source, source, mapping, 'reconciliation', 1)
+        candidates = [{'id': identifier(), 'timeline': timeline, 'round_number': value['round'],
+            'confidence': .99, 'scores': value['scores'], 'evidence': {'start': value['start'],
+                'broadcast_map': value['map'], 'teams': value.get('teams')}}
+            for timeline, values in [('live', series(teams=())), ('archive', series(base=8000, first_map=2))]
+            for value in values]
+        with patch.object(processing, 'redetect_canonical', return_value=candidates):
+            processing.segment(job)
+            segment = self.store.one('SELECT * FROM pipeline.segments WHERE expected_match_id=%s', (self.match,))
+            self.assertEqual(segment['start_time'], 8000)
+            self.assertEqual(segment['rounds'][0]['map'], 1)
+            self.assertEqual(len(segment['rounds']), len(series()))
+            self.assertEqual(segment['findings'], [])
+            processing.segment(job)
+            current = self.store.one('SELECT * FROM pipeline.segments WHERE expected_match_id=%s', (self.match,))
+            self.assertEqual(current['revision'], segment['revision'])
+            self.assertEqual(current['rounds'], segment['rounds'])
+
     def test_official_recovery_resumes_at_checkpoint_across_yielded_attempts(self):
         from detector import Observation
         import numpy as np

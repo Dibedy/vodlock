@@ -827,7 +827,7 @@
     state.entry = entry;
     state.index = index;
     state.autoSkippedRound = null;
-    state.resumeTime = Number.isFinite(resumeTime) && resumeTime >= 0 ? resumeTime : null;
+    state.resumeTime = Number.isFinite(resumeTime) && resumeTime >= Math.max(0, index.rounds[0].start - index.leadSeconds) ? resumeTime : null;
     destroyPlayer();
     state.started = false;
     resetPlayerHost();

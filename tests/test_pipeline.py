@@ -1422,6 +1422,19 @@ if has_bgutil:
         self.assertEqual(len(segments), 1)
         self.assertEqual(segments[0]["findings"], [])
 
+    def test_unidentified_opening_map_cannot_inherit_a_later_match_identity(self):
+        opening = series(teams=())
+        competitive = series(base=8000, first_map=2)
+        for item in competitive[:3]:
+            item["teams"] = None
+        segments = segment_matches(opening + competitive, [expected()])
+        self.assertEqual(len(segments), 2)
+        self.assertIsNone(segments[0]["match"])
+        self.assertEqual(segments[1]["match"]["id"], expected()["id"])
+        self.assertEqual(segments[1]["rounds"][0]["start"], 8000)
+        self.assertEqual(segments[1]["rounds"][0]["map"], 1)
+        self.assertTrue(any(value["code"] == "schedule_order_disagreement" for value in segments[1]["findings"]))
+
     def test_delayed_team_readings_require_consistent_repeated_identity(self):
         for labels in ([None, ["C", "D"]], [None, ["C", "D"], ["C", "D"], ["A", "B"]]):
             with self.subTest(labels=labels):

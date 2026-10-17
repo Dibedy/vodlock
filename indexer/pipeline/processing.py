@@ -258,6 +258,8 @@ class Processing:
                     continue
             elif candidate["timeline"] == "archive" and not archive_alignment:
                 continue
+            if archive_alignment and start < self.config.archive_start_for(broadcast):
+                continue
             rounds.append(
                 {
                     "map": evidence["broadcast_map"],

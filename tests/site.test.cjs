@@ -193,6 +193,17 @@ test('YouTube startup fails closed when the indexed position cannot be reached',
   assert.equal(startup.calls.includes('unmute'), false);
 });
 
+test('saved positions before a corrected match opening cannot resume excluded footage', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const assignment = app.match(/state\.resumeTime = Number\.isFinite\(resumeTime\)[^\n]+/)[0];
+  for (const [resumeTime, expected] of [[2000, null], [5994.99, null], [5995, 5995], [6123.25, 6123.25],
+                                      [null, null], [-1, null], [Infinity, null]]) {
+    const sandbox = {state: {}, index: {rounds: [{start: 6000}], leadSeconds: 5}, resumeTime};
+    vm.runInNewContext(assignment, sandbox);
+    assert.equal(sandbox.state.resumeTime, expected);
+  }
+});
+
 test('YouTube startup preserves fractional resume positions and existing mute settings', () => {
   const startup = playerStartup();
   startup.state.resumeTime = 321.25;

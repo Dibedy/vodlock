@@ -155,11 +155,24 @@ class Deployment:
             return "ready"
         for key, entry in new.items():
             prior = old[key]
+            index, prior_index = after[entry["index"]], before[prior["index"]]
+            coverage, prior_coverage = entry.get("coverage", {}), prior.get("coverage", {})
+            partial_progress = False
+            if coverage.get("type") == prior_coverage.get("type") == "partial-navigation":
+                opening = {"firstMap", "firstRound", "omittedOpeningRounds", "checksComplete"}
+                prior_rounds = {(value['map'], value['round']): value for value in prior_index['rounds']}
+                rounds = {(value['map'], value['round']): value for value in index['rounds']}
+                missing = {(value['map'], value['round']) for value in coverage['unavailableRounds']}
+                prior_missing = {(value['map'], value['round']) for value in prior_coverage['unavailableRounds']}
+                partial_progress = (all(coverage.get(name) == prior_coverage.get(name) for name in opening)
+                                    and missing <= prior_missing and all(rounds.get(identity) == value for identity, value in prior_rounds.items()))
             ignored = {"index", "chat", "chatSourceId", "chatChannelId", "pipelineAlignmentVersion"}
+            if partial_progress:
+                ignored.add('coverage')
             if {name: value for name, value in entry.items() if name not in ignored} != {name: value for name, value in prior.items() if name not in ignored}:
                 return "ready"
-            index, prior_index = after[entry["index"]], before[prior["index"]]
-            if {name: value for name, value in index.items() if name not in {"alignment", "alignmentVersion", "chatAlignment"}} != {name: value for name, value in prior_index.items() if name not in {"alignment", "alignmentVersion", "chatAlignment"}}:
+            ignored_index = {"alignment", "alignmentVersion", "chatAlignment"} | ({'rounds', 'coverage'} if partial_progress else set())
+            if {name: value for name, value in index.items() if name not in ignored_index} != {name: value for name, value in prior_index.items() if name not in ignored_index}:
                 return "ready"
             usable = chat_ready(entry, after)
             if usable and (not chat_ready(prior, before) or entry.get("chatSourceId") != prior.get("chatSourceId")):

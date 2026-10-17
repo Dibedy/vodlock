@@ -1007,6 +1007,22 @@ class PipelineTests(unittest.TestCase):
         after[current_entry["index"]] = index
         self.assertEqual(deploy.publication_kind(previous, current, before, after, {"stream"}), "incremental")
 
+    def test_partial_navigation_growth_batches_but_completion_and_withdrawal_publish(self):
+        deploy = Deployment(Mock(), Config('test'))
+        coverage = {'type': 'partial-navigation', 'firstMap': 1, 'firstRound': 1, 'omittedOpeningRounds': 0,
+                    'unavailableRounds': [{'map': 1, 'round': 2}, {'map': 1, 'round': 3}]}
+        old = {'canonicalPipeline': True, 'catalogId': 'party', 'index': '/old.json', 'coverage': coverage}
+        new = {**old, 'index': '/new.json', 'coverage': {**coverage, 'unavailableRounds': [{'map': 1, 'round': 3}]}}
+        first = {'map': 1, 'round': 1, 'start': 100}
+        before = {'/old.json': {'rounds': [first], 'coverage': coverage}}
+        after = {'/new.json': {'rounds': [first, {'map': 1, 'round': 2, 'start': 200}], 'coverage': new['coverage']}}
+        self.assertEqual(deploy.publication_kind({'videos': [old]}, {'videos': [new]}, before, after, set()), 'incremental')
+        new['coverage'] = {**new['coverage'], 'checksComplete': True}
+        self.assertEqual(deploy.publication_kind({'videos': [old]}, {'videos': [new]}, before, after, set()), 'ready')
+        new['coverage'] = {**coverage}
+        after['/new.json']['rounds'] = []
+        self.assertEqual(deploy.publication_kind({'videos': [old]}, {'videos': [new]}, before, after, set()), 'ready')
+
     def test_deployment_interval_configuration_rejects_excessive_publication_frequency(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory) / "pipeline.json"

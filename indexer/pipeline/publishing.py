@@ -65,7 +65,9 @@ def watchparty_contract(canonical, secondary, match, index, mapping, alignment_v
         "alignmentVersion": alignment_version, "derivedFromCanonical": True, "rounds": rounds,
         **({"coverage": {"type": "partial-navigation" if unavailable else "late-start", "omittedOpeningRounds": omitted,
                          "firstMap": rounds[0]["map"], "firstRound": rounds[0]["round"],
-                         **({"unavailableRounds": unavailable} if unavailable else {})}} if omitted or unavailable else {}),
+                         **({"unavailableRounds": unavailable,
+                             **({"checksComplete": True} if all(f"{match['id']}:{value['map']}:{value['round']}" in mapping.get('roundChecks', {})
+                                                                for value in index['rounds']) else {})} if unavailable else {})}} if omitted or unavailable else {}),
         "canonical": {"sourceId": canonical["external_id"], "matchIndexId": str(index["id"]),
                       "archiveRevision": index["archive_revision"], "rounds": canonical_contract(canonical, match, index)["rounds"]},
         "alignment": {"source": "youtube:" + canonical["external_id"], "timelineScale": scale, "strictCoverage": True,

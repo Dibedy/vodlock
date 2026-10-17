@@ -136,6 +136,8 @@ def release_to_site(release, site):
                         raise ValueError("Watch-party release has invalid unavailable rounds")
                     canonical_rounds = [value for value in canonical_rounds if (value["map"], value["round"]) not in identities]
                     expected_coverage["unavailableRounds"] = missing
+                    if coverage.get("checksComplete") is True:
+                        expected_coverage["checksComplete"] = True
                 if coverage != expected_coverage:
                     raise ValueError("Watch-party release has invalid partial coverage")
             if entry.get("coverage") != coverage:

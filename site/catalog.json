@@ -26,7 +26,7 @@
       "title": "G2 vs 100T",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/youtube-IBMdpoG-A4s-53a0364234f15f96-v43-13269adcdf31.json",
+      "index": "/indexes/youtube-IBMdpoG-A4s-53a0364234f15f96-v43-8b4a6f607a8c.json",
       "playedAt": "2026-10-16T12:10:21+02:00",
       "pipelineState": "final",
       "expectedMatchId": "780d36e2-f674-5b90-bafd-8b66055c3494",
@@ -36,7 +36,7 @@
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 14,
+      "pipelineAlignmentVersion": 15,
       "creator": "ohnepixel",
       "coverage": {
         "type": "partial-navigation",
@@ -44,22 +44,6 @@
         "firstMap": 1,
         "firstRound": 1,
         "unavailableRounds": [
-          {
-            "map": 2,
-            "round": 10
-          },
-          {
-            "map": 2,
-            "round": 11
-          },
-          {
-            "map": 2,
-            "round": 12
-          },
-          {
-            "map": 2,
-            "round": 13
-          },
           {
             "map": 2,
             "round": 14
@@ -208,7 +192,7 @@
       "title": "LOUD vs VIT",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/youtube-E_OBNfj8Cf0-07ebb5a187b553ea-v41-c8a2761f43c0.json",
+      "index": "/indexes/youtube-E_OBNfj8Cf0-07ebb5a187b553ea-v41-c9476631dc41.json",
       "playedAt": "2026-10-16T08:08:45+02:00",
       "pipelineState": "final",
       "expectedMatchId": "7866895f-41d7-5ef2-976e-9badad29ab5d",
@@ -218,7 +202,7 @@
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 16,
+      "pipelineAlignmentVersion": 17,
       "creator": "FNS",
       "canonicalPipeline": true
     },
@@ -229,7 +213,7 @@
       "title": "LOUD vs VIT",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/youtube-IBMdpoG-A4s-07ebb5a187b553ea-v41-789508990941.json",
+      "index": "/indexes/youtube-IBMdpoG-A4s-07ebb5a187b553ea-v41-08d9f92e083a.json",
       "playedAt": "2026-10-16T08:08:45+02:00",
       "pipelineState": "final",
       "expectedMatchId": "7866895f-41d7-5ef2-976e-9badad29ab5d",
@@ -239,7 +223,7 @@
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 14,
+      "pipelineAlignmentVersion": 15,
       "creator": "ohnepixel",
       "coverage": {
         "type": "late-start",
@@ -1307,7 +1291,7 @@
       "pipelineGeneration": 1,
       "pipelineVersion": 43,
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 16,
+      "pipelineAlignmentVersion": 17,
       "reason": "waiting_alignment",
       "canonicalPipeline": true
     }

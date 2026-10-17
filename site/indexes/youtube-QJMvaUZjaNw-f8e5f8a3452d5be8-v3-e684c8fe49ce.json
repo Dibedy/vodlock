@@ -1,0 +1,567 @@
+{
+  "schemaVersion": 2,
+  "provider": "youtube",
+  "sourceId": "QJMvaUZjaNw",
+  "label": "100T vs VIT",
+  "leadSeconds": 5,
+  "detector": "canonical-clock-v5",
+  "pipelineState": "final",
+  "pipelineVersion": 3,
+  "rounds": [
+    {
+      "map": 1,
+      "round": 1,
+      "start": 2074.0
+    },
+    {
+      "map": 1,
+      "round": 2,
+      "start": 2162.0
+    },
+    {
+      "map": 1,
+      "round": 3,
+      "start": 2224.0
+    },
+    {
+      "map": 1,
+      "round": 4,
+      "start": 2408.0
+    },
+    {
+      "map": 1,
+      "round": 5,
+      "start": 2512.0
+    },
+    {
+      "map": 1,
+      "round": 6,
+      "start": 2569.0
+    },
+    {
+      "map": 1,
+      "round": 7,
+      "start": 2676.0
+    },
+    {
+      "map": 1,
+      "round": 8,
+      "start": 2893.0
+    },
+    {
+      "map": 1,
+      "round": 9,
+      "start": 2978.0
+    },
+    {
+      "map": 1,
+      "round": 10,
+      "start": 3112.0
+    },
+    {
+      "map": 1,
+      "round": 11,
+      "start": 3200.0
+    },
+    {
+      "map": 1,
+      "round": 12,
+      "start": 3290.0
+    },
+    {
+      "map": 1,
+      "round": 13,
+      "start": 3387.0
+    },
+    {
+      "map": 1,
+      "round": 14,
+      "start": 3524.0
+    },
+    {
+      "map": 1,
+      "round": 15,
+      "start": 3618.0
+    },
+    {
+      "map": 1,
+      "round": 16,
+      "start": 3681.0
+    },
+    {
+      "map": 1,
+      "round": 17,
+      "start": 3782.0
+    },
+    {
+      "map": 1,
+      "round": 18,
+      "start": 3868.0
+    },
+    {
+      "map": 1,
+      "round": 19,
+      "start": 3962.0
+    },
+    {
+      "map": 1,
+      "round": 20,
+      "start": 4037.0
+    },
+    {
+      "map": 1,
+      "round": 21,
+      "start": 4108.0
+    },
+    {
+      "map": 1,
+      "round": 22,
+      "start": 4222.0
+    },
+    {
+      "map": 1,
+      "round": 23,
+      "start": 4314.0
+    },
+    {
+      "map": 1,
+      "round": 24,
+      "start": 4389.0
+    },
+    {
+      "map": 2,
+      "round": 1,
+      "start": 6487.0
+    },
+    {
+      "map": 2,
+      "round": 2,
+      "start": 6556.0
+    },
+    {
+      "map": 2,
+      "round": 3,
+      "start": 6618.0
+    },
+    {
+      "map": 2,
+      "round": 4,
+      "start": 6792.0
+    },
+    {
+      "map": 2,
+      "round": 5,
+      "start": 6856.0
+    },
+    {
+      "map": 2,
+      "round": 6,
+      "start": 7085.0
+    },
+    {
+      "map": 2,
+      "round": 7,
+      "start": 7242.0
+    },
+    {
+      "map": 2,
+      "round": 8,
+      "start": 7436.0
+    },
+    {
+      "map": 2,
+      "round": 9,
+      "start": 7547.0
+    },
+    {
+      "map": 2,
+      "round": 10,
+      "start": 7684.0
+    },
+    {
+      "map": 2,
+      "round": 11,
+      "start": 7821.0
+    },
+    {
+      "map": 2,
+      "round": 12,
+      "start": 7946.0
+    },
+    {
+      "map": 2,
+      "round": 13,
+      "start": 8197.0
+    },
+    {
+      "map": 2,
+      "round": 14,
+      "start": 8337.0
+    },
+    {
+      "map": 2,
+      "round": 15,
+      "start": 8432.0
+    },
+    {
+      "map": 2,
+      "round": 16,
+      "start": 8600.0
+    },
+    {
+      "map": 2,
+      "round": 17,
+      "start": 8704.0
+    },
+    {
+      "map": 2,
+      "round": 18,
+      "start": 8804.0
+    },
+    {
+      "map": 3,
+      "round": 1,
+      "start": 9743.0
+    },
+    {
+      "map": 3,
+      "round": 2,
+      "start": 9872.0
+    },
+    {
+      "map": 3,
+      "round": 3,
+      "start": 10002.0
+    },
+    {
+      "map": 3,
+      "round": 4,
+      "start": 10088.0
+    },
+    {
+      "map": 3,
+      "round": 5,
+      "start": 10191.0
+    },
+    {
+      "map": 3,
+      "round": 6,
+      "start": 10340.0
+    },
+    {
+      "map": 3,
+      "round": 7,
+      "start": 10443.0
+    },
+    {
+      "map": 3,
+      "round": 8,
+      "start": 10572.0
+    },
+    {
+      "map": 3,
+      "round": 9,
+      "start": 10729.0
+    },
+    {
+      "map": 3,
+      "round": 10,
+      "start": 10805.0
+    },
+    {
+      "map": 3,
+      "round": 11,
+      "start": 10948.0
+    },
+    {
+      "map": 3,
+      "round": 12,
+      "start": 11093.0
+    },
+    {
+      "map": 3,
+      "round": 13,
+      "start": 11330.0
+    },
+    {
+      "map": 3,
+      "round": 14,
+      "start": 11442.0
+    },
+    {
+      "map": 3,
+      "round": 15,
+      "start": 11557.0
+    },
+    {
+      "map": 3,
+      "round": 16,
+      "start": 11686.0
+    },
+    {
+      "map": 3,
+      "round": 17,
+      "start": 11817.0
+    },
+    {
+      "map": 3,
+      "round": 18,
+      "start": 11997.0
+    },
+    {
+      "map": 3,
+      "round": 19,
+      "start": 12121.0
+    },
+    {
+      "map": 3,
+      "round": 20,
+      "start": 12206.0
+    },
+    {
+      "map": 3,
+      "round": 21,
+      "start": 12394.0
+    },
+    {
+      "map": 3,
+      "round": 22,
+      "start": 12562.0
+    },
+    {
+      "map": 3,
+      "round": 23,
+      "start": 12627.0
+    },
+    {
+      "map": 4,
+      "round": 1,
+      "start": 13451.0
+    },
+    {
+      "map": 4,
+      "round": 2,
+      "start": 13569.0
+    },
+    {
+      "map": 4,
+      "round": 3,
+      "start": 13716.0
+    },
+    {
+      "map": 4,
+      "round": 4,
+      "start": 13808.0
+    },
+    {
+      "map": 4,
+      "round": 5,
+      "start": 13937.0
+    },
+    {
+      "map": 4,
+      "round": 6,
+      "start": 14069.0
+    },
+    {
+      "map": 4,
+      "round": 7,
+      "start": 14316.0
+    },
+    {
+      "map": 4,
+      "round": 8,
+      "start": 14423.0
+    },
+    {
+      "map": 4,
+      "round": 9,
+      "start": 14643.0
+    },
+    {
+      "map": 4,
+      "round": 10,
+      "start": 14798.0
+    },
+    {
+      "map": 4,
+      "round": 11,
+      "start": 14946.0
+    },
+    {
+      "map": 4,
+      "round": 12,
+      "start": 15051.0
+    },
+    {
+      "map": 4,
+      "round": 13,
+      "start": 15316.0
+    },
+    {
+      "map": 4,
+      "round": 14,
+      "start": 15392.0
+    },
+    {
+      "map": 4,
+      "round": 15,
+      "start": 15492.0
+    },
+    {
+      "map": 4,
+      "round": 16,
+      "start": 15639.0
+    },
+    {
+      "map": 4,
+      "round": 17,
+      "start": 15765.0
+    },
+    {
+      "map": 4,
+      "round": 18,
+      "start": 15869.0
+    },
+    {
+      "map": 4,
+      "round": 19,
+      "start": 15972.0
+    },
+    {
+      "map": 4,
+      "round": 20,
+      "start": 16162.0
+    },
+    {
+      "map": 4,
+      "round": 21,
+      "start": 16256.0
+    },
+    {
+      "map": 4,
+      "round": 22,
+      "start": 16403.0
+    },
+    {
+      "map": 4,
+      "round": 23,
+      "start": 16570.0
+    },
+    {
+      "map": 4,
+      "round": 24,
+      "start": 16701.0
+    },
+    {
+      "map": 5,
+      "round": 1,
+      "start": 17573.0
+    },
+    {
+      "map": 5,
+      "round": 2,
+      "start": 17677.0
+    },
+    {
+      "map": 5,
+      "round": 3,
+      "start": 17771.0
+    },
+    {
+      "map": 5,
+      "round": 4,
+      "start": 17853.0
+    },
+    {
+      "map": 5,
+      "round": 5,
+      "start": 18009.0
+    },
+    {
+      "map": 5,
+      "round": 6,
+      "start": 18134.0
+    },
+    {
+      "map": 5,
+      "round": 7,
+      "start": 18252.0
+    },
+    {
+      "map": 5,
+      "round": 8,
+      "start": 18453.0
+    },
+    {
+      "map": 5,
+      "round": 9,
+      "start": 18561.0
+    },
+    {
+      "map": 5,
+      "round": 10,
+      "start": 18665.0
+    },
+    {
+      "map": 5,
+      "round": 11,
+      "start": 18802.0
+    },
+    {
+      "map": 5,
+      "round": 12,
+      "start": 18929.0
+    },
+    {
+      "map": 5,
+      "round": 13,
+      "start": 19200.0
+    },
+    {
+      "map": 5,
+      "round": 14,
+      "start": 19282.0
+    },
+    {
+      "map": 5,
+      "round": 15,
+      "start": 19342.0
+    },
+    {
+      "map": 5,
+      "round": 16,
+      "start": 19472.0
+    },
+    {
+      "map": 5,
+      "round": 17,
+      "start": 19610.0
+    },
+    {
+      "map": 5,
+      "round": 18,
+      "start": 19814.0
+    },
+    {
+      "map": 5,
+      "round": 19,
+      "start": 19948.0
+    },
+    {
+      "map": 5,
+      "round": 20,
+      "start": 20140.996
+    },
+    {
+      "map": 5,
+      "round": 21,
+      "start": 20292.996
+    },
+    {
+      "map": 5,
+      "round": 22,
+      "start": 20461.996
+    }
+  ]
+}

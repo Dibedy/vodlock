@@ -18,7 +18,7 @@ from .timeline import validate_rounds
 LOG = logging.getLogger(__name__)
 
 
-def watchparty_contract(canonical, secondary, match, index, mapping, alignment_version, playback_shift=0):
+def watchparty_contract(canonical, secondary, match, index, mapping, alignment_version, playback_shift=0, *, allow_partial=False):
     provider = secondary["provider"]
     vod_id = secondary["external_id"] if provider == "youtube" else secondary["metadata"].get("vod_id", "")
     pattern = r"[A-Za-z0-9_-]{11}" if provider == "youtube" else r"[0-9]{6,20}"
@@ -34,7 +34,7 @@ def watchparty_contract(canonical, secondary, match, index, mapping, alignment_v
                   and math.isfinite(opening.get("offset", math.inf)))
     omitted = 0
     unavailable = []
-    partial = str(match["id"]) in secondary["metadata"].get("partial_navigation_matches", [])
+    partial = allow_partial or str(match["id"]) in secondary["metadata"].get("partial_navigation_matches", [])
     rounds: list[dict] = []
     for value in index["rounds"]:
         start = value["start"] - playback_shift
@@ -197,7 +197,7 @@ def persist_index(
         return row
 
 
-def export_snapshot(store, storage, shadow=True, approved_broadcasts=None, connection=None):
+def export_snapshot(store, storage, shadow=True, approved_broadcasts=None, connection=None, *, config=None):
     with (nullcontext(connection) if connection is not None else store.transaction()) as connection:
         connection.execute("SELECT pg_advisory_xact_lock(87314402)")
         rows = connection.execute(
@@ -325,7 +325,8 @@ def export_snapshot(store, storage, shadow=True, approved_broadcasts=None, conne
                     if not secondary["mapping"]:
                         raise WaitingWork("Watch-party is waiting for current canonical alignment")
                     shift = index["provenance"]["clock"]["playback_shift"] if index["provenance"].get("method") == "live_presentation_clock" else 0
-                    contract = watchparty_contract(canonical, secondary, match, index, secondary["mapping"], secondary["alignment_version"], shift)
+                    contract = watchparty_contract(canonical, secondary, match, index, secondary["mapping"], secondary["alignment_version"], shift,
+                                                   allow_partial=config.partial_navigation_for(secondary) if config else False)
                 except (NeedsReview, WaitingWork) as error:
                     pending = connection.execute("SELECT id FROM pipeline.jobs WHERE source_id=%s AND kind IN ('twitch_vod','twitch_live','twitch_align','watchparty_vod','watchparty_align') AND state IN ('queued','running','waiting_source','retryable') LIMIT 1", (secondary["id"],)).fetchone()
                     state = "waiting_alignment" if pending or isinstance(error, WaitingWork) else "needs_review"

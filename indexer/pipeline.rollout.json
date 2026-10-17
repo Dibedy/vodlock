@@ -32,6 +32,7 @@
       "official_youtube_channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
       "login": "gofns",
       "creator": "FNS",
+      "partial_navigation": true,
       "excludeTitle": "\\b(HIGHLIGHTS|SHORTS|REBROADCAST)\\b|#shorts\\b"
     },
     {
@@ -39,6 +40,7 @@
       "official_youtube_channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
       "login": "ohnepixel",
       "creator": "ohnepixel",
+      "partial_navigation": true,
       "excludeTitle": "\\b(HIGHLIGHTS|SHORTS|REBROADCAST)\\b|#shorts\\b"
     }
   ],
@@ -53,11 +55,13 @@
     {
       "login": "gofns",
       "role": "watch_party",
+      "partial_navigation": true,
       "official_youtube_channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw"
     },
     {
       "login": "ohnepixel",
       "role": "watch_party",
+      "partial_navigation": true,
       "official_youtube_channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw"
     }
   ],

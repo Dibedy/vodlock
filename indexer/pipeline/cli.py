@@ -411,7 +411,7 @@ def main():
             approved = [args.broadcast]
         print(
             json.dumps(
-                export_snapshot(store, configured_storage(config), shadow=not args.release, approved_broadcasts=approved), default=str, indent=2
+                export_snapshot(store, configured_storage(config), shadow=not args.release, approved_broadcasts=approved, config=config), default=str, indent=2
             )
         )
 

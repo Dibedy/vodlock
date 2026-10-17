@@ -389,7 +389,7 @@ class PipelineTests(unittest.TestCase):
                 base = f"http://127.0.0.1:{server.server_port}/"
                 fragments = [{"url": base + "init-stream0.m4s"}] + [
                     {"url": base + path.name, "duration": 2} for path in sorted(root.glob("chunk-stream0-*.m4s"))]
-                remote = {"url": fragments[0]["url"], "duration": 24, "fragments": fragments,
+                remote = {"url": fragments[0]["url"], "duration": 24, "fragments": fragments, "headers": {"User-Agent": "Archive test"},
                           "protocol": "http_dash_segments", "ext": "mp4", "format_id": "test",
                           "cache_identity": ("dash-fixture",)}
                 media = MediaAnalysis()
@@ -845,6 +845,52 @@ class PipelineTests(unittest.TestCase):
         mapping["segments"][0]["canonicalEnd"] = 101
         with self.assertRaises(NeedsReview):
             watchparty_contract(canonical, secondary, expected(), index, mapping, 1)
+
+    def test_partial_navigation_policy_matches_configured_creator_and_provider_only(self):
+        path = Path(__file__).resolve().parents[1] / "indexer" / "pipeline.rollout.json"
+        with patch.dict(os.environ, {"DATABASE_URL": "postgresql://test", "SPOILLESS_PIPELINE_MODE": "shadow"}):
+            config = Config.load(path)
+        for channel in config.settings["watchparty_youtube_channels"]:
+            for provider in ("youtube", "twitch"):
+                source = {"role": "watch_party", "provider": provider,
+                          "metadata": {"channel_id": channel["channel_id"], "login": channel["login"]}}
+                with self.subTest(login=channel["login"], provider=provider):
+                    self.assertTrue(config.partial_navigation_for(source))
+                    self.assertFalse(Config("test").partial_navigation_for(source))
+                    self.assertFalse(config.partial_navigation_for({**source, "role": "canonical"}))
+                    self.assertFalse(config.partial_navigation_for({**source, "role": "official_twitch"}))
+                    self.assertFalse(config.partial_navigation_for({**source, "provider": "other"}))
+                    self.assertFalse(config.partial_navigation_for({**source, "metadata": {
+                        **source["metadata"], "channel_id" if provider == "youtube" else "login": "other"}}))
+
+    def test_partial_navigation_config_requires_a_real_boolean(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "pipeline.json"
+            with patch.dict(os.environ, {"DATABASE_URL": "test", "SPOILLESS_PIPELINE_MODE": "shadow"}):
+                for value in ("true", 1, None):
+                    path.write_text(json.dumps({"twitch_channels": [{"login": "gofns", "partial_navigation": value}]}))
+                    with self.subTest(value=value), self.assertRaisesRegex(ValueError, "partial_navigation"):
+                        Config.load(path)
+
+    def test_configured_partial_navigation_keeps_opening_and_timing_checks_strict(self):
+        canonical = {"provider": "youtube", "role": "canonical", "broadcast_id": "broadcast", "external_id": "abcdefghijk"}
+        source = {"provider": "youtube", "role": "watch_party", "external_id": "lmnopqrstuv", "revision": 1, "metadata": {}}
+        index = {"id": "index", "broadcast_id": "broadcast", "version": 1, "state": "final", "archive_revision": 1, "rounds": series()}
+        left = {"sourceStart": 100, "sourceEnd": 750, "canonicalStart": 0, "canonicalEnd": 650,
+                "offset": -100, "anchors": 12, "maximumResidual": 1}
+        right = {**left, "sourceStart": 850, "sourceEnd": 1700, "canonicalStart": 750, "canonicalEnd": 1600}
+        mapping = {"timelineScale": 1, "segments": [left, right]}
+        contract = watchparty_contract(canonical, source, expected(), index, mapping, 1, allow_partial=True)
+        self.assertEqual(contract["coverage"]["unavailableRounds"], [{"map": 1, "round": 7}])
+        for invalid in ([right], [left, left, right], [{**left, "anchors": 4}, right],
+                        [{**left, "maximumResidual": 3}, right], [{**left, "offset": 200}, right]):
+            with self.subTest(segments=invalid), self.assertRaises(NeedsReview):
+                watchparty_contract(canonical, source, expected(), index, {**mapping, "segments": invalid}, 1, allow_partial=True)
+        complete = watchparty_contract(canonical, source, expected(), index,
+                                      {**mapping, "segments": [{**left, "sourceEnd": 1700, "canonicalEnd": 1600}]},
+                                      2, allow_partial=True)
+        self.assertNotIn("coverage", complete)
+        self.assertEqual(len(complete["rounds"]), len(index["rounds"]))
 
     def test_youtube_watchparty_chat_composes_only_verified_overlaps(self):
         video = {"timelineScale": 1, "segments": [{"canonicalStart": 100, "canonicalEnd": 400, "offset": -50}]}
@@ -1816,6 +1862,46 @@ if has_bgutil:
                 "url": "https://media.invalid/init", "protocol": "http_dash_segments", "fragments": fragments,
             }), self.assertRaisesRegex(WaitingSource, "fragment listing"):
                 YouTube().resolve("abcdefghijk")
+
+    def test_post_live_lazy_sequences_are_bounded_timed_and_cached_without_guessing_jumps(self):
+        import yt_dlp
+        from yt_dlp.utils import LazyList
+
+        fragments = [{"url": f"https://media.invalid/video?sq={number}", "fragment_count": 4} for number in range(4)]
+        info = {"url": "https://media.invalid/video", "protocol": "http_dash_segments", "format_id": "135",
+                "height": 480, "duration": 30, "target_duration": 5, "live_status": "post_live",
+                "fragments": LazyList(iter(fragments))}
+        with patch.object(yt_dlp.YoutubeDL, "extract_info", return_value=info) as extract:
+            youtube = YouTube()
+            remote = youtube.resolve("abcdefghijk", cached=True)
+            self.assertTrue(remote["self_contained_fragments"])
+            self.assertEqual(remote["duration"], 20)
+            self.assertEqual([fragment["duration"] for fragment in remote["fragments"]], [5] * 4)
+            self.assertNotIn("duration", fragments[0])
+            self.assertEqual(youtube.resolve("abcdefghijk", cached=True), remote)
+            self.assertEqual(extract.call_count, 1)
+        for changes in ({"target_duration": None}, {"target_duration": True}, {"target_duration": float("nan")},
+                        {"live_status": "is_live"}, {"is_live": True}, {"fragment_count": 3}, {"sq": "9"}):
+            values = [{**fragment, **({"fragment_count": changes["fragment_count"]} if "fragment_count" in changes else {})}
+                      for fragment in fragments]
+            if "sq" in changes:
+                values[0]["url"] = "https://media.invalid/video?sq=9"
+            invalid = {**info, **changes, "fragments": LazyList(iter(values))}
+            with self.subTest(changes=changes), patch.object(yt_dlp.YoutubeDL, "extract_info", return_value=invalid), self.assertRaises(WaitingSource):
+                YouTube().resolve("abcdefghijk")
+
+    def test_post_live_window_selects_only_local_self_contained_sequences(self):
+        import yt_dlp
+
+        remote = {"url": "https://media.invalid/video", "protocol": "http_dash_segments", "self_contained_fragments": True,
+                  "fragments": [{"url": f"https://media.invalid/video?sq={number}", "duration": 5} for number in range(100)]}
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "window.mp4"
+            with patch.object(yt_dlp.YoutubeDL, "process_info", side_effect=lambda info: path.write_bytes(b"fixture")) as process:
+                MediaAnalysis().download_dash_window(remote, 100, 102, path)
+                self.assertEqual(process.call_args.args[0]["fragments"], [remote["fragments"][20]])
+        with self.assertRaises(WaitingSource):
+            MediaAnalysis().download_dash_window(remote, 500, 502, Path("unused.mp4"))
 
     def test_ffmpeg_access_errors_redact_signed_urls_without_hiding_status(self):
         import io

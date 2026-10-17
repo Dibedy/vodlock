@@ -69,7 +69,7 @@ class Worker:
 
     def export(self, job):
         for shadow in [True, False] if not self.config.shadow else [True]:
-            export_snapshot(self.store, self.storage, shadow, None if shadow else self.config.approved_ids(self.store))
+            export_snapshot(self.store, self.storage, shadow, None if shadow else self.config.approved_ids(self.store), config=self.config)
         if not self.config.shadow and (self.config.settings or {}).get("deployment"):
             self.store.request_publication()
 

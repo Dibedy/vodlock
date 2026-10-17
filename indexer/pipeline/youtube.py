@@ -216,6 +216,28 @@ class YouTube:
             and info.get("format_id") and info.get("duration") else None,
         }
         if not live and info.get("protocol") == "http_dash_segments":
+            from itertools import islice
+            from yt_dlp.utils import LazyList
+
+            fragments = info.get("fragments")
+            if isinstance(fragments, LazyList) and info.get("live_status") == "post_live" and not info.get("is_live"):
+                duration = info.get("target_duration")
+                if isinstance(duration, bool) or not isinstance(duration, (int, float)) or not math.isfinite(duration) or not 0 < duration <= 60:
+                    raise WaitingSource("Fragmented YouTube archive has no bounded segment duration")
+                fragments = list(islice(fragments, 100001))
+                if (not fragments or len(fragments) > 100000 or any(
+                    not isinstance(fragment, dict) or fragment.get("fragment_count") != len(fragments)
+                    or parse_qs(urlsplit(fragment.get("url", "")).query).get("sq") != [str(number)]
+                    for number, fragment in enumerate(fragments)
+                )):
+                    raise WaitingSource("Fragmented YouTube archive has no bounded fragment listing")
+                # Post-live sequence fragments include their own initialization. Packet checks below the
+                # downloader still verify the selected window's real clock and continuous coverage.
+                info["fragments"] = [{**fragment, "duration": duration} for fragment in fragments]
+                remote["self_contained_fragments"] = True
+                # yt-dlp excludes the two newest sequences while YouTube is finishing the archive.
+                # Expose only that available prefix, not the longer metadata duration.
+                remote["duration"] = min(float(info.get("duration") or 0), len(fragments) * duration)
             if not isinstance(info.get("fragments"), list) or not info["fragments"]:
                 raise WaitingSource("Fragmented YouTube archive has no bounded fragment listing")
             remote.update({name: deepcopy(info[name]) for name in (

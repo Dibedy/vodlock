@@ -65,7 +65,7 @@ class Deployment:
                     "SELECT youtube_id,channel_id,event,day,metadata FROM pipeline.broadcasts FOR SHARE").fetchall()
                     if self.config.approved(row)]
                 connection.execute("SELECT id FROM pipeline.segments WHERE broadcast_id IN (SELECT id FROM pipeline.broadcasts WHERE youtube_id=ANY(%s)) FOR SHARE", (approved,)).fetchall()
-                export_snapshot(self.store, LocalStorage(path / "snapshot"), False, approved, connection=connection)
+                export_snapshot(self.store, LocalStorage(path / "snapshot"), False, approved, connection=connection, config=self.config)
                 release = path / "snapshot" / "release"
                 previous = json.loads((checkout / "site/catalog.json").read_text(encoding="utf-8"))
                 previous_artifacts = self.read_artifacts(previous, checkout / "site")

@@ -589,12 +589,14 @@ class TwitchCapture:
             match = self.store.one("SELECT * FROM pipeline.expected_matches WHERE id=%s", (index["expected_match_id"],))
             shift = index["provenance"].get("clock", {}).get("playback_shift", 0) if index["provenance"].get("method") == "live_presentation_clock" else 0
             try:
-                watchparty_contract(canonical, source, match, index, partial, 1, shift)
+                watchparty_contract(canonical, source, match, index, partial, 1, shift,
+                                    allow_partial=self.config.partial_navigation_for(source))
             except NeedsReview:
                 continue
             try:
                 if before:
-                    watchparty_contract(canonical, source, match, index, before["mapping"], before["revision"], shift)
+                    watchparty_contract(canonical, source, match, index, before["mapping"], before["revision"], shift,
+                                        allow_partial=self.config.partial_navigation_for(source))
                     continue
             except NeedsReview:
                 pass

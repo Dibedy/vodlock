@@ -996,6 +996,62 @@ class DatabasePipelineTests(unittest.TestCase):
         capture.save_partial_alignment(job, broadcast, source, canonical, mapping, 1)
         self.assertEqual(self.store.one('SELECT mapping FROM pipeline.alignments WHERE source_id=%s', (secondary,))['mapping']['recordingStart'], origin)
 
+    def test_configured_partial_navigation_exports_existing_sources_on_both_providers(self):
+        from detector import Observation
+        from pipeline.timeline import scoreboard_section
+
+        settings = json.loads((Path(__file__).resolve().parents[1] / "indexer/pipeline.rollout.json").read_text())
+        config = Config(DATABASE, shadow=False, storage_path=self.config.storage_path, settings=settings)
+        self.store.execute("UPDATE pipeline.broadcasts SET state='archive_ready',archive_revision=1,reconciled_revision=1 WHERE id=%s", (self.broadcast,))
+        self.store.execute("UPDATE pipeline.segments SET state='final' WHERE id=%s", (self.segment,))
+        self.store.execute("""INSERT INTO pipeline.match_indexes(id,broadcast_id,expected_match_id,segment_id,canonical_source_id,generation,version,archive_revision,state,rounds,provenance,shadow)
+            VALUES (%s,%s,%s,%s,%s,1,1,1,'final',%s,'{}',false)""",
+            (identifier(), self.broadcast, self.match, self.segment, self.source, Jsonb(series())))
+        checks = {}
+        for value in series():
+            if value['round'] == 7:
+                continue
+            start = value['start'] + 100
+            samples = [Observation(start + second, value['round'], 100 - second, .99, scores=tuple(value['scores'])) for second in range(6)]
+            checks[f"{self.match}:1:{value['round']}"] = {"canonical_start": value['start'], "scores": value['scores'],
+                "section": scoreboard_section(samples, value, value['start'], 1)}
+        mapping = {"timelineScale": 1, "anchors": 12, "maximumResidual": 1, "segments": [{"sourceStart": 100,
+            "sourceEnd": 1700, "canonicalStart": 0, "canonicalEnd": 1600, "offset": -100, "anchors": 12, "maximumResidual": 1}]}
+        capture = TwitchCapture(self.store, config, Processing(self.store, config, self.storage))
+        broadcast, canonical = self.store.one('SELECT * FROM pipeline.broadcasts WHERE id=%s', (self.broadcast,)), self.entities()[1]
+        for number, channel in enumerate(settings['watchparty_youtube_channels']):
+            for provider in ('youtube', 'twitch'):
+                secondary = identifier()
+                external = ('lmnopqrstuv', 'vwxyzabcdef')[number] if provider == 'youtube' else str(123456789 + number)
+                metadata = {'login': channel['login'], 'channel_id': channel['channel_id']}
+                if provider == 'twitch':
+                    metadata['vod_id'] = external
+                self.store.execute("INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role,metadata) VALUES (%s,%s,%s,%s,'watch_party',%s)",
+                    (secondary, self.broadcast, provider, external, Jsonb(metadata)))
+                queued = self.store.enqueue('watchparty_align' if provider == 'youtube' else 'twitch_align', str(secondary),
+                    broadcast=self.broadcast, source=secondary, priority=100,
+                    payload={"scoreboard_checks": {"source_revision": 1, "canonical_revision": 1, "checks": checks}})
+                job = self.store.claim(job_id=queued['id'])
+                source = self.store.one('SELECT * FROM pipeline.sources WHERE id=%s', (secondary,))
+                capture.save_partial_alignment(job, broadcast, source, canonical, mapping, 1)
+                self.store.finish(job)
+        self.assertTrue(self.store.one("SELECT id FROM pipeline.jobs WHERE kind='export'"))
+        self.assertTrue(self.store.one("SELECT id FROM pipeline.jobs WHERE dedupe_key='deploy:site'"))
+        strict = export_snapshot(self.store, self.storage, False, ['abcdefghijk'])
+        self.assertEqual(len(strict['videos']), 1)
+        catalog = export_snapshot(self.store, self.storage, False, ['abcdefghijk'], config=config)
+        self.assertEqual(len(catalog['videos']), 5, catalog)
+        for entry in catalog['videos'][1:]:
+            self.assertEqual(entry['coverage']['type'], 'partial-navigation')
+            self.assertEqual(entry['coverage']['unavailableRounds'], [{'map': 1, 'round': 7}])
+            contract = json.loads(self.storage.get('release/' + entry['index'].lstrip('/')))
+            self.assertNotIn(7, [value['round'] for value in contract['rounds']])
+        site = Path(self.temporary.name) / 'site'
+        site.mkdir()
+        (site / 'catalog.json').write_text(json.dumps({'videos': []}))
+        release_to_site(Path(self.temporary.name) / 'release', site)
+        self.assertEqual(len(json.loads((site / 'catalog.json').read_text())['videos']), 5)
+
     def test_watchparty_checks_extrapolate_across_breaks_without_reusing_an_earlier_round(self):
         from detector import Observation
 

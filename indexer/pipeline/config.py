@@ -30,6 +30,9 @@ class Config:
 
             if not isinstance(channel, dict) or not re.fullmatch(r"UC[A-Za-z0-9_-]{22}", channel.get("channel_id", "")) or not all(channel.get(key) for key in ("official_youtube_channel_id", "login", "creator")):
                 raise ValueError("watchparty_youtube_channels requires channel_id, official_youtube_channel_id, login and creator")
+        for channel in settings.get("watchparty_youtube_channels", []) + settings.get("twitch_channels", []):
+            if "partial_navigation" in channel and not isinstance(channel["partial_navigation"], bool):
+                raise ValueError("channel partial_navigation must be a boolean")
         slots = settings.get("processing_slots", 2)
         if isinstance(slots, bool) or not isinstance(slots, int) or slots not in {1, 2}:
             raise ValueError("processing_slots must be 1 or 2")
@@ -105,3 +108,16 @@ class Config:
 
     def archive_start_for(self, broadcast):
         return float((self.settings or {}).get("archive_start_seconds", {}).get(broadcast["youtube_id"], 0))
+
+    def partial_navigation_for(self, source):
+        if source["role"] != "watch_party":
+            return False
+        metadata = source.get("metadata", {})
+        settings = self.settings or {}
+        if source["provider"] == "youtube":
+            return any(channel.get("partial_navigation") is True and channel["channel_id"] == metadata.get("channel_id")
+                       for channel in settings.get("watchparty_youtube_channels", []))
+        if source["provider"] == "twitch":
+            return any(channel.get("partial_navigation") is True and channel.get("role") == "watch_party"
+                       and channel["login"] == metadata.get("login") for channel in settings.get("twitch_channels", []))
+        return False

@@ -225,8 +225,6 @@ class MediaAnalysis:
         command = [imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error", "-nostdin", "-rw_timeout", "20000000"]
         headers = {str(key): str(value) for key, value in (remote.get("headers") or {}).items()
                    if not re.search(r"[\r\n]", str(key) + str(value))}
-        if headers:
-            command.extend(["-headers", "".join(f"{key}: {value}\r\n" for key, value in headers.items())])
         try:
             with (tempfile.TemporaryDirectory(prefix="spoilless-dash-") if remote.get("fragments") else nullcontext()) as directory:
                 if directory:
@@ -234,6 +232,8 @@ class MediaAnalysis:
                     self.download_dash_window(remote, beginning, ending, source)
                     command.extend(["-copyts", "-i", str(source)])
                 else:
+                    if headers:
+                        command.extend(["-headers", "".join(f"{key}: {value}\r\n" for key, value in headers.items())])
                     command.extend(["-ss", str(beginning), "-t", str(ending - beginning), "-copyts", "-start_at_zero",
                                     "-i", str(remote["url"])])
                 command.extend(["-an", "-map", "0:v:0", "-c:v", "copy", "-avoid_negative_ts", "disabled",
@@ -271,10 +271,11 @@ class MediaAnalysis:
         import yt_dlp
 
         fragments = remote["fragments"]
-        if not fragments or fragments[0].get("duration") is not None:
+        self_contained = remote.get("self_contained_fragments") is True
+        if not fragments or not self_contained and fragments[0].get("duration") is not None:
             raise WaitingSource("Fragmented archive has no initialization segment")
-        selected, position = [fragments[0]], 0.0
-        for fragment in fragments[1:]:
+        selected, position = ([] if self_contained else [fragments[0]]), 0.0
+        for fragment in fragments if self_contained else fragments[1:]:
             duration = fragment.get("duration")
             if isinstance(duration, bool) or not isinstance(duration, (int, float)) or not math.isfinite(duration) or duration <= 0:
                 raise WaitingSource("Fragmented archive has invalid segment timing")
@@ -284,7 +285,7 @@ class MediaAnalysis:
             position = ending
             if position >= upper:
                 break
-        if len(selected) < 2 or position < upper - .001:
+        if len(selected) < (1 if self_contained else 2) or position < upper - .001:
             raise WaitingSource("Fragmented archive does not cover the requested range")
         started = monotonic()
 

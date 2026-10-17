@@ -46,6 +46,9 @@ class Deployment:
         settings = (self.config.settings or {}).get("deployment")
         if self.config.shadow or not settings:
             return
+        with self.store.transaction() as connection:
+            self.store.guard(connection, job)
+            connection.execute("UPDATE pipeline.jobs SET payload=payload-'publication_requested' WHERE id=%s", (job['id'],))
         root = self.config.storage_path.resolve() / "deployment"
         root.mkdir(parents=True, exist_ok=True)
         started = time.monotonic()

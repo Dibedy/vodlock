@@ -109,11 +109,15 @@ class Store:
         return self.one(query, parameters)
 
     def request_publication(self, ready=False):
-        self.enqueue("deploy", "deploy:site", priority=50)
-        if ready:
-            self.execute("""UPDATE pipeline.jobs SET available_at=now(),wait_count=0,priority=90 WHERE dedupe_key='deploy:site'
-                AND (state='queued' OR (state='waiting_source'
-                AND last_error='Website publication is batching incremental chat and alignment updates'))""")
+        with self.transaction() as connection:
+            self.enqueue("deploy", "deploy:site", priority=90 if ready else 50, connection=connection)
+            connection.execute("""UPDATE pipeline.jobs SET payload=payload||jsonb_build_object('publication_requested',
+                CASE WHEN %s OR payload->>'publication_requested'='ready' THEN 'ready' ELSE 'incremental' END)
+                WHERE dedupe_key='deploy:site' AND state='running'""", (ready,))
+            if ready:
+                connection.execute("""UPDATE pipeline.jobs SET available_at=now(),wait_count=0,priority=90 WHERE dedupe_key='deploy:site'
+                    AND (state='queued' OR (state='waiting_source'
+                    AND last_error='Website publication is batching incremental chat and alignment updates'))""")
 
     def claim(self, lease_seconds=180, job_id=None):
         token = identifier()
@@ -213,6 +217,12 @@ class Store:
     def finish(self, job, state="succeeded", error=None, delay=0, dependency=False, failure_kind=None):
         with self.transaction() as connection:
             self.guard(connection, job)
+            if job['kind'] == 'deploy':
+                requested = connection.execute("SELECT payload->>'publication_requested' AS kind FROM pipeline.jobs WHERE id=%s", (job['id'],)).fetchone()['kind']
+                if requested and (state == 'succeeded' or requested == 'ready' and
+                    state == 'waiting_source' and error == 'Website publication is batching incremental chat and alignment updates'):
+                    state, error, delay, dependency, failure_kind = 'queued', None, 0, False, None
+                    connection.execute("UPDATE pipeline.jobs SET payload=payload-'publication_requested',priority=%s WHERE id=%s", (90 if requested == 'ready' else 50, job['id']))
             wait_started = job["payload"].get("dependency_wait_started")
             if dependency:
                 wait_started = wait_started or datetime.now(timezone.utc).isoformat()

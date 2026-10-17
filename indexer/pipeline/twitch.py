@@ -62,6 +62,18 @@ def resolve_channels(channels, requester=fetch_bytes):
             for channel in channels]
 
 
+def event_broadcasts(connection, envelope, channel):
+    event = envelope['payload']['event']
+    kind = envelope['payload']['subscription']['type']
+    wall = timestamp(event['started_at'] if kind == 'stream.online' else envelope['metadata']['message_timestamp'])
+    return connection.execute(
+        """SELECT * FROM pipeline.broadcasts WHERE channel_id=%s AND state IN ('live','ended_waiting_archive','archive_ready')
+           AND actual_start<=%s+interval '6 hours'
+           AND COALESCE(actual_end+interval '6 hours',actual_start+interval '18 hours')>%s
+           ORDER BY actual_start DESC LIMIT 2""",
+        (channel['official_youtube_channel_id'], wall, wall)).fetchall()
+
+
 def ingest_event(store, envelope, channels):
     metadata, payload = envelope["metadata"], envelope["payload"]
     event = payload["event"]
@@ -77,17 +89,19 @@ def ingest_event(store, envelope, channels):
                                        VALUES ('twitch',%s,%s,%s) ON CONFLICT DO NOTHING RETURNING event_id""",
             (metadata["message_id"], kind, Jsonb(payload)),
         ).fetchone()
-        if not duplicate:
+        if not duplicate and kind != 'stream.online':
             return
-        broadcasts = connection.execute(
-            "SELECT * FROM pipeline.broadcasts WHERE channel_id=%s AND state IN ('live','ended_waiting_archive') ORDER BY day DESC LIMIT 2",
-            (channel["official_youtube_channel_id"],),
-        ).fetchall()
+        broadcasts = event_broadcasts(connection, envelope, channel)
+        if not duplicate and len(broadcasts) == 1 and connection.execute(
+            "SELECT id FROM pipeline.sources WHERE broadcast_id=%s AND provider='twitch' AND external_id=%s",
+            (broadcasts[0]['id'], str(event['id']))).fetchone():
+            return
         if len(broadcasts) != 1:
             store.enqueue(
                 "twitch_event",
                 "twitch-event:" + metadata["message_id"],
                 payload={"envelope": envelope, "channel": channel},
+                priority=80 if kind == 'stream.online' else 40 if kind == 'stream.offline' else -30,
                 connection=connection,
             )
             return
@@ -102,6 +116,7 @@ def ingest_event(store, envelope, channels):
                 "twitch_event",
                 "twitch-event:" + metadata["message_id"],
                 payload={"envelope": envelope, "channel": channel},
+                priority=-30,
                 connection=connection,
             )
             return
@@ -127,6 +142,21 @@ def apply_event(store, connection, envelope, channel, broadcast):
                 Jsonb({"login": channel["login"], "broadcaster_user_id": broadcaster}),
             ),
         )
+        misplaced = connection.execute(
+            """UPDATE pipeline.sources SET state='superseded',
+               metadata=metadata||jsonb_build_object('association_superseded_by',%s::text),updated_at=now()
+               WHERE provider='twitch' AND external_id=%s AND broadcast_id<>%s AND actual_start=%s
+               AND metadata->>'broadcaster_user_id'=%s RETURNING id""",
+            (str(source_id), str(event['id']), broadcast['id'], start, broadcaster)).fetchall()
+        for prior in misplaced:
+            connection.execute(
+                """UPDATE pipeline.jobs SET state='unsupported',failure_kind='superseded',
+                   last_error='Stream associated with its timestamp-matched broadcast',updated_at=now()
+                   WHERE source_id=%s AND state IN ('queued','waiting_source','retryable','needs_review')""", (prior['id'],))
+            connection.execute(
+                """INSERT INTO pipeline.chat_messages(source_id,message_id,media_time,wall_time,origin,message)
+                   SELECT %s,message_id,media_time,wall_time,origin,message FROM pipeline.chat_messages WHERE source_id=%s
+                   ON CONFLICT DO NOTHING""", (source_id, prior['id']))
         gap_end = max(0, (datetime.now(timezone.utc) - start).total_seconds())
         connection.execute(
             "INSERT INTO pipeline.chat_archives(source_id,gaps) VALUES (%s,%s) ON CONFLICT DO NOTHING",
@@ -258,7 +288,7 @@ class TwitchCapture:
         if not start or not math.isfinite(duration) or duration <= 0:
             raise WaitingSource("Twitch VOD association is waiting for source timing")
         candidates = [broadcast for broadcast in broadcasts
-                      if start <= broadcast["actual_start"] + timedelta(minutes=30)
+                      if start < (broadcast['actual_end'] or broadcast['actual_start'] + timedelta(hours=12))
                       and start + timedelta(seconds=duration) >= broadcast["actual_start"] + timedelta(minutes=30)
                       and abs((start - broadcast["actual_start"]).total_seconds()) <= 6 * 3600]
         if len(candidates) != 1:
@@ -424,14 +454,12 @@ class TwitchCapture:
         return True
 
     def event(self, job):
-        broadcast = self.store.one(
-            "SELECT * FROM pipeline.broadcasts WHERE channel_id=%s AND state IN ('live','ended_waiting_archive') ORDER BY day DESC LIMIT 1",
-            (job["payload"]["channel"]["official_youtube_channel_id"],),
-        )
-        if not broadcast:
-            raise WaitingSource("No corresponding official YouTube broadcast yet")
         with self.store.transaction() as connection:
             self.store.guard(connection, job)
+            broadcasts = event_broadcasts(connection, job['payload']['envelope'], job['payload']['channel'])
+            if len(broadcasts) != 1:
+                raise WaitingWork('Twitch event is waiting for a unique timestamp-matched official broadcast')
+            broadcast = broadcasts[0]
             apply_event(self.store, connection, job["payload"]["envelope"], job["payload"]["channel"], broadcast)
 
     def live(self, job):

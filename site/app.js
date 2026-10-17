@@ -4,13 +4,14 @@
   const $ = id => document.getElementById(id);
   const chatEmoteSets = new Map();
   let chatEmotes = new Map();
-  const defaultSettings = {hideTwitchTimeline: true, hideMetadata: false, hideRoundStatus: false, autoSkipSecondRounds: false, showChat: true, hideChatBots: true, filterChatSpoilers: true, fullscreenChatPosition: 'left', showChatTimestamps: false, endScreenProtection: true};
+  const defaultSettings = {hideTwitchTimeline: true, hideMetadata: false, hideRoundStatus: false, autoSkipSecondRounds: false, showCaptions: false, showChat: true, hideChatBots: true, filterChatSpoilers: true, fullscreenChatPosition: 'left', showChatTimestamps: false, endScreenProtection: true};
   const defaultKeybinds = {previousRound: 'ArrowUp', nextRound: 'ArrowDown', skipBackward: 'ArrowLeft', skipForward: 'ArrowRight'};
   const settingIds = {
     hideTwitchTimeline: 'setting-hide-twitch-timeline',
     hideMetadata: 'setting-hide-metadata',
     hideRoundStatus: 'setting-hide-round-status',
     autoSkipSecondRounds: 'setting-auto-skip-second-rounds',
+    showCaptions: 'setting-show-captions',
     showChat: 'setting-show-chat',
     hideChatBots: 'setting-hide-chat-bots',
     filterChatSpoilers: 'setting-filter-chat-spoilers',
@@ -119,7 +120,7 @@
     try {
       const saved = JSON.parse(localStorage.getItem('vodlock-settings') || '{}');
       return {...defaultSettings,
-        ...Object.fromEntries(['hideTwitchTimeline', 'hideMetadata', 'hideRoundStatus', 'autoSkipSecondRounds', 'showChat', 'hideChatBots', 'filterChatSpoilers', 'showChatTimestamps', 'endScreenProtection']
+        ...Object.fromEntries(['hideTwitchTimeline', 'hideMetadata', 'hideRoundStatus', 'autoSkipSecondRounds', 'showCaptions', 'showChat', 'hideChatBots', 'filterChatSpoilers', 'showChatTimestamps', 'endScreenProtection']
           .map(key => [key, typeof saved[key] === 'boolean' ? saved[key] : defaultSettings[key]])),
         fullscreenChatPosition: ['left', 'right', 'hidden'].includes(saved.fullscreenChatPosition) ? saved.fullscreenChatPosition : defaultSettings.fullscreenChatPosition};
     } catch {
@@ -173,6 +174,7 @@
     const twitchTimelineHidden = state.entry?.provider === 'twitch' && settings.hideTwitchTimeline;
     $('player-shell').classList.toggle('twitch-timeline-hidden', twitchTimelineHidden);
     $('watch-metadata').hidden = settings.hideMetadata;
+    applyCaptions();
     renderChat(true);
     updateStatus();
   }
@@ -230,6 +232,7 @@
     state.player = null;
     state.ready = false;
     state.playing = false;
+    applyCaptions();
     $('quality-control').hidden = true;
     $('quality').disabled = true;
     $('quality').replaceChildren();
@@ -895,6 +898,7 @@
     if (event?.target && event.target !== state.player) return;
     preventTwitchNativeFullscreen();
     setVolume(Number($('volume').value));
+    applyCaptions();
     const destination = state.resumeTime ?? Math.max(0, state.index.rounds[0].start - state.index.leadSeconds);
     state.resumeTime = null;
     if (state.entry.provider === 'youtube') {
@@ -949,6 +953,7 @@
     state.ready = true;
     setPlaying(state.entry.provider === 'youtube' ? state.player.getPlayerState() === YT.PlayerState.PLAYING : state.playing);
     setPlaybackControlsDisabled(false);
+    applyCaptions();
     updateQualityOptions();
     const player = state.player;
     if (state.entry.provider === 'twitch') setTimeout(() => {
@@ -970,10 +975,14 @@
     state.player = new YT.Player('media-player', {
       host: 'https://www.youtube-nocookie.com',
       videoId: state.entry.sourceId,
-      playerVars: {autoplay: 0, start: Math.floor(destination), controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, playsinline: 1, rel: 0},
+      playerVars: {autoplay: 0, start: Math.floor(destination), controls: 0, disablekb: 1, cc_load_policy: settings.showCaptions ? 1 : 0, fs: 0, iv_load_policy: 3, playsinline: 1, rel: 0},
       events: {
         onReady: playerReady,
+        onApiChange: event => {
+          if (event.target === state.player && !settings.showCaptions) applyCaptions();
+        },
         onStateChange: event => {
+          if (event.target === state.player && event.data === YT.PlayerState.PLAYING && !settings.showCaptions) applyCaptions();
           if (!state.ready || event.target !== state.player) return;
           setPlaying(event.data === YT.PlayerState.PLAYING);
           if (event.data === YT.PlayerState.ENDED) setTimeout(finishWatching, 0);
@@ -1107,6 +1116,35 @@
     if (options.some(quality => quality.value === current)) select.value = current;
     control.hidden = false;
     select.disabled = false;
+  }
+
+  function applyCaptions() {
+    const player = state.player;
+    const youtube = state.entry?.provider === 'youtube';
+    const supported = youtube
+      ? typeof player?.getOptions === 'function' && typeof player?.loadModule === 'function' && typeof player?.unloadModule === 'function'
+      : typeof player?.enableCaptions === 'function' && typeof player?.disableCaptions === 'function';
+    const button = $('captions-button');
+    button.disabled = !state.ready || !supported;
+    button.setAttribute('aria-pressed', String(settings.showCaptions));
+    button.setAttribute('aria-label', 'Captions');
+    button.title = settings.showCaptions ? 'Turn captions off (C)' : 'Show captions when available (C)';
+    if (!supported) return;
+    if (youtube) {
+      // cc_load_policy=0 still inherits YouTube preferences; enforce ours after the module loads.
+      // getOptions lists availability, not whether captions are currently visible.
+      if (settings.showCaptions) player.loadModule('captions');
+      else if ((player.getOptions() || []).includes('captions')) player.unloadModule('captions');
+    } else if (settings.showCaptions) player.enableCaptions();
+    else player.disableCaptions();
+  }
+
+  function toggleCaptions() {
+    if (!state.ready || $('captions-button').disabled) return;
+    settings.showCaptions = !settings.showCaptions;
+    saveSettings();
+    applySettings();
+    toast(settings.showCaptions ? 'Captions on, when available.' : 'Captions off.');
   }
 
   function setPlaybackControlsDisabled(disabled) {
@@ -1374,6 +1412,7 @@
   $('back-ten').addEventListener('click', () => seek(Math.max(0, currentTime() - 10)));
   $('skip-replay').addEventListener('click', () => seek(currentTime() + 10, 'Skipped 10 seconds'));
   $('mute-button').addEventListener('click', toggleMute);
+  $('captions-button').addEventListener('click', toggleCaptions);
   $('chat-toggle').addEventListener('click', () => {
     settings = {...settings, showChat: !settings.showChat};
     saveSettings();
@@ -1450,7 +1489,9 @@
       t: toggleTheater,
       T: toggleTheater,
       m: toggleMute,
-      M: toggleMute
+      M: toggleMute,
+      c: toggleCaptions,
+      C: toggleCaptions
     };
     if (!actions[key]) return;
     event.preventDefault();

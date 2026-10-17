@@ -1439,6 +1439,43 @@ class DatabasePipelineTests(unittest.TestCase):
             else:
                 self.assertIsNone(job)
 
+    def test_publication_requests_during_a_release_are_not_lost(self):
+        for ready in (False, True):
+            with self.subTest(ready=ready):
+                self.store.execute('TRUNCATE pipeline.jobs CASCADE')
+                self.store.request_publication()
+                job = self.store.claim()
+                self.store.request_publication(ready=ready)
+                self.store.request_publication()
+                self.assertEqual(self.store.one('SELECT state FROM pipeline.jobs')['state'], 'running')
+                self.store.finish(job)
+                followup = self.store.claim()
+                self.assertIsNotNone(followup)
+                self.assertEqual(followup['priority'], 90 if ready else 50)
+                self.assertNotIn('publication_requested', followup['payload'])
+                self.store.finish(followup)
+                self.assertIsNone(self.store.claim())
+
+    def test_running_ready_request_only_interrupts_incremental_batching(self):
+        for reason in ('Website publication is batching incremental chat and alignment updates',
+                       'Website publication is waiting for the rolling 24-hour worker budget'):
+            with self.subTest(reason=reason):
+                self.store.execute('TRUNCATE pipeline.jobs CASCADE')
+                self.store.request_publication()
+                job = self.store.claim()
+                self.store.request_publication(ready=True)
+                self.store.finish(job, 'waiting_source', reason, delay=3600, dependency=True)
+                followup = self.store.claim()
+                self.assertEqual(followup is not None, 'batching' in reason)
+
+    def test_discovery_does_not_queue_no_change_deployments(self):
+        config = Config(DATABASE, shadow=False, settings={'deployment': {'repository': 'https://github.com/example/site.git'}})
+        coordinator = Coordinator(self.store, config)
+        coordinator.discover()
+        self.assertIsNone(self.store.one("SELECT id FROM pipeline.jobs WHERE kind='deploy'"))
+        self.store.request_publication(ready=True)
+        self.assertEqual(self.store.one("SELECT state FROM pipeline.jobs WHERE kind='deploy'")['state'], 'queued')
+
     def test_concurrent_claims_serialize_sources_without_broadcast_assignment(self):
         for number in range(4):
             self.store.enqueue("twitch_live", f"source-claim:{number}", source=self.source)
@@ -3304,6 +3341,57 @@ class DatabasePipelineTests(unittest.TestCase):
         self.assertEqual(self.store.one("SELECT s.external_id,m.media_time FROM pipeline.chat_messages m JOIN pipeline.sources s ON s.id=m.source_id WHERE m.message_id='delayed-message'"),
                          {"external_id": "123456789", "media_time": 300})
 
+    def test_twitch_event_clock_excludes_stale_broadcasts_and_repairs_duplicate_poll_association(self):
+        old, misplaced = identifier(), identifier()
+        self.store.execute("""INSERT INTO pipeline.broadcasts(id,event,day,region,channel_id,youtube_id,state,actual_start)
+            VALUES (%s,'Champions','2026-09-27','international','official','oldstream01','ended_waiting_archive','2026-09-27T10:00:00Z')""", (old,))
+        channel = {'broadcaster_user_id': '8', 'login': 'fns', 'official_youtube_channel_id': 'official'}
+        self.store.execute("""INSERT INTO pipeline.sources(id,broadcast_id,provider,external_id,role,state,actual_start,metadata)
+            VALUES (%s,%s,'twitch','123456789','watch_party','live','2026-10-04T10:00:00Z',%s)""",
+            (misplaced, old, Jsonb({'login': 'fns', 'broadcaster_user_id': '8'})))
+        self.store.execute("""INSERT INTO pipeline.chat_messages(source_id,message_id,media_time,wall_time,origin,message)
+            VALUES (%s,'retained',10,'2026-10-04T10:00:10Z','live',%s)""", (misplaced, Jsonb({'user': 'viewer', 'message': {'text': 'hello'}})))
+        self.store.enqueue('twitch_live', 'misplaced', broadcast=old, source=misplaced)
+        envelope = {'metadata': {'message_id': 'poll-online:123456789', 'message_timestamp': '2026-10-04T10:02:00Z'},
+                    'payload': {'subscription': {'type': 'stream.online'}, 'event': {
+                        'broadcaster_user_id': '8', 'id': '123456789', 'started_at': '2026-10-04T10:00:00Z'}}}
+        self.store.execute("INSERT INTO pipeline.source_events(provider,event_id,event_type,payload) VALUES ('twitch',%s,'stream.online',%s)",
+                           (envelope['metadata']['message_id'], Jsonb(envelope['payload'])))
+        ingest_event(self.store, envelope, [channel])
+        source = self.store.one("SELECT * FROM pipeline.sources WHERE broadcast_id=%s AND provider='twitch'", (self.broadcast,))
+        self.assertIsNotNone(source)
+        self.assertEqual(self.store.one('SELECT state FROM pipeline.sources WHERE id=%s', (misplaced,))['state'], 'superseded')
+        self.assertEqual(self.store.one("SELECT state FROM pipeline.jobs WHERE dedupe_key='misplaced'")['state'], 'unsupported')
+        self.assertEqual(self.store.one('SELECT COUNT(*) count FROM pipeline.chat_messages WHERE source_id=%s', (source['id'],))['count'], 1)
+        ingest_event(self.store, envelope, [channel])
+        self.assertEqual(self.store.one('SELECT COUNT(*) count FROM pipeline.chat_messages')['count'], 2)
+        self.assertIsNone(self.store.one("SELECT id FROM pipeline.jobs WHERE kind='twitch_event'"))
+
+    def test_ambiguous_twitch_start_waits_without_guessing_and_precedes_deferred_chat(self):
+        second = identifier()
+        self.store.execute("""INSERT INTO pipeline.broadcasts(id,event,day,region,channel_id,youtube_id,state,actual_start)
+            VALUES (%s,'Champions','2026-10-04','international','official','secondlive1','live','2026-10-04T10:00:00Z')""", (second,))
+        channel = {'broadcaster_user_id': '8', 'login': 'fns', 'official_youtube_channel_id': 'official'}
+        envelope = {'metadata': {'message_id': 'ambiguous-online', 'message_timestamp': '2026-10-04T10:02:00Z'},
+                    'payload': {'subscription': {'type': 'stream.online'}, 'event': {
+                        'broadcaster_user_id': '8', 'id': '123456789', 'started_at': '2026-10-04T10:00:00Z'}}}
+        self.store.enqueue('twitch_event', 'old-chat', priority=-30)
+        ingest_event(self.store, envelope, [channel])
+        self.assertIsNone(self.store.one("SELECT id FROM pipeline.sources WHERE provider='twitch'"))
+        job = self.store.claim()
+        self.assertEqual(job['dedupe_key'], 'twitch-event:ambiguous-online')
+        with self.assertRaises(WaitingWork):
+            TwitchCapture(self.store, self.config, Mock()).event(job)
+
+    def test_late_twitch_watchparty_vod_can_overlap_the_middle_of_a_broadcast(self):
+        self.store.execute('UPDATE pipeline.broadcasts SET day=CURRENT_DATE WHERE id=%s', (self.broadcast,))
+        channel = {'login': 'fns', 'role': 'watch_party', 'official_youtube_channel_id': 'official'}
+        job = self.job('associate_twitch_vod', payload={'channel': channel, 'vod_id': '123456789'})
+        remote = {'actual_start': timestamp('2026-10-04T11:20:00Z'), 'duration': 3600}
+        with patch('pipeline.twitch.resolve_twitch', return_value=remote):
+            TwitchCapture(self.store, self.config, Mock()).associate_vod(job)
+        self.assertEqual(self.store.one("SELECT broadcast_id FROM pipeline.sources WHERE provider='twitch'")['broadcast_id'], self.broadcast)
+
     def test_bounded_retry_is_per_job(self):
         first = self.job("probe_archive")
         self.store.execute("UPDATE pipeline.jobs SET max_attempts=1 WHERE id=%s", (first["id"],))
@@ -3517,6 +3605,39 @@ class DatabasePipelineTests(unittest.TestCase):
         source = self.entities()[1]
         self.assertEqual(source["checkpoint_time"], 109)
         self.assertEqual(source["detector_state"]["media_sequence"], 21)
+
+    def test_live_catchup_drains_more_than_four_segments_and_yields_with_every_frame_saved(self):
+        import numpy as np
+        from detector import Observation
+
+        for clock, expected_segments in (([0, 10, 20, 30, 40, 50, 60], 6), ([0] * 49, 48)):
+            with self.subTest(expected_segments=expected_segments):
+                self.store.execute('TRUNCATE pipeline.jobs CASCADE')
+                self.store.execute("UPDATE pipeline.sources SET checkpoint_time=-1,detector_state='{}' WHERE id=%s", (self.source,))
+                job = self.job('live')
+                media = Mock()
+                media.scan_frames.side_effect = lambda *args, **kwargs: MediaAnalysis.scan_frames(media, *args, **kwargs)
+                media.manifest.return_value = [
+                    {'wall_time': timestamp('2026-10-04T10:00:00Z') + timedelta(seconds=5 * number),
+                     'duration': 5, 'sequence': number} for number in range(60)]
+                decoded = []
+                def frames(*args):
+                    for offset in range(5):
+                        decoded.append(offset)
+                        yield offset, np.zeros((324, 1280, 3), dtype=np.uint8)
+                media.live_frames.side_effect = frames
+                media.observation.side_effect = lambda frame, time, *args, **kwargs: (Observation(time, None, None), {})
+                media.fingerprint.return_value = {'hash': 'ff' * 8}
+                youtube = Mock()
+                youtube.resolve.return_value = {'url': 'fixture'}
+                processing = Processing(self.store, self.config, self.storage, youtube=youtube, media=media)
+                with patch('pipeline.processing.monotonic', side_effect=clock):
+                    processing.live(job)
+                self.assertEqual(media.live_frames.call_count, expected_segments)
+                self.assertEqual(len(decoded), expected_segments * 5)
+                source = self.entities()[1]
+                self.assertEqual(source['checkpoint_time'], expected_segments * 5 - 1)
+                self.assertEqual(source['detector_state']['media_sequence'], expected_segments - 1)
 
 
 if __name__ == "__main__":

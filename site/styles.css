@@ -229,6 +229,8 @@ main { width: min(1540px, calc(100% - 48px)); margin: 0 auto; }
 .control-group + .control-group { padding-left: 12px; border-left: 1px solid var(--line-soft); }
 .player-controls button { min-width: 52px; height: 44px; border: 1px solid transparent; background: transparent; color: #a5ada7; padding: 0 13px; cursor: pointer; font-size: 12px; font-weight: 800; }
 .player-controls button:hover:not(:disabled) { border-color: var(--line); color: var(--text); }
+.player-controls #captions-button { width: 44px; min-width: 44px; padding: 0; display: inline-flex; align-items: center; justify-content: center; }
+.player-controls #captions-button[aria-pressed="true"] { color: var(--lime); border-color: var(--line); }
 .player-controls input { width: 100px; accent-color: var(--lime); }
 .player-controls input:disabled { opacity: .35; }
 .quality-control { height: 42px; display: inline-flex; align-items: center; }

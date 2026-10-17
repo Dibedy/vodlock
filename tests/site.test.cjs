@@ -20,7 +20,12 @@ function playerStartup() {
   let now = 0;
   let sequence = 0;
   const player = {
-    time: 9000, status: 1, muted: false,
+    time: 9000, status: 1, muted: false, modules: [], captionsActive: false,
+    getOptions() { return this.modules; },
+    loadModule(module) { this.modules = [module]; this.captionsActive = true; calls.push(['loadModule', module]); },
+    unloadModule(module) { this.captionsActive = false; calls.push(['unloadModule', module]); },
+    enableCaptions() { calls.push('enableCaptions'); },
+    disableCaptions() { calls.push('disableCaptions'); },
     getCurrentTime() { return this.time; },
     getPlayerState() { return this.status; },
     isMuted() { return this.muted; },
@@ -32,9 +37,9 @@ function playerStartup() {
     destroy() { calls.push('destroy'); }
   };
   const state = {entry: {provider: 'youtube', sourceId: 'ZphbktbT26k'}, index: {rounds: [{start: 100}], leadSeconds: 5}, player, resumeTime: null, ready: false, started: true};
-  const sandbox = vm.createContext({state, Date: {now: () => now}, settings: {},
+  const sandbox = vm.createContext({state, Date: {now: () => now}, settings: {showCaptions: false},
     YT: {PlayerState: {PLAYING: 1, ENDED: 0}, Player: function(host, options) { calls.push(['create', options]); return player; }},
-    $: id => { if (!elements.has(id)) elements.set(id, {hidden: false, disabled: true, value: '50', replaceChildren() {}}); return elements.get(id); },
+    $: id => { if (!elements.has(id)) elements.set(id, {hidden: false, disabled: true, value: '50', replaceChildren() {}, setAttribute(key, value) {this[key] = value;}}); return elements.get(id); },
     setInterval: callback => { const id = ++sequence; intervals.set(id, callback); return id; },
     clearInterval: id => intervals.delete(id), setTimeout: callback => callback(),
     preventTwitchNativeFullscreen() {}, setVolume() {}, setPlaybackControlsDisabled(value) { calls.push(['disabled', value]); },
@@ -43,6 +48,7 @@ function playerStartup() {
   });
   vm.runInContext(app.slice(app.indexOf('  function destroyPlayer('), app.indexOf('  function renderChat(')), sandbox);
   vm.runInContext(app.slice(app.indexOf('  function playerReady('), app.indexOf('  function createTwitchPlayer(')), sandbox);
+  vm.runInContext(app.slice(app.indexOf('  function applyCaptions('), app.indexOf('  function setPlaybackControlsDisabled(')), sandbox);
   return {sandbox, state, player, calls, elements, intervals, tick(milliseconds = 100) { now += milliseconds; for (const callback of [...intervals.values()]) callback(); }};
 }
 
@@ -65,6 +71,88 @@ test('YouTube startup corrects an ignored live seek before revealing or unmuting
   assert.equal(startup.state.ready, true);
   assert.equal(startup.player.muted, false);
   assert.equal(startup.elements.get('start-gate').hidden, true);
+});
+
+test('YouTube captions are explicitly disabled even when inherited preferences load them later', () => {
+  const startup = playerStartup();
+  startup.sandbox.createYouTubePlayer();
+  const options = startup.calls.find(call => call[0] === 'create')[1];
+  assert.equal(options.playerVars.cc_load_policy, 0);
+  startup.player.modules = ['captions'];
+  startup.player.captionsActive = true;
+  options.events.onReady({target: startup.player});
+  assert.equal(startup.player.captionsActive, false);
+  startup.player.captionsActive = true;
+  options.events.onApiChange({target: startup.player});
+  assert.equal(startup.player.captionsActive, false);
+  startup.player.captionsActive = true;
+  options.events.onStateChange({target: startup.player, data: 1});
+  assert.equal(startup.player.captionsActive, false);
+  assert.equal(startup.elements.get('captions-button')['aria-pressed'], 'false');
+});
+
+test('caption module changes are idempotent and ignore events from replaced players', () => {
+  const startup = playerStartup();
+  startup.sandbox.createYouTubePlayer();
+  const options = startup.calls.find(call => call[0] === 'create')[1];
+  options.events.onApiChange({target: startup.player});
+  assert.equal(startup.calls.some(call => Array.isArray(call) && call[0] === 'unloadModule'), false);
+  startup.player.modules = ['captions'];
+  options.events.onApiChange({target: {}});
+  assert.deepEqual(startup.player.modules, ['captions']);
+  startup.sandbox.settings.showCaptions = true;
+  startup.sandbox.applyCaptions();
+  options.events.onApiChange({target: startup.player});
+  options.events.onApiChange({target: startup.player});
+  assert.equal(startup.calls.filter(call => Array.isArray(call) && call[0] === 'loadModule').length, 1);
+});
+
+test('caption control persists the preference and reflects it in settings and player state', () => {
+  const startup = playerStartup();
+  let saved = null;
+  startup.sandbox.saveSettings = () => {saved = startup.sandbox.settings.showCaptions;};
+  startup.sandbox.applySettings = () => startup.sandbox.applyCaptions();
+  startup.state.ready = true;
+  startup.sandbox.applyCaptions();
+  startup.sandbox.toggleCaptions();
+  assert.equal(saved, true);
+  assert.deepEqual(startup.player.modules, ['captions']);
+  assert.equal(startup.elements.get('captions-button')['aria-pressed'], 'true');
+  startup.sandbox.createYouTubePlayer();
+  assert.equal(startup.calls.find(call => call[0] === 'create')[1].playerVars.cc_load_policy, 1);
+  startup.sandbox.toggleCaptions();
+  assert.equal(saved, false);
+  assert.equal(startup.player.captionsActive, false);
+  assert.equal(startup.elements.get('captions-button')['aria-pressed'], 'false');
+  startup.sandbox.destroyPlayer();
+  assert.equal(startup.elements.get('captions-button').disabled, true);
+});
+
+test('Twitch captions use its native API and unsupported players keep the control disabled', () => {
+  const startup = playerStartup();
+  startup.state.entry.provider = 'twitch';
+  startup.sandbox.playerReady();
+  assert.ok(startup.calls.includes('disableCaptions'));
+  startup.sandbox.settings.showCaptions = true;
+  startup.sandbox.applyCaptions();
+  assert.ok(startup.calls.includes('enableCaptions'));
+  startup.player.enableCaptions = undefined;
+  startup.sandbox.applyCaptions();
+  assert.equal(startup.elements.get('captions-button').disabled, true);
+});
+
+test('captions default to off, restore boolean preferences and have a keyboard shortcut', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  const declaration = app.match(/  const defaultSettings = .*;/)[0];
+  for (const saved of [{}, {showCaptions: true}, {showCaptions: false}, {showCaptions: 'true'}]) {
+    const sandbox = vm.createContext({localStorage: {getItem: () => JSON.stringify(saved)}});
+    vm.runInContext(declaration + app.slice(app.indexOf('  function readSettings('), app.indexOf('  function saveSettings(')), sandbox);
+    assert.equal(sandbox.readSettings().showCaptions, saved.showCaptions === true);
+  }
+  assert.match(app, /c: toggleCaptions,\s+C: toggleCaptions/);
+  const html = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
+  assert.match(html, /id="captions-button"[^>]*aria-pressed="false"/);
+  assert.match(html, /id="setting-show-captions" type="checkbox"/);
 });
 
 test('YouTube startup fails closed when the indexed position cannot be reached', () => {
@@ -258,7 +346,7 @@ test('grouped settings preserve fullscreen chat preferences with native radio co
   const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
   const html = readFileSync(resolve(__dirname, '../site/index.html'), 'utf8');
   for (const title of ['Playback', 'Spoiler protection', 'Chat', 'Keyboard']) assert.ok(html.includes('>' + title + '</h3>'));
-  assert.equal((html.match(/role="switch"/g) || []).length, 9);
+  assert.equal((html.match(/role="switch"/g) || []).length, 10);
   const options = ['left', 'right', 'hidden'].map(value => ({value, checked: false}));
   const controls = new Map();
   const $ = id => {
@@ -268,7 +356,7 @@ test('grouped settings preserve fullscreen chat preferences with native radio co
   };
   Object.assign($('setting-fullscreen-chat-position'), {tagName: 'FIELDSET', querySelectorAll: () => options});
   let saved = JSON.stringify({fullscreenChatPosition: 'right', autoSkipSecondRounds: true});
-  const sandbox = vm.createContext({$, state: {}, renderChat() {}, updateStatus() {},
+  const sandbox = vm.createContext({$, state: {}, renderChat() {}, updateStatus() {}, applyCaptions() {},
     localStorage: {getItem: () => saved, setItem(key, value) {saved = value;}}});
   const declarations = app.slice(app.indexOf('  const defaultSettings ='), app.indexOf('  const teamLogos ='));
   vm.runInContext(declarations + app.slice(app.indexOf('  function readSettings('), app.indexOf('  function readKeybinds(')) +

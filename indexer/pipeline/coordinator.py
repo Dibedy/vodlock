@@ -40,8 +40,6 @@ class Coordinator:
                 bucket = int(datetime.now(timezone.utc).timestamp() // 1800)
                 self.store.enqueue("discover_twitch_vods", f"discover-twitch-vods:{channel['login']}:{bucket}",
                                    payload={"channel": channel}, priority=-50)
-        if not self.config.shadow and settings.get("deployment"):
-            self.store.enqueue("deploy", "deploy:site", priority=50)
         routes: dict[str, list[dict]] = {}
         for setting, kind in [("youtube_channels", "associate"), ("full_match_channels", "associate_upload"),
                               ("watchparty_youtube_channels", "associate_watchparty")]:

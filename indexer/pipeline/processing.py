@@ -3,6 +3,7 @@ import math
 import statistics
 import hashlib
 import json
+from time import monotonic
 from datetime import timedelta
 from typing import Any
 
@@ -86,6 +87,7 @@ class Processing:
         detector = CandidateDetector(source["detector_state"])
         checkpoint = source["checkpoint_time"]
         processed = 0
+        begun = monotonic()
         for segment in segments:
             wall = segment["wall_time"]
             if wall is None:
@@ -141,7 +143,7 @@ class Processing:
             self.store.checkpoint(job, source, checkpoint, state, candidates, fingerprints)
             self.store.heartbeat(job, self.config.lease_seconds)
             processed += 1
-            if processed >= 4:
+            if processed >= 48 or monotonic() - begun >= 60:
                 break
         self.store.enqueue("segment", f"segment:{broadcast['id']}", broadcast=broadcast["id"])
         if segments[0]["wall_time"]:

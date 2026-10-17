@@ -75,7 +75,8 @@
   ],
   "deployment": {
     "repository": "https://github.com/Dibedy/vodlock.git",
-    "branch": "main"
+    "branch": "main",
+    "daily_deployment_limit": 30
   },
   "processing_slots": 2,
   "archive_start_seconds": {

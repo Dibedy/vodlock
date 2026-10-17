@@ -249,7 +249,7 @@ def export_snapshot(store, storage, shadow=True, approved_broadcasts=None, conne
             chat_source = connection.execute(
                 """SELECT s.*,a.mapping FROM pipeline.alignments a JOIN pipeline.sources s ON s.id=a.source_id
                                              WHERE a.canonical_source_id=%s AND a.kind='secondary' AND a.canonical_revision=%s AND a.source_revision=s.revision AND s.provider='twitch' AND s.role='official_twitch'
-                                             AND EXISTS (SELECT 1 FROM pipeline.chat_messages m WHERE m.source_id=s.id)
+                                             AND s.state<>'superseded' AND EXISTS (SELECT 1 FROM pipeline.chat_messages m WHERE m.source_id=s.id)
                                              ORDER BY a.created_at DESC LIMIT 1""",
                 (source["id"], index["archive_revision"]),
             ).fetchone()
@@ -309,7 +309,7 @@ def export_snapshot(store, storage, shadow=True, approved_broadcasts=None, conne
                 """SELECT s.*,a.mapping,a.revision AS alignment_version FROM pipeline.sources s
                    LEFT JOIN pipeline.alignments a ON a.source_id=s.id AND a.canonical_source_id=%s
                    AND a.source_revision=s.revision AND a.canonical_revision=%s AND a.kind='secondary'
-                   WHERE s.broadcast_id=%s AND s.role='watch_party' AND (s.provider='youtube' OR s.metadata ? 'vod_id')
+                   WHERE s.broadcast_id=%s AND s.role='watch_party' AND s.state<>'superseded' AND (s.provider='youtube' OR s.metadata ? 'vod_id')
                    ORDER BY s.provider,s.external_id""",
                 (canonical["id"], index["archive_revision"], index["broadcast_id"])).fetchall():
                 provider = secondary["provider"]
@@ -347,7 +347,7 @@ def export_snapshot(store, storage, shadow=True, approved_broadcasts=None, conne
                         """SELECT s.*,a.mapping FROM pipeline.sources s JOIN pipeline.alignments a ON a.source_id=s.id
                            AND a.canonical_source_id=%s AND a.source_revision=s.revision AND a.canonical_revision=%s
                            AND a.kind='secondary' WHERE s.broadcast_id=%s AND s.provider='twitch'
-                           AND s.role='watch_party' AND s.metadata->>'login'=%s AND s.metadata ? 'vod_id'
+                           AND s.role='watch_party' AND s.state<>'superseded' AND s.metadata->>'login'=%s AND s.metadata ? 'vod_id'
                            ORDER BY s.external_id""",
                         (canonical["id"], index["archive_revision"], index["broadcast_id"], secondary["metadata"].get("login"))).fetchall()
                     chat_source = None

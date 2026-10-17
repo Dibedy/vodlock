@@ -9,6 +9,8 @@ test('VOD processing and site deployment use independent workflows', () => {
   const publisher = workflow('auto-publish.yml');
   const deployment = workflow('deploy-site.yml');
   assert.doesNotMatch(publisher, /^  push:/m);
+  assert.doesNotMatch(publisher, /^  schedule:/m);
+  assert.match(publisher, /^  workflow_dispatch:/m);
   assert.doesNotMatch(publisher, /vercel@latest|Deploy production site/);
   assert.match(publisher, /cancel-in-progress: false/);
   assert.match(deployment, /^  push:/m);

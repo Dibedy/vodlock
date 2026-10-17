@@ -1,8 +1,6 @@
 name: Auto-publish VOD indexes
 
 on:
-  schedule:
-    - cron: "0,15,30,45 * * * *"
   workflow_dispatch:
     inputs:
       process_vods:

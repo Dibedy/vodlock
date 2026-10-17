@@ -319,6 +319,8 @@ class Coordinator:
                                actual_start=COALESCE(actual_start,%s),actual_end=COALESCE(actual_end,%s),metadata=%s,updated_at=now() WHERE id=%s""",
                 (state, state, info["actual_start"], info["actual_end"], Jsonb(info["metadata"]), broadcast["id"]),
             )
+            connection.execute("UPDATE pipeline.sources SET actual_start=COALESCE(actual_start,%s) WHERE id=%s",
+                               (info['actual_start'] or broadcast['actual_start'], source['id']))
             if state == "live":
                 self.store.enqueue(
                     "live",

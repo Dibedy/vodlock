@@ -1312,6 +1312,23 @@ class DatabasePipelineTests(unittest.TestCase):
                 (identifier(), self.broadcast),
             )
 
+    def test_scheduled_source_receives_live_clock_without_resetting_saved_capture(self):
+        self.store.execute("UPDATE pipeline.sources SET actual_start=NULL,checkpoint_time=1234,detector_state=%s WHERE id=%s",
+                           (Jsonb({'media_sequence': 247}), self.source))
+        youtube = Mock()
+        youtube.metadata.return_value = {'state': 'live', 'actual_start': timestamp('2026-10-04T10:00:00Z'),
+                                         'actual_end': None, 'metadata': {}}
+        coordinator = Coordinator(self.store, self.config, youtube=youtube)
+        job = self.job('refresh')
+        coordinator.refresh(job)
+        saved = self.entities()[1]
+        self.assertEqual(saved['actual_start'], timestamp('2026-10-04T10:00:00Z'))
+        self.assertEqual(saved['checkpoint_time'], 1234)
+        self.assertEqual(saved['detector_state'], {'media_sequence': 247})
+        youtube.metadata.return_value['actual_start'] = timestamp('2026-10-04T10:01:00Z')
+        coordinator.refresh(job)
+        self.assertEqual(self.entities()[1]['actual_start'], saved['actual_start'])
+
     def test_manual_broadcast_assignment_is_durable_control_plane_metadata(self):
         self.store.execute(
             "UPDATE pipeline.expected_matches SET broadcast_id=NULL,completion='expected' WHERE id=%s", (self.match,)

@@ -4,6 +4,23 @@
   "videos": [
     {
       "provider": "youtube",
+      "sourceId": "QJMvaUZjaNw",
+      "catalogId": "youtube:f8e5f8a3452d5be8:QJMvaUZjaNw",
+      "title": "100T vs VIT",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Full match",
+      "index": "/indexes/youtube-QJMvaUZjaNw-f8e5f8a3452d5be8-v2-82089da22808.json",
+      "playedAt": "2026-10-17T08:05:26+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "4eab6aba-8e40-5de7-b128-4b849e7aeb28",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 2,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
       "sourceId": "QEDpGS4GXBg",
       "catalogId": "youtube:53a0364234f15f96:QEDpGS4GXBg",
       "title": "G2 vs 100T",
@@ -1225,6 +1242,45 @@
       "chatChannelId": null,
       "canonicalPipeline": true,
       "reason": "waiting_alignment"
+    },
+    {
+      "expectedMatchId": "4eab6aba-8e40-5de7-b128-4b849e7aeb28",
+      "catalogId": "twitch:2902970797:f8e5f8a3452d5be8",
+      "provider": "twitch",
+      "sourceId": "2902970797",
+      "kind": "watch-party",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 2,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 0,
+      "reason": "waiting_alignment",
+      "canonicalPipeline": true
+    },
+    {
+      "expectedMatchId": "4eab6aba-8e40-5de7-b128-4b849e7aeb28",
+      "catalogId": "twitch:2903019305:f8e5f8a3452d5be8",
+      "provider": "twitch",
+      "sourceId": "2903019305",
+      "kind": "watch-party",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 2,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 0,
+      "reason": "waiting_alignment",
+      "canonicalPipeline": true
+    },
+    {
+      "expectedMatchId": "4eab6aba-8e40-5de7-b128-4b849e7aeb28",
+      "catalogId": "youtube:TtS9cwu3wcI:f8e5f8a3452d5be8",
+      "provider": "youtube",
+      "sourceId": "TtS9cwu3wcI",
+      "kind": "watch-party",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 2,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 0,
+      "reason": "waiting_alignment",
+      "canonicalPipeline": true
     }
   ]
 }

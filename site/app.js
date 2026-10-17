@@ -1456,6 +1456,7 @@
 
   document.addEventListener('keydown', event => {
     if ($('player-view').hidden || ['INPUT', 'TEXTAREA', 'SELECT'].includes(event.target.tagName)) return;
+    if (event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.key === 'Escape' && state.windowFullscreen) {
       event.preventDefault();
       setWindowFullscreen(false);
@@ -1495,7 +1496,7 @@
     };
     if (!actions[key]) return;
     event.preventDefault();
-    if (!event.repeat || key !== ' ') actions[key]();
+    if (!event.repeat || ![' ', 'c', 'C'].includes(key)) actions[key]();
   }, true);
 
   addEventListener('popstate', () => {

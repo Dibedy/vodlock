@@ -155,6 +155,30 @@ test('captions default to off, restore boolean preferences and have a keyboard s
   assert.match(html, /id="setting-show-captions" type="checkbox"/);
 });
 
+test('caption shortcut toggles once and leaves copy, browser shortcuts and form inputs alone', () => {
+  const app = readFileSync(resolve(__dirname, '../site/app.js'), 'utf8');
+  let handler, toggles = 0, prevented = 0;
+  const noop = () => {};
+  const sandbox = vm.createContext({
+    $: () => ({hidden: false, open: false}), state: {started: true}, keybinds: {},
+    document: {addEventListener(name, callback) {handler = callback;}},
+    togglePlayback: noop, toggleFullscreen: noop, toggleTheater: noop, toggleMute: noop,
+    toggleCaptions() {toggles++;},
+  });
+  const start = app.lastIndexOf("  document.addEventListener('keydown', event => {");
+  vm.runInContext(app.slice(start, app.indexOf("  addEventListener('popstate'", start)), sandbox);
+  const event = {key: 'c', code: 'KeyC', target: {tagName: 'DIV'}, preventDefault() {prevented++;}};
+  for (const modifier of ['ctrlKey', 'metaKey', 'altKey']) handler({...event, [modifier]: true});
+  handler({...event, target: {tagName: 'INPUT'}});
+  assert.equal(toggles, 0);
+  assert.equal(prevented, 0);
+  handler(event);
+  handler({...event, repeat: true});
+  assert.equal(toggles, 1);
+  handler({...event, key: 'C'});
+  assert.equal(toggles, 2);
+});
+
 test('YouTube startup fails closed when the indexed position cannot be reached', () => {
   const startup = playerStartup();
   startup.sandbox.playerReady({target: startup.player});

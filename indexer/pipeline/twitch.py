@@ -658,8 +658,13 @@ class TwitchCapture:
                 samples = [observation_from_dict(item) for item in search["samples"]] if attempt == search["attempt"] else []
                 resume = max(lower, samples[-1].time + 1) if samples else lower
                 window = self.media.watchparty_window(remote, resume, upper)
+                loading = time.monotonic()
+                acquired = False
                 try:
                     for sample, _, _ in window:
+                        if not acquired:
+                            begun += time.monotonic() - loading
+                            acquired = True
                         self.processing.check_stop()
                         samples.append(sample)
                         section = scoreboard_section(samples, value, start, scale)

@@ -703,7 +703,7 @@ class DatabasePipelineTests(unittest.TestCase):
         media = Mock()
         media.watchparty_window.side_effect = window
         capture = TwitchCapture(self.store, self.config, Processing(self.store, self.config, self.storage), media=media)
-        with patch("pipeline.twitch.resolve_twitch", return_value={"duration": 1000}), patch("pipeline.twitch.time.monotonic", side_effect=[0, 50]):
+        with patch("pipeline.twitch.resolve_twitch", return_value={"duration": 1000}), patch("pipeline.twitch.time.monotonic", side_effect=[0, 0, 0, 50]):
             with self.assertRaisesRegex(ContinueJob, "time slice"):
                 capture.check_rounds(job, broadcast, source, canonical, mapping, 1)
         job = self.store.one("SELECT * FROM pipeline.jobs WHERE id=%s", (job["id"],))
@@ -731,20 +731,37 @@ class DatabasePipelineTests(unittest.TestCase):
         media = Mock()
         media.watchparty_window.side_effect = lambda *args: ((Observation(200 + second, 1, 100 - second, .99, scores=(0, 0)), {}, None) for second in range(6))
         capture = TwitchCapture(self.store, self.config, Processing(self.store, self.config, self.storage), media)
-        with patch.object(capture, 'resolve_archive', return_value={'duration': 1000}), patch('pipeline.twitch.time.monotonic', side_effect=[0, 50]):
+        with patch.object(capture, 'resolve_archive', return_value={'duration': 1000}), patch('pipeline.twitch.time.monotonic', side_effect=[0, 0, 60, 110]):
             result = capture.check_rounds(job, broadcast, source, canonical, mapping, 0)
         self.assertEqual(media.watchparty_window.call_count, 1)
         self.assertEqual(next(iter(result['roundChecks'].values()))['status'], 'verified')
         self.store.execute("UPDATE pipeline.jobs SET payload='{}' WHERE id=%s", (job['id'],))
         media.watchparty_window.reset_mock()
         media.watchparty_window.side_effect = lambda remote, lower, upper: (item for item in [(Observation(lower, None, None, 0), {}, None)])
-        with patch.object(capture, 'resolve_archive', return_value={'duration': 1000}), patch('pipeline.twitch.time.monotonic', side_effect=[0, 50]):
+        with patch.object(capture, 'resolve_archive', return_value={'duration': 1000}), patch('pipeline.twitch.time.monotonic', side_effect=[0, 0, 60, 60, 60, 110]):
             with self.assertRaisesRegex(ContinueJob, 'time slice'):
                 capture.check_rounds(job, broadcast, source, canonical, mapping, 0)
         search = self.store.one('SELECT payload FROM pipeline.jobs WHERE id=%s', (job['id'],))['payload']['scoreboard_search']
         self.assertEqual(media.watchparty_window.call_count, 2)
         self.assertEqual(search['attempt'], 1)
         self.assertEqual(len(search['samples']), 1)
+        self.store.execute("UPDATE pipeline.jobs SET payload='{}' WHERE id=%s", (job['id'],))
+        clock = [0.0]
+        calls = []
+        def slow_window(remote, lower, upper):
+            calls.append(lower)
+            clock[0] += 60
+            if len(calls) == 1:
+                yield Observation(lower, None, None, 0), {}, None
+            else:
+                for second in range(6):
+                    clock[0] += .1
+                    yield Observation(200 + second, 1, 100 - second, .99, scores=(0, 0)), {}, None
+        media.watchparty_window.side_effect = slow_window
+        with patch.object(capture, 'resolve_archive', return_value={'duration': 1000}), patch('pipeline.twitch.time.monotonic', side_effect=lambda: clock[0]):
+            result = capture.check_rounds(job, broadcast, source, canonical, mapping, 0)
+        self.assertEqual(len(calls), 2)
+        self.assertEqual(next(iter(result['roundChecks'].values()))['status'], 'verified')
 
     def test_optional_alignment_does_not_block_official_work_and_rejects_stale_sources(self):
         twitch = identifier()

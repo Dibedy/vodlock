@@ -12,6 +12,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 from urllib.error import HTTPError
 from urllib.request import Request, urlopen
+from urllib.parse import parse_qs, urlsplit
 
 if importlib.util.find_spec("psycopg") is None:
     raise unittest.SkipTest("Install indexer/requirements-worker.txt to run persistent pipeline tests")
@@ -47,6 +48,10 @@ from pipeline.worker import Worker, status_server
 
 
 FIXTURES = Path(__file__).parent / "fixtures" / "pipeline"
+
+
+def json_bytes_for_schedule(events):
+    return json.dumps({'data': {'esports': {'events': events, 'pages': {'older': None, 'newer': None}}}}).encode()
 
 
 def series(teams=("A", "B"), base=100, maps=1, first_map=1, pause=None):
@@ -1693,7 +1698,7 @@ if has_bgutil:
         data = ("<script>transport.push(" + json.dumps(events, separators=(",", ":")) + ")</script>").encode()
         provider = RiotSchedule(
             [{"league": "champions", "channel_id": "official", "region": "international", "timezone": "Asia/Shanghai"}],
-            requester=lambda *_: data,
+            requester=lambda url, *args: json_bytes_for_schedule([]) if '/api/gql?' in url else data,
         )
         values = provider.matches()
         self.assertEqual(len(values), 2)
@@ -1703,6 +1708,38 @@ if has_bgutil:
         self.assertNotIn("start", values[0])
         with self.assertRaises(ValueError):
             riot_events("<html>Schema changed</html>")
+
+    def test_official_schedule_api_supplies_live_matches_missing_from_homepage(self):
+        events = json.loads((FIXTURES / 'riot-events.json').read_text(encoding='utf-8'))
+        html = json.dumps([events[0]], separators=(',', ':')).encode()
+        live = {**events[1], 'state': 'inProgress'}
+        calls = []
+        def request(url, headers=None):
+            calls.append((url, headers))
+            return json_bytes_for_schedule([{**events[0], 'state': 'completed'}, live]) if '/api/gql?' in url else html
+        provider = RiotSchedule([{'league': 'champions', 'channel_id': 'official', 'region': 'international'}], requester=request)
+        values = provider.matches()
+        self.assertEqual([value['completion'] for value in values], ['completed', 'running'])
+        variables = json.loads(parse_qs(urlsplit(calls[-1][0]).query)['variables'][0])
+        self.assertEqual(variables['eventState'], ['completed', 'inProgress', 'unstarted'])
+        self.assertEqual(variables['leagues'], [events[0]['league']['id']])
+        self.assertEqual(calls[-1][1]['Content-Type'], 'application/json')
+        live['state'] = 'completed'
+        self.assertEqual([value['completion'] for value in provider.matches()], ['completed', 'completed'])
+
+    def test_schedule_api_errors_or_partial_pages_preserve_homepage_evidence(self):
+        events = json.loads((FIXTURES / 'riot-events.json').read_text(encoding='utf-8'))
+        html = json.dumps(events, separators=(',', ':')).encode()
+        for response in [b'{"errors":[{"message":"Query changed"}]}',
+                         json.dumps({'data': {'esports': {'events': [], 'pages': {'older': 'next-page'}}}}).encode(),
+                         b'{"data":{"esports":{"events":[{"__typename":"EventMatch"}],"pages":{}}}}']:
+            with self.subTest(response=response):
+                provider = RiotSchedule([{'league': 'champions', 'channel_id': 'official', 'region': 'international'}],
+                    requester=lambda url, *args: response if '/api/gql?' in url else html)
+                with self.assertLogs('pipeline.schedule', level='WARNING'):
+                    values = provider.matches()
+                self.assertEqual(len(values), 2)
+                self.assertEqual([value['completion'] for value in values], ['expected', 'expected'])
 
     def test_team_identity_requires_two_confident_names(self):
         aliases = {"PRX": ["Paper Rex", "PRX"], "NRG": ["NRG"]}

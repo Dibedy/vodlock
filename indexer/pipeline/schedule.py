@@ -2,10 +2,11 @@ import json
 import logging
 import re
 from collections import defaultdict
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Protocol
 from urllib.request import Request, urlopen
+from urllib.parse import urlencode
 from zoneinfo import ZoneInfo
 
 from psycopg.types.json import Jsonb
@@ -47,6 +48,38 @@ class RiotSchedule:
 
     def matches(self):
         events = riot_events(self.requester(self.url).decode("utf-8"))
+        leagues = sorted({str(route['league_id']) for route in self.routes if route.get('league_id')} |
+                         {str(event['league']['id']) for event in events if event['league'].get('id')
+                          and any(route['league'] == event['league']['slug'] for route in self.routes)})
+        if leagues:
+            try:
+                now = datetime.now(timezone.utc)
+                variables = {'hl': 'en-US', 'sport': 'val', 'leagues': leagues,
+                             'eventState': ['completed', 'inProgress', 'unstarted'], 'eventType': 'all',
+                             'vodType': ['recap'], 'pageSize': 300,
+                             'eventDateStart': (now - timedelta(days=14)).isoformat(),
+                             'eventDateEnd': (now + timedelta(days=7)).isoformat()}
+                query = urlencode({'operationName': 'homeEvents', 'variables': json.dumps(variables, separators=(',', ':')),
+                                   'extensions': json.dumps({'persistedQuery': {'version': 1, 'sha256Hash':
+                                       'a4ca0434b4c3af4f3f95b4d7b03fe2a3fcdda0a36887d4f181da99cf3786f664'}}, separators=(',', ':'))})
+                # The public site's live matches are client-loaded, not included in its HTML schedule.
+                response = json.loads(self.requester('https://valorantesports.com/api/gql?' + query,
+                    {'Content-Type': 'application/json', 'apollographql-client-name': 'Esports Web',
+                     'apollographql-client-version': 'a93ba50', 'Referer': self.url}))
+                if response.get('errors'):
+                    raise ValueError('Official schedule API rejected its persisted query')
+                data = response['data']['esports']
+                if not isinstance(data['events'], list) or any(data['pages'].get(key) for key in ('older', 'newer')):
+                    raise ValueError('Official schedule API returned incomplete event coverage')
+                updated = {}
+                for event in data['events']:
+                    if event.get('__typename') == 'EventMatch':
+                        if not all(key in event for key in ('id', 'state', 'startTime', 'league', 'match', 'matchTeams', 'tournament')):
+                            raise ValueError('Official schedule API returned an invalid match record')
+                        updated[event['id']] = event
+                events = list({**{event['id']: event for event in events}, **updated}.values())
+            except (OSError, ValueError, KeyError, TypeError) as error:
+                LOG.warning('schedule_live_updates_unavailable reason=%s', error)
         result = []
         groups = defaultdict(list)
         for event in sorted(events, key=lambda item: (item["startTime"], item["id"])):

@@ -12,6 +12,7 @@
   "schedule_routes": [
     {
       "league": "champions",
+      "league_id": "107254585505459304",
       "channel_id": "UCA1d3HFGFUmkKr2JIUA5Vlw",
       "region": "international",
       "timezone": "Asia/Shanghai"

@@ -1825,6 +1825,15 @@ class DatabasePipelineTests(unittest.TestCase):
         self.assertEqual(upload["attempt_count"], 0)
         self.assertEqual(upload["failure_count"], 0)
 
+    def test_archive_probe_precedes_aged_dependent_validation_and_exports(self):
+        self.store.execute("UPDATE pipeline.broadcasts SET day=CURRENT_DATE WHERE id=%s", (self.broadcast,))
+        self.store.enqueue('validate', 'dependent-validation', broadcast=self.broadcast, source=self.source,
+                           match=self.match, priority=100, payload={'segment_id': str(self.segment)})
+        self.store.enqueue('export', 'dependent-export', broadcast=self.broadcast, priority=100)
+        self.store.enqueue('probe_archive', 'archive-prerequisite', broadcast=self.broadcast, source=self.source)
+        self.store.execute("UPDATE pipeline.jobs SET available_at=now()-interval '3 minutes'")
+        self.assertEqual(self.store.claim()['dedupe_key'], 'archive-prerequisite')
+
     def test_completed_upload_rechecks_new_segment_without_repeating_ocr(self):
         self.store.execute("UPDATE pipeline.expected_matches SET best_of=3 WHERE id=%s", (self.match,))
         upload = identifier()

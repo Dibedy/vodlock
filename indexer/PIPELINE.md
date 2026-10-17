@@ -2,6 +2,8 @@
 
 ## YouTube watch-party preference
 
+Archive-readiness probes take precedence over dependent validation and export jobs within the current-broadcast queue. Repeated frozen-index checks cannot starve the prerequisite that makes the archive usable. Precise storyboard alignment distinguishes sustained conflicting clock evidence from scattered visual ambiguities: a competing offset must retain five anchors spanning sixty seconds without gaps larger than three observed anchor intervals (at least sixty seconds). Isolated lookalike frames remain excluded, the two-second residual limit is unchanged, and dense interleaved clocks still require review.
+
 Fragmented YouTube DASH archives retain their initialization and timed segment listing. Archive reads download only the segments covering the requested window, then verify original packet timestamps and continuous coverage through the existing bounded video cache. Missing segments and unknown timing remain source waits, not guessed offsets. A configured Android archive client falls back to the normal authenticated clients when that client reports unavailable media; live extraction is unchanged.
 
 Newly ended (`post_live`) archives can instead expose a finite lazy list of self-contained sequence fragments. The extractor accepts only bounded, contiguous sequence numbers with a consistent fragment count and finite target duration, exposing only the available prefix while YouTube finishes its newest segments. Window selection uses that segment grid; actual packet clocks and uninterrupted coverage must still pass before any frames can be used. HTTP headers go to fragment downloads, not FFmpeg's local-file input. Live fragment generators and unknown sequence timing remain rejected.

@@ -11,7 +11,7 @@ import imageio_ffmpeg
 import numpy as np
 
 
-ALIGNER_VERSION = "storyboard-v6"
+ALIGNER_VERSION = "storyboard-v7"
 
 
 def frame_hash(image):
@@ -214,6 +214,19 @@ def precise_segments(matches, scale, tolerance):
     def supported(values):
         return len(values) >= 5 and max(value["target"] for value in values) - min(value["target"] for value in values) >= 60
 
+    times = sorted({value["target"] for value in corrected})
+    maximum_gap = max(60, 3 * float(np.median(np.diff(times)))) if len(times) > 1 else 60
+
+    def sustained(values):
+        run = []
+        for value in sorted(values, key=lambda item: item["target"]):
+            if run and value["target"] - run[-1]["target"] > maximum_gap:
+                run = []
+            run.append(value)
+            if supported(run):
+                return True
+        return False
+
     candidates = []
     for match in corrected:
         cluster = [value for value in corrected if abs(value["offset"] - match["offset"]) <= tolerance]
@@ -251,7 +264,7 @@ def precise_segments(matches, scale, tolerance):
         end = max(value["target"] for value in run["matches"])
         within = [value for value in corrected if start <= value["target"] <= end]
         for group, offset in enumerate(offsets):
-            if group != run["group"] and supported([value for value in within if abs(value["offset"] - offset) <= tolerance]):
+            if group != run["group"] and sustained([value for value in within if abs(value["offset"] - offset) <= tolerance]):
                 raise ValueError("The videos do not have a precise storyboard alignment: interleaved clock offsets")
         verified = [value for value in within if abs(value["offset"] - offsets[run["group"]]) <= tolerance]
         segments.append({"offset": offsets[run["group"]], "matches": verified,

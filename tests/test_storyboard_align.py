@@ -240,6 +240,20 @@ class StoryboardAlignmentTests(unittest.TestCase):
         self.assertEqual([value["offset"] for value in result["segments"]], [8, 0, 8])
         self.assertEqual(result["anchors"], 90)
 
+    def test_precise_alignment_discards_scattered_ambiguities_across_a_long_recording(self):
+        for interval in (10, 100):
+            with self.subTest(interval=interval):
+                ambiguous = set(range(15, 110, 15))
+                target = {"duration": 119 * interval, "interval": interval,
+                          "frames": [{"time": index * interval, "hash": unique_hash(index)} for index in range(120)]}
+                reference = {"duration": 120 * interval, "interval": 2,
+                             "frames": [{"time": index * interval + (8 if index in ambiguous else 0),
+                                         "hash": unique_hash(index)} for index in range(120)]}
+                result = align_storyboards(reference, target, maximum_distance=0, maximum_residual=2)
+                self.assertEqual([value["offset"] for value in result["segments"]], [0])
+                self.assertEqual(result["anchors"], 120 - len(ambiguous))
+                self.assertEqual(result["maximumResidual"], 0)
+
     def test_precise_alignment_rejects_interleaved_offsets_between_stable_ends(self):
         target = {"duration": 600, "interval": 10,
                   "frames": [{"time": index * 10, "hash": unique_hash(index)} for index in range(60)]}

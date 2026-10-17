@@ -930,6 +930,7 @@ class DatabasePipelineTests(unittest.TestCase):
         coordinator.discover()
         self.assertEqual(self.store.one("SELECT count(*) AS total FROM pipeline.jobs WHERE source_id=%s AND dedupe_key LIKE '%%scoreboard-v5%%'", (twitch,))["total"], 2)
         self.store.execute("DELETE FROM pipeline.alignments WHERE source_id=%s", (twitch,))
+        self.store.execute("UPDATE pipeline.jobs SET payload=payload-'scoreboard_checks'-'scoreboard_search' WHERE source_id=%s", (twitch,))
         job["payload"] = {}
         media.watchparty_window.side_effect = lambda *args: (value for value in ())
         media.watchparty_window.reset_mock()

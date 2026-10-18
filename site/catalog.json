@@ -340,40 +340,23 @@
       "canonicalPipeline": true
     },
     {
-      "provider": "youtube",
-      "sourceId": "jdQfyr5hpOU",
-      "catalogId": "youtube:cd1f9a4636255fbf:jdQfyr5hpOU",
-      "title": "100T vs NRG",
-      "event": "Champions Shanghai | Playoffs",
-      "label": "Full match",
-      "index": "/indexes/youtube-jdQfyr5hpOU-cd1f9a4636255fbf-v7-3aeed75fae60.json",
-      "playedAt": "2026-10-11T11:06:49.968000+02:00",
-      "pipelineState": "final",
-      "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
-      "pipelineGeneration": 1,
-      "pipelineVersion": 7,
-      "tournament": "Champions Shanghai",
-      "tournamentKey": "champions-shanghai",
-      "canonicalPipeline": true
-    },
-    {
       "provider": "twitch",
       "sourceId": "2897760313",
-      "catalogId": "twitch:2897760313:cd1f9a4636255fbf",
-      "title": "100T vs NRG",
+      "catalogId": "twitch:2897760313:06768befe3765ee2",
+      "title": "T1 vs G2",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/twitch-2897760313-cd1f9a4636255fbf-v7-ec605d4632b5.json",
-      "playedAt": "2026-10-11T11:06:49.968000+02:00",
+      "index": "/indexes/twitch-2897760313-06768befe3765ee2-v3-899854ec276a.json",
+      "playedAt": "2026-10-11T13:16:06.987000+02:00",
       "pipelineState": "final",
-      "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
+      "expectedMatchId": "be2b4691-cc65-52ea-9187-01450d120f89",
       "pipelineGeneration": 1,
-      "pipelineVersion": 7,
+      "pipelineVersion": 3,
       "tournament": "Champions Shanghai",
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 1,
+      "pipelineAlignmentVersion": 11,
       "creator": "FNS",
       "coverage": {
         "type": "partial-navigation",
@@ -381,6 +364,18 @@
         "firstMap": 1,
         "firstRound": 1,
         "unavailableRounds": [
+          {
+            "map": 1,
+            "round": 2
+          },
+          {
+            "map": 1,
+            "round": 3
+          },
+          {
+            "map": 1,
+            "round": 4
+          },
           {
             "map": 1,
             "round": 5
@@ -462,14 +457,6 @@
             "round": 24
           },
           {
-            "map": 1,
-            "round": 25
-          },
-          {
-            "map": 1,
-            "round": 26
-          },
-          {
             "map": 2,
             "round": 1
           },
@@ -536,9 +523,150 @@
           {
             "map": 2,
             "round": 17
+          },
+          {
+            "map": 2,
+            "round": 18
+          },
+          {
+            "map": 2,
+            "round": 19
+          },
+          {
+            "map": 2,
+            "round": 20
+          },
+          {
+            "map": 2,
+            "round": 21
+          },
+          {
+            "map": 2,
+            "round": 22
+          },
+          {
+            "map": 2,
+            "round": 23
+          },
+          {
+            "map": 3,
+            "round": 1
+          },
+          {
+            "map": 3,
+            "round": 2
+          },
+          {
+            "map": 3,
+            "round": 3
+          },
+          {
+            "map": 3,
+            "round": 4
+          },
+          {
+            "map": 3,
+            "round": 5
+          },
+          {
+            "map": 3,
+            "round": 6
+          },
+          {
+            "map": 3,
+            "round": 7
+          },
+          {
+            "map": 3,
+            "round": 8
+          },
+          {
+            "map": 3,
+            "round": 9
+          },
+          {
+            "map": 3,
+            "round": 10
+          },
+          {
+            "map": 3,
+            "round": 11
+          },
+          {
+            "map": 3,
+            "round": 12
+          },
+          {
+            "map": 3,
+            "round": 13
+          },
+          {
+            "map": 3,
+            "round": 14
+          },
+          {
+            "map": 3,
+            "round": 15
+          },
+          {
+            "map": 3,
+            "round": 16
+          },
+          {
+            "map": 3,
+            "round": 17
+          },
+          {
+            "map": 3,
+            "round": 18
+          },
+          {
+            "map": 3,
+            "round": 19
           }
         ]
       },
+      "chat": "/chats/twitch-2897760313.json",
+      "chatSourceId": "2897760313",
+      "chatChannelId": "66418614",
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
+      "sourceId": "jdQfyr5hpOU",
+      "catalogId": "youtube:cd1f9a4636255fbf:jdQfyr5hpOU",
+      "title": "100T vs NRG",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Full match",
+      "index": "/indexes/youtube-jdQfyr5hpOU-cd1f9a4636255fbf-v7-3aeed75fae60.json",
+      "playedAt": "2026-10-11T11:06:49.968000+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 7,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "twitch",
+      "sourceId": "2897760313",
+      "catalogId": "twitch:2897760313:cd1f9a4636255fbf",
+      "title": "100T vs NRG",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Watch party",
+      "index": "/indexes/twitch-2897760313-cd1f9a4636255fbf-v7-39bfd22331d6.json",
+      "playedAt": "2026-10-11T11:06:49.968000+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 7,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "kind": "watch-party",
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 11,
+      "creator": "FNS",
       "chat": "/chats/twitch-2897760313.json",
       "chatSourceId": "2897760313",
       "chatChannelId": "66418614",
@@ -1493,31 +1621,6 @@
       "chat": "/chats/twitch-2896809061.json",
       "chatSourceId": "2896809061",
       "chatChannelId": null,
-      "canonicalPipeline": true,
-      "reason": "waiting_alignment"
-    },
-    {
-      "provider": "twitch",
-      "sourceId": "2897760313",
-      "catalogId": "twitch:2897760313:06768befe3765ee2",
-      "title": "T1 vs G2",
-      "event": "Champions Shanghai | Playoffs",
-      "label": "Watch party",
-      "index": "/indexes/twitch-2897760313-06768befe3765ee2-v2-633478533c2a.json",
-      "playedAt": "2026-10-11T13:15:59.322177+02:00",
-      "pipelineState": "provisional",
-      "expectedMatchId": "be2b4691-cc65-52ea-9187-01450d120f89",
-      "pipelineGeneration": 1,
-      "pipelineVersion": 3,
-      "tournament": "Champions Shanghai",
-      "tournamentKey": "champions-shanghai",
-      "kind": "watch-party",
-      "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 1,
-      "creator": "FNS",
-      "chat": "/chats/twitch-2897760313.json",
-      "chatSourceId": "2897760313",
-      "chatChannelId": "66418614",
       "canonicalPipeline": true,
       "reason": "waiting_alignment"
     }

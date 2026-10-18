@@ -155,7 +155,7 @@
       "tournamentKey": "champions-shanghai",
       "chat": "/chats/twitch-2902056335.json",
       "chatSourceId": "2902056335",
-      "chatChannelId": null,
+      "chatChannelId": "490592527",
       "canonicalPipeline": true
     },
     {
@@ -179,7 +179,7 @@
       "creator": "FNS",
       "chat": "/chats/twitch-2902063268.json",
       "chatSourceId": "2902063268",
-      "chatChannelId": null,
+      "chatChannelId": "66418614",
       "canonicalPipeline": true
     },
     {
@@ -203,7 +203,7 @@
       "creator": "FNS",
       "chat": "/chats/twitch-2902063268.json",
       "chatSourceId": "2902063268",
-      "chatChannelId": null,
+      "chatChannelId": "66418614",
       "canonicalPipeline": true
     },
     {
@@ -244,7 +244,7 @@
       "tournamentKey": "champions-shanghai",
       "chat": "/chats/twitch-2902056335.json",
       "chatSourceId": "2902056335",
-      "chatChannelId": null,
+      "chatChannelId": "490592527",
       "canonicalPipeline": true
     },
     {
@@ -268,7 +268,7 @@
       "creator": "FNS",
       "chat": "/chats/twitch-2902063268.json",
       "chatSourceId": "2902063268",
-      "chatChannelId": null,
+      "chatChannelId": "66418614",
       "canonicalPipeline": true
     },
     {
@@ -292,7 +292,7 @@
       "creator": "FNS",
       "chat": "/chats/twitch-2902063268.json",
       "chatSourceId": "2902063268",
-      "chatChannelId": null,
+      "chatChannelId": "66418614",
       "canonicalPipeline": true
     },
     {
@@ -346,7 +346,7 @@
       "title": "T1 vs G2",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/twitch-2897760313-06768befe3765ee2-v3-899854ec276a.json",
+      "index": "/indexes/twitch-2897760313-06768befe3765ee2-v3-a6d583c90afa.json",
       "playedAt": "2026-10-11T13:16:06.987000+02:00",
       "pipelineState": "final",
       "expectedMatchId": "be2b4691-cc65-52ea-9187-01450d120f89",
@@ -356,7 +356,7 @@
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 11,
+      "pipelineAlignmentVersion": 15,
       "creator": "FNS",
       "coverage": {
         "type": "partial-navigation",
@@ -364,70 +364,6 @@
         "firstMap": 1,
         "firstRound": 1,
         "unavailableRounds": [
-          {
-            "map": 1,
-            "round": 2
-          },
-          {
-            "map": 1,
-            "round": 3
-          },
-          {
-            "map": 1,
-            "round": 4
-          },
-          {
-            "map": 1,
-            "round": 5
-          },
-          {
-            "map": 1,
-            "round": 6
-          },
-          {
-            "map": 1,
-            "round": 7
-          },
-          {
-            "map": 1,
-            "round": 8
-          },
-          {
-            "map": 1,
-            "round": 9
-          },
-          {
-            "map": 1,
-            "round": 10
-          },
-          {
-            "map": 1,
-            "round": 11
-          },
-          {
-            "map": 1,
-            "round": 12
-          },
-          {
-            "map": 1,
-            "round": 13
-          },
-          {
-            "map": 1,
-            "round": 14
-          },
-          {
-            "map": 1,
-            "round": 15
-          },
-          {
-            "map": 1,
-            "round": 16
-          },
-          {
-            "map": 1,
-            "round": 17
-          },
           {
             "map": 1,
             "round": 18
@@ -655,7 +591,7 @@
       "title": "100T vs NRG",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/twitch-2897760313-cd1f9a4636255fbf-v7-39bfd22331d6.json",
+      "index": "/indexes/twitch-2897760313-cd1f9a4636255fbf-v7-9d793cab5680.json",
       "playedAt": "2026-10-11T11:06:49.968000+02:00",
       "pipelineState": "final",
       "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
@@ -665,7 +601,7 @@
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 11,
+      "pipelineAlignmentVersion": 15,
       "creator": "FNS",
       "chat": "/chats/twitch-2897760313.json",
       "chatSourceId": "2897760313",

@@ -21,6 +21,363 @@
     },
     {
       "provider": "youtube",
+      "sourceId": "p7VXbQsh7vM",
+      "catalogId": "youtube:p7VXbQsh7vM:ce2859a89ca95ecb",
+      "title": "VIT vs LOUD",
+      "event": "Champions Shanghai | Finals",
+      "label": "Watch party",
+      "index": "/indexes/youtube-p7VXbQsh7vM-ce2859a89ca95ecb-v82-05f8a8171fdb.json",
+      "playedAt": "2026-10-18T08:42:08+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "233a5a39-b3cc-5f9a-ad94-2db9ead10208",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 82,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "kind": "watch-party",
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 1,
+      "creator": "ohnepixel",
+      "coverage": {
+        "type": "partial-navigation",
+        "omittedOpeningRounds": 0,
+        "firstMap": 1,
+        "firstRound": 1,
+        "unavailableRounds": [
+          {
+            "map": 1,
+            "round": 5
+          },
+          {
+            "map": 1,
+            "round": 6
+          },
+          {
+            "map": 1,
+            "round": 7
+          },
+          {
+            "map": 1,
+            "round": 8
+          },
+          {
+            "map": 1,
+            "round": 9
+          },
+          {
+            "map": 1,
+            "round": 10
+          },
+          {
+            "map": 1,
+            "round": 11
+          },
+          {
+            "map": 1,
+            "round": 12
+          },
+          {
+            "map": 1,
+            "round": 13
+          },
+          {
+            "map": 1,
+            "round": 14
+          },
+          {
+            "map": 1,
+            "round": 15
+          },
+          {
+            "map": 1,
+            "round": 16
+          },
+          {
+            "map": 1,
+            "round": 17
+          },
+          {
+            "map": 1,
+            "round": 18
+          },
+          {
+            "map": 1,
+            "round": 19
+          },
+          {
+            "map": 1,
+            "round": 20
+          },
+          {
+            "map": 1,
+            "round": 21
+          },
+          {
+            "map": 1,
+            "round": 22
+          },
+          {
+            "map": 1,
+            "round": 23
+          },
+          {
+            "map": 1,
+            "round": 24
+          },
+          {
+            "map": 2,
+            "round": 1
+          },
+          {
+            "map": 2,
+            "round": 2
+          },
+          {
+            "map": 2,
+            "round": 3
+          },
+          {
+            "map": 2,
+            "round": 4
+          },
+          {
+            "map": 2,
+            "round": 5
+          },
+          {
+            "map": 2,
+            "round": 6
+          },
+          {
+            "map": 2,
+            "round": 7
+          },
+          {
+            "map": 2,
+            "round": 8
+          },
+          {
+            "map": 2,
+            "round": 9
+          },
+          {
+            "map": 2,
+            "round": 10
+          },
+          {
+            "map": 2,
+            "round": 11
+          },
+          {
+            "map": 2,
+            "round": 12
+          },
+          {
+            "map": 2,
+            "round": 13
+          },
+          {
+            "map": 2,
+            "round": 14
+          },
+          {
+            "map": 2,
+            "round": 15
+          },
+          {
+            "map": 2,
+            "round": 16
+          },
+          {
+            "map": 2,
+            "round": 17
+          },
+          {
+            "map": 2,
+            "round": 18
+          },
+          {
+            "map": 2,
+            "round": 19
+          },
+          {
+            "map": 2,
+            "round": 20
+          },
+          {
+            "map": 2,
+            "round": 21
+          },
+          {
+            "map": 3,
+            "round": 1
+          },
+          {
+            "map": 3,
+            "round": 2
+          },
+          {
+            "map": 3,
+            "round": 3
+          },
+          {
+            "map": 3,
+            "round": 4
+          },
+          {
+            "map": 3,
+            "round": 5
+          },
+          {
+            "map": 3,
+            "round": 6
+          },
+          {
+            "map": 3,
+            "round": 7
+          },
+          {
+            "map": 3,
+            "round": 8
+          },
+          {
+            "map": 3,
+            "round": 9
+          },
+          {
+            "map": 3,
+            "round": 10
+          },
+          {
+            "map": 3,
+            "round": 11
+          },
+          {
+            "map": 3,
+            "round": 12
+          },
+          {
+            "map": 3,
+            "round": 13
+          },
+          {
+            "map": 3,
+            "round": 14
+          },
+          {
+            "map": 3,
+            "round": 15
+          },
+          {
+            "map": 3,
+            "round": 16
+          },
+          {
+            "map": 3,
+            "round": 17
+          },
+          {
+            "map": 3,
+            "round": 18
+          },
+          {
+            "map": 4,
+            "round": 1
+          },
+          {
+            "map": 4,
+            "round": 2
+          },
+          {
+            "map": 4,
+            "round": 3
+          },
+          {
+            "map": 4,
+            "round": 4
+          },
+          {
+            "map": 4,
+            "round": 5
+          },
+          {
+            "map": 4,
+            "round": 6
+          },
+          {
+            "map": 4,
+            "round": 7
+          },
+          {
+            "map": 4,
+            "round": 8
+          },
+          {
+            "map": 4,
+            "round": 9
+          },
+          {
+            "map": 4,
+            "round": 10
+          },
+          {
+            "map": 4,
+            "round": 11
+          },
+          {
+            "map": 4,
+            "round": 12
+          },
+          {
+            "map": 4,
+            "round": 13
+          },
+          {
+            "map": 4,
+            "round": 14
+          },
+          {
+            "map": 4,
+            "round": 15
+          },
+          {
+            "map": 4,
+            "round": 16
+          },
+          {
+            "map": 4,
+            "round": 17
+          },
+          {
+            "map": 4,
+            "round": 18
+          },
+          {
+            "map": 4,
+            "round": 19
+          },
+          {
+            "map": 4,
+            "round": 20
+          },
+          {
+            "map": 4,
+            "round": 21
+          },
+          {
+            "map": 4,
+            "round": 22
+          },
+          {
+            "map": 4,
+            "round": 23
+          }
+        ]
+      },
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
       "sourceId": "QJMvaUZjaNw",
       "catalogId": "youtube:f8e5f8a3452d5be8:QJMvaUZjaNw",
       "title": "100T vs VIT",
@@ -363,7 +720,7 @@
       "title": "T1 vs G2",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/twitch-2897760313-06768befe3765ee2-v3-a6d583c90afa.json",
+      "index": "/indexes/twitch-2897760313-06768befe3765ee2-v3-ff32699d6dbb.json",
       "playedAt": "2026-10-11T13:16:06.987000+02:00",
       "pipelineState": "final",
       "expectedMatchId": "be2b4691-cc65-52ea-9187-01450d120f89",
@@ -373,7 +730,7 @@
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 15,
+      "pipelineAlignmentVersion": 17,
       "creator": "FNS",
       "coverage": {
         "type": "partial-navigation",
@@ -381,38 +738,6 @@
         "firstMap": 1,
         "firstRound": 1,
         "unavailableRounds": [
-          {
-            "map": 1,
-            "round": 18
-          },
-          {
-            "map": 1,
-            "round": 19
-          },
-          {
-            "map": 1,
-            "round": 20
-          },
-          {
-            "map": 1,
-            "round": 21
-          },
-          {
-            "map": 1,
-            "round": 22
-          },
-          {
-            "map": 1,
-            "round": 23
-          },
-          {
-            "map": 1,
-            "round": 24
-          },
-          {
-            "map": 2,
-            "round": 1
-          },
           {
             "map": 2,
             "round": 2
@@ -608,7 +933,7 @@
       "title": "100T vs NRG",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/twitch-2897760313-cd1f9a4636255fbf-v7-9d793cab5680.json",
+      "index": "/indexes/twitch-2897760313-cd1f9a4636255fbf-v7-e78e894c213b.json",
       "playedAt": "2026-10-11T11:06:49.968000+02:00",
       "pipelineState": "final",
       "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
@@ -618,7 +943,7 @@
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 15,
+      "pipelineAlignmentVersion": 17,
       "creator": "FNS",
       "chat": "/chats/twitch-2897760313.json",
       "chatSourceId": "2897760313",
@@ -1576,19 +1901,6 @@
       "chatChannelId": null,
       "canonicalPipeline": true,
       "reason": "waiting_alignment"
-    },
-    {
-      "expectedMatchId": "233a5a39-b3cc-5f9a-ad94-2db9ead10208",
-      "catalogId": "youtube:p7VXbQsh7vM:ce2859a89ca95ecb",
-      "provider": "youtube",
-      "sourceId": "p7VXbQsh7vM",
-      "kind": "watch-party",
-      "pipelineGeneration": 1,
-      "pipelineVersion": 82,
-      "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 0,
-      "reason": "waiting_alignment",
-      "canonicalPipeline": true
     }
   ]
 }

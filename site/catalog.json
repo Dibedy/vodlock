@@ -4,6 +4,23 @@
   "videos": [
     {
       "provider": "youtube",
+      "sourceId": "l9VxSMFMlKI",
+      "catalogId": "youtube:ce2859a89ca95ecb:l9VxSMFMlKI",
+      "title": "VIT vs LOUD",
+      "event": "Champions Shanghai | Finals",
+      "label": "Full match",
+      "index": "/indexes/youtube-l9VxSMFMlKI-ce2859a89ca95ecb-v82-1d14085478d3.json",
+      "playedAt": "2026-10-18T08:42:08+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "233a5a39-b3cc-5f9a-ad94-2db9ead10208",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 82,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
       "sourceId": "QJMvaUZjaNw",
       "catalogId": "youtube:f8e5f8a3452d5be8:QJMvaUZjaNw",
       "title": "100T vs VIT",
@@ -1559,6 +1576,19 @@
       "chatChannelId": null,
       "canonicalPipeline": true,
       "reason": "waiting_alignment"
+    },
+    {
+      "expectedMatchId": "233a5a39-b3cc-5f9a-ad94-2db9ead10208",
+      "catalogId": "youtube:p7VXbQsh7vM:ce2859a89ca95ecb",
+      "provider": "youtube",
+      "sourceId": "p7VXbQsh7vM",
+      "kind": "watch-party",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 82,
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 0,
+      "reason": "waiting_alignment",
+      "canonicalPipeline": true
     }
   ]
 }

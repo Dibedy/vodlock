@@ -384,7 +384,7 @@
       "title": "T1 vs G2",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/twitch-2897760313-06768befe3765ee2-v3-ff32699d6dbb.json",
+      "index": "/indexes/twitch-2897760313-06768befe3765ee2-v3-d5c3ebab1918.json",
       "playedAt": "2026-10-11T13:16:06.987000+02:00",
       "pipelineState": "final",
       "expectedMatchId": "be2b4691-cc65-52ea-9187-01450d120f89",
@@ -394,7 +394,7 @@
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 17,
+      "pipelineAlignmentVersion": 18,
       "creator": "FNS",
       "coverage": {
         "type": "partial-navigation",
@@ -402,22 +402,6 @@
         "firstMap": 1,
         "firstRound": 1,
         "unavailableRounds": [
-          {
-            "map": 2,
-            "round": 2
-          },
-          {
-            "map": 2,
-            "round": 3
-          },
-          {
-            "map": 2,
-            "round": 4
-          },
-          {
-            "map": 2,
-            "round": 5
-          },
           {
             "map": 2,
             "round": 6
@@ -597,7 +581,7 @@
       "title": "100T vs NRG",
       "event": "Champions Shanghai | Playoffs",
       "label": "Watch party",
-      "index": "/indexes/twitch-2897760313-cd1f9a4636255fbf-v7-e78e894c213b.json",
+      "index": "/indexes/twitch-2897760313-cd1f9a4636255fbf-v7-d459b352ee89.json",
       "playedAt": "2026-10-11T11:06:49.968000+02:00",
       "pipelineState": "final",
       "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
@@ -607,7 +591,7 @@
       "tournamentKey": "champions-shanghai",
       "kind": "watch-party",
       "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 17,
+      "pipelineAlignmentVersion": 18,
       "creator": "FNS",
       "chat": "/chats/twitch-2897760313.json",
       "chatSourceId": "2897760313",
@@ -657,6 +641,30 @@
     },
     {
       "provider": "youtube",
+      "sourceId": "bI_OQ2Gc0hg",
+      "catalogId": "youtube:bI_OQ2Gc0hg:9567a492a3bd56e0",
+      "title": "G2 vs VIT",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Watch party",
+      "index": "/indexes/youtube-bI_OQ2Gc0hg-9567a492a3bd56e0-v29-da2907870037.json",
+      "playedAt": "2026-10-10T14:09:15.012000+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "e06eb179-7b91-5e16-b1ad-7d6081f8b842",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 29,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "kind": "watch-party",
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 7,
+      "creator": "FNS",
+      "chat": "/chats/twitch-2896809061.json",
+      "chatSourceId": "2896809061",
+      "chatChannelId": null,
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
       "sourceId": "RMBxo7P3cbk",
       "catalogId": "youtube:4a055981134b5a82:RMBxo7P3cbk",
       "title": "LOUD vs NRG",
@@ -691,6 +699,43 @@
       "pipelineSourceRevision": 1,
       "pipelineAlignmentVersion": 3,
       "creator": "FNS",
+      "chat": "/chats/twitch-2896809061.json",
+      "chatSourceId": "2896809061",
+      "chatChannelId": null,
+      "canonicalPipeline": true
+    },
+    {
+      "provider": "youtube",
+      "sourceId": "bI_OQ2Gc0hg",
+      "catalogId": "youtube:bI_OQ2Gc0hg:4a055981134b5a82",
+      "title": "LOUD vs NRG",
+      "event": "Champions Shanghai | Playoffs",
+      "label": "Watch party",
+      "index": "/indexes/youtube-bI_OQ2Gc0hg-4a055981134b5a82-v68-f5e19472c999.json",
+      "playedAt": "2026-10-10T11:07:05.994000+02:00",
+      "pipelineState": "final",
+      "expectedMatchId": "9db93b9e-4af0-5bbe-b146-ae9cdc812d61",
+      "pipelineGeneration": 1,
+      "pipelineVersion": 68,
+      "tournament": "Champions Shanghai",
+      "tournamentKey": "champions-shanghai",
+      "kind": "watch-party",
+      "pipelineSourceRevision": 1,
+      "pipelineAlignmentVersion": 7,
+      "creator": "FNS",
+      "coverage": {
+        "type": "partial-navigation",
+        "omittedOpeningRounds": 0,
+        "firstMap": 1,
+        "firstRound": 1,
+        "unavailableRounds": [
+          {
+            "map": 1,
+            "round": 5
+          }
+        ],
+        "checksComplete": true
+      },
       "chat": "/chats/twitch-2896809061.json",
       "chatSourceId": "2896809061",
       "chatChannelId": null,
@@ -1425,19 +1470,6 @@
   ],
   "withheld": [
     {
-      "expectedMatchId": "9db93b9e-4af0-5bbe-b146-ae9cdc812d61",
-      "catalogId": "youtube:bI_OQ2Gc0hg:4a055981134b5a82",
-      "provider": "youtube",
-      "sourceId": "bI_OQ2Gc0hg",
-      "kind": "watch-party",
-      "pipelineGeneration": 1,
-      "pipelineVersion": 68,
-      "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 6,
-      "reason": "waiting_alignment",
-      "canonicalPipeline": true
-    },
-    {
       "expectedMatchId": "bdc076ea-8c5c-5c34-85f1-5cc7f815d626",
       "catalogId": "youtube:q_yHYw2TNMk:cd1f9a4636255fbf",
       "provider": "youtube",
@@ -1540,31 +1572,6 @@
       "pipelineAlignmentVersion": 0,
       "reason": "waiting_alignment",
       "canonicalPipeline": true
-    },
-    {
-      "provider": "youtube",
-      "sourceId": "bI_OQ2Gc0hg",
-      "catalogId": "youtube:bI_OQ2Gc0hg:9567a492a3bd56e0",
-      "title": "G2 vs VIT",
-      "event": "Champions Shanghai | Playoffs",
-      "label": "Watch party",
-      "index": "/indexes/youtube-bI_OQ2Gc0hg-9567a492a3bd56e0-v29-1a2fb47c6e41.json",
-      "playedAt": "2026-10-10T14:09:15.012000+02:00",
-      "pipelineState": "final",
-      "expectedMatchId": "e06eb179-7b91-5e16-b1ad-7d6081f8b842",
-      "pipelineGeneration": 1,
-      "pipelineVersion": 29,
-      "tournament": "Champions Shanghai",
-      "tournamentKey": "champions-shanghai",
-      "kind": "watch-party",
-      "pipelineSourceRevision": 1,
-      "pipelineAlignmentVersion": 6,
-      "creator": "FNS",
-      "chat": "/chats/twitch-2896809061.json",
-      "chatSourceId": "2896809061",
-      "chatChannelId": null,
-      "canonicalPipeline": true,
-      "reason": "waiting_alignment"
     }
   ]
 }
